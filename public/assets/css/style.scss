@@ -1,0 +1,102 @@
+// Tamaño físico real del carnet (ISO ID-1 en vertical)
+$carnet-width: 53.98mm !important;
+$carnet-height: 85.6mm !important;
+
+.card-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px; // Espacio entre carnets
+  padding: 20px;
+  flex-wrap: wrap; // Para responsividad en móviles
+
+  .div-label {
+    height: 15px;
+    font-size: 8px !important;
+  }
+}
+
+.card-container {
+  width: $carnet-width;
+  height: $carnet-height;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.image-container img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.text-overlay {
+  position: absolute;
+  top: 25%;
+  text-align: center;
+  width: 100%;
+}
+
+.img-badge {
+  height: 80px;
+  width: 80px;
+  background-color: gray;
+  border-radius: 100%;
+  border: 3px solid #b70616;
+  margin: auto;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.border-bottom-label {
+  width: 25%;
+  border-radius: 20px;
+  border-bottom: 2px solid #b70616;
+  margin: 3px auto;
+  color: #0534a5;
+}
+
+.name-student {
+  font-size: 14px;
+  color: #0534a5;
+  margin: -5px 20px 0px 20px;
+}
+
+.id-student {
+  font-size: 14px;
+  color: #0534a5;
+}
+
+.class-student {
+  font-size: 8px;
+  color: #0534a5;
+  margin: 0px 0px 5px 0px;
+}
+
+.rear-side-content {
+  display: flex;
+  justify-content: space-around;
+  .full-width {
+    width: 100% !important;
+  }
+}
+
+.rear-side-content-margin {
+  margin: 10px 0px;
+}
+
+.label-content {
+  width: 35%;
+}
+
+.qrcode-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#qrcode {
+  width: 60px;
+  canvas {
+    width: 100%;
+  }
+}
