@@ -118,6 +118,7 @@ function admin_certificate_assignment_content () {
         } else {
             setcookie('message', __('The certificates have been successfully issued', 'wp-certificates'), time() + 3600, '/');
         }
+
         wp_redirect(admin_url('admin.php?page=admin_certificate_assignment_content'));
         exit;
 

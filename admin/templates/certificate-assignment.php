@@ -26,13 +26,13 @@
                 <div id="metabox" class="postbox" style="width:100%;min-width:0px;">
                     <div class="inside">
 
-                        <form method="POST" action="<?= esc_url(admin_url('admin-post.php?page=admin_certificate_assignment_content&action=generate_certificates')); ?>">
+                        <form method="POST" action="<?= esc_url(admin_url('admin.php?page=admin_certificate_assignment_content&action=generate_certificates')); ?>">
 
                             <div class="space-offer" >
                                 <label for="certificate_id" >
                                     <b><?= __('Select Certificate','wp-certificates') ?></b>
                                     <br>
-                                    <select name="certificate_id" >
+                                    <select name="certificate_id" required >
                                         <option value=""><?= __('Select a certificate', 'wp-certificates'); ?></option>
                                         <?php foreach ( $documents_certificates as $document_certificates ): ?>
                                             <option value="<?= $document_certificates->id ?>"> <?= $document_certificates->title ?> </option>
@@ -45,7 +45,7 @@
                                 <label for="student_ids" >
                                     <b><?= __('Select Students','wp-certificates') ?></b>
                                     <br>
-                                    <select name="student_ids[]" class="WPCselect2" multiple="multiple">
+                                    <select name="student_ids[]" class="WPCselect2" multiple="multiple" required >
                                         <?php foreach ( $students as $student) : ?>
                                             <option value="<?= $student->id ?>">
                                                 <?= "($student->id) $student->name $student->middle_name $student->last_name $student->middle_last_name" ?>

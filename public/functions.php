@@ -34,11 +34,18 @@ function add_certification_public($menu_links) {
             + array_slice($menu_links, 3, null, true); // Cambiado de 2 a 3 aquí
     }
 
+    if ( in_array('student', $roles) ) {
+        $menu_links = array_slice($menu_links, 0, 3, true)
+            + array('certificates' => esc_html__('Certificates', 'wp-certificates'))
+            + array_slice($menu_links, 3, null, true); // Cambiado de 2 a 3 aquí
+    }
+
     return $menu_links;
 }
 
 add_action('init', function () {
     add_rewrite_endpoint('my-card', EP_ROOT | EP_PAGES);
+    add_rewrite_endpoint('certificates', EP_ROOT | EP_PAGES);
 });
 
 add_filter('wp_nav_menu_items', 'add_certification_link', 10, 2);
@@ -69,8 +76,39 @@ function add_certification_link($items, $args)
         $items = implode('</li>', array_filter($menu_items)) . '</li>';
     }
 
+    if ( is_user_logged_in() && in_array('student', $current_user->roles) && $args->theme_location != 'primary' ) {
+
+        // Nuevo elemento SIN cerrar </li>
+        $new_item = '<li class="menu-item"><a href="'
+            . esc_url(get_permalink(get_option('woocommerce_myaccount_page_id'))) . '/certificates">'
+            . esc_html__('Certificates', 'wp-certificates')
+            . '</a>';
+
+        // Dividir los items existentes
+        $menu_items = explode('</li>', $items);
+
+        // Posición de inserción (ej: 2 = tercer lugar)
+        $position = 6;
+
+        // Insertar el nuevo elemento
+        array_splice($menu_items, $position, 0, $new_item);
+
+        // Eliminar elementos vacíos y unir
+        $items = implode('</li>', array_filter($menu_items)) . '</li>';
+    }
+
     return $items;
 }
+
+add_action('woocommerce_account_certificates_endpoint', function () {
+
+    global $wpdb;
+    $certificates = $wpdb->get_results("SELECT * FROM `{$wpdb->prefix}certificates` WHERE type = 'download_certificate' ") ?? [];
+
+    include(plugin_dir_path(__FILE__) . 'templates/certificates.php');
+    return;
+
+});
 
 add_action('woocommerce_account_my-card_endpoint', 'my_card_endpoint');
 function my_card_endpoint()
@@ -422,6 +460,8 @@ function assign_certificate_student( $student_id, $template_id, $type, $emission
     $document = get_document_detail( $template_id ) ?? [];
     if( !$document ) return false;
 
+    global $wpdb;
+    $table_certificates = $wpdb->prefix . 'certificates';
     $existing_record = $wpdb->get_row(
         $wpdb->prepare(
             "SELECT id, simple_uuid FROM $table_certificates WHERE type = %s AND name_document = %s AND email = %s",
@@ -452,6 +492,8 @@ function assign_certificate_student( $student_id, $template_id, $type, $emission
 
         // Concatenar las partes con separación mínima
         $html = trim(($header ? $header . "\n" : '') . ($content ? $content . "\n" : '') . $footer);
+        $replacements = get_replacements_variables($student);
+        $html = process_template($html, $replacements);
 
         $insert_data = [
             'type' => $type,

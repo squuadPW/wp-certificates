@@ -100,3 +100,274 @@ $carnet-height: 85.6mm !important;
     width: 100%;
   }
 }
+
+
+
+#certificades-card {
+    h2 {
+        font-size: 24px;
+        text-align: center;
+        margin-bottom: 30px;
+        color: #333;
+    }
+
+    /* Dashboard Grid */
+    .cert-grid-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 25px;
+        margin-top: 20px;
+
+        .cert-card { 
+            background: #ffffff; 
+            border: 1px solid #e0e0e0; 
+            border-radius: 8px; 
+            overflow: hidden; 
+            display: flex; 
+            flex-direction: column; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+
+            /* Miniaturas */
+            .cert-card-preview { 
+                position: relative; 
+                background: #f1f3f4; 
+                height: 180px; 
+                display: flex; 
+                align-items: center; 
+                justify-content: center; 
+                border-bottom: 1px solid #eee; 
+                cursor: pointer; 
+                padding: 10px; 
+
+                &:hover {
+                    .cert-overlay { 
+                        opacity: 1; 
+                        z-index: 5;
+                    }
+                }
+
+                .cert-mini-doc { 
+                    background: #ffffff; 
+                    width: auto; 
+                    height: 95%; 
+                    border: 1px solid #dcdcdc; 
+                    box-shadow: 0 2px 5px rgba(0,0,0,0.06); 
+                    padding: 12px; 
+                    box-sizing: border-box; 
+                    position: relative; 
+                    overflow: hidden; 
+                    display: flex; 
+                    flex-direction: column; 
+                    gap: 6px; 
+
+                    .cert-mini-icon { 
+                        position: absolute; 
+                        top: 5px; 
+                        right: 20px; 
+                        font-size: 30px !important; 
+                        width: 20px !important; 
+                        height: 20px !important; 
+                        color: #da251c;
+                        z-index: 3;
+                    }
+
+                    .cert-mini-content { 
+                        font-family: 'Georgia', serif; 
+                        font-size: 9px; 
+                        line-height: 1.4; 
+                        color: #5f6368; 
+                        text-align: justify; 
+                        user-select: none; 
+                        display: -webkit-box; 
+                        -webkit-line-clamp: 5; 
+                        -webkit-box-orient: vertical; 
+                        overflow: hidden; 
+                        zoom: 0.3;
+                    }
+                }
+
+                .cert-overlay { 
+                    position: absolute; 
+                    top: 0; 
+                    left: 0; 
+                    width: 100%; 
+                    height: 100%; 
+                    background: rgba(0, 0, 0, 0.4); 
+                    display: flex; 
+                    align-items: center; 
+                    justify-content: center; 
+                    color: #fff; 
+                    opacity: 0; 
+                    transition: opacity 0.2s; 
+                    font-weight: bold; 
+                }
+            }
+
+            .cert-card-body { 
+                padding: 15px; 
+                flex-grow: 1; 
+
+                .cert-title { 
+                    font-size: 16px !important; 
+                    margin: 0 0 10px 0 !important; 
+                    color: #222; 
+                    text-transform: capitalize; 
+                }
+            }
+
+            .cert-meta {
+                p { 
+                    font-size: 13px; 
+                    margin: 4px 0 !important; 
+                    color: #555; 
+                }
+            }
+
+            .cert-status { 
+                padding: 2px 6px; 
+                border-radius: 4px; 
+                font-size: 11px; 
+                font-weight: bold; 
+
+                &.no-expiry { 
+                    background-color: #e2f7ed; 
+                    color: #1f784e; 
+                }
+        
+                &.expires { 
+                    background-color: #fff3cd; 
+                    color: #856404; 
+                }
+            }
+
+            .cert-card-footer { 
+                padding: 15px; 
+                border-top: 1px solid #f0f0f0;
+            }
+        }
+
+        /* --- MAQUETACIÓN MODAL AISLADA --- */
+        .cert-fullscreen-modal {
+            border: none;
+            border-radius: 12px;
+            padding: 0;
+            width: 95%;
+            max-width: 940px; 
+            height: 90vh;
+            max-height: 90vh;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            flex-direction: column;
+
+            &[open] { 
+                display: flex;
+            }
+
+            &::backdrop { 
+                background: rgba(0, 0, 0, 0.8); 
+                backdrop-filter: blur(3px); 
+            }
+
+            .cert-modal-header { 
+                display: flex; 
+                justify-content: space-between; 
+                align-items: center; 
+                padding: 15px 25px; 
+                background: #323639; 
+                color: #fff; 
+                border-bottom: 1px solid #222; 
+
+                h3 { 
+                    margin: 0 !important; 
+                    font-size: 18px; 
+                    color: #fff; 
+                }
+
+                .cert-close-btn { 
+                    background: transparent; 
+                    border: none; 
+                    font-size: 28px; 
+                    cursor: pointer; 
+                    color: #ccc; 
+                    line-height: 1; 
+
+                    &:hover { 
+                        color: #fff; 
+                    }
+                }
+            }
+
+            .cert-modal-content {
+                //padding: 30px 15px;
+                overflow-y: auto;
+                //background: #525659; 
+                flex-grow: 1;
+
+                @media ( max-width: 768px ) {
+                    zoom: 0.7;
+                }
+
+                @media ( max-width: 425px ) {
+                    zoom: 0.48;
+                }
+
+                @media ( max-width: 319px ) {
+                    zoom: 0.3;
+                }
+            }
+
+            /* El Wrapper Totalmente Aislado */
+            .cert-raw-wrapper {
+                display: flow-root;
+                width: 100%;
+                height: 100%;
+                margin: 0 auto;
+                box-shadow: 0 4px 25px rgba(0,0,0,0.4);
+                background: #fff;
+                color: #000;
+                box-sizing: border-box;
+
+                iframe {
+                    width: 100%;
+                    height: 100%;
+                    background: #525659; 
+                    border: none;
+                }
+
+                /* Bloques internos con fondo */
+                & > div {
+                    box-shadow: none !important;
+                    margin-bottom: 0 !important;
+
+                    /* Separación para páginas físicas fijas (Actas) */
+                    &[style*="width: 816px"], 
+                    &[style*="width:816px"] {
+                        position: relative;
+                        border-bottom: 20px solid #525659 !important; 
+                    }
+
+                    &:last-child {
+                        border-bottom: none !important;
+                    }
+                }
+            }
+
+            /* Marcador de salto de hoja para cuestionarios fluidos */
+            /* .cert-page-break-divider {
+                border-top: 2px dashed #bbb;
+                margin: 40px 0;
+                position: relative;
+                clear: both;
+                width: 100%;
+            } */
+
+            .cert-modal-footer { 
+                padding: 15px 25px; 
+                background: #323639; 
+                border-top: 1px solid #222; 
+                text-align: right; 
+            }
+        }
+    }
+}
+
+
