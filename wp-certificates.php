@@ -203,6 +203,7 @@ function create_tables_certificates() {
         participant_id INT(11) NULL,
         course_id INT(11) NULL,
         html text NULL,
+        option_document JSON NULL,
         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY (id)
     )" . $charset_collate . ";");

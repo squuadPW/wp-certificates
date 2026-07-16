@@ -22,7 +22,7 @@
             href="<?= admin_url('admin.php?page=add_admin_form_documents_content'); ?>"><?= esc_html__('Back') ?></a>
     </div>
 
-    <div id="dashboard-widgets" class="metabox-holder admin-add-offer" style="width: 210mm !important">
+    <div id="dashboard-widgets" class="metabox-holder admin-add-offer" style="width:100% !important">
         <div id="postbox-container-1" style="width:100% !important;">
             <div id="normal-sortables">
                 <div id="metabox" class="postbox" style="width:100%;min-width:0px;">
@@ -208,6 +208,10 @@
                                     </div>
 
                                 </div>
+                            </div>
+
+                            <div>
+                                <>
                             </div>
 
                             <?php if (isset($document) && !empty($document)): ?>

@@ -106,3 +106,47 @@ function add_certificates_to_administrator()
 }
 
 add_action('admin_init', 'add_certificates_to_administrator');
+
+// agrega 
+add_action('document_view', function ($document) {
+
+    
+    $documents_certificates = get_documents_certificates() ?? [];
+
+    $document_template = $document->document_template ?? '';
+    $downloadable_document = $document->downloadable_document ?? '';
+
+    $form_data = [];
+    if ( isset($_COOKIE['form_data']) ) {
+        $form_data = json_decode(stripslashes($_COOKIE['form_data']), true);
+
+        $document_template  = $form_data['document_template'] ?? $document_template;
+        $downloadable_document  = $form_data['downloadable_document'] ?? $downloadable_document;
+    }
+
+    ?>  
+        <div class="group-input" >
+            <label for="document_template">
+
+                <b><?= __('Document template','edusystem'); ?></b>
+                <select name="document_template" >
+                    <option value='' <?php selected( $document_template,'' ) ?> ><?= __('Select option','edusystem');?></option>
+                    
+                    <?php foreach( $documents_certificates as $document_certificate ): ?>
+                        <option value='<?= $document_certificate->id ?>' <?php selected( $document_template, $document_certificate->id ) ?> ><?= $document_certificate->title ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </label>
+        </div> 
+
+        <div class="group-input" >
+            <label for="downloadable_document">
+                    
+                <input type="checkbox" name="downloadable_document" value="1" <?php checked( $downloadable_document, 1 ) ?>    >
+                <?= __('Downloadable document','edusystem'); ?>
+                
+            </label>
+        </div> 
+    <?php
+}, 10, 1);
+

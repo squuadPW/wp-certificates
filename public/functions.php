@@ -48,7 +48,7 @@ add_action('init', function () {
     add_rewrite_endpoint('certificates', EP_ROOT | EP_PAGES);
 });
 
-add_filter('wp_nav_menu_items', 'add_certification_link', 10, 2);
+/* add_filter('wp_nav_menu_items', 'add_certification_link', 10, 2);
 
 function add_certification_link($items, $args)
 {
@@ -98,7 +98,7 @@ function add_certification_link($items, $args)
     }
 
     return $items;
-}
+} */
 
 add_action('woocommerce_account_certificates_endpoint', function () {
 
@@ -451,8 +451,149 @@ function automatic_documents_last_optimized() {
 
 add_filter('get_first_pending_automatic_document', 'automatic_documents_last_optimized');
 
+function assign_certificate_student( $student_id, $template_id, $type, $emission_date, $expiration_date = null, $program = '', $course_id = '', $user_signature_id = null ) {
+    global $wpdb;
+    $table_certificates = $wpdb->prefix . 'certificates';
 
-function assign_certificate_student( $student_id, $template_id, $type, $emission_date, $expiration_date = null, $program = '', $course_id = '') {
+    // 1. Obtener detalles del estudiante
+    $student = get_student_detail($student_id); 
+    if( !$student ) return false;
+
+    // 2. Obtener detalles del documento
+    $document = get_document_detail( $template_id );
+    if( !$document ) return false;
+
+    $existing_record = $wpdb->get_row(
+        $wpdb->prepare(
+            "SELECT id, simple_uuid FROM $table_certificates WHERE type = %s AND name_document = %s AND email = %s",
+            $type,
+            $document->title,
+            $student->email
+        )
+    );
+
+    if ( !$existing_record ) {
+        $student_full_name = trim("{$student->name} {$student->middle_name} {$student->last_name} {$student->middle_last_name}");
+
+        // Helper para mapear propiedades tanto de objetos como de arrays uniformemente
+        $get_part = function ($part) use ($document) {
+            if (is_array($document) && isset($document[$part])) return $document[$part];
+            if (is_object($document) && isset($document->{$part})) return $document->{$part};
+            return '';
+        };
+
+        $header      = $get_part('header');
+        $content     = $get_part('content');
+        $footer      = $get_part('footer');
+        $title       = $get_part('title');
+        $doc_id      = $get_part('id');
+        $orientation = $get_part('orientation');
+        $unit        = $get_part('unit');
+        $width_size  = $get_part('width_size');
+        $height_size = $get_part('height_size');
+        $paper_format= $get_part('paper_format');
+
+        // 3. Preparar los datos del tamaño/dimensiones para guardarlos en la BD
+        // Convertimos el formato a string si viene como array (en caso de 'custom')
+        $format_save = is_array($paper_format) ? 'custom' : $paper_format;
+
+        // 4. Preparar las variables de reemplazo estándar
+        $replacements = get_replacements_variables($student);
+
+        // 5. Procesar Firma Digital si se requiere
+        $signature_required = is_object($document) ? ($document->signature_required ?? false) : ($document['signature_required'] ?? false);
+        
+        if ( $signature_required && !empty($user_signature_id) ) {
+            $signature = get_user_signature_detail($user_signature_id);
+            if ( $signature ) {
+                $user_signature = get_user_by('id', $signature->user_id);
+                if ( $user_signature ) {
+                    $user_sign = $user_signature->first_name . ' ' . $user_signature->last_name;
+                    $replacements['user_sign'] = ['value' => $user_sign, 'wrap' => true];
+                    $replacements['position_user_charge'] = ['value' => $signature->charge, 'wrap' => true];
+                    $replacements['signature'] = [
+                        'value' => '<img style="width: auto !important; height: 100px !important;" src="' . wp_get_attachment_url($signature->attach_id) . '"/>',
+                        'wrap' => false
+                    ];
+                }
+            }
+        }
+
+        // 6. Procesar las secciones individualmente
+        $processed_header  = process_template($header, $replacements);
+        $processed_content = process_template($content, $replacements);
+        $processed_footer  = process_template($footer, $replacements);
+
+        // 7. Lógica del QR Code
+        $create_certificate_qr = (
+            strpos($content, '{{qrcode}}') !== false ||
+            strpos($header, '{{qrcode}}') !== false ||
+            strpos($footer, '{{qrcode}}') !== false
+        );
+
+        $qr = ['url' => '', 'image_url' => ''];
+        if ($create_certificate_qr) {
+            $qr = apply_filters('create_certificate_edusystem', 'certificate', $document->title, get_name_program_student($student->id), 1, $student, $emission_date);
+        }
+
+        // Estructura HTML final con contenedores limpios
+        $html_final = trim(
+            ($processed_header ? '<div id="header-document">' . $processed_header . '</div>' . "\n" : '') .
+            ($processed_content ? '<div id="content-pdf">' . $processed_content . '</div>' . "\n" : '') .
+            ($processed_footer ? '<div id="footer-document">' . $processed_footer . '</div>' : '')
+        );
+
+        $option_document = [
+            'orientation'  => strtolower($orientation),
+            'unit'         => strtolower($unit),
+            'paper_format' => strtolower($format_save),
+            'width_size'   => $width_size,
+            'height_size'  => $height_size,
+            'width_style'  => $width_size . $unit,
+            'height_style' => $height_size . $unit,
+            'qr'          => $qr
+        ];
+
+        // 8. Inserción de datos (Nota la columna 'document_dimensions')
+        $insert_data = [
+            'type'                => $type,
+            'name_document'       => $title,
+            'program_document'    => $program,
+            'template_id'         => $doc_id,
+            'user'                => $student_full_name,
+            'email'               => $student->email,
+            'emission_date'       => $emission_date,
+            'expiration_date'     => $expiration_date,
+            'participant_id'      => $student->id,
+            'course_id'           => $course_id,
+            'html'                => $html_final,
+            'option_document'     => json_encode($option_document) // Guardamos el tamaño en un JSON estructurado
+        ];
+
+        $result = $wpdb->insert($table_certificates, $insert_data);
+        if( !$result ) return false;
+
+        $inserted_id = $wpdb->insert_id;
+
+        // 9. Generar y actualizar con el token único
+        $string = $inserted_id;
+        $hash = wp_hash($string);
+        $simple_uuid = substr($hash, 0, 6);
+
+        $wpdb->update(
+            $table_certificates,
+            ['simple_uuid' => $simple_uuid],
+            ['id' => $inserted_id]
+        );
+        
+    } else {
+        $inserted_id = $existing_record->id;
+    }
+
+    return $inserted_id;
+}
+
+/* function assign_certificate_student( $student_id, $template_id, $type, $emission_date, $expiration_date = null, $program = '', $course_id = '') {
 
     $student = WPC_get_student( $student_id ) ?? [];
     if( !$student ) return false;
@@ -532,4 +673,4 @@ function assign_certificate_student( $student_id, $template_id, $type, $emission
 
     return $inserted_id;
 
-}
+} */
