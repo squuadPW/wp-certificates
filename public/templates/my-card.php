@@ -2,7 +2,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script type="text/javascript" src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
 
-<h2 style="font-size:24px;text-align:center;"><?= esc_html__('My ID', 'form-plugin'); ?></h2>
+<h2 style="font-size:24px;text-align:center;"><?= esc_html__('My ID', 'wp-certificates'); ?></h2>
 
 <?php if (!$card || ($expiration_date < $current_date)) { ?>
     <div style="text-align: center; margin: 30px;">

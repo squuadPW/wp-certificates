@@ -103,7 +103,10 @@ function add_certification_link($items, $args)
 add_action('woocommerce_account_certificates_endpoint', function () {
 
     global $wpdb;
-    $certificates = $wpdb->get_results("SELECT * FROM `{$wpdb->prefix}certificates` WHERE type = 'download_certificate' ") ?? [];
+    $certificates = $wpdb->get_results($wpdb->prepare(
+        "SELECT * FROM `{$wpdb->prefix}certificates` WHERE type = 'download_certificate' AND email = %s",
+        wp_get_current_user()->user_email
+    )) ?? [];
 
     include(plugin_dir_path(__FILE__) . 'templates/certificates.php');
     return;
@@ -456,7 +459,7 @@ function assign_certificate_student( $student_id, $template_id, $type, $emission
     $table_certificates = $wpdb->prefix . 'certificates';
 
     // 1. Obtener detalles del estudiante
-    $student = get_student_detail($student_id); 
+    $student = get_student($student_id); 
     if( !$student ) return false;
 
     // 2. Obtener detalles del documento

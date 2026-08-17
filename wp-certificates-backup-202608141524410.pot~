@@ -1,0 +1,475 @@
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: WP Certificates\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-08-14 14:57+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: \n"
+"Language: \n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Loco https://localise.biz/\n"
+"X-Loco-Version: 2.8.5; wp-7.0.4; php-8.2.32\n"
+"X-Domain: wp-certificates"
+
+#: admin/users-signatures.php:161 admin/cards.php:112 admin/documents.php:324
+msgid "Actions"
+msgstr ""
+
+#: admin/certificates.php:324 admin/templates/document-detail.php:45
+#: admin/templates/template-certificates-detail.php:37
+msgid "Active"
+msgstr ""
+
+#: admin/templates/list-documents.php:8
+msgid "Add Document"
+msgstr ""
+
+#: admin/templates/document-detail.php:225
+msgid "Add document"
+msgstr ""
+
+#: admin/templates/list-user-signatures.php:8
+msgid "Add Signature"
+msgstr ""
+
+#: admin/templates/user-signatures-detail.php:90
+msgid "Add signature"
+msgstr ""
+
+#: admin/certificates.php:85
+msgid "An error occurred while trying to issue the certificate"
+msgstr ""
+
+#: admin/templates/document-detail.php:170
+msgid "Automatic"
+msgstr ""
+
+#: admin/templates/template-certificates-detail.php:19
+msgid "Back"
+msgstr ""
+
+#: admin/cards.php:48
+msgid "Card adjusted successfully."
+msgstr ""
+
+#: admin/cards.php:110
+msgid "Certificate"
+msgstr ""
+
+#: admin/functions.php:85 admin/templates/certificate-assignment.php:5
+msgid "Certificate assignment"
+msgstr ""
+
+#: public/endpoint.php:28
+msgid "Certificate found"
+msgstr ""
+
+#: public/endpoint.php:36
+msgid "Certificate not found"
+msgstr ""
+
+#: public/functions.php:39 admin/templates/list-certificates.php:4
+#: public/templates/certificates.php:8
+msgid "Certificates"
+msgstr ""
+
+#: admin/functions.php:75 admin/functions.php:76
+msgid "Certification"
+msgstr ""
+
+#: admin/certificates.php:14
+msgid "Certification adjusted successfully."
+msgstr ""
+
+#: admin/certificates.php:18 admin/cards.php:52
+msgid "Certification deleted successfully."
+msgstr ""
+
+#: admin/templates/user-signatures-detail.php:55
+msgid "Charge"
+msgstr ""
+
+#: admin/certificates.php:192
+msgid "Code"
+msgstr ""
+
+#: admin/functions.php:89
+msgid "Configuration"
+msgstr ""
+
+#: admin/templates/document-detail.php:85
+msgid "Content"
+msgstr ""
+
+#: admin/documents.php:323
+msgid "Created at"
+msgstr ""
+
+#: public/templates/my-card.php:99
+msgid "Date of birth"
+msgstr ""
+
+#: admin/certificates.php:323
+msgid "Description"
+msgstr ""
+
+#: admin/certificates.php:191 admin/templates/document-detail.php:5
+msgid "Document"
+msgstr ""
+
+#: admin/documents.php:235
+msgid "Document adjusted successfully."
+msgstr ""
+
+#: admin/documents.php:250
+msgid "Document deleted successfully."
+msgstr ""
+
+#: admin/templates/document-detail.php:3
+msgid "Document details"
+msgstr ""
+
+#: admin/templates/document-detail.php:37
+msgid "Document Information"
+msgstr ""
+
+#: admin/functions.php:84 admin/templates/list-documents.php:4
+msgid "Documents"
+msgstr ""
+
+#: public/templates/certificates.php:51
+msgid "Does not expire"
+msgstr ""
+
+#: public/templates/certificates.php:140
+msgid "Download HTML (PDF View)"
+msgstr ""
+
+#: public/templates/certificates.php:157 public/templates/my-card.php:134
+msgid "Download PDF"
+msgstr ""
+
+#. Author of the plugin
+msgid "EduSof"
+msgstr ""
+
+#: public/templates/my-card.php:111
+msgid "Emission"
+msgstr ""
+
+#: admin/certificates.php:195
+msgid "Emission date"
+msgstr ""
+
+#: admin/documents.php:121
+msgid "Error saving document."
+msgstr ""
+
+#: admin/users-signatures.php:52
+msgid "Error: User already has a signature."
+msgstr ""
+
+#: public/templates/my-card.php:121
+msgid "Expiration"
+msgstr ""
+
+#: admin/certificates.php:196
+msgid "Expiration date"
+msgstr ""
+
+#: public/templates/certificates.php:47
+msgid "Expires:"
+msgstr ""
+
+#: admin/templates/document-detail.php:99
+msgid "Footer"
+msgstr ""
+
+#: admin/templates/document-detail.php:71
+msgid "Header"
+msgstr ""
+
+#: admin/templates/document-detail.php:191
+msgid "Height size"
+msgstr ""
+
+#: public/templates/my-card.php:29
+msgid "here"
+msgstr ""
+
+#: public/templates/my-card.php:57
+msgid "High School"
+msgstr ""
+
+#. Author URI of the plugin
+msgid "https://edusof.com"
+msgstr ""
+
+#: public/functions.php:33
+msgid "ID Card"
+msgstr ""
+
+#: admin/functions.php:88
+msgid "ID card"
+msgstr ""
+
+#: public/templates/my-card.php:79
+msgid "ID Number"
+msgstr ""
+
+#: admin/templates/document-detail.php:137
+msgid "ID Requirement for the admin (ID requisito)"
+msgstr ""
+
+#: admin/templates/document-detail.php:55
+msgid "Identifier (can be the name of the document)"
+msgstr ""
+
+#: admin/users-signatures.php:28
+msgid "Invalid user."
+msgstr ""
+
+#: admin/templates/document-detail.php:197
+msgid "Is required"
+msgstr ""
+
+#: admin/templates/document-detail.php:202
+msgid "Is visible in documents page?"
+msgstr ""
+
+#: public/templates/certificates.php:46
+msgid "Issued:"
+msgstr ""
+
+#: admin/templates/document-detail.php:150
+msgid "Landscape"
+msgstr ""
+
+#: admin/templates/document-detail.php:169
+msgid "Managed"
+msgstr ""
+
+#: public/templates/my-card.php:89
+msgid "Nacionality"
+msgstr ""
+
+#: admin/documents.php:321 admin/templates/document-detail.php:49
+#: public/templates/my-card.php:51
+msgid "Name"
+msgstr ""
+
+#: admin/certificates.php:322
+msgid "Name of template"
+msgstr ""
+
+#: admin/templates/document-detail.php:147
+msgid "Orientation"
+msgstr ""
+
+#: admin/templates/document-detail.php:155
+msgid "Paper Format"
+msgstr ""
+
+#: admin/templates/document-detail.php:149
+msgid "Portrait"
+msgstr ""
+
+#: admin/templates/document-detail.php:238
+#: admin/templates/template-certificates-detail.php:64
+#: public/templates/certificates.php:37
+msgid "Preview"
+msgstr ""
+
+#: public/templates/my-card.php:10
+msgid "Request ID Card"
+msgstr ""
+
+#: admin/templates/template-certificates-detail.php:55
+msgid "Save"
+msgstr ""
+
+#: admin/templates/document-detail.php:220
+#: admin/templates/user-signatures-detail.php:85
+msgid "Saves changes"
+msgstr ""
+
+#: admin/templates/list-template-certificates.php:20
+#: admin/templates/list-certificates.php:20
+msgid "Search"
+msgstr ""
+
+#: admin/templates/list-template-certificates.php:21
+#: admin/templates/list-certificates.php:21
+msgid "Search for Student"
+msgstr ""
+
+#: admin/templates/certificate-assignment.php:36
+msgid "Select a certificate"
+msgstr ""
+
+#: admin/templates/certificate-assignment.php:33
+msgid "Select Certificate"
+msgstr ""
+
+#: admin/functions.php:21
+msgid "Select option"
+msgstr ""
+
+#: admin/templates/certificate-assignment.php:46
+msgid "Select Students"
+msgstr ""
+
+#: public/templates/my-card.php:136
+msgid "Share"
+msgstr ""
+
+#: admin/templates/user-signatures-detail.php:5
+msgid "Signature"
+msgstr ""
+
+#: admin/users-signatures.php:91
+msgid "Signature adjusted successfully."
+msgstr ""
+
+#: admin/users-signatures.php:101
+msgid "Signature deleted successfully."
+msgstr ""
+
+#: admin/templates/user-signatures-detail.php:3
+msgid "Signature details"
+msgstr ""
+
+#: admin/templates/user-signatures-detail.php:61
+msgid "Signature image"
+msgstr ""
+
+#: admin/templates/user-signatures-detail.php:36
+msgid "Signature Information"
+msgstr ""
+
+#: admin/documents.php:322
+msgid "Status"
+msgstr ""
+
+#: admin/functions.php:83
+msgid "Student certificate"
+msgstr ""
+
+#: admin/functions.php:83
+msgid "Student certificates"
+msgstr ""
+
+#: admin/certificates.php:58
+msgid "Template adjusted successfully."
+msgstr ""
+
+#: admin/templates/template-certificates-detail.php:25
+msgid "Template content"
+msgstr ""
+
+#: admin/certificates.php:62
+msgid "Template deleted successfully."
+msgstr ""
+
+#: admin/templates/list-template-certificates.php:4
+msgid "Templates of certification"
+msgstr ""
+
+#: public/endpoint.php:42
+msgid "The certificate_id parameter is missing."
+msgstr ""
+
+#: admin/certificates.php:119
+msgid "The certificates have been successfully issued"
+msgstr ""
+
+#. Description of the plugin
+msgid ""
+"The WordPress plugin for certificates, certificates and personalized "
+"documents of the institution."
+msgstr ""
+
+#: admin/certificates.php:115
+msgid ""
+"There have been problems issuing certificates to the following students:"
+msgstr ""
+
+#: admin/templates/document-detail.php:133
+msgid "This document has margins (on all sides)"
+msgstr ""
+
+#: admin/templates/document-detail.php:125
+msgid "This document requires that the student be a graduate"
+msgstr ""
+
+#: admin/templates/document-detail.php:117
+msgid "This document will require signatures"
+msgstr ""
+
+#: admin/templates/document-detail.php:167
+msgid "Type"
+msgstr ""
+
+#: admin/templates/document-detail.php:142
+msgid "Type file"
+msgstr ""
+
+#: admin/templates/document-detail.php:175
+msgid "Unit"
+msgstr ""
+
+#: admin/certificates.php:193 admin/users-signatures.php:159
+#: admin/cards.php:111 admin/templates/user-signatures-detail.php:44
+msgid "User"
+msgstr ""
+
+#: admin/users-signatures.php:160
+msgid "User charge"
+msgstr ""
+
+#: admin/templates/list-user-signatures.php:4
+msgid "User signatures"
+msgstr ""
+
+#: admin/functions.php:87
+msgid "Users and signatures"
+msgstr ""
+
+#: admin/templates/document-detail.php:62
+msgid "Variables"
+msgstr ""
+
+#: admin/users-signatures.php:136 admin/cards.php:89 admin/documents.php:298
+msgid "View Details"
+msgstr ""
+
+#: public/templates/certificates.php:60
+msgid "View Fullscreen"
+msgstr ""
+
+#: admin/templates/document-detail.php:207
+msgid "When saving, all existing signatures will be deleted."
+msgstr ""
+
+#: admin/templates/document-detail.php:186
+msgid "Width size"
+msgstr ""
+
+#. Name of the plugin
+msgid "WP Certificates"
+msgstr ""
+
+#: public/templates/my-card.php:27
+msgid ""
+"You do not yet have a photo to use on the ID card, please check its status "
+"in the documents screen"
+msgstr ""
+
+#: public/templates/certificates.php:165
+msgid "You don't have certificates"
+msgstr ""
