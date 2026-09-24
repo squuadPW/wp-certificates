@@ -500,6 +500,36 @@ function assign_certificate_student( $student_id, $template_id, $type, $emission
         // Convertimos el formato a string si viene como array (en caso de 'custom')
         $format_save = is_array($paper_format) ? 'custom' : $paper_format;
 
+        $certificate_template = implode('', [
+            $header,
+            $content,
+            $footer,
+        ]);
+
+        if ( $document->book && function_exists('edusof_insert_certificate_book_line') ) {
+            $book_data = edusof_insert_certificate_book_line( $document->book, $student, $type, $title, $emission_date, $program, $course_id );
+
+            if (!empty($book_data)) {
+                $replacements['folio'] = [
+                    'value' => $book_data['folio'] ?? '',
+                    'wrap' => true,
+                ];
+
+                $replacements['tomo'] = [
+                    'value' => $book_data['tomo'] ?? '',
+                    'wrap' => true,
+                ];
+
+                $replacements['tomo_folio'] = [
+                    'value' => __('Tome: ','wp-certificates').
+                        ($book_data['tomo'] ?? '') .
+                        __('Folio: ','wp-certificates').
+                        ($book_data['folio'] ?? ''),
+                    'wrap' => true,
+                ];
+            }
+        }
+
         // 4. Preparar las variables de reemplazo estándar
         $replacements = get_replacements_variables($student);
 
@@ -570,6 +600,8 @@ function assign_certificate_student( $student_id, $template_id, $type, $emission
             'participant_id'      => $student->id,
             'course_id'           => $course_id,
             'html'                => $html_final,
+            'tomo'                => $book_data['tomo'] ?? null,
+            'folio'               => $book_data['folio'] ?? null,
             'option_document'     => json_encode($option_document) // Guardamos el tamaño en un JSON estructurado
         ];
 

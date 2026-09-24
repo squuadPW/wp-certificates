@@ -165,6 +165,7 @@ function create_tables_certificates() {
         `unit` VARCHAR(255) NOT NULL DEFAULT 'mm',
         `is_required` BOOLEAN NOT NULL DEFAULT 0,
         `is_visible` BOOLEAN NOT NULL DEFAULT 1,
+        `book` TEXT NULL,
         `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
         PRIMARY KEY (id)
     )" . $charset_collate . ";");
@@ -203,6 +204,8 @@ function create_tables_certificates() {
         participant_id INT(11) NULL,
         course_id INT(11) NULL,
         html text NULL,
+        tomo INT NULL,
+        folio INT NULL,
         option_document JSON NULL,
         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY (id)

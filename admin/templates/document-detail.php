@@ -144,6 +144,21 @@
                                     </div>
 
                                     <div style="font-weight:400; text-align: center" class="space-offer">
+                                        <label for="book"><b><?= esc_html__('Certificate book', 'wp-certificates'); ?></b></label><br>
+                                        <select name="book" id="book">
+                                            <option value="0"><?= esc_html__('Select a book', 'wp-certificates'); ?></option>
+                                            <?php foreach ((array) $books as $book):
+                                                $book_id = is_object($book) ? ($book->id ?? 0) : ($book['id'] ?? 0);
+                                                $book_title = is_object($book) ? ($book->title ?? $book->name ?? $book_id) : ($book['title'] ?? $book['name'] ?? $book_id);
+                                            ?>
+                                                <option value="<?= esc_attr($book_id); ?>" <?= selected((int) ($document->book ?? 0), (int) $book_id, false); ?>>
+                                                    <?= esc_html($book_title); ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+
+                                    <div style="font-weight:400; text-align: center" class="space-offer">
                                         <label for="hc"><b><?= esc_html__('Orientation', 'wp-certificates'); ?></b></label><br>
                                         <select name="orientation" required>
                                             <option value="portrait" <?= ($document->orientation == 'portrait' || !$document) ? 'selected' : ''; ?>><?= esc_html__('Portrait', 'wp-certificates') ?></option>

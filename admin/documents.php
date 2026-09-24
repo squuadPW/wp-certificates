@@ -9,6 +9,9 @@ function add_admin_form_documents_content()
             $document_id = $_GET['document_id'];
             $document = get_document_detail($document_id);
             $variables = get_variables_documents();
+            $books = function_exists('edusof_get_books')
+                ? edusof_get_books()
+                : [];
             $all_documents_html = [];
             $document_html = '';
             ob_start(); // Iniciar la captura de salida
@@ -61,6 +64,7 @@ function add_admin_form_documents_content()
             $unit = isset($_POST['unit']) ? sanitize_text_field($_POST['unit']) : '';
             $id_requisito = isset($_POST['id_requisito']) ? sanitize_text_field($_POST['id_requisito']) : '';
             $type_file = isset($_POST['type_file']) ? sanitize_text_field($_POST['type_file']) : '';
+            $book = isset($_POST['book']) ? absint($_POST['book']) : 0;
 
             // Convertir a valores binarios (0 o 1)
             $status = isset($_POST['status']) && $_POST['status'] === 'on' ? 1 : 0;
@@ -105,6 +109,7 @@ function add_admin_form_documents_content()
                 'unit' => $unit,
                 'id_requisito' => $id_requisito,
                 'type_file' => $type_file,
+                'book' => $book,
             );
 
             // --- 2. Actualización o Inserción del Documento Maestro ---
