@@ -150,6 +150,9 @@
                                             <?php foreach ((array) $books as $book):
                                                 $book_id = is_object($book) ? ($book->id ?? 0) : ($book['id'] ?? 0);
                                                 $book_title = is_object($book) ? ($book->title ?? $book->name ?? $book_id) : ($book['title'] ?? $book['name'] ?? $book_id);
+                                                if ((int) $book_id <= 0) {
+                                                    continue;
+                                                }
                                             ?>
                                                 <option value="<?= esc_attr($book_id); ?>" <?= selected((int) ($document->book ?? 0), (int) $book_id, false); ?>>
                                                     <?= esc_html($book_title); ?>

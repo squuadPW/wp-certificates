@@ -1,5 +1,24 @@
 <?php
 
+function get_certificates_books_list(array $args = []): array
+{
+    $response = function_exists('edusof_get_books') ? edusof_get_books($args) : [];
+
+    if (!is_array($response)) return [];
+
+    if (isset($response['data']['data']) && is_array($response['data']['data'])) {
+        return array_values($response['data']['data']);
+    }
+
+    if (isset($response['data']) && is_array($response['data']) && !isset($response['data']['meta'])) {
+        return array_values($response['data']);
+    }
+
+    if (is_array($response) && array_keys($response) !== range(0, count($response) - 1)) return [];
+
+    return array_values($response);
+}
+
 function add_admin_form_documents_content()
 {
 
@@ -9,9 +28,7 @@ function add_admin_form_documents_content()
             $document_id = $_GET['document_id'];
             $document = get_document_detail($document_id);
             $variables = get_variables_documents();
-            $books = function_exists('edusof_get_books')
-                ? edusof_get_books()
-                : [];
+            $books = get_certificates_books_list();
             $all_documents_html = [];
             $document_html = '';
             ob_start(); // Iniciar la captura de salida
