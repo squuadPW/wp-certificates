@@ -48,7 +48,7 @@ add_action('init', function () {
     add_rewrite_endpoint('certificates', EP_ROOT | EP_PAGES);
 });
 
-add_filter('wp_nav_menu_items', 'add_certification_link', 10, 2);
+/* add_filter('wp_nav_menu_items', 'add_certification_link', 10, 2);
 
 function add_certification_link($items, $args)
 {
@@ -59,7 +59,7 @@ function add_certification_link($items, $args)
 
         // Nuevo elemento SIN cerrar </li>
         $new_item = '<li class="menu-item"><a href="'
-            . esc_url(wc_get_account_endpoint_url('my-card')) . '">'
+            . esc_url(get_permalink(get_option('woocommerce_myaccount_page_id'))) . '/my-card">'
             . esc_html__('ID Card', 'form-plugin')
             . '</a>';
 
@@ -80,7 +80,7 @@ function add_certification_link($items, $args)
 
         // Nuevo elemento SIN cerrar </li>
         $new_item = '<li class="menu-item"><a href="'
-            . esc_url(wc_get_account_endpoint_url('certificates')) . '">'
+            . esc_url(get_permalink(get_option('woocommerce_myaccount_page_id'))) . '/certificates">'
             . esc_html__('Certificates', 'wp-certificates')
             . '</a>';
 
@@ -98,7 +98,7 @@ function add_certification_link($items, $args)
     }
 
     return $items;
-}
+} */
 
 add_action('woocommerce_account_certificates_endpoint', function () {
 
