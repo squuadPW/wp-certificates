@@ -59,7 +59,7 @@ function add_certification_link($items, $args)
 
         // Nuevo elemento SIN cerrar </li>
         $new_item = '<li class="menu-item"><a href="'
-            . esc_url(get_permalink(get_option('woocommerce_myaccount_page_id'))) . '/my-card">'
+            . esc_url(wc_get_account_endpoint_url('my-card')) . '">'
             . esc_html__('ID Card', 'form-plugin')
             . '</a>';
 
@@ -80,7 +80,7 @@ function add_certification_link($items, $args)
 
         // Nuevo elemento SIN cerrar </li>
         $new_item = '<li class="menu-item"><a href="'
-            . esc_url(get_permalink(get_option('woocommerce_myaccount_page_id'))) . '/certificates">'
+            . esc_url(wc_get_account_endpoint_url('certificates')) . '">'
             . esc_html__('Certificates', 'wp-certificates')
             . '</a>';
 
