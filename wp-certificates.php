@@ -16,6 +16,9 @@ defined('ABSPATH') || exit;
 // Constantes del plugin
 define('WP_C_PATH', plugin_dir_path(__FILE__));
 define('WP_C_REMOTE_INFO_URL', 'https://versions.squuad.com/plugins/wp-certificates/info.json');
+// Versión del esquema de tablas: al subirla, create_tables_certificates() se vuelve a ejecutar sin
+// reactivar el plugin (dbDelta solo crea tablas o añade/modifica columnas)
+define('WP_C_DB_VERSION', '2');
 
 // Now you can safely use get_plugin_data()
 $plugin_data = get_plugin_data(__FILE__);
@@ -181,6 +184,7 @@ function create_tables_certificates() {
         `is_required` BOOLEAN NOT NULL DEFAULT 0,
         `is_visible` BOOLEAN NOT NULL DEFAULT 1,
         `book` TEXT NULL,
+        `fields` LONGTEXT NULL,
         `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
         PRIMARY KEY (id)
     )" . $charset_collate . ";");
@@ -248,6 +252,17 @@ function create_tables_certificates() {
     default_templates();
     default_templates_cards();
 }
+
+// Actualiza las tablas cuando cambia WP_C_DB_VERSION (p. ej. tras actualizar el plugin). Prioridad 5:
+// antes de las migraciones de EduSystem que usan estas columnas.
+function wp_c_maybe_update_db() {
+    if (get_option('wp_c_db_version') === WP_C_DB_VERSION) {
+        return;
+    }
+    create_tables_certificates();
+    update_option('wp_c_db_version', WP_C_DB_VERSION);
+}
+add_action('init', 'wp_c_maybe_update_db', 5);
 
 register_activation_hook(__FILE__, function () {
 

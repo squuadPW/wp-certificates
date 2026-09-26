@@ -36,7 +36,7 @@ add_action('admin_enqueue_scripts', function () {
 
 function admin_wp_certificates_scripts()
 {
-    $version = '1.0.1';
+    $version = '1.0.2'; // subir al cambiar los JS del admin
     if (isset($_GET['page']) && !empty($_GET['page']) && $_GET['page'] == 'add_admin_form_certificates_templates_content') {
         wp_enqueue_script('templates', plugins_url('wp-certificates') . '/admin/assets/js/templates.js', array('jquery'), $version, true);
     }

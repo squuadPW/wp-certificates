@@ -134,6 +134,14 @@ function add_admin_form_documents_content()
                 'book' => $book,
             );
 
+            // Campos adicionales: se piden antes de generar el documento y sus respuestas no se guardan
+            // (ver edusystem/includes/document-fields.php). Las filas inválidas se descartan con un aviso.
+            $field_errors = [];
+            if (function_exists('edusystem_sanitize_document_fields')) {
+                [$document_fields, $field_errors] = edusystem_sanitize_document_fields(wp_unslash($_POST['fields'] ?? []));
+                $document_data['fields'] = $document_fields ? wp_json_encode($document_fields) : null;
+            }
+
             // --- 2. Actualización o Inserción del Documento Maestro ---
             $result = false;
             if ($document_id > 0) {
@@ -260,6 +268,9 @@ function add_admin_form_documents_content()
 
             // --- 4. Redirección Final ---
             setcookie('message', esc_html__('Document adjusted successfully.', 'wp-certificates'), time() + 30, '/');
+            if ($field_errors) {
+                setcookie('message-error', esc_html__('Some additional fields were not saved:', 'wp-certificates') . ' ' . implode(' ', $field_errors), time() + 30, '/');
+            }
             if ($document_id > 0) {
                 $redirect_url = admin_url('/admin.php?page=add_admin_form_documents_content&section_tab=document_detail&document_id=' . $redirect_id);
             } else {
@@ -465,6 +476,40 @@ function get_documents_certificates(string $type = null): array
     $query = $wpdb->prepare($sql, ...$where_args);
     $documents = $wpdb->get_results($query);
     return $documents ?: [];
+}
+
+/**
+ * Fila de la tabla «Campos adicionales» del formulario de documentos. $index es el índice del
+ * array fields[] del POST ('__INDEX__' en la plantilla que usa documents.js para añadir filas).
+ */
+function wpc_document_field_row($index, $field = []) {
+    $name = 'fields[' . $index . ']';
+    $type = $field['type'] ?? 'text';
+    $has_options = function_exists('edusystem_document_field_has_options') && edusystem_document_field_has_options($type);
+
+    ob_start();
+    ?>
+    <tr class="wpc-document-field">
+        <td><input type="text" class="widefat" name="<?= esc_attr($name) ?>[label]" value="<?= esc_attr($field['label'] ?? '') ?>" aria-label="<?= esc_attr__('Label', 'wp-certificates') ?>"></td>
+        <td>
+            <input type="text" class="widefat" name="<?= esc_attr($name) ?>[key]" value="<?= esc_attr($field['key'] ?? '') ?>" pattern="[a-z0-9_]*" aria-label="<?= esc_attr__('Key', 'wp-certificates') ?>">
+            <?php if (!empty($field['key'])) { ?>
+                <p class="description"><code>{{<?= esc_html($field['key']) ?>}}</code><?php if ($has_options) { ?> <code>{{<?= esc_html($field['key']) ?>_list}}</code><?php } ?></p>
+            <?php } ?>
+        </td>
+        <td>
+            <select name="<?= esc_attr($name) ?>[type]" class="wpc-document-field-type" aria-label="<?= esc_attr__('Type', 'wp-certificates') ?>">
+                <?php foreach (edusystem_document_field_types() as $value => $label) { ?>
+                    <option value="<?= esc_attr($value) ?>" <?php selected($type, $value); ?>><?= esc_html($label) ?></option>
+                <?php } ?>
+            </select>
+        </td>
+        <td><textarea class="widefat wpc-document-field-options" name="<?= esc_attr($name) ?>[options]" rows="3" aria-label="<?= esc_attr__('Options (one per line)', 'wp-certificates') ?>" <?= $has_options ? '' : 'disabled' ?>><?= esc_textarea(implode("\n", $field['options'] ?? [])) ?></textarea></td>
+        <td style="text-align: center"><input type="checkbox" name="<?= esc_attr($name) ?>[required]" value="1" style="width: auto !important" <?php checked(!empty($field['required'])); ?> aria-label="<?= esc_attr__('Required', 'wp-certificates') ?>"></td>
+        <td><button type="button" class="button-link button-link-delete wpc-remove-document-field"><?= esc_html__('Remove', 'wp-certificates') ?></button></td>
+    </tr>
+    <?php
+    return ob_get_clean();
 }
 
 function get_document_detail($id) {

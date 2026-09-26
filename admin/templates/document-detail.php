@@ -229,9 +229,37 @@
                                 </div>
                             </div>
 
-                            <div>
-                                <>
-                            </div>
+                            <?php if (function_exists('edusystem_get_document_fields')) {
+                                $document_fields = $document ? edusystem_get_document_fields($document) : []; ?>
+                                <details id="wpc-advanced" style="margin: 18px;" <?= $document_fields ? 'open' : '' ?>>
+                                    <summary style="cursor: pointer"><b><?= esc_html__('Advanced', 'wp-certificates'); ?></b></summary>
+
+                                    <h4 style="margin-bottom: 4px"><?= esc_html__('Additional fields', 'wp-certificates'); ?></h4>
+                                    <p class="description" style="margin-top: 0">
+                                        <?= esc_html__('They are requested before generating the document and the answers are only used to fill it in (they are not stored). Use {{key}} in the document to print the answer and, in fields with options, {{key_list}} to print all the options with (✓) on the selected ones. If the key is left empty, it is created from the label.', 'wp-certificates'); ?>
+                                    </p>
+
+                                    <table class="widefat striped" id="wpc-document-fields">
+                                        <thead>
+                                            <tr>
+                                                <th><?= esc_html__('Label', 'wp-certificates'); ?></th>
+                                                <th><?= esc_html__('Key', 'wp-certificates'); ?></th>
+                                                <th><?= esc_html__('Type', 'wp-certificates'); ?></th>
+                                                <th><?= esc_html__('Options (one per line)', 'wp-certificates'); ?></th>
+                                                <th style="text-align: center"><?= esc_html__('Required', 'wp-certificates'); ?></th>
+                                                <th><span class="screen-reader-text"><?= esc_html__('Actions', 'wp-certificates'); ?></span></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php foreach ($document_fields as $index => $field) {
+                                                echo wpc_document_field_row($index, $field);
+                                            } ?>
+                                        </tbody>
+                                    </table>
+                                    <p><button type="button" class="button" id="wpc-add-document-field"><?= esc_html__('+ Add field', 'wp-certificates'); ?></button></p>
+                                    <template id="wpc-document-field-template"><?= wpc_document_field_row('__INDEX__'); ?></template>
+                                </details>
+                            <?php } ?>
 
                             <?php if (isset($document) && !empty($document)): ?>
                                 <div style="margin-top:20px;display:flex;flex-direction:row;justify-content:end;gap:5px;">
