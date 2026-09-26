@@ -25,8 +25,8 @@ function add_admin_form_documents_content()
     if (isset($_GET['section_tab']) && !empty($_GET['section_tab'])) {
         if ($_GET['section_tab'] == 'document_detail') {
             global $wpdb;
-            $document_id = $_GET['document_id'];
-            $document = get_document_detail($document_id);
+            $document_id = isset($_GET['document_id']) ? absint($_GET['document_id']) : 0;
+            $document = $document_id ? get_document_detail($document_id) : null;
             $variables = get_variables_documents();
             $books = get_certificates_books_list();
             $all_documents_html = [];
@@ -62,6 +62,11 @@ function add_admin_form_documents_content()
         }
     } else {
         if (isset($_GET['action']) && $_GET['action'] == 'save_document') {
+            if ('POST' !== $_SERVER['REQUEST_METHOD'] || !current_user_can('manager_documents_certificates')) {
+                wp_die(esc_html__('You are not allowed to do this.', 'wp-certificates'), 403);
+            }
+            check_admin_referer('wpc_save_document');
+
             global $wpdb;
             $table_documents_certificates = $wpdb->prefix . 'documents_certificates';
             $table_student_documents = $wpdb->prefix . 'student_documents';
@@ -75,10 +80,10 @@ function add_admin_form_documents_content()
             $document_identificator = isset($_POST['document_identificator']) ? strtoupper(sanitize_title($_POST['document_identificator'])) : '';
 
             // Saneamiento de otros campos
-            $orientation = isset($_POST['orientation']) ? sanitize_text_field($_POST['orientation']) : '';
-            $type = isset($_POST['type']) ? sanitize_text_field($_POST['type']) : '';
-            $paper_format = isset($_POST['paper_format']) ? sanitize_text_field($_POST['paper_format']) : '';
-            $unit = isset($_POST['unit']) ? sanitize_text_field($_POST['unit']) : '';
+            $orientation = isset($_POST['orientation']) && in_array($_POST['orientation'], ['portrait', 'landscape'], true) ? $_POST['orientation'] : 'portrait';
+            $type = isset($_POST['type']) && in_array($_POST['type'], ['managed', 'automatic'], true) ? $_POST['type'] : 'managed';
+            $paper_format = isset($_POST['paper_format']) && in_array($_POST['paper_format'], ['a4', 'a3', 'letter', 'legal', 'tabloid', 'custom'], true) ? $_POST['paper_format'] : 'a4';
+            $unit = isset($_POST['unit']) && in_array($_POST['unit'], ['mm', 'pt', 'cm', 'in', 'px'], true) ? $_POST['unit'] : 'mm';
             $id_requisito = isset($_POST['id_requisito']) ? sanitize_text_field($_POST['id_requisito']) : '';
             $type_file = isset($_POST['type_file']) ? sanitize_text_field($_POST['type_file']) : '';
             $book = isset($_POST['book']) ? absint($_POST['book']) : 0;
@@ -264,9 +269,14 @@ function add_admin_form_documents_content()
             wp_redirect($redirect_url);
             exit;
         } else if (isset($_GET['action']) && $_GET['action'] == 'delete_document') {
+            $document_id = isset($_GET['document_id']) ? absint($_GET['document_id']) : 0;
+            if (!current_user_can('manager_documents_certificates')) {
+                wp_die(esc_html__('You are not allowed to do this.', 'wp-certificates'), 403);
+            }
+            check_admin_referer('wpc_delete_document_' . $document_id);
+
             global $wpdb;
             $table_documents_certificates = $wpdb->prefix . 'documents_certificates';
-            $document_id = $_GET['document_id'];
             $wpdb->delete($table_documents_certificates, ['id' => $document_id]);
 
             setcookie('message', esc_html__('Document deleted successfully.', 'wp-certificates'), time() + 3600, '/');
@@ -318,7 +328,7 @@ class TT_Documents_Certificates_List_Table extends WP_List_Table
                 return $item[$column_name] == 1 ? '<span style="color: green">Active</span>' : '<span style="color: red">Inactive</span>';
             case 'view_details':
                 $html = "<a href='" . admin_url('/admin.php?page=add_admin_form_documents_content&section_tab=document_detail&document_id=' . $item['id']) . "' class='button button-primary'>" . esc_html__('View Details', 'wp-certificates') . "</a>";
-                $html .= '<a style="margin-left: 10px" href="' . admin_url('admin.php?page=add_admin_form_documents_content&action=delete_document&document_id=' . $item['id']) . '" class="button button-danger" onclick="return confirm(\'Are you sure?\');"><span class="dashicons dashicons-trash"></span></a>';
+                $html .= '<a style="margin-left: 10px" href="' . esc_url(wp_nonce_url(admin_url('admin.php?page=add_admin_form_documents_content&action=delete_document&document_id=' . $item['id']), 'wpc_delete_document_' . $item['id'])) . '" class="button button-danger" onclick="return confirm(\'Are you sure?\');"><span class="dashicons dashicons-trash"></span></a>';
                 return $html;
             default:
                 return strtoupper($item[$column_name]);
@@ -460,6 +470,6 @@ function get_documents_certificates(string $type = null): array
 function get_document_detail($id) {
     global $wpdb;
     $table_documents_certificates = $wpdb->prefix . 'documents_certificates';
-    $document = $wpdb->get_row("SELECT * FROM {$table_documents_certificates} WHERE id = {$id}");
+    $document = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$table_documents_certificates} WHERE id = %d", $id));
     return $document;
 }
