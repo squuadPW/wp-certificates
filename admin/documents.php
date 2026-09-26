@@ -36,22 +36,22 @@ function add_admin_form_documents_content()
             // Renderizar Header
             if (!empty($document->header)) {
                 echo '<div class="automatic-document-header">';
-                // El uso de eval permite ejecutar código PHP incrustado en el header
-                eval ('?>' . $document->header . '<?php ');
+                // El contenido se muestra como HTML: ya no se ejecuta como PHP (antes eval)
+                echo $document->header;
                 echo '</div>';
             }
 
             // Renderizar Content
             if (!empty($document->content)) {
                 echo '<div class="automatic-document-content">';
-                eval ('?>' . $document->content . '<?php ');
+                echo $document->content;
                 echo '</div>';
             }
 
             // Renderizar Footer
             if (!empty($document->footer)) {
                 echo '<div class="automatic-document-footer">';
-                eval ('?>' . $document->footer . '<?php ');
+                echo $document->footer;
                 echo '</div>';
             }
 
