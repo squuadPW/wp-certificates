@@ -27,7 +27,6 @@ if ( !class_exists('WP_List_Table') )
 
 require_once WP_C_PATH . 'public/functions.php';
 require_once WP_C_PATH . 'admin/functions.php';
-require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
 // Include the required file for get_plugin_data()
 if ( !function_exists('get_plugin_data') ) 
@@ -38,25 +37,38 @@ add_filter('plugins_api', 'wp_c_plugin_info', 20, 3);
 add_filter('site_transient_update_plugins', 'wp_c_check_update');
 
 // Obtener información remota con caché
+// WordPress aplica site_transient_update_plugins varias veces por página del admin: el servidor se
+// consulta como máximo una vez cada 12 h (1 h si falla, p. ej. 404) y "Comprobar de nuevo" en
+// Actualizaciones fuerza la consulta.
 function wp_c_get_remote_info() {
-    static $remote_info = null;
+    static $remote_info = null; // '' = la consulta falló
 
     if (null === $remote_info) {
-        $remote = wp_remote_get(WP_C_REMOTE_INFO_URL, [
-            'timeout' => 10,
-            'headers' => ['Accept' => 'application/json']
-        ]);
+        $forzar = is_admin() && isset($_GET['force-check']);
+        $cache = $forzar ? false : get_site_transient('wp_c_remote_info');
 
-        if (
-            !is_wp_error($remote) &&
-            200 === wp_remote_retrieve_response_code($remote) &&
-            !empty($body = wp_remote_retrieve_body($remote))
-        ) {
-            $remote_info = json_decode($body);
+        if (false !== $cache) {
+            $remote_info = $cache;
+        } else {
+            $remote = wp_remote_get(WP_C_REMOTE_INFO_URL, [
+                'timeout' => 10,
+                'headers' => ['Accept' => 'application/json']
+            ]);
+
+            $remote_info = '';
+            if (
+                !is_wp_error($remote) &&
+                200 === wp_remote_retrieve_response_code($remote) &&
+                !empty($body = wp_remote_retrieve_body($remote))
+            ) {
+                $remote_info = json_decode($body) ?: '';
+            }
+
+            set_site_transient('wp_c_remote_info', $remote_info, $remote_info ? 12 * HOUR_IN_SECONDS : HOUR_IN_SECONDS);
         }
     }
 
-    return $remote_info;
+    return $remote_info ?: null;
 }
 
 // Proporcionar información del plugin
@@ -131,6 +143,9 @@ function wp_c_check_update($transient) {
 }
 
 function create_tables_certificates() {
+    // dbDelta() vive en upgrade.php: se carga solo aquí (antes se cargaba en cada petición)
+    require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
     global $wpdb;
     $charset_collate = $wpdb->get_charset_collate();
 
