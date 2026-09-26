@@ -48,7 +48,7 @@ add_action('init', function () {
     add_rewrite_endpoint('certificates', EP_ROOT | EP_PAGES);
 });
 
-/* add_filter('wp_nav_menu_items', 'add_certification_link', 10, 2);
+add_filter('wp_nav_menu_items', 'add_certification_link', 10, 2);
 
 function add_certification_link($items, $args)
 {
@@ -98,7 +98,7 @@ function add_certification_link($items, $args)
     }
 
     return $items;
-} */
+}
 
 add_action('woocommerce_account_certificates_endpoint', function () {
 
