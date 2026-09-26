@@ -236,7 +236,7 @@
 
                                     <h4 style="margin-bottom: 4px"><?= esc_html__('Additional fields', 'wp-certificates'); ?></h4>
                                     <p class="description" style="margin-top: 0">
-                                        <?= esc_html__('They are requested before generating the document and the answers are only used to fill it in (they are not stored). Use {{key}} in the document to print the answer and, in fields with options, {{key_list}} to print all the options with (✓) on the selected ones. If the key is left empty, it is created from the label.', 'wp-certificates'); ?>
+                                        <?= esc_html__('They are requested before generating the document and the answers are only used to fill it in (they are only stored while the document is partially signed). Use {{key}} in the document to print the answer and, in fields with options, {{key_list}} to print all the options with (✓) on the selected ones. If the key is left empty, it is created from the label.', 'wp-certificates'); ?>
                                     </p>
 
                                     <table class="widefat striped" id="wpc-document-fields">

@@ -532,6 +532,10 @@ function assign_certificate_student( $student_id, $template_id, $type, $emission
 
         // 4. Preparar las variables de reemplazo estándar
         $replacements = get_replacements_variables($student);
+        // Campos adicionales del documento (EduSystem): aquí no hay respuestas; así no queda el texto literal {{clave}}
+        if (function_exists('edusystem_document_fields_empty_replacements')) {
+            $replacements = array_merge(edusystem_document_fields_empty_replacements($document), $replacements);
+        }
 
         // 5. Procesar Firma Digital si se requiere
         $signature_required = is_object($document) ? ($document->signature_required ?? false) : ($document['signature_required'] ?? false);

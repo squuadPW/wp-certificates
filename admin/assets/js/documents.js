@@ -65,4 +65,14 @@ document.addEventListener("DOMContentLoaded", function () {
       event.target.closest("tr").remove();
     }
   });
+
+  // Con «Avanzado» cerrado, el navegador bloquearía el envío por una clave inválida sin mostrar el error
+  table.addEventListener(
+    "invalid",
+    function () {
+      const advanced = document.getElementById("wpc-advanced");
+      if (advanced) advanced.open = true;
+    },
+    true
+  );
 });

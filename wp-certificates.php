@@ -259,8 +259,21 @@ function wp_c_maybe_update_db() {
     if (get_option('wp_c_db_version') === WP_C_DB_VERSION) {
         return;
     }
+    // Candado: si varias peticiones llegan a la vez, solo una ejecuta dbDelta y las plantillas por defecto.
+    // add_option() falla si la opción ya existe; pasados 10 minutos se considera abandonado.
+    $lock = get_option('wp_c_db_updating');
+    if ($lock && (time() - (int) $lock) < 10 * MINUTE_IN_SECONDS) {
+        return;
+    }
+    if (!$lock && !add_option('wp_c_db_updating', time(), '', false)) {
+        return;
+    }
+    if ($lock) {
+        update_option('wp_c_db_updating', time(), false);
+    }
     create_tables_certificates();
     update_option('wp_c_db_version', WP_C_DB_VERSION);
+    delete_option('wp_c_db_updating');
 }
 add_action('init', 'wp_c_maybe_update_db', 5);
 

@@ -492,7 +492,7 @@ function wpc_document_field_row($index, $field = []) {
     <tr class="wpc-document-field">
         <td><input type="text" class="widefat" name="<?= esc_attr($name) ?>[label]" value="<?= esc_attr($field['label'] ?? '') ?>" aria-label="<?= esc_attr__('Label', 'wp-certificates') ?>"></td>
         <td>
-            <input type="text" class="widefat" name="<?= esc_attr($name) ?>[key]" value="<?= esc_attr($field['key'] ?? '') ?>" pattern="[a-z0-9_]*" aria-label="<?= esc_attr__('Key', 'wp-certificates') ?>">
+            <input type="text" class="widefat" name="<?= esc_attr($name) ?>[key]" value="<?= esc_attr($field['key'] ?? '') ?>" pattern="[a-z][a-z0-9_]*" aria-label="<?= esc_attr__('Key', 'wp-certificates') ?>">
             <?php if (!empty($field['key'])) { ?>
                 <p class="description"><code>{{<?= esc_html($field['key']) ?>}}</code><?php if ($has_options) { ?> <code>{{<?= esc_html($field['key']) ?>_list}}</code><?php } ?></p>
             <?php } ?>
