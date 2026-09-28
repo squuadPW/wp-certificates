@@ -16,6 +16,9 @@ defined('ABSPATH') || exit;
 // Constantes del plugin
 define('WP_C_PATH', plugin_dir_path(__FILE__));
 define('WP_C_REMOTE_INFO_URL', 'https://versions.squuad.com/plugins/wp-certificates/info.json');
+// Versión del esquema de tablas: al subirla, create_tables_certificates() se vuelve a ejecutar sin
+// reactivar el plugin (dbDelta solo crea tablas o añade/modifica columnas)
+define('WP_C_DB_VERSION', '2');
 
 // Now you can safely use get_plugin_data()
 $plugin_data = get_plugin_data(__FILE__);
@@ -27,7 +30,6 @@ if ( !class_exists('WP_List_Table') )
 
 require_once WP_C_PATH . 'public/functions.php';
 require_once WP_C_PATH . 'admin/functions.php';
-require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
 // Include the required file for get_plugin_data()
 if ( !function_exists('get_plugin_data') ) 
@@ -38,25 +40,38 @@ add_filter('plugins_api', 'wp_c_plugin_info', 20, 3);
 add_filter('site_transient_update_plugins', 'wp_c_check_update');
 
 // Obtener información remota con caché
+// WordPress aplica site_transient_update_plugins varias veces por página del admin: el servidor se
+// consulta como máximo una vez cada 12 h (1 h si falla, p. ej. 404) y "Comprobar de nuevo" en
+// Actualizaciones fuerza la consulta.
 function wp_c_get_remote_info() {
-    static $remote_info = null;
+    static $remote_info = null; // '' = la consulta falló
 
     if (null === $remote_info) {
-        $remote = wp_remote_get(WP_C_REMOTE_INFO_URL, [
-            'timeout' => 10,
-            'headers' => ['Accept' => 'application/json']
-        ]);
+        $forzar = is_admin() && isset($_GET['force-check']);
+        $cache = $forzar ? false : get_site_transient('wp_c_remote_info');
 
-        if (
-            !is_wp_error($remote) &&
-            200 === wp_remote_retrieve_response_code($remote) &&
-            !empty($body = wp_remote_retrieve_body($remote))
-        ) {
-            $remote_info = json_decode($body);
+        if (false !== $cache) {
+            $remote_info = $cache;
+        } else {
+            $remote = wp_remote_get(WP_C_REMOTE_INFO_URL, [
+                'timeout' => 10,
+                'headers' => ['Accept' => 'application/json']
+            ]);
+
+            $remote_info = '';
+            if (
+                !is_wp_error($remote) &&
+                200 === wp_remote_retrieve_response_code($remote) &&
+                !empty($body = wp_remote_retrieve_body($remote))
+            ) {
+                $remote_info = json_decode($body) ?: '';
+            }
+
+            set_site_transient('wp_c_remote_info', $remote_info, $remote_info ? 12 * HOUR_IN_SECONDS : HOUR_IN_SECONDS);
         }
     }
 
-    return $remote_info;
+    return $remote_info ?: null;
 }
 
 // Proporcionar información del plugin
@@ -131,6 +146,9 @@ function wp_c_check_update($transient) {
 }
 
 function create_tables_certificates() {
+    // dbDelta() vive en upgrade.php: se carga solo aquí (antes se cargaba en cada petición)
+    require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
     global $wpdb;
     $charset_collate = $wpdb->get_charset_collate();
 
@@ -166,6 +184,7 @@ function create_tables_certificates() {
         `is_required` BOOLEAN NOT NULL DEFAULT 0,
         `is_visible` BOOLEAN NOT NULL DEFAULT 1,
         `book` TEXT NULL,
+        `fields` LONGTEXT NULL,
         `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
         PRIMARY KEY (id)
     )" . $charset_collate . ";");
@@ -233,6 +252,30 @@ function create_tables_certificates() {
     default_templates();
     default_templates_cards();
 }
+
+// Actualiza las tablas cuando cambia WP_C_DB_VERSION (p. ej. tras actualizar el plugin). Prioridad 5:
+// antes de las migraciones de EduSystem que usan estas columnas.
+function wp_c_maybe_update_db() {
+    if (get_option('wp_c_db_version') === WP_C_DB_VERSION) {
+        return;
+    }
+    // Candado: si varias peticiones llegan a la vez, solo una ejecuta dbDelta y las plantillas por defecto.
+    // add_option() falla si la opción ya existe; pasados 10 minutos se considera abandonado.
+    $lock = get_option('wp_c_db_updating');
+    if ($lock && (time() - (int) $lock) < 10 * MINUTE_IN_SECONDS) {
+        return;
+    }
+    if (!$lock && !add_option('wp_c_db_updating', time(), '', false)) {
+        return;
+    }
+    if ($lock) {
+        update_option('wp_c_db_updating', time(), false);
+    }
+    create_tables_certificates();
+    update_option('wp_c_db_version', WP_C_DB_VERSION);
+    delete_option('wp_c_db_updating');
+}
+add_action('init', 'wp_c_maybe_update_db', 5);
 
 register_activation_hook(__FILE__, function () {
 

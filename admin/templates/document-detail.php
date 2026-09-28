@@ -7,13 +7,13 @@
 
     <?php if (isset($_COOKIE['message']) && !empty($_COOKIE['message'])) { ?>
         <div class="notice notice-success is-dismissible">
-            <p><?= $_COOKIE['message']; ?></p>
+            <p><?= esc_html(wp_unslash($_COOKIE['message'])); ?></p>
         </div>
         <?php setcookie('message', '', time(), '/'); ?>
     <?php } ?>
     <?php if (isset($_COOKIE['message-error']) && !empty($_COOKIE['message-error'])) { ?>
         <div class="notice notice-error is-dismissible">
-            <p><?= $_COOKIE['message-error']; ?></p>
+            <p><?= esc_html(wp_unslash($_COOKIE['message-error'])); ?></p>
         </div>
         <?php setcookie('message-error', '', time(), '/'); ?>
     <?php } ?>
@@ -31,6 +31,7 @@
                         <form method="post"
                             action="<?= admin_url('admin.php?page=add_admin_form_documents_content&action=save_document'); ?>"
                             enctype="multipart/form-data">
+                            <?php wp_nonce_field('wpc_save_document'); ?>
                             <div>
                                 <h3
                                     style="margin-top:20px;margin-bottom:0px;text-align:center; border-bottom: 1px solid #8080805c;">
@@ -38,7 +39,7 @@
                                 </h3>
 
                                 <div style="margin: 18px;">
-                                    <input type="hidden" name="document_id" value="<?= $document->id ?>">
+                                    <input type="hidden" name="document_id" value="<?= esc_attr($document->id ?? ''); ?>">
 
                                     <div style="font-weight:400; text-align: center;" class="space-offer">
                                         <input type="checkbox" name="status" id="status" <?= ($document->status == 1) ? 'checked' : ''; ?> style="width: auto !important">
@@ -48,13 +49,13 @@
                                     <div style="font-weight:400;" class="space-offer">
                                         <label for="title"><b><?= esc_html__('Name', 'wp-certificates'); ?></b><span
                                                 class="text-danger">*</span></label><br>
-                                        <input type="text" name="title" value="<?= $document->title; ?>" required>
+                                        <input type="text" name="title" value="<?= esc_attr($document->title ?? ''); ?>" required>
                                     </div>
 
                                     <div style="font-weight:400;" class="space-offer">
                                         <label for="title"><b><?= esc_html__('Identifier (can be the name of the document)', 'wp-certificates'); ?></b><span
                                                 class="text-danger">*</span></label><br>
-                                        <input type="text" name="document_identificator" value="<?= $document->document_identificator; ?>" required>
+                                        <input type="text" name="document_identificator" value="<?= esc_attr($document->document_identificator ?? ''); ?>" required>
                                     </div>
 
                                     <div style="font-weight:400;" class="space-offer">
@@ -135,12 +136,12 @@
 
                                     <div style="font-weight:400; text-align: center" class="space-offer">
                                         <label for="id_requisito"><b><?= esc_html__('ID Requirement for the admin (ID requisito)', 'wp-certificates'); ?></b></label><br>
-                                        <input type="text" name="id_requisito" value="<?= $document->id_requisito ?>">
+                                        <input type="text" name="id_requisito" value="<?= esc_attr($document->id_requisito ?? ''); ?>">
                                     </div>
 
                                     <div style="font-weight:400; text-align: center" class="space-offer">
                                         <label for="type_file"><b><?= esc_html__('Type file', 'wp-certificates'); ?></b></label><br>
-                                        <input type="text" name="type_file" value="<?= $document->type_file ?>">
+                                        <input type="text" name="type_file" value="<?= esc_attr($document->type_file ?? ''); ?>">
                                     </div>
 
                                     <div style="font-weight:400; text-align: center" class="space-offer">
@@ -202,12 +203,12 @@
 
                                     <div style="font-weight:400; text-align: center" class="space-offer">
                                         <label for="width_size"><b><?= esc_html__('Width size', 'wp-certificates'); ?></b></label><br>
-                                        <input type="number" name="width_size" placeholder="210mm" step="0.01" value="<?= $document->width_size ?>">
+                                        <input type="number" name="width_size" placeholder="210mm" step="0.01" value="<?= esc_attr($document->width_size ?? ''); ?>">
                                     </div>
 
                                     <div style="font-weight:400; text-align: center" class="space-offer">
                                         <label for="height_size"><b><?= esc_html__('Height size', 'wp-certificates'); ?></b></label><br>
-                                        <input type="number" name="height_size" placeholder="287mm" step="0.01" value="<?= $document->height_size ?>">
+                                        <input type="number" name="height_size" placeholder="287mm" step="0.01" value="<?= esc_attr($document->height_size ?? ''); ?>">
                                     </div>
 
                                     <div style="font-weight:400; text-align: center;" class="space-offer">
@@ -228,9 +229,37 @@
                                 </div>
                             </div>
 
-                            <div>
-                                <>
-                            </div>
+                            <?php if (function_exists('edusystem_get_document_fields')) {
+                                $document_fields = $document ? edusystem_get_document_fields($document) : []; ?>
+                                <details id="wpc-advanced" style="margin: 18px;" <?= $document_fields ? 'open' : '' ?>>
+                                    <summary style="cursor: pointer"><b><?= esc_html__('Advanced', 'wp-certificates'); ?></b></summary>
+
+                                    <h4 style="margin-bottom: 4px"><?= esc_html__('Additional fields', 'wp-certificates'); ?></h4>
+                                    <p class="description" style="margin-top: 0">
+                                        <?= esc_html__('They are requested before generating the document and the answers are only used to fill it in (they are only stored while the document is partially signed). Use {{key}} in the document to print the answer and, in fields with options, {{key_list}} to print all the options with (✓) on the selected ones. If the key is left empty, it is created from the label.', 'wp-certificates'); ?>
+                                    </p>
+
+                                    <table class="widefat striped" id="wpc-document-fields">
+                                        <thead>
+                                            <tr>
+                                                <th><?= esc_html__('Label', 'wp-certificates'); ?></th>
+                                                <th><?= esc_html__('Key', 'wp-certificates'); ?></th>
+                                                <th><?= esc_html__('Type', 'wp-certificates'); ?></th>
+                                                <th><?= esc_html__('Options (one per line)', 'wp-certificates'); ?></th>
+                                                <th style="text-align: center"><?= esc_html__('Required', 'wp-certificates'); ?></th>
+                                                <th><span class="screen-reader-text"><?= esc_html__('Actions', 'wp-certificates'); ?></span></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php foreach ($document_fields as $index => $field) {
+                                                echo wpc_document_field_row($index, $field);
+                                            } ?>
+                                        </tbody>
+                                    </table>
+                                    <p><button type="button" class="button" id="wpc-add-document-field"><?= esc_html__('+ Add field', 'wp-certificates'); ?></button></p>
+                                    <template id="wpc-document-field-template"><?= wpc_document_field_row('__INDEX__'); ?></template>
+                                </details>
+                            <?php } ?>
 
                             <?php if (isset($document) && !empty($document)): ?>
                                 <div style="margin-top:20px;display:flex;flex-direction:row;justify-content:end;gap:5px;">
