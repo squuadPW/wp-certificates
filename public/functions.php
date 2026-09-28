@@ -506,6 +506,9 @@ function assign_certificate_student( $student_id, $template_id, $type, $emission
             $footer,
         ]);
 
+        // 4. Preparar las variables de reemplazo estándar
+        $replacements = get_replacements_variables($student);
+
         if ( $document->book && function_exists('edusof_insert_certificate_book_line') ) {
             $book_data = edusof_insert_certificate_book_line( $document->book, $student, $type, $title, $emission_date, $program, $course_id );
 
@@ -529,9 +532,6 @@ function assign_certificate_student( $student_id, $template_id, $type, $emission
                 ];
             }
         }
-
-        // 4. Preparar las variables de reemplazo estándar
-        $replacements = get_replacements_variables($student);
 
         // 5. Procesar Firma Digital si se requiere
         $signature_required = is_object($document) ? ($document->signature_required ?? false) : ($document['signature_required'] ?? false);
