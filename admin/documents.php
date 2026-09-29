@@ -93,6 +93,13 @@ function add_admin_form_documents_content()
             $isRequired = (isset($_POST['is_required']) && $_POST['is_required'] === 'on') && $type == 'automatic' ? 1 : 0;
             $isVisible = (isset($_POST['is_visible']) && $_POST['is_visible'] === 'on') && $type == 'automatic' ? 1 : 0;
             $deleteSignatures = isset($_POST['delete_signatures']) && $_POST['delete_signatures'] === 'on' ? 1 : 0;
+            // Con el sistema de firmas de EduSystem las firmas son legales y selladas: no se borran en bloque (el
+            // contenido de cada solicitud se congela al firmar, así que cambiar la plantilla no afecta a lo firmado).
+            // Para anular un documento concreto se declina desde Admisión, con motivo.
+            if ($deleteSignatures && wpc_edusystem_signatures_active()) {
+                wpc_log_signature_action(sprintf('Borrado masivo de firmas ignorado en el documento %d (usuario %d): EduSystem gestiona las firmas', $document_id, get_current_user_id()));
+                $deleteSignatures = 0;
+            }
             $signature_required = isset($_POST['signature_required']) && $_POST['signature_required'] === 'on' ? 1 : 0;
             $graduated_required = isset($_POST['graduated_required']) && $_POST['graduated_required'] === 'on' ? 1 : 0;
             $margin_required = isset($_POST['margin_required']) && $_POST['margin_required'] === 'on' ? 1 : 0;

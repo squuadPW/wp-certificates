@@ -221,10 +221,12 @@
                                         <label for="is_visible"><b><?= esc_html__('Is visible in documents page?', 'wp-certificates'); ?></b></label>
                                     </div>
 
+                                    <?php if (!wpc_edusystem_signatures_active()) : ?>
                                     <div style="font-weight:400; text-align: center;" class="space-offer">
                                         <input type="checkbox" name="delete_signatures" id="delete_signatures" style="width: auto !important">
                                         <label for="delete_signatures" style="color: red"><b><?= esc_html__('When saving, all existing signatures will be deleted.', 'wp-certificates'); ?></b></label>
                                     </div>
+                                    <?php endif; ?>
 
                                 </div>
                             </div>

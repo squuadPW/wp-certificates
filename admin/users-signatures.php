@@ -6,7 +6,7 @@ function add_admin_form_users_signatures_certificate_list_content()
     if (isset($_GET['section_tab']) && !empty($_GET['section_tab'])) {
         if ($_GET['section_tab'] == 'user_signature_detail') {
             global $wpdb;
-            $signature_id = $_GET['signature_id'];
+            $signature_id = absint($_GET['signature_id'] ?? 0);
             $signature = get_user_signature_detail($signature_id);
             $users = get_users();
             include(plugin_dir_path(__FILE__) . 'templates/user-signatures-detail.php');
@@ -14,6 +14,14 @@ function add_admin_form_users_signatures_certificate_list_content()
     } else {
 
         if (isset($_GET['action']) && $_GET['action'] == 'save_user_signature') {
+            if ('POST' !== $_SERVER['REQUEST_METHOD'] || !current_user_can('manager_users_signatures_certificate')) {
+                wp_die(esc_html__('You are not allowed to do this.', 'wp-certificates'), 403);
+            }
+            check_admin_referer('wpc_save_user_signature');
+            // Con EduSystem (firmantes del sistema) las firmas institucionales se gestionan allí: aquí solo lectura
+            if (wpc_edusystem_signers_active()) {
+                wp_die(esc_html__('Signatures are managed by EduSystem on this site.', 'wp-certificates'), 403);
+            }
             global $wpdb;
             $table_users_signatures_certificate = $wpdb->prefix . 'users_signatures_certificate';
 
@@ -21,7 +29,12 @@ function add_admin_form_users_signatures_certificate_list_content()
             $signature_id = isset($_POST['signature_id']) ? intval($_POST['signature_id']) : 0;
             $user_id = isset($_POST['user_id']) ? intval($_POST['user_id']) : 0;
             $charge = isset($_POST['charge']) ? sanitize_text_field($_POST['charge']) : '';
-            $attach_id = isset($_POST['attach_id']) ? intval($_POST['attach_id']) : 0;
+            // La imagen solo puede ser la que ya tenía esta firma o la subida en esta misma petición (antes se aceptaba
+            // cualquier attach_id del POST: cualquier archivo del sitio)
+            $attach_id = $signature_id ? (int) $wpdb->get_var($wpdb->prepare(
+                "SELECT attach_id FROM $table_users_signatures_certificate WHERE id = %d",
+                $signature_id
+            )) : 0;
 
             // Validar user_id
             if ($user_id <= 0) {
@@ -66,6 +79,12 @@ function add_admin_form_users_signatures_certificate_list_content()
                 }
             }
 
+            if (!$attach_id) {
+                setcookie('message-error', esc_html__('Upload the signature image.', 'wp-certificates'), time() + 3600, '/');
+                wp_redirect(admin_url('/admin.php?page=add_admin_form_users_signatures_certificate_list_content'));
+                exit;
+            }
+
             // Actualizar o insertar
             if ($signature_id) {
                 $wpdb->update(
@@ -88,15 +107,28 @@ function add_admin_form_users_signatures_certificate_list_content()
                 );
             }
 
+            wpc_log_signature_action(sprintf('Firma-imagen %s por el usuario %d (titular %d, archivo %d)', $signature_id ? 'modificada (' . $signature_id . ')' : 'creada', get_current_user_id(), $user_id, $attach_id));
             setcookie('message', esc_html__('Signature adjusted successfully.', 'wp-certificates'), time() + 3600, '/');
             wp_redirect(admin_url('/admin.php?page=add_admin_form_users_signatures_certificate_list_content'));
             exit;
         }
         if (isset($_GET['action']) && $_GET['action'] == 'delete_user_signature') {
+            // Solo por POST, con permiso y nonce por firma (antes bastaba con abrir el enlace: CSRF), y con registro
+            $signature_id = absint($_POST['signature_id'] ?? 0);
+            if ('POST' !== $_SERVER['REQUEST_METHOD'] || !current_user_can('manager_users_signatures_certificate')) {
+                wp_die(esc_html__('You are not allowed to do this.', 'wp-certificates'), 403);
+            }
+            check_admin_referer('wpc_delete_user_signature_' . $signature_id);
+            if (wpc_edusystem_signers_active()) {
+                wp_die(esc_html__('Signatures are managed by EduSystem on this site.', 'wp-certificates'), 403);
+            }
             global $wpdb;
             $table_users_signatures_certificate = $wpdb->prefix . 'users_signatures_certificate';
-            $signature_id = $_GET['signature_id'];
-            $wpdb->delete($table_users_signatures_certificate, ['id' => $signature_id]);
+            $signature = get_user_signature_detail($signature_id);
+            if ($signature) {
+                $wpdb->delete($table_users_signatures_certificate, ['id' => $signature_id]);
+                wpc_log_signature_action(sprintf('Firma-imagen %d borrada por el usuario %d (titular %d, cargo «%s», archivo %d)', $signature_id, get_current_user_id(), (int) $signature->user_id, (string) $signature->charge, (int) $signature->attach_id));
+            }
 
             setcookie('message', esc_html__('Signature deleted successfully.', 'wp-certificates'), time() + 3600, '/');
             wp_redirect(admin_url('/admin.php?page=add_admin_form_users_signatures_certificate_list_content'));
@@ -134,7 +166,13 @@ class TT_Users_Signatures_Certificate_List_Table extends WP_List_Table
         switch ($column_name) {
             case 'view_details':
                 $html = "<a href='" . admin_url('/admin.php?page=add_admin_form_users_signatures_certificate_list_content&section_tab=user_signature_detail&signature_id=' . $item['id']) . "' class='button button-primary'>" . esc_html__('View Details', 'wp-certificates') . "</a>";
-                $html .= '<a style="margin-left: 10px" href="' . admin_url('admin.php?page=add_admin_form_users_signatures_certificate_list_content&action=delete_user_signature&signature_id=' . $item['id']) . '" class="button button-danger" onclick="return confirm(\'Are you sure?\');"><span class="dashicons dashicons-trash"></span></a>';
+                // Borrar: formulario POST con nonce por firma (no un enlace)
+                if (!wpc_edusystem_signers_active()) {
+                    $html .= '<form method="post" style="display:inline;margin-left:10px" action="' . esc_url(admin_url('admin.php?page=add_admin_form_users_signatures_certificate_list_content&action=delete_user_signature')) . '" onsubmit="return confirm(\'' . esc_js(__('Are you sure?', 'wp-certificates')) . '\');">'
+                        . '<input type="hidden" name="signature_id" value="' . (int) $item['id'] . '">'
+                        . wp_nonce_field('wpc_delete_user_signature_' . (int) $item['id'], '_wpnonce', true, false)
+                        . '<button type="submit" class="button button-danger"><span class="dashicons dashicons-trash"></span></button></form>';
+                }
                 return $html;
             default:
                 return strtoupper($item[$column_name]);
@@ -248,7 +286,7 @@ function get_user_signature_detail($id)
 {
     global $wpdb;
     $table_users_signatures_certificate = $wpdb->prefix . 'users_signatures_certificate';
-    $signature = $wpdb->get_row("SELECT * FROM {$table_users_signatures_certificate} WHERE id = {$id}");
+    $signature = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$table_users_signatures_certificate} WHERE id = %d", absint($id)));
     return $signature;
 }
 
