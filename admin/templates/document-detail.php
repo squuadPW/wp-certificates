@@ -309,7 +309,13 @@
     </div>
     <?php endif; ?>
 
-    <?php if (isset($document) && !empty($document)): ?>
+    <?php
+    // Vista previa: un plugin puede sustituirla (EduSystem la muestra en PDF, con datos de ejemplo)
+    $custom_preview = (isset($document) && !empty($document)) ? (string) apply_filters('wpc_document_preview', '', $document) : '';
+    ?>
+    <?php if ('' !== $custom_preview): ?>
+        <?= $custom_preview; ?>
+    <?php elseif (isset($document) && !empty($document)): ?>
         <div>
             <div style="text-align: center">
                 <h2 style="margin-bottom:15px;"><?= esc_html__('Preview', 'wp-certificates'); ?></h2>
