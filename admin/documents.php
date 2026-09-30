@@ -69,6 +69,53 @@ function add_admin_form_documents_content()
 
             global $wpdb;
             $table_documents_certificates = $wpdb->prefix . 'documents_certificates';
+
+            // Alta en dos pasos: primero solo nombre y código; el documento nace inactivo (no se pide ni se genera
+            // hasta activarlo) y se completa en su página de edición
+            if (empty($_POST['document_id'])) {
+                $title = isset($_POST['title']) ? sanitize_text_field(wp_unslash($_POST['title'])) : '';
+                $document_identificator = isset($_POST['document_identificator']) ? strtoupper(sanitize_title(wp_unslash($_POST['document_identificator']))) : '';
+                $create_url = admin_url('admin.php?page=add_admin_form_documents_content&section_tab=document_detail');
+                $back_with_error = static function (string $message) use ($create_url, $title, $document_identificator) {
+                    setcookie('message-error', $message, time() + 30, '/');
+                    wp_redirect(add_query_arg(['title' => rawurlencode($title), 'document_identificator' => rawurlencode($document_identificator)], $create_url));
+                    exit;
+                };
+                if ('' === $title || '' === $document_identificator) {
+                    $back_with_error(esc_html__('The name and the code are required.', 'wp-certificates'));
+                }
+                // El código enlaza el documento con los documentos de cada estudiante y con las firmas: no se repite
+                $exists = $wpdb->get_var($wpdb->prepare("SELECT id FROM {$table_documents_certificates} WHERE document_identificator = %s LIMIT 1", $document_identificator));
+                if ($exists) {
+                    $back_with_error(sprintf(esc_html__('There is already a document with the code %s.', 'wp-certificates'), $document_identificator));
+                }
+                $inserted = $wpdb->insert($table_documents_certificates, [
+                    'title' => strtoupper($title),
+                    'document_identificator' => $document_identificator,
+                    'header' => '',
+                    'content' => '',
+                    'footer' => '',
+                    'status' => 0,
+                    'signature_required' => 0,
+                    'graduated_required' => 0,
+                    'margin_required' => 0,
+                    'orientation' => 'portrait',
+                    'type' => 'managed',
+                    'width_size' => 0,
+                    'height_size' => 0,
+                    'paper_format' => 'a4',
+                    'unit' => 'mm',
+                    'is_required' => 0,
+                    'is_visible' => 0,
+                ]);
+                if (!$inserted) {
+                    $back_with_error(esc_html__('Error saving document.', 'wp-certificates'));
+                }
+                setcookie('message', esc_html__('Document created as inactive. Complete it and activate it when it is ready.', 'wp-certificates'), time() + 30, '/');
+                wp_redirect(admin_url('admin.php?page=add_admin_form_documents_content&section_tab=document_detail&document_id=' . (int) $wpdb->insert_id));
+                exit;
+            }
+
             $table_student_documents = $wpdb->prefix . 'student_documents';
             $table_students = $wpdb->prefix . 'students';
             $table_users_signatures = $wpdb->prefix . 'users_signatures';
