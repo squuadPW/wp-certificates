@@ -208,7 +208,7 @@ function create_tables_certificates() {
         charge TEXT NOT NULL,
         attach_id INT(11) NOT NULL,
         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        PRIMARY (id)
+        PRIMARY KEY (id)
     )" . $charset_collate . ";");
 
     dbDelta("CREATE TABLE {$table_certificates} (
@@ -284,5 +284,7 @@ add_action('init', 'wp_c_maybe_update_db', 5);
 // trabaja con sus estudiantes; sin él, esas funciones se ocultan (ver wpc_edusystem_active()).
 register_activation_hook(__FILE__, function () {
     create_tables_certificates();
+    // Permisos del administrador ya al activar: WordPress comprueba el acceso a las pantallas antes de admin_init
+    add_certificates_to_administrator();
     update_option('wp_c_db_version', WP_C_DB_VERSION);
 });
