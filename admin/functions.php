@@ -1,4 +1,39 @@
 <?php
+/**
+ * ¿El sitio usa el sistema de firmas de EduSystem (solicitudes con evidencia, ADR 0002/0003)? Entonces las firmas de
+ * estudiantes y representantes son legales y selladas: wp-certificates no las borra, y las firmas institucionales las
+ * gestiona EduSystem (la pantalla "Users and signatures" queda en solo lectura). Sin EduSystem nuevo, todo sigue igual.
+ */
+function wpc_edusystem_signatures_active(): bool
+{
+    return function_exists('edusystem_signature_requests_enabled') && edusystem_signature_requests_enabled();
+}
+
+/**
+ * ¿Rige la regla "nadie firma por otro" de EduSystem (ADR 0003, paso 10)? Entonces las firmas-imagen de "Users and
+ * signatures" no se insertan en ningún documento y los documentos que exigen firma se emiten para firma en EduSystem.
+ */
+function wpc_third_party_signatures_blocked(): bool
+{
+    return function_exists('edusystem_third_party_signatures_blocked') && edusystem_third_party_signatures_blocked();
+}
+
+/** ¿EduSystem gestiona los firmantes institucionales (esquema v6, ADR 0003)? */
+function wpc_edusystem_signers_active(): bool
+{
+    return function_exists('edusystem_signers_enabled') && edusystem_signers_enabled();
+}
+
+/** Registro de una acción sobre firmas: en el log de EduSystem si existe; si no, en el log de PHP. */
+function wpc_log_signature_action(string $message): void
+{
+    if (function_exists('edusystem_set_log')) {
+        edusystem_set_log($message, 'legacy_signature_used');
+    } else {
+        error_log('[wp-certificates] ' . $message);
+    }
+}
+
 require plugin_dir_path(__FILE__) . 'certificates.php';
 require plugin_dir_path(__FILE__) . 'cards.php';
 require plugin_dir_path(__FILE__) . 'configuration-options.php';

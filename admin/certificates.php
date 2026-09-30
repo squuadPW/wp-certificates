@@ -80,6 +80,15 @@ function admin_certificate_assignment_content () {
         // Fecha de hoy con formato de base de datos usando la hora local de WP
         $emission_date = current_time('mysql'); 
 
+        // Nadie firma por otro (EduSystem, ADR 0003 paso 10): los documentos que exigen firma se emiten para firma
+        // desde la ficha del estudiante en EduSystem, no aquí
+        $certificate_document = $certificate_id && function_exists('get_document_detail') ? get_document_detail($certificate_id) : null;
+        if ( $certificate_document && !empty($certificate_document->signature_required) && wpc_third_party_signatures_blocked() ) {
+            setcookie('message-error', __('This document requires signatures: it cannot be issued here. Configure its signers and issue it for signature from the student file; each responsible person signs from their own account.', 'wp-certificates'), time() + 10, '/');
+            wp_redirect(admin_url('admin.php?page=admin_certificate_assignment_content'));
+            exit;
+        }
+
         // Validación rápida de datos requeridos
         if ( empty($student_ids) || empty($certificate_id) ) {
             $error_message = __('An error occurred while trying to issue the certificate', 'wp-certificates') . $student_failed;

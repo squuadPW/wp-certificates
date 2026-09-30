@@ -18,7 +18,7 @@
         <?php setcookie('message-error', '', time(), '/'); ?>
     <?php } ?>
     <div style="display:flex;width:100%;">
-        <a class="button button-outline-primary" href="<?= $_SERVER['HTTP_REFERER']; ?>"><?= esc_html__('Back') ?></a>
+        <a class="button button-outline-primary" href="<?= esc_url(admin_url('admin.php?page=add_admin_form_users_signatures_certificate_list_content')); ?>"><?= esc_html__('Back') ?></a>
     </div>
 
     <div id="dashboard-widgets" class="metabox-holder admin-add-offer" style="width: 70% !important">
@@ -30,6 +30,7 @@
                         <form method="post"
                             action="<?= admin_url('admin.php?page=add_admin_form_users_signatures_certificate_list_content&action=save_user_signature'); ?>"
                             enctype="multipart/form-data">
+                            <?php wp_nonce_field('wpc_save_user_signature'); ?>
                             <div>
                                 <h3
                                     style="margin-top:20px;margin-bottom:0px;text-align:center; border-bottom: 1px solid #8080805c;">
@@ -37,8 +38,7 @@
                                 </h3>
 
                                 <div style="margin: 18px;">
-                                    <input type="hidden" name="signature_id" value="<?= $signature->id ?>">
-                                    <input type="hidden" name="attach_id" value="<?= $signature->attach_id ?>">
+                                    <input type="hidden" name="signature_id" value="<?= (int) ($signature->id ?? 0) ?>">
 
                                     <div style="font-weight:400;" class="space-offer">
                                         <label for="hc"><b><?= esc_html__('User', 'wp-certificates'); ?></b></label><br>
@@ -54,7 +54,7 @@
                                     <div style="font-weight:400;" class="space-offer">
                                         <label for="name"><b><?= esc_html__('Charge', 'wp-certificates'); ?></b><span
                                                 class="text-danger">*</span></label><br>
-                                        <input type="text" name="charge" value="<?= $signature->charge; ?>" required>
+                                        <input type="text" name="charge" value="<?= esc_attr($signature->charge ?? ''); ?>" required>
                                     </div>
 
                                     <div style="font-weight:400;" class="space-offer">

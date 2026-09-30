@@ -69,6 +69,53 @@ function add_admin_form_documents_content()
 
             global $wpdb;
             $table_documents_certificates = $wpdb->prefix . 'documents_certificates';
+
+            // Alta en dos pasos: primero solo nombre y código; el documento nace inactivo (no se pide ni se genera
+            // hasta activarlo) y se completa en su página de edición
+            if (empty($_POST['document_id'])) {
+                $title = isset($_POST['title']) ? sanitize_text_field(wp_unslash($_POST['title'])) : '';
+                $document_identificator = isset($_POST['document_identificator']) ? strtoupper(sanitize_title(wp_unslash($_POST['document_identificator']))) : '';
+                $create_url = admin_url('admin.php?page=add_admin_form_documents_content&section_tab=document_detail');
+                $back_with_error = static function (string $message) use ($create_url, $title, $document_identificator) {
+                    setcookie('message-error', $message, time() + 30, '/');
+                    wp_redirect(add_query_arg(['title' => rawurlencode($title), 'document_identificator' => rawurlencode($document_identificator)], $create_url));
+                    exit;
+                };
+                if ('' === $title || '' === $document_identificator) {
+                    $back_with_error(esc_html__('The name and the code are required.', 'wp-certificates'));
+                }
+                // El código enlaza el documento con los documentos de cada estudiante y con las firmas: no se repite
+                $exists = $wpdb->get_var($wpdb->prepare("SELECT id FROM {$table_documents_certificates} WHERE document_identificator = %s LIMIT 1", $document_identificator));
+                if ($exists) {
+                    $back_with_error(sprintf(esc_html__('There is already a document with the code %s.', 'wp-certificates'), $document_identificator));
+                }
+                $inserted = $wpdb->insert($table_documents_certificates, [
+                    'title' => strtoupper($title),
+                    'document_identificator' => $document_identificator,
+                    'header' => '',
+                    'content' => '',
+                    'footer' => '',
+                    'status' => 0,
+                    'signature_required' => 0,
+                    'graduated_required' => 0,
+                    'margin_required' => 0,
+                    'orientation' => 'portrait',
+                    'type' => 'managed',
+                    'width_size' => 0,
+                    'height_size' => 0,
+                    'paper_format' => 'a4',
+                    'unit' => 'mm',
+                    'is_required' => 0,
+                    'is_visible' => 0,
+                ]);
+                if (!$inserted) {
+                    $back_with_error(esc_html__('Error saving document.', 'wp-certificates'));
+                }
+                setcookie('message', esc_html__('Document created as inactive. Complete it and activate it when it is ready.', 'wp-certificates'), time() + 30, '/');
+                wp_redirect(admin_url('admin.php?page=add_admin_form_documents_content&section_tab=document_detail&document_id=' . (int) $wpdb->insert_id));
+                exit;
+            }
+
             $table_student_documents = $wpdb->prefix . 'student_documents';
             $table_students = $wpdb->prefix . 'students';
             $table_users_signatures = $wpdb->prefix . 'users_signatures';
@@ -93,6 +140,13 @@ function add_admin_form_documents_content()
             $isRequired = (isset($_POST['is_required']) && $_POST['is_required'] === 'on') && $type == 'automatic' ? 1 : 0;
             $isVisible = (isset($_POST['is_visible']) && $_POST['is_visible'] === 'on') && $type == 'automatic' ? 1 : 0;
             $deleteSignatures = isset($_POST['delete_signatures']) && $_POST['delete_signatures'] === 'on' ? 1 : 0;
+            // Con el sistema de firmas de EduSystem las firmas son legales y selladas: no se borran en bloque (el
+            // contenido de cada solicitud se congela al firmar, así que cambiar la plantilla no afecta a lo firmado).
+            // Para anular un documento concreto se declina desde Admisión, con motivo.
+            if ($deleteSignatures && wpc_edusystem_signatures_active()) {
+                wpc_log_signature_action(sprintf('Borrado masivo de firmas ignorado en el documento %d (usuario %d): EduSystem gestiona las firmas', $document_id, get_current_user_id()));
+                $deleteSignatures = 0;
+            }
             $signature_required = isset($_POST['signature_required']) && $_POST['signature_required'] === 'on' ? 1 : 0;
             $graduated_required = isset($_POST['graduated_required']) && $_POST['graduated_required'] === 'on' ? 1 : 0;
             $margin_required = isset($_POST['margin_required']) && $_POST['margin_required'] === 'on' ? 1 : 0;

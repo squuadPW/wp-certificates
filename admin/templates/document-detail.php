@@ -22,6 +22,33 @@
             href="<?= admin_url('admin.php?page=add_admin_form_documents_content'); ?>"><?= esc_html__('Back') ?></a>
     </div>
 
+    <?php if (empty($document)): ?>
+        <?php // Alta en dos pasos: aquí solo nombre y código; el resto se completa en la página de edición ?>
+        <div class="postbox" style="max-width:640px;margin-top:20px;">
+            <div class="inside">
+                <form method="post" action="<?= esc_url(admin_url('admin.php?page=add_admin_form_documents_content&action=save_document')); ?>">
+                    <?php wp_nonce_field('wpc_save_document'); ?>
+                    <h3 style="margin-top:10px;"><?= esc_html__('New document', 'wp-certificates'); ?></h3>
+                    <p class="description"><?= esc_html__('The document is created as inactive. Then you will be taken to its page to complete the content, the format and the rest of the settings, and to activate it.', 'wp-certificates'); ?></p>
+                    <p>
+                        <label for="wpc-new-title"><b><?= esc_html__('Name', 'wp-certificates'); ?></b><span class="text-danger">*</span></label><br>
+                        <input type="text" id="wpc-new-title" name="title" class="regular-text" style="width:100%" required
+                            value="<?= esc_attr(sanitize_text_field(wp_unslash($_GET['title'] ?? ''))); ?>">
+                    </p>
+                    <p>
+                        <label for="wpc-new-code"><b><?= esc_html__('Code', 'wp-certificates'); ?></b><span class="text-danger">*</span></label><br>
+                        <input type="text" id="wpc-new-code" name="document_identificator" class="regular-text" style="width:100%" required
+                            value="<?= esc_attr(sanitize_text_field(wp_unslash($_GET['document_identificator'] ?? ''))); ?>">
+                        <span class="description"><?= esc_html__('Unique. It is saved in capital letters with hyphens (e.g. OFFICIAL-TRANSCRIPT) and cannot be repeated.', 'wp-certificates'); ?></span>
+                    </p>
+                    <p style="text-align:right;margin-bottom:0;">
+                        <button type="submit" class="button button-primary"><?= esc_html__('Create document', 'wp-certificates'); ?></button>
+                    </p>
+                </form>
+            </div>
+        </div>
+    <?php else: ?>
+
     <div id="dashboard-widgets" class="metabox-holder admin-add-offer" style="width:100% !important">
         <div id="postbox-container-1" style="width:100% !important;">
             <div id="normal-sortables">
@@ -221,10 +248,12 @@
                                         <label for="is_visible"><b><?= esc_html__('Is visible in documents page?', 'wp-certificates'); ?></b></label>
                                     </div>
 
+                                    <?php if (!wpc_edusystem_signatures_active()) : ?>
                                     <div style="font-weight:400; text-align: center;" class="space-offer">
                                         <input type="checkbox" name="delete_signatures" id="delete_signatures" style="width: auto !important">
                                         <label for="delete_signatures" style="color: red"><b><?= esc_html__('When saving, all existing signatures will be deleted.', 'wp-certificates'); ?></b></label>
                                     </div>
+                                    <?php endif; ?>
 
                                 </div>
                             </div>
@@ -278,8 +307,15 @@
             </div>
         </div>
     </div>
+    <?php endif; ?>
 
-    <?php if (isset($document) && !empty($document)): ?>
+    <?php
+    // Vista previa: un plugin puede sustituirla (EduSystem la muestra en PDF, con datos de ejemplo)
+    $custom_preview = (isset($document) && !empty($document)) ? (string) apply_filters('wpc_document_preview', '', $document) : '';
+    ?>
+    <?php if ('' !== $custom_preview): ?>
+        <?= $custom_preview; ?>
+    <?php elseif (isset($document) && !empty($document)): ?>
         <div>
             <div style="text-align: center">
                 <h2 style="margin-bottom:15px;"><?= esc_html__('Preview', 'wp-certificates'); ?></h2>
@@ -301,6 +337,7 @@
         const heightSection = document.querySelector('div.space-offer:has(label[for="height_size"])');
         const isRequired = document.querySelector('div.space-offer:has(label[for="is_required"])');
         const isVisible = document.querySelector('div.space-offer:has(label[for="is_visible"])');
+        if (!paperFormatSelect || !documentType) return; // alta: formulario corto sin estos campos
 
         function toggleCustomSizeFields() {
             const isCustom = paperFormatSelect.value === 'custom';

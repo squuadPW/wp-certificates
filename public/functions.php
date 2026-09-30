@@ -466,6 +466,15 @@ function assign_certificate_student( $student_id, $template_id, $type, $emission
     $document = get_document_detail( $template_id );
     if( !$document ) return false;
 
+    // Nadie firma por otro (ADR 0003 de EduSystem, paso 10): con el sistema de firmas de EduSystem, un documento que
+    // exige firma no se emite aquí (quedaría sin firmas o con firmas-imagen de terceros). Se comprueba antes de
+    // consumir el tomo/folio del libro. Se emite para firma desde la ficha del estudiante.
+    $signature_required = is_object($document) ? ($document->signature_required ?? false) : ($document['signature_required'] ?? false);
+    if ( $signature_required && wpc_third_party_signatures_blocked() ) {
+        wpc_log_signature_action(sprintf('Asignación de certificado bloqueada: el documento %d exige firma (estudiante %d, usuario %d)', (int) $template_id, (int) $student_id, get_current_user_id()));
+        return false;
+    }
+
     $existing_record = $wpdb->get_row(
         $wpdb->prepare(
             "SELECT id, simple_uuid FROM $table_certificates WHERE type = %s AND name_document = %s AND email = %s",
@@ -536,7 +545,7 @@ function assign_certificate_student( $student_id, $template_id, $type, $emission
         // 5. Procesar Firma Digital si se requiere
         $signature_required = is_object($document) ? ($document->signature_required ?? false) : ($document['signature_required'] ?? false);
         
-        if ( $signature_required && !empty($user_signature_id) ) {
+        if ( $signature_required && !empty($user_signature_id) && !wpc_third_party_signatures_blocked() ) {
             $signature = get_user_signature_detail($user_signature_id);
             if ( $signature ) {
                 $user_signature = get_user_by('id', $signature->user_id);
