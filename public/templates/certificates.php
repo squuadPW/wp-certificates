@@ -295,7 +295,7 @@ async function download_document( document_config ) {
             orientation: config.orientation,
             hotfixes: parches 
         },
-        pagebreak: { mode: ["avoid-all", "css", "legacy"], after: ".pagebreak" } // sin cortar texto entre páginas
+        pagebreak: { after: ".pagebreak" }
     };
 
     // Generar el PDF
