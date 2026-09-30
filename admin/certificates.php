@@ -472,13 +472,19 @@ function get_certificate_details($template_id) {
 
 function WPC_get_students() {
     global $wpdb;
+    if (!wpc_edusystem_active()) {
+        return [];
+    }
     $students = $wpdb->get_results("SELECT * FROM `{$wpdb->prefix}students`") ?? [];
     return $students;
 }
 
 function WPC_get_student( $id ) {
     global $wpdb;
-    $students = $wpdb->get_row("SELECT * FROM `{$wpdb->prefix}students` WHERE id={$id}") ?? [];
+    if (!wpc_edusystem_active()) {
+        return [];
+    }
+    $students = $wpdb->get_row($wpdb->prepare("SELECT * FROM `{$wpdb->prefix}students` WHERE id = %d", absint($id))) ?? [];
     return $students;
 }
 

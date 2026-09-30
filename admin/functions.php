@@ -1,5 +1,15 @@
 <?php
 /**
+ * ¿Está EduSystem (estudiantes, representantes, requisitos)? wp-certificates funciona sin él (ADR 0004 de EduSystem):
+ * lo que depende de estudiantes (asignar certificados, carné, documentos automáticos de estudiantes) solo se usa
+ * cuando está.
+ */
+function wpc_edusystem_active(): bool
+{
+    return defined('EDUSYSTEM_VERSION') && function_exists('get_student');
+}
+
+/**
  * ¿El sitio usa el sistema de firmas de EduSystem (solicitudes con evidencia, ADR 0002/0003)? Entonces las firmas de
  * estudiantes y representantes son legales y selladas: wp-certificates no las borra, y las firmas institucionales las
  * gestiona EduSystem (la pantalla "Users and signatures" queda en solo lectura). Sin EduSystem nuevo, todo sigue igual.
@@ -117,7 +127,10 @@ function add_certificates_page_admin()
         );
         add_submenu_page('add_admin_form_certificates_content', esc_html__('Student certificates', 'wp-certificates'), esc_html__('Student certificate', 'wp-certificates'), 'manager_certificates', 'add_admin_form_certificates_list_content', 'add_admin_form_certificates_list_content', 10);
         add_submenu_page('add_admin_form_certificates_content', esc_html__('Documents', 'wp-certificates'), esc_html__('Documents', 'wp-certificates'), 'manager_documents_certificates', 'add_admin_form_documents_content', 'add_admin_form_documents_content', 10);
-        add_submenu_page('add_admin_form_certificates_content', esc_html__('Certificate assignment', 'wp-certificates'), esc_html__('Certificate assignment', 'wp-certificates'), 'manager_certificate_assignment', 'admin_certificate_assignment_content', 'admin_certificate_assignment_content', 10);
+        // Asignar certificados a estudiantes: solo con EduSystem
+        if (wpc_edusystem_active()) {
+            add_submenu_page('add_admin_form_certificates_content', esc_html__('Certificate assignment', 'wp-certificates'), esc_html__('Certificate assignment', 'wp-certificates'), 'manager_certificate_assignment', 'admin_certificate_assignment_content', 'admin_certificate_assignment_content', 10);
+        }
         // add_submenu_page('add_admin_form_certificates_content', esc_html__('Certificates', 'wp-certificates'), esc_html__('Certificates', 'wp-certificates'), 'manager_certificates_templates', 'add_admin_form_certificates_templates_content', 'add_admin_form_certificates_templates_content', 10);
         add_submenu_page('add_admin_form_certificates_content', esc_html__('Users and signatures', 'wp-certificates'), esc_html__('Users and signatures', 'wp-certificates'), 'manager_users_signatures_certificate', 'add_admin_form_users_signatures_certificate_list_content', 'add_admin_form_users_signatures_certificate_list_content', 10);
         add_submenu_page('add_admin_form_certificates_content', esc_html__('ID card', 'wp-certificates'), esc_html__('ID card', 'wp-certificates'), 'manager_id_card', 'add_admin_form_cards_content', 'add_admin_form_cards_content', 10);

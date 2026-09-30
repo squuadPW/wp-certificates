@@ -218,7 +218,8 @@ function add_admin_form_documents_content()
             $document_identifier_for_related_tables = $document_identificator; // Asumimos que la tabla usa el IDENTIFICATOR de texto.
 
             // a) Consulta OPTIMIZADA de estudiantes. Solo necesitamos ID, email y partner_id.
-            $students = $wpdb->get_results("SELECT id, email, partner_id FROM {$table_students} ORDER BY id DESC");
+            // Sin EduSystem no hay estudiantes ni requisitos: solo se guarda el documento
+            $students = wpc_edusystem_active() ? $wpdb->get_results("SELECT id, email, partner_id FROM {$table_students} ORDER BY id DESC") : [];
 
             if (!empty($students)) {
 

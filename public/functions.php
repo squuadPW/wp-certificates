@@ -245,6 +245,10 @@ add_action('wp_ajax_nopriv_set_nacionality', 'set_nacionality_callback');
 function set_nacionality_callback()
 {
     global $wpdb, $current_user;
+    // Estudiantes y docentes son de EduSystem
+    if (!wpc_edusystem_active()) {
+        wp_send_json_error(['success' => false]);
+    }
     $roles = $current_user->roles;
     $nacionality = $_POST['nacionality'];
 
@@ -275,6 +279,10 @@ add_action('wp_ajax_nopriv_request_card', 'request_card_callback');
 function request_card_callback()
 {
     global $current_user;
+    // Estudiantes y docentes son de EduSystem
+    if (!wpc_edusystem_active()) {
+        wp_send_json_error(['success' => false]);
+    }
     $roles = $current_user->roles;
 
     if (in_array('student', $roles)) {
@@ -424,6 +432,10 @@ add_filter('load_automatic_documents', 'automatic_documents_loaded');
 
 function automatic_documents_last_optimized() {
     global $wpdb, $current_user;
+    // Las firmas de estudiantes y representantes (users_signatures) son de EduSystem
+    if (!wpc_edusystem_active()) {
+        return null;
+    }
 
     // Table definitions
     $table_documents_certificates = $wpdb->prefix . 'documents_certificates';
@@ -456,6 +468,10 @@ add_filter('get_first_pending_automatic_document', 'automatic_documents_last_opt
 
 function assign_certificate_student( $student_id, $template_id, $type, $emission_date, $expiration_date = null, $program = '', $course_id = '', $user_signature_id = null ) {
     global $wpdb;
+    // Emitir a un estudiante usa sus datos y el motor de plantillas de EduSystem: sin EduSystem no se emite
+    if (!wpc_edusystem_active()) {
+        return false;
+    }
     $table_certificates = $wpdb->prefix . 'certificates';
 
     // 1. Obtener detalles del estudiante

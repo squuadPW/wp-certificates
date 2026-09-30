@@ -20,7 +20,10 @@ define('WP_C_REMOTE_INFO_URL', 'https://versions.squuad.com/plugins/wp-certifica
 // reactivar el plugin (dbDelta solo crea tablas o añade/modifica columnas)
 define('WP_C_DB_VERSION', '2');
 
-// Now you can safely use get_plugin_data()
+// get_plugin_data() vive en wp-admin/includes/plugin.php, que en el front no está cargado (antes solo funcionaba
+// porque EduSystem lo cargaba primero)
+if ( !function_exists('get_plugin_data') )
+    require_once ABSPATH . 'wp-admin/includes/plugin.php';
 $plugin_data = get_plugin_data(__FILE__);
 define('WP_C_VERSION', $plugin_data['Version']);
 
@@ -277,34 +280,9 @@ function wp_c_maybe_update_db() {
 }
 add_action('init', 'wp_c_maybe_update_db', 5);
 
+// Activación: wp-certificates funciona con o sin EduSystem (ADR 0004 de EduSystem, paso 1). Con EduSystem, además,
+// trabaja con sus estudiantes; sin él, esas funciones se ocultan (ver wpc_edusystem_active()).
 register_activation_hook(__FILE__, function () {
-
-    // Incluir funciones necesarias de WordPress
-    require_once ABSPATH . 'wp-admin/includes/plugin.php';
-
-    // Plugin requerido (ejemplo: WooCommerce)
-    $plugin_requerido = 'edusystem/edusystem.php'; // Reemplaza con el path correcto
-
-    // Verificar si el plugin está activo
-    if (!is_plugin_active($plugin_requerido)) {
-        // Desactivar este plugin
-        deactivate_plugins(plugin_basename(__FILE__));
-
-        // Mensaje de error
-        $mensaje = '<h2>Error</h2>';
-        $mensaje .= '<p>This plugin requires that <strong>' . $plugin_requerido . '</strong> is installed and activated.</p>';
-
-        // Verificar si el plugin está instalado
-        $plugins_instalados = get_plugins();
-        if (!isset($plugins_instalados[$plugin_requerido])) {
-            $mensaje .= '<p>The required plugin is not installed. Please install it first.</p>';
-        } else {
-            $mensaje .= '<p>The required plugin is installed but not activated. Activate it before proceeding.</p>';
-        }
-
-        // Mostrar error y detener la ejecución
-        wp_die($mensaje);
-    } else {
-        create_tables_certificates();
-    }
+    create_tables_certificates();
+    update_option('wp_c_db_version', WP_C_DB_VERSION);
 });
