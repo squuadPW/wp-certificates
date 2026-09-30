@@ -9,6 +9,15 @@ function wpc_edusystem_signatures_active(): bool
     return function_exists('edusystem_signature_requests_enabled') && edusystem_signature_requests_enabled();
 }
 
+/**
+ * ¿Rige la regla "nadie firma por otro" de EduSystem (ADR 0003, paso 10)? Entonces las firmas-imagen de "Users and
+ * signatures" no se insertan en ningún documento y los documentos que exigen firma se emiten para firma en EduSystem.
+ */
+function wpc_third_party_signatures_blocked(): bool
+{
+    return function_exists('edusystem_third_party_signatures_blocked') && edusystem_third_party_signatures_blocked();
+}
+
 /** ¿EduSystem gestiona los firmantes institucionales (esquema v6, ADR 0003)? */
 function wpc_edusystem_signers_active(): bool
 {
