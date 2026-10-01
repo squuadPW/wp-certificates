@@ -201,6 +201,12 @@
                                     </div>
 
                                     <div style="font-weight:400; text-align: center" class="space-offer">
+                                        <label for="book_line_description"><b><?= esc_html__('Registry book line description', 'wp-certificates'); ?></b></label><br>
+                                        <textarea name="book_line_description" id="book_line_description" rows="3" style="width: 100%;" placeholder="<?= esc_attr(squuad_cert_book_line_default()); ?>"><?= esc_textarea($document->book_line_description ?? ''); ?></textarea>
+                                        <p class="description"><?= esc_html(sprintf(__('Text of the line registered in the book when the document is issued. It accepts the same variables as the document, except {{tomo}}, {{folio}}, {{tomo_folio}} and {{qrcode}}, and is sent as plain text (maximum %d characters). If a variable has no value, the document is not issued. Empty: the text shown as an example is used.', 'wp-certificates'), SQUUAD_CERT_BOOK_LINE_MAX)); ?></p>
+                                    </div>
+
+                                    <div style="font-weight:400; text-align: center" class="space-offer">
                                         <label for="hc"><b><?= esc_html__('Orientation', 'wp-certificates'); ?></b></label><br>
                                         <select name="orientation" required>
                                             <option value="portrait" <?= ($document->orientation == 'portrait' || !$document) ? 'selected' : ''; ?>><?= esc_html__('Portrait', 'wp-certificates') ?></option>

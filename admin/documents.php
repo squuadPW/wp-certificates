@@ -1,22 +1,10 @@
 <?php
 
+// Libros del selector: los da quien tenga la conexión con el servidor de libros (filtro squuad_cert_books, ver
+// includes/book.php); wp-certificates no llama a funciones de EduSystem.
 function get_certificates_books_list(array $args = []): array
 {
-    $response = function_exists('edusof_get_books') ? edusof_get_books($args) : [];
-
-    if (!is_array($response)) return [];
-
-    if (isset($response['data']['data']) && is_array($response['data']['data'])) {
-        return array_values($response['data']['data']);
-    }
-
-    if (isset($response['data']) && is_array($response['data']) && !isset($response['data']['meta'])) {
-        return array_values($response['data']);
-    }
-
-    if (is_array($response) && array_keys($response) !== range(0, count($response) - 1)) return [];
-
-    return array_values($response);
+    return squuad_cert_books();
 }
 
 function add_admin_form_documents_content()
@@ -134,6 +122,8 @@ function add_admin_form_documents_content()
             $id_requisito = isset($_POST['id_requisito']) ? sanitize_text_field($_POST['id_requisito']) : '';
             $type_file = isset($_POST['type_file']) ? sanitize_text_field($_POST['type_file']) : '';
             $book = isset($_POST['book']) ? absint($_POST['book']) : 0;
+            // Descripción de la línea del libro: texto plano con variables (includes/book.php)
+            $book_line_description = isset($_POST['book_line_description']) ? sanitize_textarea_field(wp_unslash($_POST['book_line_description'])) : '';
 
             // Convertir a valores binarios (0 o 1)
             $status = isset($_POST['status']) && $_POST['status'] === 'on' ? 1 : 0;
@@ -186,6 +176,7 @@ function add_admin_form_documents_content()
                 'id_requisito' => $id_requisito,
                 'type_file' => $type_file,
                 'book' => $book,
+                'book_line_description' => '' !== $book_line_description ? $book_line_description : null,
             );
 
             // Campos adicionales: se piden antes de generar el documento y sus respuestas no se guardan
@@ -323,8 +314,13 @@ function add_admin_form_documents_content()
 
             // --- 4. Redirección Final ---
             setcookie('message', esc_html__('Document adjusted successfully.', 'wp-certificates'), time() + 30, '/');
-            if ($field_errors) {
-                setcookie('message-error', esc_html__('Some additional fields were not saved:', 'wp-certificates') . ' ' . implode(' ', $field_errors), time() + 30, '/');
+            $save_warnings = $field_errors ? [esc_html__('Some additional fields were not saved:', 'wp-certificates') . ' ' . implode(' ', $field_errors)] : [];
+            $forbidden = squuad_cert_book_line_forbidden_used($book_line_description);
+            if ($forbidden) {
+                $save_warnings[] = esc_html(sprintf(__('The registry book line cannot use %s: they are assigned when the line is reserved. Remove them, or the document will not be issued.', 'wp-certificates'), '{{' . implode('}}, {{', $forbidden) . '}}'));
+            }
+            if ($save_warnings) {
+                setcookie('message-error', implode(' ', $save_warnings), time() + 30, '/');
             }
             if ($document_id > 0) {
                 $redirect_url = admin_url('/admin.php?page=add_admin_form_documents_content&section_tab=document_detail&document_id=' . $redirect_id);

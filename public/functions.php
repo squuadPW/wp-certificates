@@ -544,9 +544,13 @@ function assign_certificate_student( $student_id, $template_id, $type, $emission
         $replacements = $resolved['replacements'];
 
         // Tomo y folio del libro de registro: se reservan ahora y se aplican después de las demás variables, para que
-        // nada los sobrescriba (antes se calculaban y a continuación se borraban al preparar las variables)
-        if ( $document->book && function_exists('edusof_insert_certificate_book_line') ) {
-            $book_data = edusof_insert_certificate_book_line( $document->book, $student, $type, $title, $emission_date, $program, $course_id );
+        // nada los sobrescriba. El texto de la línea es la descripción del documento y la reserva la hace quien tenga la
+        // conexión con el libro (includes/book.php). Si no se puede reservar, el certificado no se emite.
+        if ( $document->book ) {
+            $book_data = squuad_cert_book_reserve_line( $document, 'edusystem_student', (int) $student->id );
+            if ( is_wp_error($book_data) ) {
+                return false;
+            }
 
             if (!empty($book_data)) {
                 $replacements['folio'] = [

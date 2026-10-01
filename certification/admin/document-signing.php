@@ -152,43 +152,35 @@ function squuad_cert_document_issued_section(object $student): void
 
 /**
  * Reserva la línea del libro al emitir (filtro de squuad_cert_signature_issue_document): una línea nueva en el libro del
- * documento; el libro devuelve tomo, folio y número de línea. Devuelve la fila de squuad_cert_book_entries o WP_Error.
+ * documento, con su descripción (includes/book.php de wp-certificates); el libro devuelve tomo, folio y número de
+ * línea. Devuelve la fila de squuad_cert_book_entries o WP_Error (no se emite).
  */
 add_filter('squuad_cert_issue_book_entry', 'squuad_cert_document_issue_reserve_book_line', 10, 4);
 function squuad_cert_document_issue_reserve_book_line($entry, object $student, object $document, object $request)
 {
-    if ((is_object($entry) && !is_wp_error($entry)) || !function_exists('edusof_insert_certificate_book_line')) {
-        return $entry ?? new WP_Error('squuad_cert_book', __('The registry book is not available on this site. The document was not issued.', 'edusystem'));
+    if (is_object($entry) && !is_wp_error($entry)) {
+        return $entry;
     }
-    $program = function_exists('get_name_program_student') ? (string) get_name_program_student($student->id) : '';
-    $line = edusof_insert_certificate_book_line((int) $document->book, $student, 'certificate', (string) $document->title, gmdate('Y-m-d'), $program, '');
-    $row = $line ? squuad_cert_book_entry_insert((int) $student->id, (int) $document->id, (int) $document->book, $line) : null;
+    $line = squuad_cert_book_reserve_line($document, 'edusystem_student', (int) $student->id);
+    if (is_wp_error($line)) {
+        return $line;
+    }
+    $row = squuad_cert_book_entry_insert((int) $student->id, (int) $document->id, (int) $document->book, ['id' => $line['line_id']] + $line);
     if (!$row) {
         return new WP_Error('squuad_cert_book', __('The registry book did not assign a volume and folio (connection or book error). The document was not issued; try again.', 'edusystem'));
-    }
-    if (function_exists('edusystem_set_log')) {
-        edusystem_set_log(sprintf('Tomo %d, folio %d (línea %d del libro %d) reservados para el documento %d del estudiante %d', (int) $row->tomo, (int) $row->folio, (int) $row->line_id, (int) $row->book_id, (int) $document->id, (int) $student->id), 'signing_policy');
     }
 
     return $row;
 }
 
-/** Anula la línea en el libro de EduSof (voidLine, con motivo) y la marca anulada en EduSystem. Devuelve ['ok', 'message']. */
+/** Anula la línea en el libro (con motivo) y la marca anulada. Devuelve ['ok', 'message']. */
 function squuad_cert_document_issue_void_book_line(object $entry, string $reason): array
 {
-    $api = function_exists('edusof_api') ? edusof_api() : null;
-    if (!$api || is_wp_error($api)) {
-        return ['ok' => false, 'message' => __('The registry book is not available on this site.', 'edusystem')];
-    }
-    try {
-        $api->voidLine((int) $entry->line_id, $reason);
-    } catch (Exception $e) {
-        return ['ok' => false, 'message' => sprintf(__('The registry book could not void the volume and folio: %s', 'edusystem'), $e->getMessage())];
+    $voided = squuad_cert_book_void_line((int) $entry->line_id, $reason);
+    if (is_wp_error($voided)) {
+        return ['ok' => false, 'message' => sprintf(__('The registry book could not void the volume and folio: %s', 'edusystem'), $voided->get_error_message())];
     }
     squuad_cert_book_entry_mark_void((int) $entry->id, $reason);
-    if (function_exists('edusystem_set_log')) {
-        edusystem_set_log(sprintf('Tomo %d, folio %d (línea %d del libro %d) anulados por el usuario %d: %s', (int) $entry->tomo, (int) $entry->folio, (int) $entry->line_id, (int) $entry->book_id, get_current_user_id(), $reason), 'signing_policy');
-    }
 
     return ['ok' => true, 'message' => ''];
 }
