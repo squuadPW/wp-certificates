@@ -14,8 +14,8 @@ $statuses = [
 <section class="edusystem-documents-to-sign" id="edusystem-documents-to-sign" style="margin-bottom:24px">
     <h3><?= esc_html__('Documents to sign', 'edusystem') ?></h3>
     <form method="post" action="<?= esc_url(admin_url('admin-post.php')) ?>">
-    <input type="hidden" name="action" value="edusystem_holder_batch_prepare">
-    <?php wp_nonce_field('edusystem_holder_batch_prepare'); ?>
+    <input type="hidden" name="action" value="squuad_cert_holder_batch_prepare">
+    <?php wp_nonce_field('squuad_cert_holder_batch_prepare'); ?>
     <table class="woocommerce-orders-table shop_table shop_table_responsive my_account_orders">
         <thead><tr>
             <?php if ($batchable) : ?><th><span class="screen-reader-text"><?= esc_html__('Select', 'edusystem') ?></span></th><?php endif; ?>
@@ -41,9 +41,9 @@ $statuses = [
                     <td data-title="<?= esc_attr__('Status', 'edusystem') ?>"><?= esc_html($statuses[$item['state']] ?? '') ?></td>
                     <td>
                         <?php if ('to_sign' === $item['state']) : ?>
-                            <a class="woocommerce-button button" href="<?= esc_url(add_query_arg('edusystem_sign', (int) $student->id . '-' . (int) $item['document']->id, $dashboard)) ?>"><?= esc_html__('Sign', 'edusystem') ?></a>
+                            <a class="woocommerce-button button" href="<?= esc_url(add_query_arg('squuad_cert_sign', (int) $student->id . '-' . (int) $item['document']->id, $dashboard)) ?>"><?= esc_html__('Sign', 'edusystem') ?></a>
                         <?php elseif ('pdf' === $item['state']) : ?>
-                            <a class="woocommerce-button button" href="<?= esc_url(add_query_arg('edusystem_pdf', $request_id, $dashboard)) ?>"><?= esc_html__('Generate PDF', 'edusystem') ?></a>
+                            <a class="woocommerce-button button" href="<?= esc_url(add_query_arg('squuad_cert_pdf', $request_id, $dashboard)) ?>"><?= esc_html__('Generate PDF', 'edusystem') ?></a>
                         <?php endif; ?>
                     </td>
                 </tr>

@@ -21,10 +21,10 @@
                     <input type="hidden" name="request_id" value="<?= (int) $request->id ?>">
                     <input type="hidden" name="content_sha256" value="<?= esc_attr($request->content_sha256) ?>">
                     <?php // Firmantes exigidos en esta solicitud (el recuadro de quien no firma se oculta)
-                    $required_slots = function_exists('edusystem_signature_request_required_roles') ? edusystem_signature_request_required_roles($request) : [];
+                    $required_slots = function_exists('squuad_cert_signature_request_required_roles') ? squuad_cert_signature_request_required_roles($request) : [];
                     ?>
                     <input type="hidden" name="required_roles" value="<?= esc_attr(implode(',', $required_slots)) ?>">
-                    <input type="hidden" name="institutional_pending" value="<?= (function_exists('edusystem_signature_request_institutional_pending') && edusystem_signature_request_institutional_pending($request)) ? '1' : '0' ?>">
+                    <input type="hidden" name="institutional_pending" value="<?= (function_exists('squuad_cert_signature_request_institutional_pending') && squuad_cert_signature_request_institutional_pending($request)) ? '1' : '0' ?>">
                 <?php } ?>
                 <?php if (!empty($legacy_partial)) { ?>
                     <div class="edusystem-signature-notice" style="margin:0 0 12px;padding:10px 12px;border-left:4px solid #dba617;background:#fcf9e8;" data-html2canvas-ignore="true">
@@ -42,10 +42,10 @@
                 <?php } ?>
             </div>
             <div class="modal-footer" style="text-align: center; display: block">
-                <?php if (!empty($request) && function_exists('edusystem_signature_consent_text')) { // consentimiento (ADR 0002, punto 7): fuera del PDF ?>
+                <?php if (!empty($request) && function_exists('squuad_cert_signature_consent_text')) { // consentimiento (ADR 0002, punto 7): fuera del PDF ?>
                     <label class="edusystem-signature-consent" style="display:block;max-width:640px;margin:0 auto 12px;text-align:left;font-size:13px;">
-                        <input type="checkbox" name="consent_version" value="<?= esc_attr(EDUSYSTEM_SIGNATURE_CONSENT_CURRENT) ?>">
-                        <?= esc_html(edusystem_signature_consent_text(EDUSYSTEM_SIGNATURE_CONSENT_CURRENT)) ?>
+                        <input type="checkbox" name="consent_version" value="<?= esc_attr(SQUUAD_CERT_SIGNATURE_CONSENT_CURRENT) ?>">
+                        <?= esc_html(squuad_cert_signature_consent_text(SQUUAD_CERT_SIGNATURE_CONSENT_CURRENT)) ?>
                     </label>
                 <?php } ?>
                 <button type="button" class="submit button-create-enrollment" id="saveSignatures"><?= __('Save', 'edusystem') ?></button>

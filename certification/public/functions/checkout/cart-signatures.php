@@ -1,18 +1,18 @@
 <?php
 /**
- * EduSystem - Certificación: firmas ya guardadas para el modal de firma (AJAX load_signatures_data). Movido sin
+ * EduSystem - Certificación: firmas ya guardadas para el modal de firma (AJAX squuad_cert_load_signatures_data). Movido sin
  * cambios desde public/functions/checkout/cart.php (ADR 0004, paso 3c).
  */
 
 if (!defined('ABSPATH')) exit;
 
-add_action('wp_ajax_load_signatures_data', 'load_signatures_data');
+add_action('wp_ajax_load_signatures_data', 'squuad_cert_load_signatures_data');
 
 /**
  * Firmas ya guardadas del estudiante y su representante para un documento (las pinta create-enrollment.js).
  * Solo con sesión; el estudiante y el representante salen del usuario actual, no de la petición.
  */
-function load_signatures_data()
+function squuad_cert_load_signatures_data()
 {
     global $wpdb, $current_user;
 
@@ -22,9 +22,9 @@ function load_signatures_data()
 
     // Con solicitud (ADR 0002): las firmas de esa solicitud, solo para sus firmantes
     $request_id = absint($_POST['request_id'] ?? 0);
-    if ($request_id && function_exists('edusystem_signature_requests_enabled') && edusystem_signature_requests_enabled()) {
-        $request = edusystem_signature_request_get($request_id);
-        if (!$request || '' === edusystem_signature_request_role($request, (int) $current_user->ID)) {
+    if ($request_id && function_exists('squuad_cert_signature_requests_enabled') && squuad_cert_signature_requests_enabled()) {
+        $request = squuad_cert_signature_request_get($request_id);
+        if (!$request || '' === squuad_cert_signature_request_role($request, (int) $current_user->ID)) {
             wp_send_json_error(__('You are not allowed to sign this document.', 'edusystem'), 403);
         }
         $by_role = [];

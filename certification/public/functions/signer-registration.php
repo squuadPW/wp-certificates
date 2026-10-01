@@ -4,37 +4,37 @@ declare(strict_types=1);
 /**
  * EduSystem - Registro por invitación de un firmante sin cuenta (ADR 0003, paso 3).
  *
- * El enlace del correo (?edusystem_signer_invitation=TOKEN) permite, una sola vez y antes de que caduque, crear la
+ * El enlace del correo (?squuad_cert_invitation=TOKEN) permite, una sola vez y antes de que caduque, crear la
  * contraseña de la cuenta que se creó al invitar (rol Firmante, ligada al correo invitado). Después se inicia la
  * sesión y se va a "Mi firma" para dibujar la firma. Si la cuenta ya tiene contraseña, el enlace solo lleva al acceso.
  */
 
 if (!defined('ABSPATH')) exit;
 
-add_action('init', 'edusystem_signer_registration_handle', 20);
-function edusystem_signer_registration_handle(): void
+add_action('init', 'squuad_cert_signer_registration_handle', 20);
+function squuad_cert_signer_registration_handle(): void
 {
-    if (!isset($_GET['edusystem_signer_invitation']) || !function_exists('edusystem_signers_enabled') || !edusystem_signers_enabled()) {
+    if (!isset($_GET['squuad_cert_invitation']) || !function_exists('squuad_cert_signers_enabled') || !squuad_cert_signers_enabled()) {
         return;
     }
     header('Referrer-Policy: no-referrer'); // el token no debe salir en cabeceras hacia otros sitios
     nocache_headers();
 
-    $token = sanitize_text_field(wp_unslash($_GET['edusystem_signer_invitation']));
-    $invitation = edusystem_signer_invitation_by_token($token);
+    $token = sanitize_text_field(wp_unslash($_GET['squuad_cert_invitation']));
+    $invitation = squuad_cert_signer_invitation_by_token($token);
     $user = $invitation ? get_userdata((int) $invitation->user_id) : null;
     if (!$invitation || !$user || 0 !== strcasecmp((string) $user->user_email, (string) $invitation->email_at_invite)) {
-        edusystem_signer_registration_render(__('This invitation is not valid or has expired. Ask the administration to send it again.', 'edusystem'));
+        squuad_cert_signer_registration_render(__('This invitation is not valid or has expired. Ask the administration to send it again.', 'edusystem'));
     }
     // La cuenta ya tiene contraseña: el enlace no vuelve a servir para crearla, solo lleva al acceso
-    if (!get_user_meta($user->ID, 'edusystem_signer_needs_password', true)) {
-        wp_safe_redirect(wp_login_url(add_query_arg('page', 'edusystem-my-signature', admin_url('admin.php'))));
+    if (!get_user_meta($user->ID, 'squuad_cert_signer_needs_password', true)) {
+        wp_safe_redirect(wp_login_url(add_query_arg('page', 'squuad-cert-my-signature', admin_url('admin.php'))));
         exit;
     }
 
     $error = '';
     if ('POST' === ($_SERVER['REQUEST_METHOD'] ?? '')) {
-        $nonce_ok = wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['_wpnonce'] ?? '')), 'edusystem_signer_register_' . $invitation->id);
+        $nonce_ok = wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['_wpnonce'] ?? '')), 'squuad_cert_signer_register_' . $invitation->id);
         $password = (string) wp_unslash($_POST['password'] ?? '');
         $repeat = (string) wp_unslash($_POST['password_repeat'] ?? '');
         if (!$nonce_ok) {
@@ -45,22 +45,22 @@ function edusystem_signer_registration_handle(): void
             $error = __('The passwords do not match.', 'edusystem');
         } else {
             wp_set_password($password, $user->ID);
-            delete_user_meta($user->ID, 'edusystem_signer_needs_password');
+            delete_user_meta($user->ID, 'squuad_cert_signer_needs_password');
             if (function_exists('edusystem_set_log')) {
                 edusystem_set_log(sprintf('El firmante invitado %d creó su contraseña con la invitación %d', $user->ID, $invitation->id), 'signer_invitation', $user->ID);
             }
             wp_set_current_user($user->ID);
             wp_set_auth_cookie($user->ID);
-            wp_safe_redirect(add_query_arg('page', 'edusystem-my-signature', admin_url('admin.php')));
+            wp_safe_redirect(add_query_arg('page', 'squuad-cert-my-signature', admin_url('admin.php')));
             exit;
         }
     }
 
-    edusystem_signer_registration_render('', $user, (int) $invitation->id, $error);
+    squuad_cert_signer_registration_render('', $user, (int) $invitation->id, $error);
 }
 
 /** Página mínima de registro (sin el tema), con el correo fijo. Termina la petición. */
-function edusystem_signer_registration_render(string $message, ?WP_User $user = null, int $invitation_id = 0, string $error = ''): void
+function squuad_cert_signer_registration_render(string $message, ?WP_User $user = null, int $invitation_id = 0, string $error = ''): void
 {
     status_header($user ? 200 : 403);
     $site = get_bloginfo('name');
@@ -89,7 +89,7 @@ function edusystem_signer_registration_render(string $message, ?WP_User $user = 
             <p><?= esc_html(sprintf(__('Hello %s. Create your password to access your account; then you will draw your signature.', 'edusystem'), $user->display_name)) ?></p>
             <?php if ($error) : ?><div class="error"><?= esc_html($error) ?></div><?php endif; ?>
             <form method="post">
-                <?php wp_nonce_field('edusystem_signer_register_' . $invitation_id); ?>
+                <?php wp_nonce_field('squuad_cert_signer_register_' . $invitation_id); ?>
                 <label><?= esc_html__('Email', 'edusystem') ?></label>
                 <input type="email" value="<?= esc_attr($user->user_email) ?>" readonly disabled>
                 <label for="password"><?= esc_html__('Password', 'edusystem') ?></label>

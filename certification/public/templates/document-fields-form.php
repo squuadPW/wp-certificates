@@ -1,7 +1,7 @@
 <?php
 /**
  * Formulario de los campos adicionales de un documento automático, antes de mostrarlo.
- * Lo incluye modal_document_automatic(). Variables: $document, $student, $document_fields,
+ * Lo incluye squuad_cert_modal_document_automatic(). Variables: $document, $student, $document_fields,
  * $field_values, $field_errors.
  *
  * Se envía por POST a la misma página; las respuestas se copian en sessionStorage (create-enrollment.js)
@@ -17,7 +17,7 @@
                     class='dashicons dashicons-no-alt'></span></span>
             <form id="form-document-fields" class="modal-body" method="post"
                 data-storage-key="<?= esc_attr('edusystem_document_fields_' . $document->id . '_' . $student->id) ?>">
-                <input type="hidden" name="edusystem_document_fields" value="<?= esc_attr($document->id) ?>">
+                <input type="hidden" name="squuad_cert_document_fields" value="<?= esc_attr($document->id) ?>">
                 <?php wp_nonce_field('edusystem_document_fields_' . $document->id); ?>
 
                 <h3 style="font-weight: 600; margin: 0 0 0.5rem"><?= esc_html($document->title) ?></h3>
@@ -31,7 +31,7 @@
                     </div>
                 <?php } ?>
 
-                <?= edusystem_render_document_fields($document_fields, $field_values) ?>
+                <?= squuad_cert_render_document_fields($document_fields, $field_values) ?>
 
                 <div style="text-align: center; margin-top: 2rem">
                     <button type="submit" class="submit button-create-enrollment"><?= esc_html__('Continue', 'edusystem') ?></button>

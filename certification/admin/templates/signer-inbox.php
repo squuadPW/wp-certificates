@@ -5,7 +5,7 @@
  */
 if (!defined('ABSPATH')) exit;
 
-$page_url = add_query_arg('page', EDUSYSTEM_SIGNER_INBOX_PAGE, admin_url('admin.php'));
+$page_url = add_query_arg('page', SQUUAD_CERT_SIGNER_INBOX_PAGE, admin_url('admin.php'));
 $frame = static function (string $html): string {
     // Contenido del documento aislado: sin scripts ni acceso a la página del admin
     $doc = '<!doctype html><html><head><meta charset="utf-8"><style>body{font-family:Arial,sans-serif;margin:16px;color:#111}img{max-width:100%}</style></head><body>' . $html . '</body></html>';
@@ -22,7 +22,7 @@ $frame = static function (string $html): string {
     <?php if (!$profile) : ?>
         <div class="notice notice-warning"><p>
             <?= esc_html__('Register your signature before signing documents.', 'edusystem') ?>
-            <a href="<?= esc_url(add_query_arg('page', 'edusystem-my-signature', admin_url('admin.php'))) ?>"><?= esc_html__('My signature', 'edusystem') ?></a>
+            <a href="<?= esc_url(add_query_arg('page', 'squuad-cert-my-signature', admin_url('admin.php'))) ?>"><?= esc_html__('My signature', 'edusystem') ?></a>
         </p></div>
     <?php endif; ?>
 
@@ -35,23 +35,23 @@ $frame = static function (string $html): string {
 
         <?php if ($pending_here && $profile) : ?>
             <form method="post" action="<?= esc_url(admin_url('admin-post.php')) ?>" style="max-width:760px;margin-top:16px">
-                <input type="hidden" name="action" value="edusystem_sign_as_signer">
+                <input type="hidden" name="action" value="squuad_cert_sign_as_signer">
                 <input type="hidden" name="request_id" value="<?= (int) $request->id ?>">
                 <input type="hidden" name="content_sha256" value="<?= esc_attr($request->content_sha256) ?>">
-                <?php wp_nonce_field('edusystem_sign_as_signer_' . (int) $request->id); ?>
+                <?php wp_nonce_field('squuad_cert_sign_as_signer_' . (int) $request->id); ?>
                 <p><?= esc_html__('Your registered signature will be applied to this document:', 'edusystem') ?></p>
-                <div style="background:#fff;border:1px solid #c3c4c7;display:inline-block;padding:4px"><?= edusystem_signature_svg((string) $profile->strokes) // SVG generado en el servidor ?></div>
-                <p><label><input type="checkbox" name="consent_version" value="<?= esc_attr(EDUSYSTEM_SIGNATURE_CONSENT_CURRENT) ?>" required>
-                    <?= esc_html(edusystem_signature_consent_text(EDUSYSTEM_SIGNATURE_CONSENT_CURRENT)) ?></label></p>
+                <div style="background:#fff;border:1px solid #c3c4c7;display:inline-block;padding:4px"><?= squuad_cert_signature_svg((string) $profile->strokes) // SVG generado en el servidor ?></div>
+                <p><label><input type="checkbox" name="consent_version" value="<?= esc_attr(SQUUAD_CERT_SIGNATURE_CONSENT_CURRENT) ?>" required>
+                    <?= esc_html(squuad_cert_signature_consent_text(SQUUAD_CERT_SIGNATURE_CONSENT_CURRENT)) ?></label></p>
                 <p><button type="submit" class="button button-primary"><?= esc_html__('Sign this document', 'edusystem') ?></button></p>
             </form>
 
             <details style="max-width:760px;margin-top:16px">
                 <summary style="cursor:pointer;color:#b32d2e;font-weight:600"><?= esc_html__('Decline this document', 'edusystem') ?></summary>
                 <form method="post" action="<?= esc_url(admin_url('admin-post.php')) ?>" style="margin-top:8px">
-                    <input type="hidden" name="action" value="edusystem_signer_decline">
+                    <input type="hidden" name="action" value="squuad_cert_signer_decline">
                     <input type="hidden" name="request_id" value="<?= (int) $request->id ?>">
-                    <?php wp_nonce_field('edusystem_signer_decline_' . (int) $request->id); ?>
+                    <?php wp_nonce_field('squuad_cert_signer_decline_' . (int) $request->id); ?>
                     <div class="notice notice-error inline" style="margin:0 0 8px"><p><strong><?= esc_html__('This action cannot be reverted.', 'edusystem') ?></strong>
                         <?= esc_html__('When you decline this document, the signatures of the student and the parent linked to it (if any) will be revoked, and the document can no longer be approved or set back to pending. The user will have to send or sign a new document.', 'edusystem') ?></p></div>
                     <p><label for="edusystem-decline-reason"><?= esc_html__('Reason why it is declined', 'edusystem') ?></label><br>
@@ -63,7 +63,7 @@ $frame = static function (string $html): string {
         <?php elseif ('signed' === $request->status && $generate_pdf) : ?>
             <div id="edusystem-pdf-status" class="notice notice-info inline"><p><?= esc_html__('Generating the final PDF…', 'edusystem') ?></p></div>
             <?php
-            $pdf_page = edusystem_signature_pdf_page($request);
+            $pdf_page = squuad_cert_signature_pdf_page($request);
             // Sin texto cortado entre páginas (avoid-all) en los documentos automáticos; no en los emitidos, que son
             // diseños de página fija de wp-certificates y avoid-all los desplaza (páginas en blanco, probado en Chrome)
             $pdf_pagebreak = 'issued' === ($request->origin ?? '') ? ['after' => '.pagebreak'] : ['mode' => ['avoid-all', 'css', 'legacy'], 'after' => '.pagebreak'];
@@ -147,12 +147,12 @@ $frame = static function (string $html): string {
                 </tbody>
             </table>
             <form method="post" action="<?= esc_url(admin_url('admin-post.php')) ?>" style="max-width:760px;margin-top:16px">
-                <input type="hidden" name="action" value="edusystem_signer_batch_confirm">
+                <input type="hidden" name="action" value="squuad_cert_signer_batch_confirm">
                 <input type="hidden" name="batch_id" value="<?= (int) $batch->id ?>">
-                <?php wp_nonce_field('edusystem_signer_batch_confirm_' . (int) $batch->id); ?>
+                <?php wp_nonce_field('squuad_cert_signer_batch_confirm_' . (int) $batch->id); ?>
                 <?php if ($profile) : ?>
                     <p><?= esc_html__('Your registered signature will be applied to each document:', 'edusystem') ?></p>
-                    <div style="background:#fff;border:1px solid #c3c4c7;display:inline-block;padding:4px"><?= edusystem_signature_svg((string) $profile->strokes) // SVG generado en el servidor ?></div>
+                    <div style="background:#fff;border:1px solid #c3c4c7;display:inline-block;padding:4px"><?= squuad_cert_signature_svg((string) $profile->strokes) // SVG generado en el servidor ?></div>
                 <?php endif; ?>
                 <p><label><input type="checkbox" name="consent_sha256" value="<?= esc_attr($batch->consent_sha256) ?>" required>
                     <?= nl2br(esc_html((string) $batch->data['consent_text'])) ?></label></p>
@@ -193,8 +193,8 @@ $frame = static function (string $html): string {
             <p><?= esc_html__('There are no documents waiting for your signature.', 'edusystem') ?></p>
         <?php else : ?>
             <form method="post" action="<?= esc_url(admin_url('admin-post.php')) ?>">
-            <input type="hidden" name="action" value="edusystem_signer_batch_prepare">
-            <?php wp_nonce_field('edusystem_signer_batch_prepare'); ?>
+            <input type="hidden" name="action" value="squuad_cert_signer_batch_prepare">
+            <?php wp_nonce_field('squuad_cert_signer_batch_prepare'); ?>
             <table class="widefat striped" style="max-width:1100px">
                 <thead><tr>
                     <td class="check-column" style="padding:8px 0 0 3px"><input type="checkbox" id="edusystem-batch-all" aria-label="<?= esc_attr__('Select all', 'edusystem') ?>"></td>
@@ -222,7 +222,7 @@ $frame = static function (string $html): string {
                     <span class="description"><?= esc_html(sprintf(
                         /* translators: %d: maximum number of documents per batch */
                         __('Up to %d documents at once. You will review the list and confirm with your password.', 'edusystem'),
-                        EDUSYSTEM_SIGNATURE_BATCH_MAX
+                        SQUUAD_CERT_SIGNATURE_BATCH_MAX
                     )) ?></span></p>
             <?php endif; ?>
             </form>

@@ -35,7 +35,7 @@ $status_labels = [
     <?php if ($can_manage) : ?>
         <h2><?= esc_html__('Invite a signer', 'edusystem') ?></h2>
         <form method="get" action="<?= esc_url(admin_url('admin.php')) ?>" style="margin-bottom:10px">
-            <input type="hidden" name="page" value="<?= esc_attr(EDUSYSTEM_SIGNERS_PAGE) ?>">
+            <input type="hidden" name="page" value="<?= esc_attr(SQUUAD_CERT_SIGNERS_PAGE) ?>">
             <label for="edusystem-signer-search" class="screen-reader-text"><?= esc_html__('Search by name or email', 'edusystem') ?></label>
             <input type="search" id="edusystem-signer-search" name="q" value="<?= esc_attr($search) ?>" placeholder="<?= esc_attr__('Search by name or email', 'edusystem') ?>" style="min-width:320px">
             <button type="submit" class="button"><?= esc_html__('Search', 'edusystem') ?></button>
@@ -52,9 +52,9 @@ $status_labels = [
                                 <td><?= esc_html($found->user_email) ?></td>
                                 <td colspan="2">
                                     <form method="post" action="<?= esc_url(admin_url('admin-post.php')) ?>" style="display:flex;gap:6px;align-items:center">
-                                        <input type="hidden" name="action" value="edusystem_signer_invite">
+                                        <input type="hidden" name="action" value="squuad_cert_signer_invite">
                                         <input type="hidden" name="user_id" value="<?= (int) $found->ID ?>">
-                                        <?php wp_nonce_field('edusystem_signer_invite'); ?>
+                                        <?php wp_nonce_field('squuad_cert_signer_invite'); ?>
                                         <input type="text" name="charge" required placeholder="<?= esc_attr__('Charge (e.g. Academic Director)', 'edusystem') ?>" style="min-width:240px">
                                         <button type="submit" class="button button-primary"><?= esc_html__('Invite', 'edusystem') ?></button>
                                     </form>
@@ -71,8 +71,8 @@ $status_labels = [
         <details <?= ('' !== $search && !$results) ? 'open' : '' ?> style="max-width:960px;margin-bottom:24px">
             <summary style="cursor:pointer;font-weight:600"><?= esc_html__('Invite someone without an account', 'edusystem') ?></summary>
             <form method="post" action="<?= esc_url(admin_url('admin-post.php')) ?>" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;gap:8px;align-items:end;margin-top:8px">
-                <input type="hidden" name="action" value="edusystem_signer_invite_new">
-                <?php wp_nonce_field('edusystem_signer_invite_new'); ?>
+                <input type="hidden" name="action" value="squuad_cert_signer_invite_new">
+                <?php wp_nonce_field('squuad_cert_signer_invite_new'); ?>
                 <label><?= esc_html__('Full name', 'edusystem') ?><br><input type="text" name="name" required style="width:100%"></label>
                 <label><?= esc_html__('Email', 'edusystem') ?><br><input type="email" name="email" required value="<?= is_email($search) ? esc_attr($search) : '' ?>" style="width:100%"></label>
                 <label><?= esc_html__('Charge', 'edusystem') ?><br><input type="text" name="charge" required style="width:100%"></label>
@@ -112,15 +112,15 @@ $status_labels = [
                         <td>
                             <?php if ($can_manage) : ?>
                                 <?php if ('active' !== $signer->status && 'suspended' !== $signer->status) {
-                                    $post_form('edusystem_signer_resend', ['signer_id' => $signer->id], __('Resend invitation', 'edusystem'));
+                                    $post_form('squuad_cert_signer_resend', ['signer_id' => $signer->id], __('Resend invitation', 'edusystem'));
                                 } ?>
                                 <?php if ($signer->pending_invitation_id) {
-                                    $post_form('edusystem_signer_revoke', ['invitation_id' => $signer->pending_invitation_id], __('Revoke invitation', 'edusystem'), 'button', __('Revoke this invitation?', 'edusystem'));
+                                    $post_form('squuad_cert_signer_revoke', ['invitation_id' => $signer->pending_invitation_id], __('Revoke invitation', 'edusystem'), 'button', __('Revoke this invitation?', 'edusystem'));
                                 } ?>
                                 <?php if ('suspended' === $signer->status) {
-                                    $post_form('edusystem_signer_status', ['signer_id' => $signer->id, 'change' => 'reactivate'], __('Reactivate', 'edusystem'));
+                                    $post_form('squuad_cert_signer_status', ['signer_id' => $signer->id, 'change' => 'reactivate'], __('Reactivate', 'edusystem'));
                                 } else {
-                                    $post_form('edusystem_signer_status', ['signer_id' => $signer->id, 'change' => 'suspend'], __('Suspend', 'edusystem'), 'button', __('Suspend this signer? Signed documents do not change.', 'edusystem'));
+                                    $post_form('squuad_cert_signer_status', ['signer_id' => $signer->id, 'change' => 'suspend'], __('Suspend', 'edusystem'), 'button', __('Suspend this signer? Signed documents do not change.', 'edusystem'));
                                 } ?>
                             <?php endif; ?>
                         </td>
@@ -142,8 +142,8 @@ $status_labels = [
                         <td><?= esc_html((string) $old->charge) ?></td>
                         <td><?= esc_html__('Legacy (image uploaded by an administrator)', 'edusystem') ?></td>
                         <td>
-                            <?php if ($can_manage && $old->user_id && !edusystem_signer_by_user((int) $old->user_id)) {
-                                $post_form('edusystem_signer_invite', ['user_id' => $old->user_id, 'charge' => $old->charge], __('Invite this user', 'edusystem'), 'button button-primary');
+                            <?php if ($can_manage && $old->user_id && !squuad_cert_signer_by_user((int) $old->user_id)) {
+                                $post_form('squuad_cert_signer_invite', ['user_id' => $old->user_id, 'charge' => $old->charge], __('Invite this user', 'edusystem'), 'button button-primary');
                             } ?>
                         </td>
                     </tr>

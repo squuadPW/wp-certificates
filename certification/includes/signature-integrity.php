@@ -11,7 +11,7 @@ declare(strict_types=1);
 if (!defined('ABSPATH')) exit;
 
 /** Las columnas de evidencia y las tablas de anuladas y de cadena llegan con la versión 4 del esquema. */
-function edusystem_signature_evidence_enabled(): bool
+function squuad_cert_signature_evidence_enabled(): bool
 {
     return version_compare((string) get_option('edusystem_db_version'), '4', '>=');
 }
@@ -22,29 +22,29 @@ function edusystem_signature_evidence_enabled(): bool
  * - la fila de cabeza de la cadena se crea una sola vez;
  * - la clave solo se genera si el sitio no tiene ninguna.
  */
-function edusystem_signature_integrity_install(): void
+function squuad_cert_signature_integrity_install(): void
 {
     global $wpdb;
 
     // Corte: las firmas con id <= a este valor son "antiguas sin huella". En una instalación nueva vale 0.
     $max_id = (int) $wpdb->get_var("SELECT COALESCE(MAX(id), 0) FROM {$wpdb->prefix}users_signatures");
-    add_option('edusystem_signature_legacy_max_id', $max_id, '', 'no');
+    add_option('squuad_cert_signature_legacy_max_id', $max_id, '', 'no');
 
     $wpdb->query(
-        "INSERT IGNORE INTO {$wpdb->prefix}edusystem_signature_chain (id, last_seq, head_fingerprint, updated_at_utc)
+        "INSERT IGNORE INTO {$wpdb->prefix}squuad_cert_chain (id, last_seq, head_fingerprint, updated_at_utc)
          VALUES (1, 0, '', NULL)"
     );
 
-    edusystem_signature_ensure_key();
+    squuad_cert_signature_ensure_key();
 }
 
 /**
  * Claves del sitio guardadas en la BD (opción sin autoload). Nunca se muestran ni se editan desde el admin.
  * Formato: ['current' => key_id, 'keys' => [key_id => ['key' => base64, 'created_at' => UTC, 'created_by' => user_id]]]
  */
-function edusystem_signature_stored_keys(): array
+function squuad_cert_signature_stored_keys(): array
 {
-    $stored = get_option('edusystem_signature_keys', []);
+    $stored = get_option('squuad_cert_signature_keys', []);
     if (!is_array($stored) || empty($stored['keys']) || !is_array($stored['keys'])) {
         return ['current' => '', 'keys' => []];
     }
@@ -56,19 +56,19 @@ function edusystem_signature_stored_keys(): array
  * desaparece (restauración parcial, borrado), la clave nueva nunca reutiliza el id de una anterior, así que las
  * huellas firmadas con la clave perdida pasan a "clave desconocida" en lugar de parecer alteradas.
  */
-function edusystem_signature_ensure_key(): string
+function squuad_cert_signature_ensure_key(): string
 {
-    $stored = edusystem_signature_stored_keys();
+    $stored = squuad_cert_signature_stored_keys();
     if ($stored['current'] !== '' && isset($stored['keys'][$stored['current']])) {
         return $stored['current'];
     }
-    return edusystem_signature_add_key($stored);
+    return squuad_cert_signature_add_key($stored);
 }
 
 /** Crea una clave nueva y la deja como actual; las anteriores se conservan solo para verificar. */
-function edusystem_signature_add_key(?array $stored = null): string
+function squuad_cert_signature_add_key(?array $stored = null): string
 {
-    $stored = $stored ?? edusystem_signature_stored_keys();
+    $stored = $stored ?? squuad_cert_signature_stored_keys();
     $key_id = 'opt-' . gmdate('Ymd') . '-' . bin2hex(random_bytes(3));
 
     // La clave que deja de ser la activa queda retirada: solo sirve para verificar lo firmado antes de esta fecha
@@ -85,10 +85,10 @@ function edusystem_signature_add_key(?array $stored = null): string
     $stored['current'] = $key_id;
 
     // update_option no cambia el autoload de una opción existente; add_option la crea sin autoload
-    if (get_option('edusystem_signature_keys', null) === null) {
-        add_option('edusystem_signature_keys', $stored, '', 'no');
+    if (get_option('squuad_cert_signature_keys', null) === null) {
+        add_option('squuad_cert_signature_keys', $stored, '', 'no');
     } else {
-        update_option('edusystem_signature_keys', $stored, 'no');
+        update_option('squuad_cert_signature_keys', $stored, 'no');
     }
 
     if (function_exists('edusystem_set_log')) {
@@ -102,42 +102,42 @@ function edusystem_signature_add_key(?array $stored = null): string
  * Versión de las plantillas de EduSystem que no vienen de documents_certificates (p. ej. MISSING DOCUMENT, que
  * se pinta en includes/html-documents.php). Subirla a mano cuando cambie el texto que se firma.
  */
-const EDUSYSTEM_SIGNATURE_TEMPLATE_VERSIONS = [
+const SQUUAD_CERT_TEMPLATE_VERSIONS = [
     'MISSING DOCUMENT' => '1',
 ];
 
 /**
  * Clave con la que se firma ahora: [key_id, clave en bytes]. Si wp-config.php define las constantes
- * EDUSYSTEM_SIGNATURE_KEYS (id => clave en base64) y EDUSYSTEM_SIGNATURE_KEY_ID, se usan ellas; si no, la clave
+ * SQUUAD_CERT_SIGNATURE_KEYS (id => clave en base64) y SQUUAD_CERT_SIGNATURE_KEY_ID, se usan ellas; si no, la clave
  * automática del sitio. Devuelve null si no hay ninguna clave utilizable.
  */
-function edusystem_signature_current_key(): ?array
+function squuad_cert_signature_current_key(): ?array
 {
-    if (defined('EDUSYSTEM_SIGNATURE_KEYS') && defined('EDUSYSTEM_SIGNATURE_KEY_ID')) {
-        $key_id = (string) EDUSYSTEM_SIGNATURE_KEY_ID;
-        $key = edusystem_signature_key_by_id($key_id);
+    if (defined('SQUUAD_CERT_SIGNATURE_KEYS') && defined('SQUUAD_CERT_SIGNATURE_KEY_ID')) {
+        $key_id = (string) SQUUAD_CERT_SIGNATURE_KEY_ID;
+        $key = squuad_cert_signature_key_by_id($key_id);
         if (null !== $key) {
             return [$key_id, $key];
         }
     }
 
-    $key_id = edusystem_signature_ensure_key();
-    $key = edusystem_signature_key_by_id($key_id);
+    $key_id = squuad_cert_signature_ensure_key();
+    $key = squuad_cert_signature_key_by_id($key_id);
 
     return null === $key ? null : [$key_id, $key];
 }
 
 /** Clave en bytes por su id (constantes de wp-config.php o claves guardadas), o null si no existe. */
-function edusystem_signature_key_by_id(string $key_id): ?string
+function squuad_cert_signature_key_by_id(string $key_id): ?string
 {
     if ('' === $key_id) {
         return null;
     }
-    if (defined('EDUSYSTEM_SIGNATURE_KEYS') && is_array(EDUSYSTEM_SIGNATURE_KEYS) && isset(EDUSYSTEM_SIGNATURE_KEYS[$key_id])) {
-        $key = base64_decode((string) EDUSYSTEM_SIGNATURE_KEYS[$key_id], true);
+    if (defined('SQUUAD_CERT_SIGNATURE_KEYS') && is_array(SQUUAD_CERT_SIGNATURE_KEYS) && isset(SQUUAD_CERT_SIGNATURE_KEYS[$key_id])) {
+        $key = base64_decode((string) SQUUAD_CERT_SIGNATURE_KEYS[$key_id], true);
         return (false !== $key && strlen($key) >= 32) ? $key : null;
     }
-    $stored = edusystem_signature_stored_keys();
+    $stored = squuad_cert_signature_stored_keys();
     if (isset($stored['keys'][$key_id]['key'])) {
         $key = base64_decode((string) $stored['keys'][$key_id]['key'], true);
         return (false !== $key && strlen($key) >= 32) ? $key : null;
@@ -150,18 +150,18 @@ function edusystem_signature_key_by_id(string $key_id): ?string
  * Fecha (UTC) en que se retiró una clave guardada al rotarla, o null si sigue activa o es de wp-config.php
  * (de esas no se conoce la fecha).
  */
-function edusystem_signature_key_retired_at(string $key_id): ?string
+function squuad_cert_signature_key_retired_at(string $key_id): ?string
 {
-    $stored = edusystem_signature_stored_keys();
+    $stored = squuad_cert_signature_stored_keys();
     $retired = $stored['keys'][$key_id]['retired_at'] ?? null;
 
     return $retired ? (string) $retired : null;
 }
 
 /** Posición de una clave guardada en el orden en que se crearon (0 = la primera), o null si no es de la opción. */
-function edusystem_signature_key_rank(string $key_id): ?int
+function squuad_cert_signature_key_rank(string $key_id): ?int
 {
-    $position = array_search($key_id, array_keys(edusystem_signature_stored_keys()['keys']), true);
+    $position = array_search($key_id, array_keys(squuad_cert_signature_stored_keys()['keys']), true);
 
     return false === $position ? null : (int) $position;
 }
@@ -171,19 +171,19 @@ function edusystem_signature_key_rank(string $key_id): ?int
  * el cambio. Se anota en los metadatos del token de sesión, en el servidor (la cookie del plugin la controla el
  * operador). Un login normal no tiene usuario conectado, así que no se marca.
  */
-add_filter('attach_session_information', 'edusystem_signature_mark_switched_session', 10, 2);
-function edusystem_signature_mark_switched_session($session, $user_id)
+add_filter('attach_session_information', 'squuad_cert_signature_mark_switched_session', 10, 2);
+function squuad_cert_signature_mark_switched_session($session, $user_id)
 {
     $current_user_id = get_current_user_id();
     if ($current_user_id && $current_user_id !== (int) $user_id && is_array($session)) {
-        $session['edusystem_switched_from'] = $current_user_id;
+        $session['squuad_cert_switched_from'] = $current_user_id;
     }
 
     return $session;
 }
 
 /** Usuario que hizo el Switch hacia la sesión actual, o 0 si la sesión es del propio usuario. */
-function edusystem_signature_session_switched_from(): int
+function squuad_cert_signature_session_switched_from(): int
 {
     $user_id = get_current_user_id();
     $token = wp_get_session_token();
@@ -192,14 +192,14 @@ function edusystem_signature_session_switched_from(): int
     }
     $session = WP_Session_Tokens::get_instance($user_id)->get($token);
 
-    return (int) ($session['edusystem_switched_from'] ?? 0);
+    return (int) ($session['squuad_cert_switched_from'] ?? 0);
 }
 
 /** sha256 de la versión del documento que se firma (plantilla de documents_certificates o versión fija). */
-function edusystem_signature_doc_version_hash(string $document_id): string
+function squuad_cert_signature_doc_version_hash(string $document_id): string
 {
-    $document = function_exists('edusystem_get_automatic_document_by_identificator')
-        ? edusystem_get_automatic_document_by_identificator($document_id)
+    $document = function_exists('squuad_cert_get_automatic_document_by_identificator')
+        ? squuad_cert_get_automatic_document_by_identificator($document_id)
         : null;
     if ($document) {
         return hash('sha256', implode("\n", [
@@ -212,7 +212,7 @@ function edusystem_signature_doc_version_hash(string $document_id): string
         ]));
     }
 
-    $version = EDUSYSTEM_SIGNATURE_TEMPLATE_VERSIONS[$document_id] ?? '0';
+    $version = SQUUAD_CERT_TEMPLATE_VERSIONS[$document_id] ?? '0';
     return hash('sha256', 'edusystem-template' . "\n" . $document_id . "\n" . $version);
 }
 
@@ -220,7 +220,7 @@ function edusystem_signature_doc_version_hash(string $document_id): string
  * Mensaje que sella la huella (formato EDUSIG1). Campos en orden fijo, unidos por "\n"; los textos libres van
  * con rawurlencode para que un salto de línea no pueda desplazar campos. No cambiar sin subir la versión.
  */
-function edusystem_signature_canonical(array $row): string
+function squuad_cert_signature_canonical(array $row): string
 {
     $text = static fn($value): string => rawurlencode((string) ($value ?? ''));
 
@@ -253,10 +253,10 @@ function edusystem_signature_canonical(array $row): string
  * request_created_fingerprint (huella del evento de creación) ata la firma a una solicitud concreta aunque alguien
  * reasigne ids en la BD. No cambiar sin subir la versión.
  */
-function edusystem_signature_canonical_v2(array $row): string
+function squuad_cert_signature_canonical_v2(array $row): string
 {
     $text = static fn($value): string => rawurlencode((string) ($value ?? ''));
-    $lines = explode("\n", edusystem_signature_canonical($row));
+    $lines = explode("\n", squuad_cert_signature_canonical($row));
     $lines[0] = 'EDUSIG2';
 
     return implode("\n", array_merge($lines, [
@@ -273,18 +273,18 @@ function edusystem_signature_canonical_v2(array $row): string
 }
 
 /** Mensaje sellado de una fila según su formato (evidence_format; sin él, EDUSIG1). */
-function edusystem_signature_canonical_for(array $row): string
+function squuad_cert_signature_canonical_for(array $row): string
 {
-    return 'EDUSIG2' === ($row['evidence_format'] ?? '') ? edusystem_signature_canonical_v2($row) : edusystem_signature_canonical($row);
+    return 'EDUSIG2' === ($row['evidence_format'] ?? '') ? squuad_cert_signature_canonical_v2($row) : squuad_cert_signature_canonical($row);
 }
 
 /** Fija la cabeza de la cadena (llamar solo bajo el bloqueo de la cadena). */
-function edusystem_signature_chain_set_head(int $seq, string $fingerprint): void
+function squuad_cert_signature_chain_set_head(int $seq, string $fingerprint): void
 {
     global $wpdb;
 
     $wpdb->query($wpdb->prepare(
-        "INSERT INTO {$wpdb->prefix}edusystem_signature_chain (id, last_seq, head_fingerprint, updated_at_utc)
+        "INSERT INTO {$wpdb->prefix}squuad_cert_chain (id, last_seq, head_fingerprint, updated_at_utc)
          VALUES (1, %d, %s, UTC_TIMESTAMP())
          ON DUPLICATE KEY UPDATE last_seq = VALUES(last_seq), head_fingerprint = VALUES(head_fingerprint),
          updated_at_utc = VALUES(updated_at_utc)",
@@ -294,11 +294,11 @@ function edusystem_signature_chain_set_head(int $seq, string $fingerprint): void
 }
 
 /** Nombre del bloqueo de la cadena: GET_LOCK es global en el servidor MySQL, que pueden compartir varios sitios. */
-function edusystem_signature_lock_name(): string
+function squuad_cert_signature_lock_name(): string
 {
     global $wpdb;
 
-    return 'edusig_' . substr(hash('sha256', DB_NAME . '|' . $wpdb->prefix), 0, 40);
+    return 'squuad_cert_chain_' . substr(hash('sha256', DB_NAME . '|' . $wpdb->prefix), 0, 40);
 }
 
 /**
@@ -312,16 +312,16 @@ function edusystem_signature_lock_name(): string
  * reused_signature_id. Con ella la firma se sella en formato EDUSIG2; sin ella, EDUSIG1.
  * Devuelve el id de la fila o 0 si el INSERT falla.
  */
-function edusystem_signature_insert(array $data, int $student_id, string $signer_role, array $request_evidence = []): int
+function squuad_cert_signature_insert(array $data, int $student_id, string $signer_role, array $request_evidence = []): int
 {
     global $wpdb;
     $table = $wpdb->prefix . 'users_signatures';
 
-    if (!edusystem_signature_evidence_enabled()) {
+    if (!squuad_cert_signature_evidence_enabled()) {
         return $wpdb->insert($table, $data) ? (int) $wpdb->insert_id : 0;
     }
 
-    $key = edusystem_signature_current_key();
+    $key = squuad_cert_signature_current_key();
     $session_token = wp_get_session_token();
     $ip = isset($_SERVER['REMOTE_ADDR']) ? substr(sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'])), 0, 45) : '';
     $user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? substr(sanitize_text_field(wp_unslash($_SERVER['HTTP_USER_AGENT'])), 0, 255) : '';
@@ -335,8 +335,8 @@ function edusystem_signature_insert(array $data, int $student_id, string $signer
         'student_id' => $student_id,
         'signer_role' => $signer_role,
         'actor_user_id' => get_current_user_id(),
-        'switched_from' => edusystem_signature_session_switched_from(),
-        'doc_version_sha256' => edusystem_signature_doc_version_hash((string) $data['document_id']),
+        'switched_from' => squuad_cert_signature_session_switched_from(),
+        'doc_version_sha256' => squuad_cert_signature_doc_version_hash((string) $data['document_id']),
         'signature_sha256' => hash('sha256', (string) $data['signature']),
         'document_fields_sha256' => hash('sha256', (string) ($row['document_fields'] ?? '')),
         'signed_at_utc' => gmdate('Y-m-d H:i:s'),
@@ -348,7 +348,7 @@ function edusystem_signature_insert(array $data, int $student_id, string $signer
     ];
 
     // Formato de la evidencia: EDUSIG2 si la firma pertenece a una solicitud (esquema v5)
-    $v5 = function_exists('edusystem_signature_requests_enabled') && edusystem_signature_requests_enabled();
+    $v5 = function_exists('squuad_cert_signature_requests_enabled') && squuad_cert_signature_requests_enabled();
     if ($v5 && $request_evidence) {
         foreach (['request_id', 'student_document_id', 'round', 'reused_signature_id'] as $column) {
             $row[$column] = (int) ($request_evidence[$column] ?? 0);
@@ -365,7 +365,7 @@ function edusystem_signature_insert(array $data, int $student_id, string $signer
         $row['evidence_format'] = 'EDUSIG1';
     }
 
-    $lock = edusystem_signature_lock_name();
+    $lock = squuad_cert_signature_lock_name();
     $locked = $key && '1' === (string) $wpdb->get_var($wpdb->prepare('SELECT GET_LOCK(%s, 5)', $lock));
 
     if (!$locked) {
@@ -384,9 +384,9 @@ function edusystem_signature_insert(array $data, int $student_id, string $signer
 
     try {
         // La clave se vuelve a leer bajo el bloqueo: si se rotó mientras esta petición esperaba, se usa la nueva
-        [$key_id, $key_bytes] = edusystem_signature_current_key() ?? $key;
+        [$key_id, $key_bytes] = squuad_cert_signature_current_key() ?? $key;
         // Cabeza de la cadena con SQL directo bajo el bloqueo (nunca de una opción: la caché la podría servir vieja)
-        $head = $wpdb->get_row("SELECT last_seq, head_fingerprint FROM {$wpdb->prefix}edusystem_signature_chain WHERE id = 1");
+        $head = $wpdb->get_row("SELECT last_seq, head_fingerprint FROM {$wpdb->prefix}squuad_cert_chain WHERE id = 1");
         $last_seq = $head ? (int) $head->last_seq : 0;
         $prev = ($head && '' !== $head->head_fingerprint) ? $head->head_fingerprint : str_repeat('0', 64);
 
@@ -395,14 +395,14 @@ function edusystem_signature_insert(array $data, int $student_id, string $signer
         $row['ip_hmac'] = hash_hmac('sha256', $ip, $key_bytes);
         $row['prev_fingerprint'] = $prev;
         $row['evidence_status'] = 'ok';
-        $row['fingerprint'] = hash_hmac('sha256', edusystem_signature_canonical_for($row), $key_bytes);
+        $row['fingerprint'] = hash_hmac('sha256', squuad_cert_signature_canonical_for($row), $key_bytes);
 
         if (!$wpdb->insert($table, $row)) {
             return 0;
         }
         $inserted = (int) $wpdb->insert_id;
 
-        edusystem_signature_chain_set_head((int) $row['chain_seq'], (string) $row['fingerprint']);
+        squuad_cert_signature_chain_set_head((int) $row['chain_seq'], (string) $row['fingerprint']);
     } finally {
         $wpdb->query($wpdb->prepare('SELECT RELEASE_LOCK(%s)', $lock));
     }
@@ -423,12 +423,12 @@ function edusystem_signature_insert(array $data, int $student_id, string $signer
 }
 
 /**
- * Anula firmas en lugar de borrarlas: copia cada fila completa (con su huella) a edusystem_signatures_revoked y
+ * Anula firmas en lugar de borrarlas: copia cada fila completa (con su huella) a squuad_cert_signatures_revoked y
  * después la retira de la tabla viva, así los puntos de lectura actuales vuelven a pedir la firma y la cadena se
  * sigue pudiendo verificar. Sin el esquema v4 las borra como antes. Otros plugins deben usar esta función
  * (con function_exists) para cambiar filas de users_signatures. Devuelve cuántas filas se retiraron.
  */
-function edusystem_revoke_signatures(array $ids, string $reason, int $actor_user_id, ?int $student_document_id = null): int
+function squuad_cert_revoke_signatures(array $ids, string $reason, int $actor_user_id, ?int $student_document_id = null): int
 {
     global $wpdb;
     $table = $wpdb->prefix . 'users_signatures';
@@ -438,7 +438,7 @@ function edusystem_revoke_signatures(array $ids, string $reason, int $actor_user
     }
     $in = implode(',', $ids);
 
-    if (!edusystem_signature_evidence_enabled()) {
+    if (!squuad_cert_signature_evidence_enabled()) {
         return (int) $wpdb->query("DELETE FROM {$table} WHERE id IN ({$in})");
     }
 
@@ -447,20 +447,20 @@ function edusystem_revoke_signatures(array $ids, string $reason, int $actor_user
         document_fields_sha256, signed_at_utc, ip, ip_hmac, user_agent, ua_sha256, session_hash, ratifies_id,
         prev_fingerprint, fingerprint';
     // Columnas de solicitud (ADR 0002, esquema v5): se copian también, o una firma EDUSIG2 anulada quedaría "alterada"
-    if (function_exists('edusystem_signature_requests_enabled') && edusystem_signature_requests_enabled()) {
+    if (function_exists('squuad_cert_signature_requests_enabled') && squuad_cert_signature_requests_enabled()) {
         $columns .= ', request_id, round, content_sha256, request_created_fingerprint, consent_version, consent_sha256,
         signature_method, reused_signature_id, evidence_format';
     }
 
     // Documento de la anulación: el indicado o, con el esquema v5, el que ya guarda la propia firma
-    $document_expression = (function_exists('edusystem_signature_requests_enabled') && edusystem_signature_requests_enabled())
+    $document_expression = (function_exists('squuad_cert_signature_requests_enabled') && squuad_cert_signature_requests_enabled())
         ? "COALESCE(NULLIF(%s, ''), student_document_id)"
         : '%s';
 
     $removed = 0;
     foreach ($ids as $id) {
         $copied = $wpdb->query($wpdb->prepare(
-            "INSERT INTO {$wpdb->prefix}edusystem_signatures_revoked
+            "INSERT INTO {$wpdb->prefix}squuad_cert_signatures_revoked
                 (signature_row_id, {$columns}, revoked_at_utc, revoked_by, reason, student_document_id)
              SELECT id, {$columns}, UTC_TIMESTAMP(), %d, %s, {$document_expression} FROM {$table} WHERE id = %d",
             $actor_user_id,
@@ -486,11 +486,11 @@ function edusystem_revoke_signatures(array $ids, string $reason, int $actor_user
  * $previous_fingerprint: huella del eslabón anterior si ya se conoce (el verificador recorre la cadena en orden);
  * si es null se busca en la BD.
  */
-function edusystem_signature_verify_row(object $row, ?string $previous_fingerprint = null): string
+function squuad_cert_signature_verify_row(object $row, ?string $previous_fingerprint = null): string
 {
     global $wpdb;
 
-    $legacy_max_id = (int) get_option('edusystem_signature_legacy_max_id', 0);
+    $legacy_max_id = (int) get_option('squuad_cert_signature_legacy_max_id', 0);
     $row_id = (int) ($row->signature_row_id ?? $row->id);
 
     if (empty($row->fingerprint)) {
@@ -500,13 +500,13 @@ function edusystem_signature_verify_row(object $row, ?string $previous_fingerpri
         return $row_id <= $legacy_max_id ? 'legacy' : 'missing';
     }
 
-    $key = edusystem_signature_key_by_id((string) $row->key_id);
+    $key = squuad_cert_signature_key_by_id((string) $row->key_id);
     if (null === $key) {
         return 'unknown_key';
     }
 
     $data = (array) $row;
-    $expected = hash_hmac('sha256', edusystem_signature_canonical_for($data), $key);
+    $expected = hash_hmac('sha256', squuad_cert_signature_canonical_for($data), $key);
     $content_ok = hash_equals((string) $row->signature_sha256, hash('sha256', (string) $row->signature))
         // document_fields se vacía a propósito al subir el PDF: solo se comprueba mientras exista
         && (null === $row->document_fields || hash_equals((string) $row->document_fields_sha256, hash('sha256', (string) $row->document_fields)))
@@ -518,16 +518,16 @@ function edusystem_signature_verify_row(object $row, ?string $previous_fingerpri
     }
 
     // Clave retirada: nada firmado después de la rotación puede llevarla (margen de 60 s para una firma en curso)
-    $retired_at = edusystem_signature_key_retired_at((string) $row->key_id);
+    $retired_at = squuad_cert_signature_key_retired_at((string) $row->key_id);
     if (null !== $retired_at && strtotime((string) $row->signed_at_utc . ' UTC') > strtotime($retired_at . ' UTC') + 60) {
         return 'retired_key';
     }
 
     // EDUSIG2: el contenido que firmó tiene que ser el de su solicitud, y ese contenido tiene que estar íntegro
-    if ('EDUSIG2' === ($row->evidence_format ?? '') && function_exists('edusystem_signature_request_get')) {
-        $request = edusystem_signature_request_get((int) $row->request_id);
+    if ('EDUSIG2' === ($row->evidence_format ?? '') && function_exists('squuad_cert_signature_request_get')) {
+        $request = squuad_cert_signature_request_get((int) $row->request_id);
         if (!$request || !hash_equals((string) $request->content_sha256, (string) $row->content_sha256)
-            || null === edusystem_signature_request_content((int) $row->request_id)) {
+            || null === squuad_cert_signature_request_content((int) $row->request_id)) {
             return 'content_altered';
         }
     }
@@ -535,7 +535,7 @@ function edusystem_signature_verify_row(object $row, ?string $previous_fingerpri
     // Eslabón anterior (firmas vivas, anuladas o eventos de solicitud): tiene que existir y coincidir
     $seq = (int) $row->chain_seq;
     if ($seq > 1) {
-        $prev = null !== $previous_fingerprint ? $previous_fingerprint : edusystem_signature_chain_fingerprint_at($seq - 1);
+        $prev = null !== $previous_fingerprint ? $previous_fingerprint : squuad_cert_signature_chain_fingerprint_at($seq - 1);
         if (null === $prev || !hash_equals((string) $prev, (string) $row->prev_fingerprint)) {
             return 'chain_broken';
         }
@@ -547,15 +547,15 @@ function edusystem_signature_verify_row(object $row, ?string $previous_fingerpri
 }
 
 /** Huella del eslabón número $seq de la cadena (firma viva, anulada o evento de solicitud), o null si no existe. */
-function edusystem_signature_chain_fingerprint_at(int $seq): ?string
+function squuad_cert_signature_chain_fingerprint_at(int $seq): ?string
 {
     global $wpdb;
 
     $sql = "SELECT fingerprint FROM {$wpdb->prefix}users_signatures WHERE chain_seq = %d
-            UNION ALL SELECT fingerprint FROM {$wpdb->prefix}edusystem_signatures_revoked WHERE chain_seq = %d";
+            UNION ALL SELECT fingerprint FROM {$wpdb->prefix}squuad_cert_signatures_revoked WHERE chain_seq = %d";
     $args = [$seq, $seq];
-    if (function_exists('edusystem_signature_requests_enabled') && edusystem_signature_requests_enabled()) {
-        $sql .= " UNION ALL SELECT fingerprint FROM {$wpdb->prefix}edusystem_signature_events WHERE chain_seq = %d";
+    if (function_exists('squuad_cert_signature_requests_enabled') && squuad_cert_signature_requests_enabled()) {
+        $sql .= " UNION ALL SELECT fingerprint FROM {$wpdb->prefix}squuad_cert_events WHERE chain_seq = %d";
         $args[] = $seq;
     }
     $fingerprint = $wpdb->get_var($wpdb->prepare($sql . ' LIMIT 1', $args));
@@ -564,7 +564,7 @@ function edusystem_signature_chain_fingerprint_at(int $seq): ?string
 }
 
 /** Etiqueta traducible de un estado de integridad. */
-function edusystem_signature_integrity_label(string $status): string
+function squuad_cert_signature_integrity_label(string $status): string
 {
     $labels = [
         'verified' => __('Verified', 'edusystem'),
@@ -585,7 +585,7 @@ function edusystem_signature_integrity_label(string $status): string
  * Contexto de una firma (independiente de la integridad): automática, hecha desde la cuenta de otra persona,
  * sesión conmutada o firmada en otro sitio. Devuelve etiquetas traducidas.
  */
-function edusystem_signature_context_labels(object $row): array
+function squuad_cert_signature_context_labels(object $row): array
 {
     $labels = [];
     if ('["automatic"]' === (string) $row->signature) {
@@ -613,13 +613,13 @@ function edusystem_signature_context_labels(object $row): array
 /**
  * Recorre toda la cadena (firmas vivas y anuladas, por lotes) y cuenta los estados de integridad y de contexto.
  * Comprueba además que los eslabones sean consecutivos y que la cabeza guardada coincida con el último.
- * Guarda el resultado en la opción edusystem_signature_last_verification (sin autoload) y lo devuelve.
+ * Guarda el resultado en la opción squuad_cert_signature_last_verification (sin autoload) y lo devuelve.
  */
-function edusystem_signature_verify_chain(int $problems_limit = 100): array
+function squuad_cert_signature_verify_chain(int $problems_limit = 100): array
 {
     global $wpdb;
     $live = $wpdb->prefix . 'users_signatures';
-    $revoked = $wpdb->prefix . 'edusystem_signatures_revoked';
+    $revoked = $wpdb->prefix . 'squuad_cert_signatures_revoked';
 
     $result = [
         'verified_at' => gmdate('Y-m-d H:i:s'),
@@ -633,7 +633,7 @@ function edusystem_signature_verify_chain(int $problems_limit = 100): array
         'head_ok' => true,
         'problems' => [],
     ];
-    if (!edusystem_signature_evidence_enabled()) {
+    if (!squuad_cert_signature_evidence_enabled()) {
         return $result;
     }
 
@@ -668,8 +668,8 @@ function edusystem_signature_verify_chain(int $problems_limit = 100): array
     };
 
     // 1) Eslabones de la cadena, en orden: firmas vivas, anuladas y (esquema v5) eventos de solicitud, por tramos
-    $events_table = $wpdb->prefix . 'edusystem_signature_events';
-    $with_events = function_exists('edusystem_signature_requests_enabled') && edusystem_signature_requests_enabled();
+    $events_table = $wpdb->prefix . 'squuad_cert_events';
+    $with_events = function_exists('squuad_cert_signature_requests_enabled') && squuad_cert_signature_requests_enabled();
     $max_seq = (int) $wpdb->get_var(
         "SELECT MAX(s) FROM (SELECT MAX(chain_seq) s FROM {$live} UNION ALL SELECT MAX(chain_seq) FROM {$revoked}"
         . ($with_events ? " UNION ALL SELECT MAX(chain_seq) FROM {$events_table}" : '') . ") AS m"
@@ -701,12 +701,12 @@ function edusystem_signature_verify_chain(int $problems_limit = 100): array
             if ('event' === $link['kind']) {
                 $result['events']++;
                 // Hueco en la secuencia: falta un eslabón (borrado de la BD)
-                $status = $seq === $expected_seq ? edusystem_signature_request_verify_event($row, $previous) : 'chain_broken';
+                $status = $seq === $expected_seq ? squuad_cert_signature_request_verify_event($row, $previous) : 'chain_broken';
             } else {
                 $result['revoked' === $link['kind'] ? 'revoked' : 'live']++;
-                $status = $seq === $expected_seq ? edusystem_signature_verify_row($row, $previous) : 'chain_broken';
+                $status = $seq === $expected_seq ? squuad_cert_signature_verify_row($row, $previous) : 'chain_broken';
             }
-            $key_rank = edusystem_signature_key_rank((string) $row->key_id);
+            $key_rank = squuad_cert_signature_key_rank((string) $row->key_id);
             if (null !== $key_rank) {
                 // Un eslabón posterior a otro sellado con una clave más nueva no puede usar una clave anterior
                 if ('verified' === $status && $key_rank < $newest_key_rank) {
@@ -745,7 +745,7 @@ function edusystem_signature_verify_chain(int $problems_limit = 100): array
     }
 
     // 2) Cabeza de la cadena: el último eslabón tiene que ser el que dice la tabla de la cabeza
-    $head = $wpdb->get_row("SELECT last_seq, head_fingerprint FROM {$wpdb->prefix}edusystem_signature_chain WHERE id = 1");
+    $head = $wpdb->get_row("SELECT last_seq, head_fingerprint FROM {$wpdb->prefix}squuad_cert_chain WHERE id = 1");
     if ($head && ((int) $head->last_seq !== $result['last_seq'] || ((int) $head->last_seq > 0 && !hash_equals((string) $head->head_fingerprint, $last_fingerprint)))) {
         $result['head_ok'] = false;
     }
@@ -766,7 +766,7 @@ function edusystem_signature_verify_chain(int $problems_limit = 100): array
             } else {
                 $result['live']++;
             }
-            $status = edusystem_signature_verify_row($row);
+            $status = squuad_cert_signature_verify_row($row);
             $result['status'][$status]++;
             if (!in_array($status, ['legacy', 'verified'], true)) {
                 $add_problem($row, $status);
@@ -775,7 +775,7 @@ function edusystem_signature_verify_chain(int $problems_limit = 100): array
         }
     }
 
-    update_option('edusystem_signature_last_verification', $result, false);
+    update_option('squuad_cert_signature_last_verification', $result, false);
     if (function_exists('edusystem_set_log')) {
         edusystem_set_log(sprintf(
             'Verificación de firmas: %d verificadas, %d alteradas, %d cadena rota, cabeza %s',
@@ -794,10 +794,10 @@ function edusystem_signature_verify_chain(int $problems_limit = 100): array
  * indicadores de riesgo: automática, par firmado en la misma petición (<= 2 s), estudiante menor al firmar y
  * usuario que ya no existe. Incluye las antiguas que ya se anularon.
  */
-function edusystem_signature_legacy_rows(): array
+function squuad_cert_signature_legacy_rows(): array
 {
     global $wpdb;
-    $cutoff = (int) get_option('edusystem_signature_legacy_max_id', 0);
+    $cutoff = (int) get_option('squuad_cert_signature_legacy_max_id', 0);
     if ($cutoff <= 0) {
         return [];
     }
@@ -807,7 +807,7 @@ function edusystem_signature_legacy_rows(): array
          FROM {$wpdb->prefix}users_signatures sig WHERE sig.id <= %d
          UNION ALL
          SELECT rev.signature_row_id, rev.user_id, rev.document_id, rev.created_at, rev.signature, 1
-         FROM {$wpdb->prefix}edusystem_signatures_revoked rev WHERE rev.signature_row_id <= %d AND rev.chain_seq IS NULL
+         FROM {$wpdb->prefix}squuad_cert_signatures_revoked rev WHERE rev.signature_row_id <= %d AND rev.chain_seq IS NULL
          ORDER BY id",
         $cutoff,
         $cutoff

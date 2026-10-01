@@ -20,7 +20,7 @@ if (!defined('ABSPATH')) exit;
  * o el original sin tocar si alguna expresión regular falla (p. ej. límite de pila del JIT de PCRE
  * con bloques grandes): así la migración nunca guarda un campo vacío.
  */
-function edusystem_convert_document_php($html)
+function squuad_cert_convert_document_php($html)
 {
     if (strpos($html, '<?') === false) {
         return $html;
@@ -58,7 +58,7 @@ function edusystem_convert_document_php($html)
  * Sustituye el bloque de grados con onclick="updateGrade(...)" por {{last_completed_grade_list}}.
  * Devuelve el HTML original si no encuentra el bloque completo o si la expresión falla.
  */
-function edusystem_convert_document_grade($html)
+function squuad_cert_convert_document_grade($html)
 {
     if (strpos($html, 'updateGrade(') === false) {
         return $html;
@@ -78,7 +78,7 @@ function edusystem_convert_document_grade($html)
 /**
  * Campo adicional que sustituye a la selección de grado del documento de inscripción.
  */
-function edusystem_last_completed_grade_field()
+function squuad_cert_last_completed_grade_field()
 {
     return [
         'key' => 'last_completed_grade',
@@ -93,23 +93,23 @@ function edusystem_last_completed_grade_field()
  * Convierte una sola vez los documentos guardados. Corre en init para que el panel del estudiante
  * no muestre un documento sin convertir justo después de actualizar el plugin.
  */
-function edusystem_migrate_documents_php()
+function squuad_cert_migrate_documents_php()
 {
     // 'done-2' = versión actual terminada; el 'done' de la versión 1 hace que se vuelva a ejecutar
-    $state = get_option('edusystem_documents_php_migrated');
+    $state = get_option('squuad_cert_documents_php_migrated');
     if ('done-2' === $state) {
         return;
     }
     // Candado con la hora de inicio: evita que dos peticiones migren a la vez y, si una ejecución
     // se corta (o la tabla de wp-certificates aún no existe), se reintenta pasados 5 minutos
     if (false === $state) {
-        if (!add_option('edusystem_documents_php_migrated', time())) {
+        if (!add_option('squuad_cert_documents_php_migrated', time())) {
             return;
         }
     } elseif (time() - (int) $state < 5 * MINUTE_IN_SECONDS) {
         return;
     } else {
-        update_option('edusystem_documents_php_migrated', time());
+        update_option('squuad_cert_documents_php_migrated', time());
     }
 
     global $wpdb;
@@ -135,9 +135,9 @@ function edusystem_migrate_documents_php()
         $grade_converted = false;
         foreach (['header', 'content', 'footer'] as $field) {
             $original = (string) $document->$field;
-            $converted = edusystem_convert_document_php($original);
+            $converted = squuad_cert_convert_document_php($original);
             if ($has_fields_column) {
-                $with_grade = edusystem_convert_document_grade($converted);
+                $with_grade = squuad_cert_convert_document_grade($converted);
                 $grade_converted = $grade_converted || $with_grade !== $converted;
                 $converted = $with_grade;
             }
@@ -149,10 +149,10 @@ function edusystem_migrate_documents_php()
             }
         }
         if ($grade_converted) {
-            $fields = edusystem_get_document_fields($document);
+            $fields = squuad_cert_get_document_fields($document);
             $keys = array_column($fields, 'key');
             if (!in_array('last_completed_grade', $keys, true)) {
-                $fields[] = edusystem_last_completed_grade_field();
+                $fields[] = squuad_cert_last_completed_grade_field();
             }
             $data['fields'] = wp_json_encode($fields);
         }
@@ -197,27 +197,27 @@ function edusystem_migrate_documents_php()
     }
 
     if ($pending) {
-        update_option('edusystem_documents_php_pending', array_values(array_unique($pending)), false);
+        update_option('squuad_cert_documents_php_pending', array_values(array_unique($pending)), false);
     } else {
-        delete_option('edusystem_documents_php_pending');
+        delete_option('squuad_cert_documents_php_pending');
     }
     // Sin la columna `fields` queda pendiente la conversión del bloque de grados: se reintenta pasados 5 minutos
     if ($has_fields_column) {
-        update_option('edusystem_documents_php_migrated', 'done-2');
+        update_option('squuad_cert_documents_php_migrated', 'done-2');
     }
 }
-add_action('init', 'edusystem_migrate_documents_php');
+add_action('init', 'squuad_cert_migrate_documents_php');
 
 /**
  * Aviso para quien gestiona documentos si alguno conserva PHP que no se pudo convertir
  * (ya no se ejecuta: se mostraría como texto).
  */
-function edusystem_notice_documents_php_pending()
+function squuad_cert_notice_documents_php_pending()
 {
     if (!current_user_can('manager_documents_certificates')) {
         return;
     }
-    $pending = get_option('edusystem_documents_php_pending');
+    $pending = get_option('squuad_cert_documents_php_pending');
     if (empty($pending)) {
         return;
     }
@@ -231,10 +231,10 @@ function edusystem_notice_documents_php_pending()
          AND (header LIKE '%<?%' OR content LIKE '%<?%' OR footer LIKE '%<?%')"
     ));
     if (empty($pending)) {
-        delete_option('edusystem_documents_php_pending');
+        delete_option('squuad_cert_documents_php_pending');
         return;
     }
-    update_option('edusystem_documents_php_pending', $pending, false);
+    update_option('squuad_cert_documents_php_pending', $pending, false);
 
     echo '<div class="notice notice-warning"><p>' . esc_html(sprintf(
         /* translators: %s: IDs de documentos */
@@ -242,4 +242,4 @@ function edusystem_notice_documents_php_pending()
         implode(', ', array_map('intval', $pending))
     )) . '</p></div>';
 }
-add_action('admin_notices', 'edusystem_notice_documents_php_pending');
+add_action('admin_notices', 'squuad_cert_notice_documents_php_pending');

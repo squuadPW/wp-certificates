@@ -7,7 +7,7 @@ if (!defined('ABSPATH')) exit;
 
 $items = (array) $batch->data['items'];
 $expired = 'prepared' === $batch->status && strtotime($batch->expires_at_utc . ' UTC') < time();
-wp_enqueue_script('edusystem-signature-pad', EDUSYSTEM_CERTIFICATION_URL . 'admin/assets/js/signature-pad-edusystem.js', [], VERSIONS_JS, true);
+wp_enqueue_script('edusystem-signature-pad', SQUUAD_CERT_MODULE_URL . 'admin/assets/js/signature-pad-edusystem.js', [], VERSIONS_JS, true);
 ?>
 <section class="edusystem-documents-to-sign" id="edusystem-documents-to-sign" style="margin-bottom:24px">
     <p><a href="<?= esc_url($dashboard) ?>">&larr; <?= esc_html__('Back to the list', 'edusystem') ?></a></p>
@@ -35,10 +35,10 @@ wp_enqueue_script('edusystem-signature-pad', EDUSYSTEM_CERTIFICATION_URL . 'admi
         </table>
 
         <form method="post" action="<?= esc_url(admin_url('admin-post.php')) ?>" id="edusystem-batch-form">
-            <input type="hidden" name="action" value="edusystem_holder_batch_confirm">
+            <input type="hidden" name="action" value="squuad_cert_holder_batch_confirm">
             <input type="hidden" name="batch_id" value="<?= (int) $batch->id ?>">
             <input type="hidden" name="strokes" id="edusystem-batch-strokes" value="">
-            <?php wp_nonce_field('edusystem_holder_batch_confirm_' . (int) $batch->id); ?>
+            <?php wp_nonce_field('squuad_cert_holder_batch_confirm_' . (int) $batch->id); ?>
             <p><strong><?= esc_html__('Draw your signature', 'edusystem') ?></strong><br>
                 <small><?= esc_html__('It will be applied to each document of the list.', 'edusystem') ?></small></p>
             <canvas id="edusystem-batch-pad" style="border:1px solid #8c8f94;background:#fffef0;width:100%;max-width:600px;height:200px;display:block;touch-action:none"></canvas>
@@ -98,7 +98,7 @@ wp_enqueue_script('edusystem-signature-pad', EDUSYSTEM_CERTIFICATION_URL . 'admi
         </table>
         <?php if ($pdf_requests) : ?>
             <h4><?= esc_html__('Final PDF', 'edusystem') ?></h4>
-            <?php include EDUSYSTEM_CERTIFICATION_PATH . 'public/templates/signature-final-pdf.php'; ?>
+            <?php include SQUUAD_CERT_MODULE_PATH . 'public/templates/signature-final-pdf.php'; ?>
         <?php endif; ?>
 
     <?php else : ?>

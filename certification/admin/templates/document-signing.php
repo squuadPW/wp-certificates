@@ -44,15 +44,15 @@ $next = count($positions) + 1;
         <?php endif; ?>
 
         <form method="post" action="<?= esc_url(admin_url('admin-post.php')) ?>">
-            <input type="hidden" name="action" value="edusystem_save_signing_policy">
+            <input type="hidden" name="action" value="squuad_cert_save_signing_policy">
             <input type="hidden" name="document_certificate_id" value="<?= (int) $document->id ?>">
-            <?php wp_nonce_field('edusystem_save_signing_policy'); ?>
+            <?php wp_nonce_field('squuad_cert_save_signing_policy'); ?>
             <p><label><input type="checkbox" name="requires_signatures" value="1" <?= checked($policy['requires_signatures'], true, false) ?>> <strong><?= esc_html__('This document asks for signatures', 'edusystem') ?></strong></label></p>
-            <?php if ('automatic' === $document->type && function_exists('edusystem_document_conditions')) : ?>
+            <?php if ('automatic' === $document->type && function_exists('squuad_cert_document_conditions')) : ?>
                 <p><label for="edusystem-request-condition"><strong><?= esc_html__('When to ask for it', 'edusystem') ?></strong></label><br>
                     <select name="request_condition" id="edusystem-request-condition">
-                        <?php foreach (edusystem_document_conditions() as $key => $label) : ?>
-                            <option value="<?= esc_attr($key) ?>" <?= selected(edusystem_document_request_condition((int) $document->id), $key, false) ?>><?= esc_html($label) ?></option>
+                        <?php foreach (squuad_cert_document_conditions() as $key => $label) : ?>
+                            <option value="<?= esc_attr($key) ?>" <?= selected(squuad_cert_document_request_condition((int) $document->id), $key, false) ?>><?= esc_html($label) ?></option>
                         <?php endforeach; ?>
                     </select><br>
                     <span class="description"><?= esc_html__('"Only when the student has optional documents pending": the other automatic documents are complete, there are no overdue payments, every required document is approved and at least one optional document is still pending (the missing documents commitment letter). Requests already in progress are not affected.', 'edusystem') ?></span></p>

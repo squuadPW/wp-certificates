@@ -13,26 +13,26 @@ declare(strict_types=1);
 
 if (!defined('ABSPATH')) exit;
 
-const EDUSYSTEM_SIGNATURE_REQUEST_CLOSED = ['completed', 'declined', 'closed_by_upload'];
-const EDUSYSTEM_SIGNATURE_REQUEST_OPEN = ['open', 'partially_signed', 'signed'];
-const EDUSYSTEM_SIGNATURE_CONTENT_MAX_BYTES = 1048576; // 1 MB
+const SQUUAD_CERT_SIGNATURE_REQUEST_CLOSED = ['completed', 'declined', 'closed_by_upload'];
+const SQUUAD_CERT_SIGNATURE_REQUEST_OPEN = ['open', 'partially_signed', 'signed'];
+const SQUUAD_CERT_SIGNATURE_CONTENT_MAX_BYTES = 1048576; // 1 MB
 
 /** Las tablas de solicitudes y las columnas de solicitud llegan con la versión 5 del esquema. */
-function edusystem_signature_requests_enabled(): bool
+function squuad_cert_signature_requests_enabled(): bool
 {
     return version_compare((string) get_option('edusystem_db_version'), '5', '>=');
 }
 
 /** Solicitud por id, o null. */
-function edusystem_signature_request_get(int $request_id): ?object
+function squuad_cert_signature_request_get(int $request_id): ?object
 {
     global $wpdb;
 
-    if (!$request_id || !edusystem_signature_requests_enabled()) {
+    if (!$request_id || !squuad_cert_signature_requests_enabled()) {
         return null;
     }
     $row = $wpdb->get_row($wpdb->prepare(
-        "SELECT * FROM {$wpdb->prefix}edusystem_signature_requests WHERE id = %d",
+        "SELECT * FROM {$wpdb->prefix}squuad_cert_requests WHERE id = %d",
         $request_id
     ));
 
@@ -40,15 +40,15 @@ function edusystem_signature_request_get(int $request_id): ?object
 }
 
 /** Última ronda de un documento de un estudiante (abierta o cerrada), o null si nunca tuvo solicitud. */
-function edusystem_signature_request_latest(int $student_id, string $document_id): ?object
+function squuad_cert_signature_request_latest(int $student_id, string $document_id): ?object
 {
     global $wpdb;
 
-    if (!$student_id || '' === $document_id || !edusystem_signature_requests_enabled()) {
+    if (!$student_id || '' === $document_id || !squuad_cert_signature_requests_enabled()) {
         return null;
     }
     $row = $wpdb->get_row($wpdb->prepare(
-        "SELECT * FROM {$wpdb->prefix}edusystem_signature_requests
+        "SELECT * FROM {$wpdb->prefix}squuad_cert_requests
          WHERE student_id = %d AND document_id = %s ORDER BY round DESC LIMIT 1",
         $student_id,
         $document_id
@@ -65,7 +65,7 @@ function edusystem_signature_request_latest(int $student_id, string $document_id
  * $signers: ['student_user_id' => int, 'parent_user_id' => int] (0 si no aplica; iguales si el estudiante es su
  * propio representante). Quedan fijados en la solicitud. Devuelve null si el esquema no está en v5 o si falla.
  */
-function edusystem_signature_request_get_or_create(
+function squuad_cert_signature_request_get_or_create(
     int $student_id,
     string $document_id,
     array $signers,
@@ -76,30 +76,30 @@ function edusystem_signature_request_get_or_create(
 ): ?object {
     global $wpdb;
 
-    if (!$student_id || '' === $document_id || strlen($document_id) > 100 || !edusystem_signature_requests_enabled()) {
+    if (!$student_id || '' === $document_id || strlen($document_id) > 100 || !squuad_cert_signature_requests_enabled()) {
         return null;
     }
 
-    $latest = edusystem_signature_request_latest($student_id, $document_id);
-    if ($latest && in_array($latest->status, EDUSYSTEM_SIGNATURE_REQUEST_OPEN, true)) {
+    $latest = squuad_cert_signature_request_latest($student_id, $document_id);
+    if ($latest && in_array($latest->status, SQUUAD_CERT_SIGNATURE_REQUEST_OPEN, true)) {
         return $latest;
     }
 
-    $lock = 'edusig_req_' . substr(hash('sha256', DB_NAME . '|' . $wpdb->prefix . '|' . $student_id . '|' . $document_id), 0, 40);
+    $lock = 'squuad_cert_req_' . substr(hash('sha256', DB_NAME . '|' . $wpdb->prefix . '|' . $student_id . '|' . $document_id), 0, 40);
     if ('1' !== (string) $wpdb->get_var($wpdb->prepare('SELECT GET_LOCK(%s, 5)', $lock))) {
         return null;
     }
 
     try {
         // Bajo el bloqueo se vuelve a leer: otra petición pudo crearla mientras esperábamos
-        $latest = edusystem_signature_request_latest($student_id, $document_id);
-        if ($latest && in_array($latest->status, EDUSYSTEM_SIGNATURE_REQUEST_OPEN, true)) {
+        $latest = squuad_cert_signature_request_latest($student_id, $document_id);
+        if ($latest && in_array($latest->status, SQUUAD_CERT_SIGNATURE_REQUEST_OPEN, true)) {
             return $latest;
         }
 
         $round = $latest ? (int) $latest->round + 1 : 1;
         $wpdb->query($wpdb->prepare(
-            "INSERT IGNORE INTO {$wpdb->prefix}edusystem_signature_requests
+            "INSERT IGNORE INTO {$wpdb->prefix}squuad_cert_requests
                 (student_id, document_id, round, student_document_id, student_user_id, parent_user_id, status,
                  template_version_sha256, created_at_utc, created_by)
              VALUES (%d, %s, %d, %s, %d, %d, 'open', %s, UTC_TIMESTAMP(), %d)",
@@ -113,13 +113,13 @@ function edusystem_signature_request_get_or_create(
             get_current_user_id()
         ));
 
-        $request = edusystem_signature_request_latest($student_id, $document_id);
+        $request = squuad_cert_signature_request_latest($student_id, $document_id);
         if ($request && (int) $request->round === $round && $wpdb->insert_id) {
             // Esquema v6 (ADR 0003): firmantes fijados en su tabla (con nombre en ese momento) y sellados en 'created'
-            $fixed = function_exists('edusystem_request_signers_fix')
-                ? edusystem_request_signers_fix($request, $signers, $document_certificate_id, $origin)
+            $fixed = function_exists('squuad_cert_request_signers_fix')
+                ? squuad_cert_request_signers_fix($request, $signers, $document_certificate_id, $origin)
                 : [];
-            edusystem_signature_request_log_event((int) $request->id, 'created', ['round' => $round] + ($fixed ? ['signers' => $fixed] : []));
+            squuad_cert_signature_request_log_event((int) $request->id, 'created', ['round' => $round] + ($fixed ? ['signers' => $fixed] : []));
         }
 
         return $request;
@@ -132,11 +132,11 @@ function edusystem_signature_request_get_or_create(
  * Ejecuta $callback bajo un bloqueo por solicitud (GET_LOCK con el nombre del sitio): el borrador y el congelado no
  * se pueden cruzar. Devuelve el resultado del callback, o $on_busy si no se obtiene el bloqueo.
  */
-function edusystem_signature_request_locked(int $request_id, callable $callback, $on_busy = null)
+function squuad_cert_signature_request_locked(int $request_id, callable $callback, $on_busy = null)
 {
     global $wpdb;
 
-    $lock = 'edusig_rc_' . substr(hash('sha256', DB_NAME . '|' . $wpdb->prefix . '|' . $request_id), 0, 40);
+    $lock = 'squuad_cert_rc_' . substr(hash('sha256', DB_NAME . '|' . $wpdb->prefix . '|' . $request_id), 0, 40);
     if ('1' !== (string) $wpdb->get_var($wpdb->prepare('SELECT GET_LOCK(%s, 5)', $lock))) {
         return $on_busy;
     }
@@ -150,22 +150,22 @@ function edusystem_signature_request_locked(int $request_id, callable $callback,
 /**
  * Guarda (o sustituye) el borrador del contenido de una solicitud y devuelve su sha256. Solo mientras no esté
  * congelada: después de la primera firma el contenido es inmutable y devuelve null. El hash se calcula sobre los
- * bytes exactos que se guardan (UTF-8, sin normalizar). Límite: EDUSYSTEM_SIGNATURE_CONTENT_MAX_BYTES.
+ * bytes exactos que se guardan (UTF-8, sin normalizar). Límite: SQUUAD_CERT_SIGNATURE_CONTENT_MAX_BYTES.
  */
-function edusystem_signature_request_save_draft(int $request_id, string $html): ?string
+function squuad_cert_signature_request_save_draft(int $request_id, string $html): ?string
 {
-    return edusystem_signature_request_locked($request_id, static fn() => edusystem_signature_request_save_draft_unlocked($request_id, $html));
+    return squuad_cert_signature_request_locked($request_id, static fn() => squuad_cert_signature_request_save_draft_unlocked($request_id, $html));
 }
 
-function edusystem_signature_request_save_draft_unlocked(int $request_id, string $html): ?string
+function squuad_cert_signature_request_save_draft_unlocked(int $request_id, string $html): ?string
 {
     global $wpdb;
 
-    $request = edusystem_signature_request_get($request_id);
-    if (!$request || null !== $request->frozen_at_utc || !in_array($request->status, EDUSYSTEM_SIGNATURE_REQUEST_OPEN, true)) {
+    $request = squuad_cert_signature_request_get($request_id);
+    if (!$request || null !== $request->frozen_at_utc || !in_array($request->status, SQUUAD_CERT_SIGNATURE_REQUEST_OPEN, true)) {
         return null;
     }
-    if (strlen($html) > EDUSYSTEM_SIGNATURE_CONTENT_MAX_BYTES) {
+    if (strlen($html) > SQUUAD_CERT_SIGNATURE_CONTENT_MAX_BYTES) {
         return null;
     }
 
@@ -177,7 +177,7 @@ function edusystem_signature_request_save_draft_unlocked(int $request_id, string
     // Primero la solicitud, solo si sigue sin congelar; después el contenido. Si alguien intentara congelar entre las
     // dos operaciones, el contenido guardado no coincidiría con el hash y el congelado fallaría (nunca al revés).
     $updated = $wpdb->query($wpdb->prepare(
-        "UPDATE {$wpdb->prefix}edusystem_signature_requests SET content_sha256 = %s
+        "UPDATE {$wpdb->prefix}squuad_cert_requests SET content_sha256 = %s
          WHERE id = %d AND frozen_at_utc IS NULL",
         $sha256,
         $request_id
@@ -186,7 +186,7 @@ function edusystem_signature_request_save_draft_unlocked(int $request_id, string
         return null;
     }
     $wpdb->query($wpdb->prepare(
-        "REPLACE INTO {$wpdb->prefix}edusystem_signature_request_contents (request_id, content, content_sha256, updated_at_utc)
+        "REPLACE INTO {$wpdb->prefix}squuad_cert_request_contents (request_id, content, content_sha256, updated_at_utc)
          VALUES (%d, %s, %s, UTC_TIMESTAMP())",
         $request_id,
         $html,
@@ -200,16 +200,16 @@ function edusystem_signature_request_save_draft_unlocked(int $request_id, string
  * Contenido de una solicitud (borrador o congelado), comprobando que su sha256 coincide con el guardado en la
  * solicitud. Devuelve null si no hay contenido o si no coincide (contenido alterado).
  */
-function edusystem_signature_request_content(int $request_id): ?string
+function squuad_cert_signature_request_content(int $request_id): ?string
 {
     global $wpdb;
 
-    $request = edusystem_signature_request_get($request_id);
+    $request = squuad_cert_signature_request_get($request_id);
     if (!$request || !$request->content_sha256) {
         return null;
     }
     $content = $wpdb->get_var($wpdb->prepare(
-        "SELECT content FROM {$wpdb->prefix}edusystem_signature_request_contents WHERE request_id = %d",
+        "SELECT content FROM {$wpdb->prefix}squuad_cert_request_contents WHERE request_id = %d",
         $request_id
     ));
     if (null === $content || !hash_equals((string) $request->content_sha256, hash('sha256', (string) $content))) {
@@ -225,29 +225,29 @@ function edusystem_signature_request_content(int $request_id): ?string
  * ese mismo contenido; false si el borrador cambió (el firmante debe revisarlo de nuevo) o si la solicitud no lo
  * admite.
  */
-function edusystem_signature_request_freeze(int $request_id, string $shown_sha256, int $user_id): bool
+function squuad_cert_signature_request_freeze(int $request_id, string $shown_sha256, int $user_id): bool
 {
-    return (bool) edusystem_signature_request_locked($request_id, static fn() => edusystem_signature_request_freeze_unlocked($request_id, $shown_sha256, $user_id), false);
+    return (bool) squuad_cert_signature_request_locked($request_id, static fn() => squuad_cert_signature_request_freeze_unlocked($request_id, $shown_sha256, $user_id), false);
 }
 
-function edusystem_signature_request_freeze_unlocked(int $request_id, string $shown_sha256, int $user_id): bool
+function squuad_cert_signature_request_freeze_unlocked(int $request_id, string $shown_sha256, int $user_id): bool
 {
     global $wpdb;
 
-    $request = edusystem_signature_request_get($request_id);
-    if (!$request || !in_array($request->status, EDUSYSTEM_SIGNATURE_REQUEST_OPEN, true) || '' === $shown_sha256) {
+    $request = squuad_cert_signature_request_get($request_id);
+    if (!$request || !in_array($request->status, SQUUAD_CERT_SIGNATURE_REQUEST_OPEN, true) || '' === $shown_sha256) {
         return false;
     }
     if (null !== $request->frozen_at_utc) {
         return hash_equals((string) $request->content_sha256, $shown_sha256);
     }
     // El contenido guardado tiene que ser íntegro y ser el que vio el firmante
-    if (null === edusystem_signature_request_content($request_id) || !hash_equals((string) $request->content_sha256, $shown_sha256)) {
+    if (null === squuad_cert_signature_request_content($request_id) || !hash_equals((string) $request->content_sha256, $shown_sha256)) {
         return false;
     }
 
     $updated = $wpdb->query($wpdb->prepare(
-        "UPDATE {$wpdb->prefix}edusystem_signature_requests
+        "UPDATE {$wpdb->prefix}squuad_cert_requests
          SET frozen_at_utc = UTC_TIMESTAMP(), frozen_by = %d
          WHERE id = %d AND frozen_at_utc IS NULL AND content_sha256 = %s",
         $user_id,
@@ -255,12 +255,12 @@ function edusystem_signature_request_freeze_unlocked(int $request_id, string $sh
         $shown_sha256
     ));
     if ($updated) {
-        edusystem_signature_request_log_event($request_id, 'frozen', ['content_sha256' => $shown_sha256], $user_id);
+        squuad_cert_signature_request_log_event($request_id, 'frozen', ['content_sha256' => $shown_sha256], $user_id);
         return true;
     }
 
     // Otra petición la congeló a la vez: vale si fue con el mismo contenido
-    $request = edusystem_signature_request_get($request_id);
+    $request = squuad_cert_signature_request_get($request_id);
     return $request && null !== $request->frozen_at_utc && hash_equals((string) $request->content_sha256, $shown_sha256);
 }
 
@@ -269,7 +269,7 @@ function edusystem_signature_request_freeze_unlocked(int $request_id, string $sh
  * firmar una solicitud declinada o finalizarla dos veces. $fields: columnas adicionales a fijar en el mismo UPDATE
  * (p. ej. completed_at_utc, final_pdf_sha256). Devuelve true si cambió.
  */
-function edusystem_signature_request_transition(int $request_id, array $from, string $to, array $fields = [], array $event_data = []): bool
+function squuad_cert_signature_request_transition(int $request_id, array $from, string $to, array $fields = [], array $event_data = []): bool
 {
     global $wpdb;
 
@@ -277,7 +277,7 @@ function edusystem_signature_request_transition(int $request_id, array $from, st
         'completed_at_utc', 'final_attachment_id', 'final_pdf_sha256', 'final_uploaded_by', 'declined_at_utc',
         'declined_by', 'decline_reason', 'closed_by', 'closed_upload_sha256', 'student_document_id',
     ];
-    $valid_states = array_merge(EDUSYSTEM_SIGNATURE_REQUEST_OPEN, EDUSYSTEM_SIGNATURE_REQUEST_CLOSED);
+    $valid_states = array_merge(SQUUAD_CERT_SIGNATURE_REQUEST_OPEN, SQUUAD_CERT_SIGNATURE_REQUEST_CLOSED);
     if (!$request_id || !in_array($to, $valid_states, true) || !$from || array_diff($from, $valid_states)) {
         return false;
     }
@@ -300,12 +300,12 @@ function edusystem_signature_request_transition(int $request_id, array $from, st
     $values = array_merge($values, $from);
 
     $updated = $wpdb->query($wpdb->prepare(
-        "UPDATE {$wpdb->prefix}edusystem_signature_requests SET " . implode(', ', $sets) . "
+        "UPDATE {$wpdb->prefix}squuad_cert_requests SET " . implode(', ', $sets) . "
          WHERE id = %d AND status IN ({$placeholders})",
         $values
     ));
     if ($updated) {
-        edusystem_signature_request_log_event($request_id, 'status_' . $to, array_intersect_key($fields, array_flip(['final_pdf_sha256', 'closed_upload_sha256', 'decline_reason'])) + $event_data);
+        squuad_cert_signature_request_log_event($request_id, 'status_' . $to, array_intersect_key($fields, array_flip(['final_pdf_sha256', 'closed_upload_sha256', 'decline_reason'])) + $event_data);
     }
 
     return (bool) $updated;
@@ -315,7 +315,7 @@ function edusystem_signature_request_transition(int $request_id, array $from, st
  * Mensaje sellado de un evento de solicitud (formato EDUEVT1), en orden fijo. data se sella por su sha256 (el JSON
  * guardado, byte a byte). No cambiar sin subir la versión.
  */
-function edusystem_signature_request_event_canonical(array $row): string
+function squuad_cert_signature_request_event_canonical(array $row): string
 {
     $text = static fn($value): string => rawurlencode((string) ($value ?? ''));
 
@@ -339,22 +339,22 @@ function edusystem_signature_request_event_canonical(array $row): string
  * bloqueo, el evento se guarda sin huella y se anota en el log (el verificador lo mostrará). Devuelve el id del
  * evento o 0.
  */
-function edusystem_signature_request_log_event(int $request_id, string $event_type, array $data = [], ?int $actor_user_id = null): int
+function squuad_cert_signature_request_log_event(int $request_id, string $event_type, array $data = [], ?int $actor_user_id = null): int
 {
     global $wpdb;
-    $table = $wpdb->prefix . 'edusystem_signature_events';
+    $table = $wpdb->prefix . 'squuad_cert_events';
 
     $row = [
         'request_id' => $request_id,
         'event_type' => substr($event_type, 0, 30),
         'actor_user_id' => null === $actor_user_id ? get_current_user_id() : $actor_user_id,
-        'switched_from' => function_exists('edusystem_signature_session_switched_from') ? edusystem_signature_session_switched_from() : 0,
+        'switched_from' => function_exists('squuad_cert_signature_session_switched_from') ? squuad_cert_signature_session_switched_from() : 0,
         'created_at_utc' => gmdate('Y-m-d H:i:s'),
         'data' => $data ? wp_json_encode($data) : null,
     ];
 
-    $key = function_exists('edusystem_signature_current_key') ? edusystem_signature_current_key() : null;
-    $lock = edusystem_signature_lock_name();
+    $key = function_exists('squuad_cert_signature_current_key') ? squuad_cert_signature_current_key() : null;
+    $lock = squuad_cert_signature_lock_name();
     $locked = $key && '1' === (string) $wpdb->get_var($wpdb->prepare('SELECT GET_LOCK(%s, 5)', $lock));
     if (!$locked) {
         $wpdb->insert($table, $row);
@@ -366,18 +366,18 @@ function edusystem_signature_request_log_event(int $request_id, string $event_ty
     }
 
     try {
-        [$key_id, $key_bytes] = edusystem_signature_current_key() ?? $key;
-        $head = $wpdb->get_row("SELECT last_seq, head_fingerprint FROM {$wpdb->prefix}edusystem_signature_chain WHERE id = 1");
+        [$key_id, $key_bytes] = squuad_cert_signature_current_key() ?? $key;
+        $head = $wpdb->get_row("SELECT last_seq, head_fingerprint FROM {$wpdb->prefix}squuad_cert_chain WHERE id = 1");
         $row['chain_seq'] = ($head ? (int) $head->last_seq : 0) + 1;
         $row['key_id'] = $key_id;
         $row['prev_fingerprint'] = ($head && '' !== $head->head_fingerprint) ? $head->head_fingerprint : str_repeat('0', 64);
-        $row['fingerprint'] = hash_hmac('sha256', edusystem_signature_request_event_canonical($row), $key_bytes);
+        $row['fingerprint'] = hash_hmac('sha256', squuad_cert_signature_request_event_canonical($row), $key_bytes);
 
         if (!$wpdb->insert($table, $row)) {
             return 0;
         }
         $id = (int) $wpdb->insert_id;
-        edusystem_signature_chain_set_head((int) $row['chain_seq'], (string) $row['fingerprint']);
+        squuad_cert_signature_chain_set_head((int) $row['chain_seq'], (string) $row['fingerprint']);
 
         return $id;
     } finally {
@@ -389,25 +389,25 @@ function edusystem_signature_request_log_event(int $request_id, string $event_ty
  * Estado de integridad de un evento de solicitud: verified, altered, unknown_key, retired_key, chain_broken o
  * missing (sin huella). $previous_fingerprint: huella del eslabón anterior si ya se conoce.
  */
-function edusystem_signature_request_verify_event(object $row, ?string $previous_fingerprint = null): string
+function squuad_cert_signature_request_verify_event(object $row, ?string $previous_fingerprint = null): string
 {
     if (empty($row->fingerprint)) {
         return 'missing';
     }
-    $key = edusystem_signature_key_by_id((string) $row->key_id);
+    $key = squuad_cert_signature_key_by_id((string) $row->key_id);
     if (null === $key) {
         return 'unknown_key';
     }
-    if (!hash_equals(hash_hmac('sha256', edusystem_signature_request_event_canonical((array) $row), $key), (string) $row->fingerprint)) {
+    if (!hash_equals(hash_hmac('sha256', squuad_cert_signature_request_event_canonical((array) $row), $key), (string) $row->fingerprint)) {
         return 'altered';
     }
-    $retired_at = edusystem_signature_key_retired_at((string) $row->key_id);
+    $retired_at = squuad_cert_signature_key_retired_at((string) $row->key_id);
     if (null !== $retired_at && strtotime((string) $row->created_at_utc . ' UTC') > strtotime($retired_at . ' UTC') + 60) {
         return 'retired_key';
     }
     $seq = (int) $row->chain_seq;
     $prev = $seq > 1
-        ? (null !== $previous_fingerprint ? $previous_fingerprint : edusystem_signature_chain_fingerprint_at($seq - 1))
+        ? (null !== $previous_fingerprint ? $previous_fingerprint : squuad_cert_signature_chain_fingerprint_at($seq - 1))
         : str_repeat('0', 64);
     if (null === $prev || !hash_equals((string) $prev, (string) $row->prev_fingerprint)) {
         return 'chain_broken';
@@ -417,12 +417,12 @@ function edusystem_signature_request_verify_event(object $row, ?string $previous
 }
 
 /** Huella del evento de creación de una solicitud (se sella en cada firma EDUSIG2), o '' si no existe. */
-function edusystem_signature_request_created_fingerprint(int $request_id): string
+function squuad_cert_signature_request_created_fingerprint(int $request_id): string
 {
     global $wpdb;
 
     return (string) $wpdb->get_var($wpdb->prepare(
-        "SELECT fingerprint FROM {$wpdb->prefix}edusystem_signature_events
+        "SELECT fingerprint FROM {$wpdb->prefix}squuad_cert_events
          WHERE request_id = %d AND event_type = 'created' ORDER BY id ASC LIMIT 1",
         $request_id
     ));
@@ -433,19 +433,19 @@ function edusystem_signature_request_created_fingerprint(int $request_id): strin
  * ------------------------------------------------------------------------------------------------------------ */
 
 /** Marcador fijo que sustituye a {{signature_section}} en el contenido (los recuadros se pintan al mostrarlo). */
-const EDUSYSTEM_SIGNATURE_SLOT = '<div data-edusig-slot="signature_section"></div>';
+const SQUUAD_CERT_SIGNATURE_SLOT = '<div data-edusig-slot="signature_section"></div>';
 /** Marcador fijo que sustituye a {{qrcode}} en el contenido. */
-const EDUSYSTEM_SIGNATURE_QR_SLOT = '<div data-edusig-slot="qrcode"></div>';
+const SQUUAD_CERT_SIGNATURE_QR_SLOT = '<div data-edusig-slot="qrcode"></div>';
 
 /** Rol del usuario en la solicitud según los firmantes fijados en ella: 'student', 'parent' o '' si no firma. */
-function edusystem_signature_request_role(object $request, int $user_id): string
+function squuad_cert_signature_request_role(object $request, int $user_id): string
 {
     if (!$user_id) {
         return '';
     }
     // ADR 0003: hueco del usuario entre los firmantes fijados en la solicitud ('student', 'parent', 'signer:<id>')
-    if (function_exists('edusystem_request_signers')) {
-        foreach (edusystem_request_signers($request) as $signer) {
+    if (function_exists('squuad_cert_request_signers')) {
+        foreach (squuad_cert_request_signers($request) as $signer) {
             if ($signer['user_id'] === $user_id) {
                 return $signer['slot_key'];
             }
@@ -463,12 +463,12 @@ function edusystem_signature_request_role(object $request, int $user_id): string
 }
 
 /** Roles que deben firmar la solicitud: el estudiante y, si es otra persona, su representante. */
-function edusystem_signature_request_required_roles(object $request): array
+function squuad_cert_signature_request_required_roles(object $request): array
 {
-    if (function_exists('edusystem_request_signers')) {
+    if (function_exists('squuad_cert_request_signers')) {
         return array_values(array_map(
             static fn(array $signer): string => $signer['slot_key'],
-            array_filter(edusystem_request_signers($request), static fn(array $signer): bool => $signer['required'])
+            array_filter(squuad_cert_request_signers($request), static fn(array $signer): bool => $signer['required'])
         ));
     }
     $roles = [];
@@ -483,7 +483,7 @@ function edusystem_signature_request_required_roles(object $request): array
 }
 
 /** Roles que ya firmaron dentro de la solicitud (firmas vivas con ese request_id). */
-function edusystem_signature_request_signed_roles(int $request_id): array
+function squuad_cert_signature_request_signed_roles(int $request_id): array
 {
     global $wpdb;
 
@@ -505,10 +505,10 @@ function edusystem_signature_request_signed_roles(int $request_id): array
  *
  * Devuelve ['student', 'document', 'request' (o null), 'student_user_id', 'parent_user_id', 'legacy_partial'] o null.
  */
-function edusystem_signature_pending_for_user(WP_User $user, string $selection = ''): ?array
+function squuad_cert_signature_pending_for_user(WP_User $user, string $selection = ''): ?array
 {
     $first = null;
-    foreach (edusystem_signature_user_documents($user) as $item) {
+    foreach (squuad_cert_signature_user_documents($user) as $item) {
         if ('to_sign' !== $item['state']) {
             continue;
         }
@@ -526,14 +526,14 @@ function edusystem_signature_pending_for_user(WP_User $user, string $selection =
  * Todos los documentos automáticos que conciernen al usuario (ADR 0003, paso 5b): los que le toca firmar ('to_sign'),
  * los que ya firmó y esperan a otro firmante ('waiting') y los que tienen todas las firmas y esperan su PDF final
  * ('pdf', paso 6b), de todos sus estudiantes. Mismo criterio que
- * edusystem_signature_pending_for_user().
+ * squuad_cert_signature_pending_for_user().
  */
-function edusystem_signature_user_documents(WP_User $user): array
+function squuad_cert_signature_user_documents(WP_User $user): array
 {
     $items = [];
     global $wpdb;
 
-    if (!$user->ID || !edusystem_signature_requests_enabled()) {
+    if (!$user->ID || !squuad_cert_signature_requests_enabled()) {
         return [];
     }
     $roles = (array) $user->roles;
@@ -573,21 +573,21 @@ function edusystem_signature_user_documents(WP_User $user): array
             if ('' === $document_id) {
                 continue;
             }
-            $request = edusystem_signature_request_latest((int) $student->id, $document_id);
+            $request = squuad_cert_signature_request_latest((int) $student->id, $document_id);
             // Firmantes del documento (ADR 0003, paso 4): la política decide solo para solicitudes nuevas; una solicitud
             // en curso conserva sus firmantes aunque la configuración haya cambiado
-            $in_progress = $request && in_array($request->status, EDUSYSTEM_SIGNATURE_REQUEST_OPEN, true);
+            $in_progress = $request && in_array($request->status, SQUUAD_CERT_SIGNATURE_REQUEST_OPEN, true);
             // Condición del documento (ADR 0003, paso 9): p. ej. la carta de documentos faltantes solo se pide cuando
             // el estudiante tiene documentos no obligatorios pendientes. Una solicitud en curso sigue hasta el final.
-            if (!$in_progress && function_exists('edusystem_document_condition_met') && !edusystem_document_condition_met($document, $student, $documents)) {
+            if (!$in_progress && function_exists('squuad_cert_document_condition_met') && !squuad_cert_document_condition_met($document, $student, $documents)) {
                 continue;
             }
-            if (!$in_progress && function_exists('edusystem_signing_policy')) {
-                $policy = edusystem_signing_policy($document);
+            if (!$in_progress && function_exists('squuad_cert_signing_policy')) {
+                $policy = squuad_cert_signing_policy($document);
                 $self = $student_user_id && $student_user_id === $parent_user_id;
                 $asks_me = $self
-                    ? (edusystem_signing_policy_has($policy, 'student') || edusystem_signing_policy_has($policy, 'parent'))
-                    : edusystem_signing_policy_has($policy, $my_role);
+                    ? (squuad_cert_signing_policy_has($policy, 'student') || squuad_cert_signing_policy_has($policy, 'parent'))
+                    : squuad_cert_signing_policy_has($policy, $my_role);
                 if (!$asks_me) {
                     continue;
                 }
@@ -596,14 +596,14 @@ function edusystem_signature_user_documents(WP_User $user): array
                 continue;
             }
             $state = 'to_sign';
-            if ($request && in_array($request->status, EDUSYSTEM_SIGNATURE_REQUEST_OPEN, true)) {
-                $role_here = edusystem_signature_request_role($request, (int) $user->ID);
+            if ($request && in_array($request->status, SQUUAD_CERT_SIGNATURE_REQUEST_OPEN, true)) {
+                $role_here = squuad_cert_signature_request_role($request, (int) $user->ID);
                 if ('' === $role_here) {
                     continue; // no firma aquí
                 }
                 if ('signed' === $request->status) {
                     $state = 'pdf'; // todas las firmas; falta generar el PDF final
-                } elseif (in_array($role_here, edusystem_signature_request_signed_roles((int) $request->id), true)) {
+                } elseif (in_array($role_here, squuad_cert_signature_request_signed_roles((int) $request->id), true)) {
                     $state = 'waiting'; // ya firmó; falta otro firmante
                 }
             } elseif (!$request) {
@@ -623,12 +623,12 @@ function edusystem_signature_user_documents(WP_User $user): array
                 'state' => $state,
                 'student' => $student,
                 'document' => $document,
-                'request' => ($request && in_array($request->status, EDUSYSTEM_SIGNATURE_REQUEST_OPEN, true)) ? $request : null,
+                'request' => ($request && in_array($request->status, SQUUAD_CERT_SIGNATURE_REQUEST_OPEN, true)) ? $request : null,
                 'student_user_id' => $student_user_id,
                 'parent_user_id' => $parent_user_id,
                 // Aviso de "fírmelo de nuevo" durante toda la ronda 1 de un documento con firma del modelo anterior
                 'legacy_partial' => (!$request || 1 === (int) $request->round)
-                    && edusystem_signature_has_legacy_partial($student, $document_id, $student_user_id, $parent_user_id),
+                    && squuad_cert_signature_has_legacy_partial($student, $document_id, $student_user_id, $parent_user_id),
             ];
         }
     }
@@ -641,7 +641,7 @@ function edusystem_signature_user_documents(WP_User $user): array
  * del estudiante y la del representante solo si no tiene otros hijos (si los tiene, esa firma es compartida y puede
  * ser la de un hermano). Se usa para el aviso de "fírmelo de nuevo" (ADR 0002, punto 10, opción b).
  */
-function edusystem_signature_has_legacy_partial(object $student, string $document_id, int $student_user_id, int $parent_user_id): bool
+function squuad_cert_signature_has_legacy_partial(object $student, string $document_id, int $student_user_id, int $parent_user_id): bool
 {
     global $wpdb;
 
@@ -669,7 +669,7 @@ function edusystem_signature_has_legacy_partial(object $student, string $documen
  * devuelven texto se evalúan y se escapan, y las secciones que dependen del estado de las firmas se sustituyen por
  * marcadores fijos. Las tablas HTML se dejan como las genera el plugin.
  */
-function edusystem_signature_escape_replacements(array $replacements): array
+function squuad_cert_signature_escape_replacements(array $replacements): array
 {
     $text_closures = ['parent_full_name', 'parent_email', 'parent_cell', 'parent_identification', 'institute_name',
         'institute_address', 'institute_phone', 'start_academic_year', 'end_academic_year', 'today'];
@@ -681,11 +681,11 @@ function edusystem_signature_escape_replacements(array $replacements): array
         }
         $value = $config['value'];
         if ('signature_section' === $key) {
-            $replacements[$key] = ['value' => EDUSYSTEM_SIGNATURE_SLOT, 'wrap' => false];
+            $replacements[$key] = ['value' => SQUUAD_CERT_SIGNATURE_SLOT, 'wrap' => false];
             continue;
         }
         if ('qrcode' === $key) {
-            $replacements[$key] = ['value' => EDUSYSTEM_SIGNATURE_QR_SLOT, 'wrap' => false];
+            $replacements[$key] = ['value' => SQUUAD_CERT_SIGNATURE_QR_SLOT, 'wrap' => false];
             continue;
         }
         if (!empty($config['wrap']) || in_array($key, $text_closures, true)) {
@@ -704,7 +704,7 @@ function edusystem_signature_escape_replacements(array $replacements): array
  * se vea siempre igual aunque cambien los archivos. Solo archivos locales bajo ABSPATH, de hasta 300 KB cada uno y
  * mientras el contenido no pase del límite.
  */
-function edusystem_signature_inline_images(string $html): string
+function squuad_cert_signature_inline_images(string $html): string
 {
     $home = trailingslashit(home_url());
     $site = trailingslashit(site_url());
@@ -715,7 +715,7 @@ function edusystem_signature_inline_images(string $html): string
             if (0 === strpos($url, $base)) {
                 $path = realpath(ABSPATH . ltrim(substr((string) strtok($url, '?'), strlen($base)), '/'));
                 if ($path && 0 === strpos($path, realpath(ABSPATH)) && is_file($path) && filesize($path) <= 307200
-                    && strlen($html) + filesize($path) * 1.4 < EDUSYSTEM_SIGNATURE_CONTENT_MAX_BYTES) {
+                    && strlen($html) + filesize($path) * 1.4 < SQUUAD_CERT_SIGNATURE_CONTENT_MAX_BYTES) {
                     $mime = wp_check_filetype($path)['type'] ?? '';
                     if ($mime && 0 === strpos($mime, 'image/')) {
                         return $match[1] . $match[2] . 'data:' . $mime . ';base64,' . base64_encode((string) file_get_contents($path)) . $match[2];
@@ -731,59 +731,59 @@ function edusystem_signature_inline_images(string $html): string
  * HTML para mostrar el contenido de una solicitud al firmante: los marcadores se sustituyen por los recuadros de
  * firma y el hueco del QR. El contenido guardado (y su huella) no cambia.
  */
-function edusystem_signature_render_content(string $content, object $student, ?object $request = null): string
+function squuad_cert_signature_render_content(string $content, object $student, ?object $request = null): string
 {
     // Huecos institucionales (ADR 0003): la firma si ya existe o "pendiente"
-    if ($request && function_exists('edusystem_request_signers') && false !== strpos($content, 'data-edusig-slot="signer:')) {
-        foreach (edusystem_request_signers($request) as $signer) {
+    if ($request && function_exists('squuad_cert_request_signers') && false !== strpos($content, 'data-edusig-slot="signer:')) {
+        foreach (squuad_cert_request_signers($request) as $signer) {
             if ($signer['phase'] >= 2) {
-                $content = str_replace(edusystem_signer_slot_marker($signer['slot_key']), edusystem_signature_render_slot_box($request, $signer), $content);
+                $content = str_replace(squuad_cert_signer_slot_marker($signer['slot_key']), squuad_cert_signature_render_slot_box($request, $signer), $content);
             }
         }
     }
 
     // Estudiante y representante colocados por separado ({{signature_student}} / {{signature_parent}}): su recuadro
     // va ahí y {{signature_section}} lleva solo los que no se colocaron (si no se separa nada, sale como siempre)
-    $section = function_exists('get_signature_section') ? get_signature_section($student) : '';
+    $section = function_exists('squuad_cert_get_signature_section') ? squuad_cert_get_signature_section($student) : '';
     $placed = [];
     foreach (['student', 'parent'] as $role) {
         $marker = '<div data-edusig-slot="' . $role . '"></div>';
         if (false !== strpos($content, $marker)) {
             $placed[] = $role;
-            $content = str_replace($marker, function_exists('edusystem_signature_pad_box') ? edusystem_signature_pad_box($student, $role) : '', $content);
+            $content = str_replace($marker, function_exists('squuad_cert_signature_pad_box') ? squuad_cert_signature_pad_box($student, $role) : '', $content);
         }
     }
-    if ($placed && function_exists('edusystem_signature_pad_box')) {
+    if ($placed && function_exists('squuad_cert_signature_pad_box')) {
         $section = '';
         foreach (array_diff(['student', 'parent'], $placed) as $role) {
-            $section .= edusystem_signature_pad_box($student, $role);
+            $section .= squuad_cert_signature_pad_box($student, $role);
         }
     }
 
     return str_replace(
-        [EDUSYSTEM_SIGNATURE_SLOT, EDUSYSTEM_SIGNATURE_QR_SLOT],
+        [SQUUAD_CERT_SIGNATURE_SLOT, SQUUAD_CERT_SIGNATURE_QR_SLOT],
         [$section, '<div id="qrcode"></div>'],
         $content
     );
 }
 
 /** Registra un evento de la solicitud solo si todavía no existe uno de ese tipo. */
-function edusystem_signature_request_log_event_once(int $request_id, string $event_type, array $data = []): void
+function squuad_cert_signature_request_log_event_once(int $request_id, string $event_type, array $data = []): void
 {
     global $wpdb;
 
     $exists = $wpdb->get_var($wpdb->prepare(
-        "SELECT id FROM {$wpdb->prefix}edusystem_signature_events WHERE request_id = %d AND event_type = %s LIMIT 1",
+        "SELECT id FROM {$wpdb->prefix}squuad_cert_events WHERE request_id = %d AND event_type = %s LIMIT 1",
         $request_id,
         $event_type
     ));
     if (!$exists) {
-        edusystem_signature_request_log_event($request_id, $event_type, $data);
+        squuad_cert_signature_request_log_event($request_id, $event_type, $data);
     }
 }
 
 /** Fila de student_documents del documento del estudiante (la más antigua si hubiera duplicadas), o null. */
-function edusystem_signature_student_document_id(int $student_id, string $document_id): ?int
+function squuad_cert_signature_student_document_id(int $student_id, string $document_id): ?int
 {
     global $wpdb;
 
@@ -801,13 +801,13 @@ function edusystem_signature_student_document_id(int $student_id, string $docume
  * ------------------------------------------------------------------------------------------------------------ */
 
 /** Versión vigente del texto de consentimiento. Si el texto cambia, se añade una versión nueva y esta pasa a ella. */
-const EDUSYSTEM_SIGNATURE_CONSENT_CURRENT = 'v1';
+const SQUUAD_CERT_SIGNATURE_CONSENT_CURRENT = 'v1';
 
 /**
  * Texto de consentimiento de una versión, traducido al idioma actual, o null si la versión no existe. El cliente
  * solo envía la versión; el texto que se sella es el que el servidor mostró.
  */
-function edusystem_signature_consent_text(string $version): ?string
+function squuad_cert_signature_consent_text(string $version): ?string
 {
     $texts = [
         'v1' => __('I agree to sign this document electronically. I understand that my electronic signature has the same validity as my handwritten signature, that it is recorded with the date, the time and the details of my connection, and that the signed document cannot be modified.', 'edusystem'),
@@ -820,12 +820,12 @@ function edusystem_signature_consent_text(string $version): ?string
  * Evidencia del consentimiento que aceptó el firmante: ['consent_version' => 'v1:es_ES', 'consent_sha256' => ...].
  * Sella la versión, el idioma y el sha256 del texto exacto mostrado. Devuelve null si la versión no es la vigente.
  */
-function edusystem_signature_consent_evidence(string $version): ?array
+function squuad_cert_signature_consent_evidence(string $version): ?array
 {
-    if (EDUSYSTEM_SIGNATURE_CONSENT_CURRENT !== $version) {
+    if (SQUUAD_CERT_SIGNATURE_CONSENT_CURRENT !== $version) {
         return null;
     }
-    $text = edusystem_signature_consent_text($version);
+    $text = squuad_cert_signature_consent_text($version);
     if (null === $text) {
         return null;
     }
@@ -844,11 +844,11 @@ function edusystem_signature_consent_evidence(string $version): ?array
  * Solicitud abierta (abierta, a medio firmar o firmada sin PDF) del documento de una fila de student_documents, o
  * null. Sirve para saber si una subida manual la cerraría.
  */
-function edusystem_signature_request_open_for_row(int $student_document_row_id): ?object
+function squuad_cert_signature_request_open_for_row(int $student_document_row_id): ?object
 {
     global $wpdb;
 
-    if (!$student_document_row_id || !edusystem_signature_requests_enabled()) {
+    if (!$student_document_row_id || !squuad_cert_signature_requests_enabled()) {
         return null;
     }
     $row = $wpdb->get_row($wpdb->prepare(
@@ -858,9 +858,9 @@ function edusystem_signature_request_open_for_row(int $student_document_row_id):
     if (!$row) {
         return null;
     }
-    $request = edusystem_signature_request_latest((int) $row->student_id, (string) $row->document_id);
+    $request = squuad_cert_signature_request_latest((int) $row->student_id, (string) $row->document_id);
 
-    return ($request && in_array($request->status, EDUSYSTEM_SIGNATURE_REQUEST_OPEN, true)) ? $request : null;
+    return ($request && in_array($request->status, SQUUAD_CERT_SIGNATURE_REQUEST_OPEN, true)) ? $request : null;
 }
 
 /**
@@ -869,27 +869,27 @@ function edusystem_signature_request_open_for_row(int $student_document_row_id):
  * (evento sellado). Las firmas que ya tuviera la solicitud no se anulan: quedan ligadas a ella. Una solicitud
  * completada no se cierra por subida. Devuelve true si cerró una solicitud.
  */
-function edusystem_signature_request_close_by_upload(int $student_document_row_id, string $file_path, int $user_id, string $reason = ''): bool
+function squuad_cert_signature_request_close_by_upload(int $student_document_row_id, string $file_path, int $user_id, string $reason = ''): bool
 {
-    $request = edusystem_signature_request_open_for_row($student_document_row_id);
+    $request = squuad_cert_signature_request_open_for_row($student_document_row_id);
     if (!$request) {
         return false;
     }
     $sha256 = is_readable($file_path) ? (string) hash_file('sha256', $file_path) : '';
 
-    return edusystem_signature_request_transition((int) $request->id, EDUSYSTEM_SIGNATURE_REQUEST_OPEN, 'closed_by_upload', [
+    return squuad_cert_signature_request_transition((int) $request->id, SQUUAD_CERT_SIGNATURE_REQUEST_OPEN, 'closed_by_upload', [
         'closed_by' => $user_id,
         'closed_upload_sha256' => $sha256,
         'student_document_id' => $student_document_row_id,
     ], [
         'uploaded_by' => $user_id,
         'reason' => $reason,
-        'signed_roles' => edusystem_signature_request_signed_roles((int) $request->id),
+        'signed_roles' => squuad_cert_signature_request_signed_roles((int) $request->id),
     ]);
 }
 
 /** Hueco de un firmante institucional pintado: su firma en SVG con la fecha, o "Pendiente de firma". */
-function edusystem_signature_render_slot_box(object $request, array $signer): string
+function squuad_cert_signature_render_slot_box(object $request, array $signer): string
 {
     global $wpdb;
 
@@ -903,6 +903,6 @@ function edusystem_signature_render_slot_box(object $request, array $signer): st
             . esc_html__('Pending signature', 'edusystem') . '</div>';
     }
 
-    return edusystem_signature_svg((string) $row->signature, $signer['name'])
+    return squuad_cert_signature_svg((string) $row->signature, $signer['name'])
         . '<div style="font-size:10px;color:#666">' . esc_html(get_date_from_gmt((string) $row->signed_at_utc, 'Y-m-d H:i')) . ' UTC</div>';
 }

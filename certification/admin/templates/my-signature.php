@@ -32,12 +32,12 @@ if (!defined('ABSPATH')) exit;
     <?php if ($can_register) : ?>
         <h2><?= $active ? esc_html__('Replace your signature', 'edusystem') : esc_html__('Draw your signature', 'edusystem') ?></h2>
         <form method="post" action="<?= esc_url(admin_url('admin-post.php')) ?>" id="edusystem-my-signature-form" style="max-width:640px">
-            <input type="hidden" name="action" value="edusystem_save_my_signature">
+            <input type="hidden" name="action" value="squuad_cert_save_my_signature">
             <input type="hidden" name="strokes" id="edusystem-signature-strokes" value="">
-            <?php wp_nonce_field('edusystem_save_my_signature'); ?>
+            <?php wp_nonce_field('squuad_cert_save_my_signature'); ?>
             <canvas id="edusystem-signature-new" style="border:1px solid #8c8f94;background:#fffef0;width:100%;height:200px;display:block"></canvas>
             <p><button type="button" class="button" id="edusystem-signature-clear"><?= esc_html__('Clear', 'edusystem') ?></button></p>
-            <p><label><input type="checkbox" name="consent" value="1" required> <?= esc_html(edusystem_signer_profile_consent_text()) ?></label></p>
+            <p><label><input type="checkbox" name="consent" value="1" required> <?= esc_html(squuad_cert_signer_profile_consent_text()) ?></label></p>
             <p><label for="edusystem-signature-password"><?= esc_html__('Confirm your password', 'edusystem') ?></label><br>
                 <input type="password" id="edusystem-signature-password" name="password" required autocomplete="current-password" style="min-width:280px"></p>
             <p><button type="submit" class="button button-primary"><?= $active ? esc_html__('Replace my signature', 'edusystem') : esc_html__('Register my signature', 'edusystem') ?></button></p>

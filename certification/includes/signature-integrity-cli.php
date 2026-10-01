@@ -4,24 +4,24 @@ declare(strict_types=1);
 /**
  * EduSystem - Comando WP-CLI de evidencias de firma (ADR 0001, paso 3).
  *
- *   wp edusystem firmas verificar    Recorre la cadena y muestra los estados (sale con código 1 si hay problemas)
+ *   wp squuad-cert firmas verificar    Recorre la cadena y muestra los estados (sale con código 1 si hay problemas)
  */
 
 if (!defined('ABSPATH') || !defined('WP_CLI') || !WP_CLI) {
     return;
 }
 
-WP_CLI::add_command('edusystem firmas verificar', 'edusystem_signature_cli_verify', [
+WP_CLI::add_command('squuad-cert firmas verificar', 'squuad_cert_signature_cli_verify', [
     'shortdesc' => 'Verifica la cadena de huellas de las firmas de estudiantes y representantes.',
 ]);
 
-function edusystem_signature_cli_verify(): void
+function squuad_cert_signature_cli_verify(): void
 {
-    if (!edusystem_signature_evidence_enabled()) {
+    if (!squuad_cert_signature_evidence_enabled()) {
         WP_CLI::error('El esquema de la BD aún no está en la versión 4: no hay huellas que verificar.');
     }
 
-    $result = edusystem_signature_verify_chain();
+    $result = squuad_cert_signature_verify_chain();
 
     $items = [];
     foreach ($result['status'] as $status => $total) {

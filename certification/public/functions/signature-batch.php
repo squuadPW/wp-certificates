@@ -13,7 +13,7 @@ declare(strict_types=1);
 if (!defined('ABSPATH')) exit;
 
 /** URL del escritorio de Mi Cuenta con parámetros. */
-function edusystem_signature_batch_account_url(array $args = []): string
+function squuad_cert_signature_batch_account_url(array $args = []): string
 {
     return add_query_arg($args, wc_get_account_endpoint_url('dashboard'));
 }
@@ -22,14 +22,14 @@ function edusystem_signature_batch_account_url(array $args = []): string
  * Aviso de una sola lectura para la siguiente carga de Mi Cuenta (admin-post.php no tiene la sesión de WooCommerce,
  * así que sus avisos no llegan a la página).
  */
-function edusystem_signature_batch_notice(string $message, bool $ok): void
+function squuad_cert_signature_batch_notice(string $message, bool $ok): void
 {
-    set_transient('edusystem_batch_notice_' . get_current_user_id(), ['message' => $message, 'ok' => $ok], 300);
+    set_transient('squuad_cert_batch_notice_' . get_current_user_id(), ['message' => $message, 'ok' => $ok], 300);
 }
 
-function edusystem_signature_batch_take_notice(): ?array
+function squuad_cert_signature_batch_take_notice(): ?array
 {
-    $key = 'edusystem_batch_notice_' . get_current_user_id();
+    $key = 'squuad_cert_batch_notice_' . get_current_user_id();
     $notice = get_transient($key);
     delete_transient($key);
 
@@ -37,40 +37,40 @@ function edusystem_signature_batch_take_notice(): ?array
 }
 
 /** Imprime el aviso pendiente con el estilo de avisos de WooCommerce. */
-function edusystem_signature_batch_print_notice(): void
+function squuad_cert_signature_batch_print_notice(): void
 {
-    $notice = edusystem_signature_batch_take_notice();
+    $notice = squuad_cert_signature_batch_take_notice();
     if ($notice) {
         printf('<div class="%s" role="alert">%s</div>', $notice['ok'] ? 'woocommerce-message' : 'woocommerce-error', esc_html($notice['message']));
     }
 }
 
-add_action('admin_post_edusystem_holder_batch_prepare', 'edusystem_signature_handle_holder_batch_prepare');
-function edusystem_signature_handle_holder_batch_prepare(): void
+add_action('admin_post_squuad_cert_holder_batch_prepare', 'squuad_cert_signature_handle_holder_batch_prepare');
+function squuad_cert_signature_handle_holder_batch_prepare(): void
 {
-    check_admin_referer('edusystem_holder_batch_prepare');
-    $result = edusystem_signature_batch_prepare(array_map('absint', (array) ($_POST['request_ids'] ?? [])), 'holder');
+    check_admin_referer('squuad_cert_holder_batch_prepare');
+    $result = squuad_cert_signature_batch_prepare(array_map('absint', (array) ($_POST['request_ids'] ?? [])), 'holder');
     if (!$result['ok']) {
-        edusystem_signature_batch_notice($result['message'], false);
+        squuad_cert_signature_batch_notice($result['message'], false);
     }
-    wp_safe_redirect(edusystem_signature_batch_account_url(array_filter(['edusystem_batch' => $result['batch_id']])));
+    wp_safe_redirect(squuad_cert_signature_batch_account_url(array_filter(['squuad_cert_batch' => $result['batch_id']])));
     exit;
 }
 
-add_action('admin_post_edusystem_holder_batch_confirm', 'edusystem_signature_handle_holder_batch_confirm');
-function edusystem_signature_handle_holder_batch_confirm(): void
+add_action('admin_post_squuad_cert_holder_batch_confirm', 'squuad_cert_signature_handle_holder_batch_confirm');
+function squuad_cert_signature_handle_holder_batch_confirm(): void
 {
     $batch_id = absint($_POST['batch_id'] ?? 0);
-    check_admin_referer('edusystem_holder_batch_confirm_' . $batch_id);
+    check_admin_referer('squuad_cert_holder_batch_confirm_' . $batch_id);
     $strokes = is_string($_POST['strokes'] ?? null) ? json_decode(wp_unslash($_POST['strokes']), true) : null;
-    $result = edusystem_signature_batch_confirm(
+    $result = squuad_cert_signature_batch_confirm(
         $batch_id,
         (string) wp_unslash($_POST['password'] ?? ''), // phpcs:ignore -- contraseña: no se sanea
         sanitize_text_field(wp_unslash($_POST['consent_sha256'] ?? '')),
         $strokes
     );
-    edusystem_signature_batch_notice($result['message'], $result['ok']);
-    wp_safe_redirect(edusystem_signature_batch_account_url(['edusystem_batch' => $batch_id]));
+    squuad_cert_signature_batch_notice($result['message'], $result['ok']);
+    wp_safe_redirect(squuad_cert_signature_batch_account_url(['squuad_cert_batch' => $batch_id]));
     exit;
 }
 
@@ -78,15 +78,15 @@ function edusystem_signature_handle_holder_batch_confirm(): void
  * Solicitudes con todas las firmas que este usuario (estudiante o representante firmante) puede cerrar generando
  * el PDF final. Con $only, solo esas.
  */
-function edusystem_signature_account_pdf_requests(WP_User $user, array $only = []): array
+function squuad_cert_signature_account_pdf_requests(WP_User $user, array $only = []): array
 {
     $requests = [];
-    foreach (edusystem_signature_user_documents($user) as $item) {
+    foreach (squuad_cert_signature_user_documents($user) as $item) {
         $request = $item['request'];
         if (!$request || 'signed' !== $request->status || ($only && !in_array((int) $request->id, $only, true))) {
             continue;
         }
-        $html = edusystem_signature_request_render_final($request);
+        $html = squuad_cert_signature_request_render_final($request);
         if (null === $html) {
             continue;
         }

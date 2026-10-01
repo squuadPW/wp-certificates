@@ -18,7 +18,7 @@ if (!defined('ABSPATH')) exit;
 /**
  * Tipos de campo admitidos.
  */
-function edusystem_document_field_types()
+function squuad_cert_document_field_types()
 {
     return [
         'text' => __('Text', 'edusystem'),
@@ -32,7 +32,7 @@ function edusystem_document_field_types()
 /**
  * Tipos de campo que tienen opciones.
  */
-function edusystem_document_field_has_options($type)
+function squuad_cert_document_field_has_options($type)
 {
     return in_array($type, ['radio', 'checkbox', 'select'], true);
 }
@@ -42,7 +42,7 @@ function edusystem_document_field_has_options($type)
  * aquí se guarda el texto tal cual (se escapa al mostrarlo), para que «< 5 years» coincida con lo
  * que envía el navegador.
  */
-function edusystem_document_field_text($text, $multiline = false)
+function squuad_cert_document_field_text($text, $multiline = false)
 {
     if (!is_string($text)) {
         return '';
@@ -55,7 +55,7 @@ function edusystem_document_field_text($text, $multiline = false)
 /**
  * Formato válido de una clave: empieza por letra; solo minúsculas, números y «_».
  */
-function edusystem_document_field_key_is_valid($key)
+function squuad_cert_document_field_key_is_valid($key)
 {
     return is_string($key) && (bool) preg_match('/^[a-z][a-z0-9_]*$/', $key);
 }
@@ -65,7 +65,7 @@ function edusystem_document_field_key_is_valid($key)
  * get_replacements_variables() (includes/document-variables.php) y las de la tabla variables_document.
  * Solo se usa al guardar en el admin; al rellenar el documento ganan siempre las del sistema.
  */
-function edusystem_document_fields_reserved_keys()
+function squuad_cert_document_fields_reserved_keys()
 {
     global $wpdb;
     static $reserved = null;
@@ -103,17 +103,17 @@ function edusystem_document_fields_reserved_keys()
  *
  * @param array $rows Filas con label, key, type, options (texto, una por línea) y required.
  */
-function edusystem_sanitize_document_fields($rows)
+function squuad_cert_sanitize_document_fields($rows)
 {
     $fields = [];
     $errors = [];
-    $reserved = edusystem_document_fields_reserved_keys();
+    $reserved = squuad_cert_document_fields_reserved_keys();
 
     foreach ((array) $rows as $row) {
         if (!is_array($row)) {
             continue;
         }
-        $label = edusystem_document_field_text($row['label'] ?? '');
+        $label = squuad_cert_document_field_text($row['label'] ?? '');
         $key = is_string($row['key'] ?? null) ? sanitize_key($row['key']) : '';
         $type = is_string($row['type'] ?? null) ? $row['type'] : 'text';
 
@@ -131,15 +131,15 @@ function edusystem_sanitize_document_fields($rows)
         $key = str_replace('-', '_', $key);
 
         // Clave derivada de una etiqueta sin letras latinas («¿?», «年级»): se pide que la escriban
-        if ('' === $key || ($derived && !edusystem_document_field_key_is_valid($key))) {
+        if ('' === $key || ($derived && !squuad_cert_document_field_key_is_valid($key))) {
             $errors[] = sprintf(__('The field "%s" needs a key (lowercase letters, numbers and _).', 'edusystem'), $label);
             continue;
         }
-        if (!edusystem_document_field_key_is_valid($key)) {
+        if (!squuad_cert_document_field_key_is_valid($key)) {
             $errors[] = sprintf(__('The key "%s" must start with a letter and only use lowercase letters, numbers and _.', 'edusystem'), $key);
             continue;
         }
-        if (!array_key_exists($type, edusystem_document_field_types())) {
+        if (!array_key_exists($type, squuad_cert_document_field_types())) {
             $errors[] = sprintf(__('The field "%s" has an invalid type.', 'edusystem'), $label);
             continue;
         }
@@ -154,9 +154,9 @@ function edusystem_sanitize_document_fields($rows)
         }
 
         $options = [];
-        if (edusystem_document_field_has_options($type)) {
+        if (squuad_cert_document_field_has_options($type)) {
             foreach (preg_split('/\r\n|\r|\n/', (string) ($row['options'] ?? '')) as $option) {
-                $option = edusystem_document_field_text($option);
+                $option = squuad_cert_document_field_text($option);
                 if ('' !== $option && !in_array($option, $options, true)) {
                     $options[] = $option;
                 }
@@ -182,7 +182,7 @@ function edusystem_sanitize_document_fields($rows)
 /**
  * Campos definidos en un documento (objeto o array con la columna `fields`).
  */
-function edusystem_get_document_fields($document)
+function squuad_cert_get_document_fields($document)
 {
     $json = is_object($document) ? ($document->fields ?? '') : ($document['fields'] ?? '');
     if (empty($json)) {
@@ -204,7 +204,7 @@ function edusystem_get_document_fields($document)
         }
         $key = $field['key'] ?? '';
         $type = $field['type'] ?? '';
-        if (!edusystem_document_field_key_is_valid($key) || !is_string($type) || !array_key_exists($type, edusystem_document_field_types())) {
+        if (!squuad_cert_document_field_key_is_valid($key) || !is_string($type) || !array_key_exists($type, squuad_cert_document_field_types())) {
             continue;
         }
         $options = [];
@@ -229,7 +229,7 @@ function edusystem_get_document_fields($document)
  * HTML de los campos para un formulario. Los nombres son document_fields[clave]
  * (document_fields[clave][] en las casillas). $values rellena el formulario (p. ej. tras un error).
  */
-function edusystem_render_document_fields($fields, $values = [])
+function squuad_cert_render_document_fields($fields, $values = [])
 {
     $html = '';
 
@@ -284,7 +284,7 @@ function edusystem_render_document_fields($fields, $values = [])
  * Valida las respuestas enviadas (sin barras: pasar wp_unslash($_POST['document_fields'])).
  * Devuelve [respuestas, errores]. Las opciones solo se aceptan si están en la definición.
  */
-function edusystem_document_fields_values($fields, $input)
+function squuad_cert_document_fields_values($fields, $input)
 {
     $values = [];
     $errors = [];
@@ -296,7 +296,7 @@ function edusystem_document_fields_values($fields, $input)
 
         switch ($field['type']) {
             case 'textarea':
-                $value = edusystem_document_field_text($raw, true);
+                $value = squuad_cert_document_field_text($raw, true);
                 break;
             case 'checkbox':
                 $value = array_values(array_intersect($field['options'], array_filter((array) $raw, 'is_string')));
@@ -306,7 +306,7 @@ function edusystem_document_fields_values($fields, $input)
                 $value = is_string($raw) && in_array($raw, $field['options'], true) ? $raw : '';
                 break;
             default:
-                $value = edusystem_document_field_text($raw);
+                $value = squuad_cert_document_field_text($raw);
         }
 
         if ($field['required'] && (is_array($value) ? !$value : '' === trim($value))) {
@@ -322,7 +322,7 @@ function edusystem_document_fields_values($fields, $input)
  * Variables para process_template() a partir de las respuestas: {{clave}} y, en los campos con
  * opciones, {{clave_list}}. Los valores van escapados.
  */
-function edusystem_document_fields_replacements($fields, $values)
+function squuad_cert_document_fields_replacements($fields, $values)
 {
     $replacements = [];
 
@@ -337,7 +337,7 @@ function edusystem_document_fields_replacements($fields, $values)
         }
         $replacements[$key] = ['value' => $text, 'wrap' => false];
 
-        if (edusystem_document_field_has_options($field['type'])) {
+        if (squuad_cert_document_field_has_options($field['type'])) {
             $items = [];
             foreach ($field['options'] as $option) {
                 $selected = is_array($value) ? in_array($option, $value, true) : $value === $option;
@@ -353,7 +353,7 @@ function edusystem_document_fields_replacements($fields, $values)
 /**
  * Documento automático de wp-certificates por su identificador (document_identificator), o null.
  */
-function edusystem_get_automatic_document_by_identificator($identificator)
+function squuad_cert_get_automatic_document_by_identificator($identificator)
 {
     global $wpdb;
 
@@ -374,7 +374,7 @@ function edusystem_get_automatic_document_by_identificator($identificator)
 /**
  * La columna users_signatures.document_fields llega con la versión 3 del esquema (core/schema.php).
  */
-function edusystem_signatures_store_document_fields()
+function squuad_cert_signatures_store_document_fields()
 {
     return version_compare((string) get_option('edusystem_db_version'), '3', '>=');
 }
@@ -383,12 +383,12 @@ function edusystem_signatures_store_document_fields()
  * Respuestas guardadas con una firma parcial del documento (de cualquiera de los usuarios dados),
  * validadas otra vez con la definición actual. Devuelve null si no hay respuestas válidas.
  */
-function edusystem_document_fields_stored_values($document, $fields, $user_ids)
+function squuad_cert_document_fields_stored_values($document, $fields, $user_ids)
 {
     global $wpdb;
 
     $user_ids = array_values(array_filter(array_map('intval', (array) $user_ids)));
-    if (!$fields || !$user_ids || !edusystem_signatures_store_document_fields()) {
+    if (!$fields || !$user_ids || !squuad_cert_signatures_store_document_fields()) {
         return null;
     }
 
@@ -405,7 +405,7 @@ function edusystem_document_fields_stored_values($document, $fields, $user_ids)
         return null;
     }
 
-    [$values, $errors] = edusystem_document_fields_values($fields, $input);
+    [$values, $errors] = squuad_cert_document_fields_values($fields, $input);
 
     return $errors ? null : $values;
 }
@@ -414,7 +414,7 @@ function edusystem_document_fields_stored_values($document, $fields, $user_ids)
  * Variables de los campos con respuestas vacías, para las vías que generan el documento sin pasar por el
  * formulario (admin, plantillas): así no queda el texto literal {{clave}} ni {{clave_list}}.
  */
-function edusystem_document_fields_empty_replacements($document)
+function squuad_cert_document_fields_empty_replacements($document)
 {
-    return $document ? edusystem_document_fields_replacements(edusystem_get_document_fields($document), []) : [];
+    return $document ? squuad_cert_document_fields_replacements(squuad_cert_get_document_fields($document), []) : [];
 }

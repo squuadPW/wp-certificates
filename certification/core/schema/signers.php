@@ -8,14 +8,14 @@
 
 if (!defined('ABSPATH')) exit;
 
-function edusystem_schema_signers()
+function squuad_cert_schema_signers()
 {
     global $wpdb;
     $charset_collate = $wpdb->get_charset_collate();
 
     // Firmantes registrados del sistema (otros roles: director, coordinador...). Un registro por usuario.
     dbDelta(
-        "CREATE TABLE " . $wpdb->prefix . "edusystem_signers (
+        "CREATE TABLE " . $wpdb->prefix . "squuad_cert_signers (
         id INT(11) NOT NULL AUTO_INCREMENT,
         user_id BIGINT(20) UNSIGNED NOT NULL,
         charge VARCHAR(191) NOT NULL DEFAULT '',
@@ -31,7 +31,7 @@ function edusystem_schema_signers()
 
     // Invitaciones: el token solo viaja en el correo; aquí se guarda su HMAC con la clave del sitio
     dbDelta(
-        "CREATE TABLE " . $wpdb->prefix . "edusystem_signer_invitations (
+        "CREATE TABLE " . $wpdb->prefix . "squuad_cert_signer_invitations (
         id INT(11) NOT NULL AUTO_INCREMENT,
         signer_id INT(11) NOT NULL,
         user_id BIGINT(20) UNSIGNED NOT NULL,
@@ -54,7 +54,7 @@ function edusystem_schema_signers()
 
     // Firma propia registrada: solo la crea su titular; inmutable (cambiarla crea otra). Sellada en la cadena (EDUPSG1).
     dbDelta(
-        "CREATE TABLE " . $wpdb->prefix . "edusystem_user_signatures (
+        "CREATE TABLE " . $wpdb->prefix . "squuad_cert_signer_signatures (
         id INT(11) NOT NULL AUTO_INCREMENT,
         user_id BIGINT(20) UNSIGNED NOT NULL,
         strokes LONGTEXT NOT NULL,
@@ -79,7 +79,7 @@ function edusystem_schema_signers()
 
     // Política de firmantes por documento (versionada: un cambio crea una fila nueva y la anterior queda inactiva)
     dbDelta(
-        "CREATE TABLE " . $wpdb->prefix . "edusystem_document_signing_policies (
+        "CREATE TABLE " . $wpdb->prefix . "squuad_cert_signing_policies (
         id INT(11) NOT NULL AUTO_INCREMENT,
         document_certificate_id INT(11) NOT NULL,
         requires_signatures TINYINT(1) NOT NULL DEFAULT 1,
@@ -92,7 +92,7 @@ function edusystem_schema_signers()
     );
 
     dbDelta(
-        "CREATE TABLE " . $wpdb->prefix . "edusystem_document_signing_slots (
+        "CREATE TABLE " . $wpdb->prefix . "squuad_cert_signing_slots (
         id INT(11) NOT NULL AUTO_INCREMENT,
         policy_id INT(11) NOT NULL,
         position INT(11) NOT NULL DEFAULT 0,
@@ -105,7 +105,7 @@ function edusystem_schema_signers()
 
     // Firmantes fijados en cada solicitud (generaliza student_user_id/parent_user_id); se sellan en el evento created
     dbDelta(
-        "CREATE TABLE " . $wpdb->prefix . "edusystem_signature_request_signers (
+        "CREATE TABLE " . $wpdb->prefix . "squuad_cert_request_signers (
         id INT(11) NOT NULL AUTO_INCREMENT,
         request_id INT(11) NOT NULL,
         position INT(11) NOT NULL DEFAULT 0,
@@ -123,7 +123,7 @@ function edusystem_schema_signers()
 
     // Lotes de firma: el manifiesto (request_id:content_sha256) se fija al preparar y se firma exactamente ese
     dbDelta(
-        "CREATE TABLE " . $wpdb->prefix . "edusystem_signature_batches (
+        "CREATE TABLE " . $wpdb->prefix . "squuad_cert_batches (
         id INT(11) NOT NULL AUTO_INCREMENT,
         user_id BIGINT(20) UNSIGNED NOT NULL,
         manifest LONGTEXT NOT NULL,
@@ -143,7 +143,7 @@ function edusystem_schema_signers()
     // emitido. Se reserva al emitir; puede pasar a otra ronda del mismo documento (se reemite con el mismo tomo/folio)
     // o anularse en el libro ('void', con motivo) para reemitir con otra. request_id: la ronda que la usa ahora.
     dbDelta(
-        "CREATE TABLE " . $wpdb->prefix . "edusystem_book_entries (
+        "CREATE TABLE " . $wpdb->prefix . "squuad_cert_book_entries (
         id INT(11) NOT NULL AUTO_INCREMENT,
         student_id BIGINT(20) UNSIGNED NOT NULL,
         document_certificate_id INT(11) NOT NULL,

@@ -59,7 +59,7 @@ $form = static function (string $action, string $label, string $class = 'button'
     <?php if ($uses_config) : ?>
         <p class="description"><?= esc_html__('This site signs with the key of wp-config.php; rotating here only affects the automatic key.', 'edusystem') ?></p>
     <?php endif; ?>
-    <p><?php $form('edusystem_signature_rotate_key', __('Rotate key', 'edusystem'), 'button', __('Create a new signing key? New signatures will use it.', 'edusystem')); ?></p>
+    <p><?php $form('squuad_cert_signature_rotate_key', __('Rotate key', 'edusystem'), 'button', __('Create a new signing key? New signatures will use it.', 'edusystem')); ?></p>
 
     <h2><?= esc_html__('Chain verification', 'edusystem') ?></h2>
     <?php if (!is_array($last)) : ?>
@@ -82,7 +82,7 @@ $form = static function (string $action, string $label, string $class = 'button'
                 <?php foreach ((array) $last['status'] as $status => $total) :
                     $alarm = in_array($status, ['altered', 'retired_key', 'chain_broken', 'unknown_key', 'missing'], true) && $total > 0; ?>
                     <tr>
-                        <td><?= $alarm ? '<strong style="color:#b32d2e">' : '' ?><?= esc_html(edusystem_signature_integrity_label((string) $status)) ?><?= $alarm ? '</strong>' : '' ?></td>
+                        <td><?= $alarm ? '<strong style="color:#b32d2e">' : '' ?><?= esc_html(squuad_cert_signature_integrity_label((string) $status)) ?><?= $alarm ? '</strong>' : '' ?></td>
                         <td style="text-align:right"><?= (int) $total ?></td>
                     </tr>
                 <?php endforeach; ?>
@@ -129,15 +129,15 @@ $form = static function (string $action, string $label, string $class = 'button'
                                     <a href="<?= esc_url(admin_url('admin.php?page=add_admin_form_admission_content&section_tab=student_details&student_id=' . (int) $problem['student_id'])) ?>">#<?= (int) $problem['student_id'] ?></a>
                                 <?php else : ?>—<?php endif; ?>
                             </td>
-                            <td><strong style="color:#b32d2e"><?= esc_html(edusystem_signature_integrity_label($problem['status'])) ?></strong></td>
+                            <td><strong style="color:#b32d2e"><?= esc_html(squuad_cert_signature_integrity_label($problem['status'])) ?></strong></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
             </table>
         <?php endif; ?>
     <?php endif; ?>
-    <p><?php $form('edusystem_signature_verify', __('Verify now', 'edusystem'), 'button button-primary'); ?></p>
-    <p class="description"><?= esc_html__('Also available from the command line: wp edusystem firmas verificar', 'edusystem') ?></p>
+    <p><?php $form('squuad_cert_signature_verify', __('Verify now', 'edusystem'), 'button button-primary'); ?></p>
+    <p class="description"><?= esc_html__('Also available from the command line: wp squuad-cert firmas verificar', 'edusystem') ?></p>
 
     <h2><?= esc_html__('Legacy signatures (before the fingerprint)', 'edusystem') ?></h2>
     <p style="max-width:760px">
@@ -157,6 +157,6 @@ $form = static function (string $action, string $label, string $class = 'button'
             <tr><td><?= esc_html__('Already revoked by a rejection', 'edusystem') ?></td><td style="text-align:right"><?= (int) $count('revoked') ?></td></tr>
         </tbody>
     </table>
-    <p><?php $form('edusystem_signature_legacy_csv', __('Export CSV', 'edusystem')); ?></p>
+    <p><?php $form('squuad_cert_signature_legacy_csv', __('Export CSV', 'edusystem')); ?></p>
     <?php endif; ?>
 </div>

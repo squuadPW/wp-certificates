@@ -1,20 +1,20 @@
 <?php
 /**
  * EduSystem - Certificación: firma del documento por el estudiante y su representante desde Mi Cuenta
- * (create_enrollment_document y funciones edusystem_signature_*). Movido sin cambios desde
+ * (create_enrollment_document y funciones squuad_cert_signature_*). Movido sin cambios desde
  * public/functions/documents.php (ADR 0004, paso 3c).
  */
 
 if (!defined('ABSPATH')) exit;
 
-add_action('wp_ajax_create_enrollment_document', 'create_enrollment_document_callback');
+add_action('wp_ajax_create_enrollment_document', 'squuad_cert_create_enrollment_document_callback');
 
 /**
  * Comprueba que el usuario actual puede firmar por este estudiante y su representante: tiene que ser uno de
  * los dos, y los dos tienen que ser pareja (students.partner_id). Devuelve la fila del estudiante o null.
  * Los IDs son de usuarios de WordPress; si el estudiante es su propio representante, ambos coinciden.
  */
-function edusystem_signature_student($student_user_id, $partner_user_id)
+function squuad_cert_signature_student($student_user_id, $partner_user_id)
 {
     global $wpdb;
 
@@ -42,7 +42,7 @@ function edusystem_signature_student($student_user_id, $partner_user_id)
  * Documento que se puede firmar desde Mi Cuenta: la carta de documentos faltantes, uno de los documentos
  * del estudiante (student_documents, p. ej. ENROLLMENT) o un documento automático de wp-certificates.
  */
-function edusystem_signature_document_is_valid($student, $document_id)
+function squuad_cert_signature_document_is_valid($student, $document_id)
 {
     global $wpdb;
 
@@ -55,20 +55,20 @@ function edusystem_signature_document_is_valid($student, $document_id)
         $document_id
     ));
 
-    return $has_document || edusystem_get_automatic_document_by_identificator($document_id);
+    return $has_document || squuad_cert_get_automatic_document_by_identificator($document_id);
 }
 
 /**
  * Firma decodificada que envía create-enrollment.js (JSON de signature_pad o ["automatic"]); [] si no hay.
  */
-function edusystem_signature_from_request($name)
+function squuad_cert_signature_from_request($name)
 {
     $signature = is_string($_POST[$name] ?? null) ? json_decode(wp_unslash($_POST[$name])) : null;
 
     return is_array($signature) ? $signature : [];
 }
 
-function create_enrollment_document_callback()
+function squuad_cert_create_enrollment_document_callback()
 {
     global $wpdb;
 
@@ -77,7 +77,7 @@ function create_enrollment_document_callback()
     }
 
     // Nadie firma por otro desde una sesión conmutada (Switch de usuario): ADR 0001, decisión abierta 1
-    $switched_from = function_exists('edusystem_signature_session_switched_from') ? edusystem_signature_session_switched_from() : 0;
+    $switched_from = function_exists('squuad_cert_signature_session_switched_from') ? squuad_cert_signature_session_switched_from() : 0;
     if ($switched_from) {
         if (function_exists('edusystem_set_log')) {
             edusystem_set_log(
@@ -91,9 +91,9 @@ function create_enrollment_document_callback()
 
     // Solicitudes de firma (ADR 0002, esquema v5): el servidor deduce de la solicitud el estudiante, los firmantes y
     // el rol; lo que envía el navegador (ids de usuario, documento) no se usa
-    $requests_enabled = function_exists('edusystem_signature_requests_enabled') && edusystem_signature_requests_enabled();
+    $requests_enabled = function_exists('squuad_cert_signature_requests_enabled') && squuad_cert_signature_requests_enabled();
     if ($requests_enabled && !empty($_POST['request_id'])) {
-        edusystem_signature_handle_request_submission(absint($_POST['request_id']));
+        squuad_cert_signature_handle_request_submission(absint($_POST['request_id']));
     }
     $table_student_documents = $wpdb->prefix . 'student_documents';
     $table_users_signatures = $wpdb->prefix . 'users_signatures';
@@ -101,19 +101,19 @@ function create_enrollment_document_callback()
     $partner_user_id = absint($_POST['partner_user_id'] ?? 0);
     $document_id = is_string($_POST['document_id'] ?? null) ? sanitize_text_field(wp_unslash($_POST['document_id'])) : 'ENROLLMENT';
     $grade_selected = is_string($_POST['grade_selected'] ?? null) ? sanitize_text_field(wp_unslash($_POST['grade_selected'])) : null;
-    $signature_student = edusystem_signature_from_request('signature_student');
-    $signature_parent = edusystem_signature_from_request('signature_parent');
+    $signature_student = squuad_cert_signature_from_request('signature_student');
+    $signature_parent = squuad_cert_signature_from_request('signature_parent');
     $file = !empty($_FILES['document']) ? $_FILES['document'] : null;
 
     // Solo el estudiante o su representante, y solo sobre un documento que le corresponde
-    $student = edusystem_signature_student($student_user_id, $partner_user_id);
-    if (!$student || '' === $document_id || !edusystem_signature_document_is_valid($student, $document_id)) {
+    $student = squuad_cert_signature_student($student_user_id, $partner_user_id);
+    if (!$student || '' === $document_id || !squuad_cert_signature_document_is_valid($student, $document_id)) {
         wp_send_json_error(__('You are not allowed to sign this document.', 'edusystem'), 403);
     }
 
     // Con solicitudes, los documentos automáticos ya no se firman por esta vía: página abierta antes de actualizar
     // o JS en caché (se comprueba después del permiso, para no dar pistas a quien no firma este documento)
-    if ($requests_enabled && edusystem_get_automatic_document_by_identificator($document_id)) {
+    if ($requests_enabled && squuad_cert_get_automatic_document_by_identificator($document_id)) {
         if (function_exists('edusystem_set_log')) {
             edusystem_set_log(sprintf('Firma sin solicitud rechazada (%s): la página era anterior a la actualización', $document_id), 'signature_blocked');
         }
@@ -141,12 +141,12 @@ function create_enrollment_document_callback()
     // Campos adicionales del documento: si solo firma uno (sin PDF) las respuestas se guardan con su firma
     // para que el segundo firmante vea el mismo documento. Se validan otra vez con la definición del documento.
     $document_fields_json = null;
-    if (!$file && edusystem_signatures_store_document_fields()) {
-        $automatic_document = edusystem_get_automatic_document_by_identificator($document_id);
-        $fields = $automatic_document ? edusystem_get_document_fields($automatic_document) : [];
+    if (!$file && squuad_cert_signatures_store_document_fields()) {
+        $automatic_document = squuad_cert_get_automatic_document_by_identificator($document_id);
+        $fields = $automatic_document ? squuad_cert_get_document_fields($automatic_document) : [];
         if ($fields) {
             $input = is_string($_POST['document_fields'] ?? null) ? json_decode(wp_unslash($_POST['document_fields']), true) : null;
-            [$field_values, $field_errors] = edusystem_document_fields_values($fields, $input);
+            [$field_values, $field_errors] = squuad_cert_document_fields_values($fields, $input);
             if ($field_errors) {
                 wp_send_json_error(implode(' ', $field_errors));
             }
@@ -181,8 +181,8 @@ function create_enrollment_document_callback()
             $data['document_fields'] = $document_fields_json;
         }
         // Con la evidencia de firma (ADR 0001) si el esquema ya está en v4; si no, se guarda como antes
-        if (function_exists('edusystem_signature_insert')) {
-            edusystem_signature_insert($data, (int) $student->id, $user_id === $student_user_id ? 'student' : 'parent');
+        if (function_exists('squuad_cert_signature_insert')) {
+            squuad_cert_signature_insert($data, (int) $student->id, $user_id === $student_user_id ? 'student' : 'parent');
         } else {
             $wpdb->insert($table_users_signatures, $data);
         }
@@ -226,7 +226,7 @@ function create_enrollment_document_callback()
         ));
         if ($has_row) {
             $wpdb->update($table_student_documents, $document_row, ['student_id' => $student->id, 'document_id' => $document_id]);
-        } elseif ($automatic_document = edusystem_get_automatic_document_by_identificator($document_id)) {
+        } elseif ($automatic_document = squuad_cert_get_automatic_document_by_identificator($document_id)) {
             // wp-certificates solo crea la fila del documento automático para los estudiantes que existían al
             // guardarlo en el admin: a los registrados después se les crea aquí, con sus mismos valores
             $wpdb->insert($table_student_documents, $document_row + [
@@ -239,7 +239,7 @@ function create_enrollment_document_callback()
         }
 
         // Documento completo: las respuestas guardadas con la firma parcial ya están en el PDF
-        if (edusystem_signatures_store_document_fields()) {
+        if (squuad_cert_signatures_store_document_fields()) {
             $wpdb->query($wpdb->prepare(
                 "UPDATE {$table_users_signatures} SET document_fields = NULL WHERE document_id = %s AND user_id IN (%d, %d)",
                 $document_id,
@@ -258,35 +258,35 @@ function create_enrollment_document_callback()
  * - La primera firma congela el contenido: el hash que mostró el navegador tiene que ser el borrador vigente.
  * - El PDF se acepta una sola vez, cuando ya firmaron todos, y cierra la solicitud como completada.
  */
-function edusystem_signature_handle_request_submission(int $request_id): void
+function squuad_cert_signature_handle_request_submission(int $request_id): void
 {
     global $wpdb;
 
-    $request = edusystem_signature_request_get($request_id);
+    $request = squuad_cert_signature_request_get($request_id);
     $user_id = get_current_user_id();
-    $role = $request ? edusystem_signature_request_role($request, $user_id) : '';
+    $role = $request ? squuad_cert_signature_request_role($request, $user_id) : '';
     if (!$request || '' === $role) {
         if (function_exists('edusystem_set_log')) {
             edusystem_set_log(sprintf('Firma rechazada: el usuario %d no firma la solicitud %d', $user_id, $request_id), 'signature_blocked');
         }
         wp_send_json_error(__('You are not allowed to sign this document.', 'edusystem'), 403);
     }
-    if (!in_array($request->status, EDUSYSTEM_SIGNATURE_REQUEST_OPEN, true)) {
+    if (!in_array($request->status, SQUUAD_CERT_SIGNATURE_REQUEST_OPEN, true)) {
         wp_send_json_error(__('This document no longer accepts signatures. Please reload the page.', 'edusystem'), 409);
     }
-    if (function_exists('edusystem_signature_request_slot_open') && !edusystem_signature_request_slot_open($request, $role)) {
+    if (function_exists('squuad_cert_signature_request_slot_open') && !squuad_cert_signature_request_slot_open($request, $role)) {
         wp_send_json_error(__('This document is still waiting for previous signatures.', 'edusystem'), 409);
     }
 
     $shown_sha256 = is_string($_POST['content_sha256'] ?? null) ? strtolower(sanitize_text_field(wp_unslash($_POST['content_sha256']))) : '';
-    $signature_student = edusystem_signature_from_request('signature_student');
-    $signature_parent = edusystem_signature_from_request('signature_parent');
+    $signature_student = squuad_cert_signature_from_request('signature_student');
+    $signature_parent = squuad_cert_signature_from_request('signature_parent');
     if (('student' === $role && $signature_parent) || ('parent' === $role && $signature_student)) {
         wp_send_json_error(__('You can only sign your own part of the document.', 'edusystem'), 403);
     }
     $signature = 'student' === $role ? $signature_student : $signature_parent;
     $file = !empty($_FILES['document']) ? $_FILES['document'] : null;
-    $signed_roles = edusystem_signature_request_signed_roles((int) $request->id);
+    $signed_roles = squuad_cert_signature_request_signed_roles((int) $request->id);
 
     // 1) Firma del usuario (la primera congela el contenido)
     if ($signature) {
@@ -294,18 +294,18 @@ function edusystem_signature_handle_request_submission(int $request_id): void
             wp_send_json_error(__('You already signed this document.', 'edusystem'), 409);
         }
         // Consentimiento explícito (ADR 0002, punto 7): sin la casilla no hay firma, también con la firma automática
-        $consent = edusystem_signature_consent_evidence(
+        $consent = squuad_cert_signature_consent_evidence(
             is_string($_POST['consent_version'] ?? null) ? sanitize_text_field(wp_unslash($_POST['consent_version'])) : ''
         );
         if (null === $consent) {
             wp_send_json_error(__('To sign, you must accept signing the document electronically.', 'edusystem'), 400);
         }
-        if (!edusystem_signature_request_freeze((int) $request->id, $shown_sha256, $user_id)) {
+        if (!squuad_cert_signature_request_freeze((int) $request->id, $shown_sha256, $user_id)) {
             wp_send_json_error(__('The document was updated while you had it open. Please reload the page and review it again before signing.', 'edusystem'), 409);
         }
-        $request = edusystem_signature_request_get((int) $request->id);
+        $request = squuad_cert_signature_request_get((int) $request->id);
         $signature_json = wp_json_encode($signature);
-        $signature_id = edusystem_signature_insert([
+        $signature_id = squuad_cert_signature_insert([
             'user_id' => $user_id,
             'signature' => $signature_json,
             'document_id' => $request->document_id,
@@ -314,30 +314,30 @@ function edusystem_signature_handle_request_submission(int $request_id): void
             'student_document_id' => (int) $request->student_document_id,
             'round' => (int) $request->round,
             'content_sha256' => (string) $request->content_sha256,
-            'request_created_fingerprint' => edusystem_signature_request_created_fingerprint((int) $request->id),
+            'request_created_fingerprint' => squuad_cert_signature_request_created_fingerprint((int) $request->id),
             'template_version_sha256' => (string) $request->template_version_sha256,
             'signature_method' => '["automatic"]' === $signature_json ? 'automatic' : 'drawn',
         ] + $consent);
         if (!$signature_id) {
             wp_send_json_error(__('Your signature could not be saved. Please reload the page and try again.', 'edusystem'), 409);
         }
-        edusystem_signature_request_log_event((int) $request->id, 'signed', ['role' => $role, 'signature_id' => $signature_id] + $consent);
+        squuad_cert_signature_request_log_event((int) $request->id, 'signed', ['role' => $role, 'signature_id' => $signature_id] + $consent);
 
-        $signed_roles = edusystem_signature_request_signed_roles((int) $request->id);
-        $all_signed = !array_diff(edusystem_signature_request_required_roles($request), $signed_roles);
-        edusystem_signature_request_transition((int) $request->id, ['open', 'partially_signed'], $all_signed ? 'signed' : 'partially_signed');
+        $signed_roles = squuad_cert_signature_request_signed_roles((int) $request->id);
+        $all_signed = !array_diff(squuad_cert_signature_request_required_roles($request), $signed_roles);
+        squuad_cert_signature_request_transition((int) $request->id, ['open', 'partially_signed'], $all_signed ? 'signed' : 'partially_signed');
         // Estudiante y representante terminaron: avisar a los firmantes institucionales (ADR 0003, paso 10)
-        if (function_exists('edusystem_signer_notify_open_slots')) {
-            edusystem_signer_notify_open_slots((int) $request->id);
+        if (function_exists('squuad_cert_signer_notify_open_slots')) {
+            squuad_cert_signer_notify_open_slots((int) $request->id);
         }
-        $request = edusystem_signature_request_get((int) $request->id);
+        $request = squuad_cert_signature_request_get((int) $request->id);
     }
 
     // 2) PDF final: una sola vez, con todas las firmas y sobre el contenido congelado
     $attach_id = null;
     // Faltan firmas institucionales (fase 2): el PDF lo generará el último firmante; la firma de este usuario ya quedó
-    if ($file && 'signed' !== $request->status && function_exists('edusystem_signature_request_institutional_pending')
-        && edusystem_signature_request_institutional_pending($request)) {
+    if ($file && 'signed' !== $request->status && function_exists('squuad_cert_signature_request_institutional_pending')
+        && squuad_cert_signature_request_institutional_pending($request)) {
         $file = null;
     }
     if ($file) {
@@ -371,11 +371,11 @@ function edusystem_signature_handle_request_submission(int $request_id): void
 
         // Fila del documento del estudiante: la de la solicitud, la existente o una nueva (documento automático)
         $student_document_id = (int) $request->student_document_id
-            ?: (int) edusystem_signature_student_document_id((int) $request->student_id, (string) $request->document_id);
+            ?: (int) squuad_cert_signature_student_document_id((int) $request->student_id, (string) $request->document_id);
         $document_row = ['status' => 1, 'attachment_id' => $attach_id, 'upload_at' => date('Y-m-d H:i:s')];
 
         // Solo una finalización: si otra petición ya la completó, este PDF se descarta
-        $completed = edusystem_signature_request_transition((int) $request->id, ['signed'], 'completed', [
+        $completed = squuad_cert_signature_request_transition((int) $request->id, ['signed'], 'completed', [
             'completed_at_utc' => gmdate('Y-m-d H:i:s'),
             'final_attachment_id' => $attach_id,
             'final_pdf_sha256' => hash('sha256', $pdf),
@@ -388,7 +388,7 @@ function edusystem_signature_handle_request_submission(int $request_id): void
 
         if ($student_document_id) {
             $wpdb->update($wpdb->prefix . 'student_documents', $document_row, ['id' => $student_document_id]);
-        } elseif ($automatic_document = edusystem_get_automatic_document_by_identificator((string) $request->document_id)) {
+        } elseif ($automatic_document = squuad_cert_get_automatic_document_by_identificator((string) $request->document_id)) {
             $wpdb->insert($wpdb->prefix . 'student_documents', $document_row + [
                 'student_id' => (int) $request->student_id,
                 'document_id' => (string) $request->document_id,
@@ -399,7 +399,7 @@ function edusystem_signature_handle_request_submission(int $request_id): void
             $student_document_id = (int) $wpdb->insert_id;
         }
         if ($student_document_id && !(int) $request->student_document_id) {
-            $wpdb->update($wpdb->prefix . 'edusystem_signature_requests', ['student_document_id' => $student_document_id], ['id' => (int) $request->id]);
+            $wpdb->update($wpdb->prefix . 'squuad_cert_requests', ['student_document_id' => $student_document_id], ['id' => (int) $request->id]);
         }
     }
 

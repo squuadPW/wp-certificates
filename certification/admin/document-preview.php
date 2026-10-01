@@ -19,59 +19,59 @@ declare(strict_types=1);
 
 if (!defined('ABSPATH')) exit;
 
-add_filter('wpc_document_preview', 'edusystem_document_preview_markup', 10, 2);
-function edusystem_document_preview_markup($markup, $document)
+add_filter('wpc_document_preview', 'squuad_cert_document_preview_markup', 10, 2);
+function squuad_cert_document_preview_markup($markup, $document)
 {
     if (!is_object($document) || empty($document->id) || !function_exists('process_template')) {
         return $markup;
     }
-    $preview = edusystem_document_preview_data($document);
+    $preview = squuad_cert_document_preview_data($document);
 
     ob_start();
-    include EDUSYSTEM_CERTIFICATION_PATH . 'admin/templates/document-preview.php';
+    include SQUUAD_CERT_MODULE_PATH . 'admin/templates/document-preview.php';
 
     return (string) ob_get_clean();
 }
 
 /** Camino por el que sale el documento real: 'automatic', 'issued' o 'generate'. */
-function edusystem_document_preview_mode(object $document): string
+function squuad_cert_document_preview_mode(object $document): string
 {
     if ('automatic' === ($document->type ?? '')) {
         return 'automatic';
     }
 
-    return function_exists('edusystem_signature_issue_signers') && edusystem_signature_issue_signers($document) ? 'issued' : 'generate';
+    return function_exists('squuad_cert_signature_issue_signers') && squuad_cert_signature_issue_signers($document) ? 'issued' : 'generate';
 }
 
 /** Recuadro de firma de ejemplo, como los del PDF final (trazo en SVG y fecha). */
-function edusystem_document_preview_signature_box(string $name): string
+function squuad_cert_document_preview_signature_box(string $name): string
 {
     $strokes = '[{"penColor":"black","points":[{"x":20,"y":60},{"x":40,"y":30},{"x":60,"y":65},{"x":80,"y":25},{"x":100,"y":60},'
         . '{"x":120,"y":35},{"x":140,"y":62},{"x":160,"y":30},{"x":180,"y":58},{"x":200,"y":40},{"x":220,"y":50}]}]';
-    $svg = function_exists('edusystem_signature_svg') ? edusystem_signature_svg($strokes, $name) : '';
+    $svg = function_exists('squuad_cert_signature_svg') ? squuad_cert_signature_svg($strokes, $name) : '';
 
     return $svg . '<div style="font-size:10px;color:#666">' . esc_html(gmdate('Y-m-d H:i')) . ' UTC</div>';
 }
 
 /** Recuadro con nombre y cargo debajo de la línea, como en el bloque de firmas del PDF final. */
-function edusystem_document_preview_signature_block(string $name, string $label): string
+function squuad_cert_document_preview_signature_block(string $name, string $label): string
 {
-    return '<div style="min-width:260px;text-align:center">' . edusystem_document_preview_signature_box($name)
+    return '<div style="min-width:260px;text-align:center">' . squuad_cert_document_preview_signature_box($name)
         . '<div style="border-top:1px solid #333;margin-top:4px;padding-top:4px"><strong>' . esc_html($name) . '</strong><br>'
         . esc_html($label) . '</div></div>';
 }
 
 /** Firmantes de ejemplo según los firmantes configurados del documento (nombres y cargos de ejemplo). */
-function edusystem_document_preview_signers(object $document): array
+function squuad_cert_document_preview_signers(object $document): array
 {
-    $policy = function_exists('edusystem_signing_policy') ? edusystem_signing_policy($document) : ['slots' => []];
+    $policy = function_exists('squuad_cert_signing_policy') ? squuad_cert_signing_policy($document) : ['slots' => []];
     $signers = [];
     $n = 0;
     foreach ($policy['slots'] ?? [] as $slot) {
         if ('signer' === $slot['slot_type'] && !empty($slot['signer_id'])) {
             $n++;
             $signers[] = [
-                'slot_key' => edusystem_signer_slot_key((int) $slot['signer_id']),
+                'slot_key' => squuad_cert_signer_slot_key((int) $slot['signer_id']),
                 'signer_id' => (int) $slot['signer_id'],
                 /* translators: %d: number of the signer in the document */
                 'name' => sprintf(__('Signer %d (example)', 'edusystem'), $n),
@@ -87,7 +87,7 @@ function edusystem_document_preview_signers(object $document): array
 }
 
 /** Tabla de ejemplo con el mismo formato que las tablas de notas reales (html-notes.php). */
-function edusystem_document_preview_notes_table(array $headers, array $rows): string
+function squuad_cert_document_preview_notes_table(array $headers, array $rows): string
 {
     $head = '';
     foreach ($headers as $header => $width) {
@@ -103,7 +103,7 @@ function edusystem_document_preview_notes_table(array $headers, array $rows): st
 }
 
 /** Tabla simple de ejemplo con bordes (formato de las tablas de documentos de html-documents.php). */
-function edusystem_document_preview_plain_table(array $headers, array $rows): string
+function squuad_cert_document_preview_plain_table(array $headers, array $rows): string
 {
     $cell = 'border: 1px solid #333; padding: 4px 6px; text-align: left;';
     $html = '<table style="width: 100%; border-collapse: collapse; margin: 0 !important"><thead><tr>';
@@ -122,7 +122,7 @@ function edusystem_document_preview_plain_table(array $headers, array $rows): st
  * Valores de ejemplo de todas las variables de los documentos (las de get_replacements_variables(), las de firma,
  * las de tomo y folio y los campos adicionales del documento), con el mismo formato que los reales.
  */
-function edusystem_document_preview_replacements(object $document, string $mode): array
+function squuad_cert_document_preview_replacements(object $document, string $mode): array
 {
     $text = static fn(string $value): array => ['value' => esc_html($value), 'wrap' => true];
     $html = static fn(string $value): array => ['value' => $value, 'wrap' => false];
@@ -186,47 +186,47 @@ function edusystem_document_preview_replacements(object $document, string $mode)
         'institute_phone' => $text('+1 (305) 555-0103'),
         'payment_full_year_check' => $html('✓'),
         'payment_balance_check' => $html('  '),
-        'table_notes' => $html(edusystem_document_preview_notes_table(
+        'table_notes' => $html(squuad_cert_document_preview_notes_table(
             ['PERIOD' => 150, 'CODE' => 70, 'COURSE' => 0, 'CH' => 40, '0-100' => 40, '0-4' => 40],
             array_map(static fn($s) => ['2025-2026', $s[0], $s[1], $s[5], $s[2], $s[4]], $subjects)
         )),
-        'new_table_notes' => $html(edusystem_document_preview_notes_table(
+        'new_table_notes' => $html(squuad_cert_document_preview_notes_table(
             ['Semester / Academic Year' => 70, 'Course Code and Title' => 0, 'Status' => 40, 'Grade' => 40, 'GPA' => 40],
             array_map(static fn($s) => ['2025-2026', $s[0] . ' - ' . $s[1], 'T', $s[3], $s[4]], $subjects)
         )),
         'table_notes_summary' => $html("<table class='wp-list-table widefat fixed posts striped' style='margin-top: 20px; border: 1px dashed #c3c4c7;' id=\"tablenotcustom\"><tbody>"
             . "<tr><td colspan='12'>Total Quality Points: 14</td></tr><tr><td colspan='12'>Earned CH: 4</td></tr><tr><td colspan='12'>GPA: 3.5</td></tr></tbody></table>"),
-        'table_inscriptions' => $html(edusystem_document_preview_notes_table(
+        'table_inscriptions' => $html(squuad_cert_document_preview_notes_table(
             ['Subject - Code' => 0, 'Period - cut' => 80, 'Calification' => 80, 'Status' => 90],
             array_map(static fn($s) => [$s[1] . ' - ' . $s[0], '2025-2026 - A', $s[2], 'Approved'], $subjects)
         )),
-        'table_notes_period' => $html(edusystem_document_preview_notes_table(
+        'table_notes_period' => $html(squuad_cert_document_preview_notes_table(
             ['Subject - Code' => 0, 'Calification' => 0, 'Status' => 0],
             array_map(static fn($s) => [$s[1] . ' - ' . $s[0], $s[2], 'Approved'], $subjects)
         )),
-        'subjects_enrolled' => $html(edusystem_document_preview_plain_table(['Code', 'Subject'], array_map(static fn($s) => [$s[0], $s[1]], $subjects))),
-        'subjects_enrolled_spanish' => $html(edusystem_document_preview_plain_table(['Código', 'Materia'], array_map(static fn($s) => [$s[0], $s[1]], $subjects))),
-        'payment_method_table' => $html(edusystem_document_preview_plain_table(['Payment method', 'Amount'], [['Credit card', '$1,200.00'], ['Bank transfer', '$800.00']])),
-        'payment_plan_table' => $html(edusystem_document_preview_plain_table(['Concept', 'Date', 'Amount'], [['Registration fee', '08/01/2025', '$150.00'], ['Installment 1', '09/01/2025', '$500.00'], ['Installment 2', '10/01/2025', '$500.00']])),
-        'educational_background_information' => $html(edusystem_document_preview_plain_table(['Institution', 'City / Country', 'Title', 'Year'], [['Example High School', 'Caracas / Venezuela', 'High School Diploma', '2024']])),
+        'subjects_enrolled' => $html(squuad_cert_document_preview_plain_table(['Code', 'Subject'], array_map(static fn($s) => [$s[0], $s[1]], $subjects))),
+        'subjects_enrolled_spanish' => $html(squuad_cert_document_preview_plain_table(['Código', 'Materia'], array_map(static fn($s) => [$s[0], $s[1]], $subjects))),
+        'payment_method_table' => $html(squuad_cert_document_preview_plain_table(['Payment method', 'Amount'], [['Credit card', '$1,200.00'], ['Bank transfer', '$800.00']])),
+        'payment_plan_table' => $html(squuad_cert_document_preview_plain_table(['Concept', 'Date', 'Amount'], [['Registration fee', '08/01/2025', '$150.00'], ['Installment 1', '09/01/2025', '$500.00'], ['Installment 2', '10/01/2025', '$500.00']])),
+        'educational_background_information' => $html(squuad_cert_document_preview_plain_table(['Institution', 'City / Country', 'Title', 'Year'], [['Example High School', 'Caracas / Venezuela', 'High School Diploma', '2024']])),
         'admission_requirements_table' => $html('<ul style="list-style-type: none; padding-left: 0; margin-top: 0"><li style="margin-bottom: 5px">✓ ' . esc_html__('Example requirement 1', 'edusystem') . '</li><li style="margin-bottom: 5px">✓ ' . esc_html__('Example requirement 2', 'edusystem') . '</li></ul>'),
     ];
 
     // Campos adicionales del documento: la primera opción marcada o un texto de ejemplo
-    if (function_exists('edusystem_get_document_fields') && function_exists('edusystem_document_fields_replacements')) {
-        $fields = edusystem_get_document_fields($document);
+    if (function_exists('squuad_cert_get_document_fields') && function_exists('squuad_cert_document_fields_replacements')) {
+        $fields = squuad_cert_get_document_fields($document);
         $values = [];
         foreach ($fields as $field) {
-            $values[$field['key']] = edusystem_document_field_has_options($field['type'])
+            $values[$field['key']] = squuad_cert_document_field_has_options($field['type'])
                 ? ('checkbox' === $field['type'] ? array_slice($field['options'], 0, 1) : ($field['options'][0] ?? ''))
                 /* translators: %s: label of the additional field */
                 : sprintf(__('%s (example)', 'edusystem'), $field['label']);
         }
-        $replacements = array_merge(edusystem_document_fields_replacements($fields, $values), $replacements);
+        $replacements = array_merge(squuad_cert_document_fields_replacements($fields, $values), $replacements);
     }
 
-    $replacements['signature_section'] = $html(EDUSYSTEM_SIGNATURE_SLOT);
-    $replacements['admission_signature_fgu'] = $html(EDUSYSTEM_SIGNATURE_SLOT);
+    $replacements['signature_section'] = $html(SQUUAD_CERT_SIGNATURE_SLOT);
+    $replacements['admission_signature_fgu'] = $html(SQUUAD_CERT_SIGNATURE_SLOT);
 
     // "Generar" no tiene variables por firmante (quedan como texto, igual que en el documento real); la firma-imagen
     // heredada solo existe si el documento la pide y el sitio aún la permite
@@ -234,7 +234,7 @@ function edusystem_document_preview_replacements(object $document, string $mode)
         if (!empty($document->signature_required)) {
             $replacements['user_sign'] = $text(__('Signer (example)', 'edusystem'));
             $replacements['position_user_charge'] = $text(__('Position (example)', 'edusystem'));
-            $replacements['signature'] = $html(edusystem_document_preview_signature_box(__('Signer (example)', 'edusystem')));
+            $replacements['signature'] = $html(squuad_cert_document_preview_signature_box(__('Signer (example)', 'edusystem')));
         }
         $replacements['qrcode'] = $html('<div id="qrcode"></div>');
 
@@ -242,12 +242,12 @@ function edusystem_document_preview_replacements(object $document, string $mode)
     }
 
     // Firmas: estudiante, representante y firmantes del sistema, cada uno con su recuadro de ejemplo
-    $signers = edusystem_document_preview_signers($document);
+    $signers = squuad_cert_document_preview_signers($document);
     $slots = array_column($signers, 'slot_key');
     $has_student = in_array('student', $slots, true);
     $has_parent = in_array('parent', $slots, true);
-    $replacements['signature_student'] = $html($has_student ? edusystem_signer_slot_marker('student') : '');
-    $replacements['signature_parent'] = $html($has_parent ? edusystem_signer_slot_marker('parent') : '');
+    $replacements['signature_student'] = $html($has_student ? squuad_cert_signer_slot_marker('student') : '');
+    $replacements['signature_parent'] = $html($has_parent ? squuad_cert_signer_slot_marker('parent') : '');
     $replacements['requires_student_signature'] = $html($has_student ? '1' : '');
     $replacements['requires_parent_signature'] = $html($has_parent ? '1' : '');
     $replacements['student_is_own_parent'] = $html('');
@@ -258,7 +258,7 @@ function edusystem_document_preview_replacements(object $document, string $mode)
         }
         $n++;
         $values = [
-            'signature' => $html(edusystem_signer_slot_marker($signer['slot_key'])),
+            'signature' => $html(squuad_cert_signer_slot_marker($signer['slot_key'])),
             'user_sign' => $text($signer['name']),
             'position_user_charge' => $text($signer['charge']),
         ];
@@ -283,16 +283,16 @@ function edusystem_document_preview_replacements(object $document, string $mode)
  * Datos de la vista previa: modo, HTML con los valores de ejemplo y las firmas dibujadas, opciones de la página y
  * variables que la plantilla usa pero no existen.
  */
-function edusystem_document_preview_data(object $document): array
+function squuad_cert_document_preview_data(object $document): array
 {
-    $mode = edusystem_document_preview_mode($document);
-    $replacements = edusystem_document_preview_replacements($document, $mode);
+    $mode = squuad_cert_document_preview_mode($document);
+    $replacements = squuad_cert_document_preview_replacements($document, $mode);
     // Variables generales del propio documento (wp-certificates): {{document_name}} y {{document_code}}
     if (function_exists('squuad_cert_document_replacements')) {
         $replacements = array_merge($replacements, squuad_cert_document_replacements($document));
     }
     $parts = ['header' => (string) $document->header, 'content' => (string) $document->content, 'footer' => (string) $document->footer];
-    $signers = edusystem_document_preview_signers($document);
+    $signers = squuad_cert_document_preview_signers($document);
 
     // Variables escritas en la plantilla que no existen: en el documento real quedan como texto
     preg_match_all('/\{\{[#^\/]?(\w+)\}\}/', implode('', $parts), $found);
@@ -312,12 +312,12 @@ function edusystem_document_preview_data(object $document): array
                 $html .= '<div class="' . $wrap . '-' . $key . '">' . process_template($part, $replacements) . '</div>';
             }
         }
-        $html = edusystem_signature_strip_unused_signer_tags($html);
+        $html = squuad_cert_signature_strip_unused_signer_tags($html);
         // Firmantes del sistema que la plantilla no coloca: bloque al final, como en el documento real
         $missing = '';
         foreach ($signers as $signer) {
-            if ($signer['phase'] >= 2 && false === strpos($html, edusystem_signer_slot_marker($signer['slot_key']))) {
-                $missing .= '<div style="min-width:260px;text-align:center">' . edusystem_signer_slot_marker($signer['slot_key'])
+            if ($signer['phase'] >= 2 && false === strpos($html, squuad_cert_signer_slot_marker($signer['slot_key']))) {
+                $missing .= '<div style="min-width:260px;text-align:center">' . squuad_cert_signer_slot_marker($signer['slot_key'])
                     . '<div style="border-top:1px solid #333;margin-top:4px;padding-top:4px"><strong>' . esc_html($signer['name']) . '</strong><br>'
                     . esc_html($signer['charge']) . '</div></div>';
             }
@@ -332,13 +332,13 @@ function edusystem_document_preview_data(object $document): array
     $section = '';
     $render = static function (string $text) use (&$section, $signers, $labels): string {
         foreach ($signers as $signer) {
-            $marker = edusystem_signer_slot_marker($signer['slot_key']);
+            $marker = squuad_cert_signer_slot_marker($signer['slot_key']);
             if ($signer['phase'] >= 2) {
-                $text = str_replace($marker, edusystem_document_preview_signature_box($signer['name']), $text);
+                $text = str_replace($marker, squuad_cert_document_preview_signature_box($signer['name']), $text);
             }
         }
         foreach ($labels as $role => [$name, $label]) {
-            $text = str_replace(edusystem_signer_slot_marker($role), edusystem_document_preview_signature_block($name, $label), $text);
+            $text = str_replace(squuad_cert_signer_slot_marker($role), squuad_cert_document_preview_signature_block($name, $label), $text);
         }
         return $text;
     };
@@ -346,20 +346,20 @@ function edusystem_document_preview_data(object $document): array
     $all = implode('', array_filter([$html, ...array_values($parts)]));
     foreach ($labels as $role => [$name, $label]) {
         $in_policy = 'generate' === $mode || in_array($role, array_column($signers, 'slot_key'), true);
-        if ($in_policy && false === strpos($all, edusystem_signer_slot_marker($role))) {
-            $users .= edusystem_document_preview_signature_block($name, $label);
+        if ($in_policy && false === strpos($all, squuad_cert_signer_slot_marker($role))) {
+            $users .= squuad_cert_document_preview_signature_block($name, $label);
         }
     }
     $users_block = '<div style="display:flex;flex-wrap:wrap;gap:24px;margin-top:16px">' . $users . '</div>';
 
     if (null !== $html) {
-        $html = str_replace([EDUSYSTEM_SIGNATURE_SLOT, EDUSYSTEM_SIGNATURE_QR_SLOT], [$users_block, ''], $render($html));
-        if (function_exists('edusystem_signature_inline_images')) {
-            $html = edusystem_signature_inline_images($html);
+        $html = str_replace([SQUUAD_CERT_SIGNATURE_SLOT, SQUUAD_CERT_SIGNATURE_QR_SLOT], [$users_block, ''], $render($html));
+        if (function_exists('squuad_cert_signature_inline_images')) {
+            $html = squuad_cert_signature_inline_images($html);
         }
     } else {
         foreach ($parts as $key => $part) {
-            $parts[$key] = str_replace(EDUSYSTEM_SIGNATURE_SLOT, $users_block, $render($part));
+            $parts[$key] = str_replace(SQUUAD_CERT_SIGNATURE_SLOT, $users_block, $render($part));
         }
     }
 
@@ -371,8 +371,8 @@ function edusystem_document_preview_data(object $document): array
         'height_size' => (float) $document->height_size,
     ];
     $page = 'automatic' === $mode
-        ? edusystem_signature_pdf_page_from_options(['orientation' => 'portrait', 'unit' => 'mm', 'paper_format' => 'a4', 'width_size' => 0, 'height_size' => 0], 7.62)
-        : edusystem_signature_pdf_page_from_options($options, 0);
+        ? squuad_cert_signature_pdf_page_from_options(['orientation' => 'portrait', 'unit' => 'mm', 'paper_format' => 'a4', 'width_size' => 0, 'height_size' => 0], 7.62)
+        : squuad_cert_signature_pdf_page_from_options($options, 0);
 
     return [
         'mode' => $mode,
@@ -392,6 +392,6 @@ function edusystem_document_preview_data(object $document): array
         ],
         'unknown' => $unknown,
         'signature_blocked' => 'generate' === $mode && !empty($document->signature_required)
-            && function_exists('edusystem_third_party_signatures_blocked') && edusystem_third_party_signatures_blocked(),
+            && function_exists('squuad_cert_third_party_signatures_blocked') && squuad_cert_third_party_signatures_blocked(),
     ];
 }

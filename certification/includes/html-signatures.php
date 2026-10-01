@@ -1,12 +1,12 @@
 <?php
 /**
- * EduSystem - Certificación: recuadros de firma de los documentos (get_signature_section, edusystem_signature_pad_box,
- * get_signature_section_fgu). Movido sin cambios desde includes/html-documents.php (ADR 0004, paso 3c).
+ * EduSystem - Certificación: recuadros de firma de los documentos (squuad_cert_get_signature_section, squuad_cert_signature_pad_box,
+ * squuad_cert_get_signature_section_fgu). Movido sin cambios desde includes/html-documents.php (ADR 0004, paso 3c).
  */
 
 if (!defined('ABSPATH')) exit;
 
-function get_signature_section($student): string
+function squuad_cert_get_signature_section($student): string
 {
 
     global $current_user;
@@ -101,11 +101,11 @@ function get_signature_section($student): string
 
 /**
  * Recuadro de firma de un solo firmante, para colocarlo por separado en la plantilla con {{signature_student}} o
- * {{signature_parent}} (ADR 0003, variables de firma por firmante). Mismo marcado e ids que get_signature_section(),
+ * {{signature_parent}} (ADR 0003, variables de firma por firmante). Mismo marcado e ids que squuad_cert_get_signature_section(),
  * que sigue igual para {{signature_section}}. $role: 'student' o 'parent'. Sin recuadro del representante si el
  * estudiante es su propio representante.
  */
-function edusystem_signature_pad_box($student, string $role): string
+function squuad_cert_signature_pad_box($student, string $role): string
 {
     if (!in_array($role, ['student', 'parent'], true)) {
         return '';
@@ -161,7 +161,7 @@ function edusystem_signature_pad_box($student, string $role): string
     return (string) ob_get_clean();
 }
 
-function get_signature_section_fgu($student): string
+function squuad_cert_get_signature_section_fgu($student): string
 {
     ob_start();
     ?>

@@ -1,14 +1,14 @@
 <?php
 /**
  * EduSystem - Certificación: modales y sección "Documentos por firmar" del escritorio de Mi Cuenta
- * (modal_missing_student, modal_enrollment_student, modal_document_automatic,
- * edusystem_signature_account_documents_to_sign). Movido sin cambios desde public/functions/account/dashboard.php
- * (ADR 0004, paso 3c). modal_enrollment_student() no se usa (ya no se llamaba en main).
+ * (squuad_cert_modal_missing_student, squuad_cert_modal_enrollment_student, squuad_cert_modal_document_automatic,
+ * squuad_cert_signature_account_documents_to_sign). Movido sin cambios desde public/functions/account/dashboard.php
+ * (ADR 0004, paso 3c). squuad_cert_modal_enrollment_student() no se usa (ya no se llamaba en main).
  */
 
 if (!defined('ABSPATH')) exit;
 
-function modal_missing_student()
+function squuad_cert_modal_missing_student()
 {
     // Imprime el contenido del archivo modal-reset-password.php
     global $wpdb, $current_user;
@@ -49,11 +49,11 @@ function modal_missing_student()
     $documents_required_not_approved = $wpdb->get_results("SELECT * FROM {$table_student_documents} WHERE `status` != 5 AND is_visible=1 AND is_required = 1 AND student_id={$student->id}");
     $today = date('m-d-Y');
     if (count($documents_required_not_approved) == 0) {
-        include EDUSYSTEM_CERTIFICATION_PATH . 'public/templates/create-missing-documents.php';
+        include SQUUAD_CERT_MODULE_PATH . 'public/templates/create-missing-documents.php';
     }
 }
 
-function modal_enrollment_student()
+function squuad_cert_modal_enrollment_student()
 {
     // Imprime el contenido del archivo modal-reset-password.php
     global $wpdb, $current_user;
@@ -108,10 +108,10 @@ function modal_enrollment_student()
         'student_email' => $student->email,
         'today' => date('Y-m-d'),
     ];
-    include EDUSYSTEM_CERTIFICATION_PATH . 'public/templates/create-enrollment.php';
+    include SQUUAD_CERT_MODULE_PATH . 'public/templates/create-enrollment.php';
 }
 
-function modal_document_automatic()
+function squuad_cert_modal_document_automatic()
 {
     global $wpdb, $current_user;
     $roles = (array) $current_user->roles;
@@ -142,7 +142,7 @@ function modal_document_automatic()
     }
 
     // En la confirmación del lote o la generación del PDF final no se abre el documento pendiente encima
-    if (!empty($_GET['edusystem_batch']) || !empty($_GET['edusystem_pdf'])) {
+    if (!empty($_GET['squuad_cert_batch']) || !empty($_GET['squuad_cert_pdf'])) {
         return;
     }
 
@@ -158,11 +158,11 @@ function modal_document_automatic()
 
     // Solicitudes de firma (ADR 0002, esquema v5): el documento pendiente se elige por estudiante (todos los hijos
     // del representante) y por solicitud, no por usuario
-    $pending = function_exists('edusystem_signature_requests_enabled') && edusystem_signature_requests_enabled()
-        ? edusystem_signature_pending_for_user(
+    $pending = function_exists('squuad_cert_signature_requests_enabled') && squuad_cert_signature_requests_enabled()
+        ? squuad_cert_signature_pending_for_user(
             $current_user,
             // Documento elegido en "Documentos por firmar" de Mi Cuenta (si no está pendiente, se abre el primero)
-            isset($_GET['edusystem_sign']) ? sanitize_text_field(wp_unslash($_GET['edusystem_sign'])) : ''
+            isset($_GET['squuad_cert_sign']) ? sanitize_text_field(wp_unslash($_GET['squuad_cert_sign'])) : ''
         )
         : false;
     if (null === $pending) {
@@ -274,16 +274,16 @@ function modal_document_automatic()
     // campos adicionales ni regenerar nada (ADR 0002, puntos 2 y 11)
     $request = $pending ? $pending['request'] : null;
     if ($request && null !== $request->frozen_at_utc) {
-        $content = edusystem_signature_request_content((int) $request->id);
+        $content = squuad_cert_signature_request_content((int) $request->id);
         if (null === $content) {
             return; // contenido alterado: no se muestra para firmar (el verificador lo marca)
         }
-        $html = edusystem_signature_render_content($content, $student, $request);
+        $html = squuad_cert_signature_render_content($content, $student, $request);
         $document_fields = [];
         $field_values = [];
         $legacy_partial = !empty($pending['legacy_partial']) && 1 === (int) $request->round;
         extract($template_data, EXTR_SKIP);
-        include EDUSYSTEM_CERTIFICATION_PATH . 'public/templates/create-document-automatic.php';
+        include SQUUAD_CERT_MODULE_PATH . 'public/templates/create-document-automatic.php';
         return;
     }
 
@@ -292,34 +292,34 @@ function modal_document_automatic()
     // las respuestas guardadas con su firma (users_signatures.document_fields) y no se vuelve a preguntar.
     $field_replacements = [];
     $field_values = [];
-    $document_fields = $document ? edusystem_get_document_fields($document) : [];
+    $document_fields = $document ? squuad_cert_get_document_fields($document) : [];
     if ($document_fields) {
         // Con solicitudes, las respuestas viven en el contenido congelado: antes de la primera firma no hay guardadas
-        $stored_values = $pending ? null : edusystem_document_fields_stored_values($document, $document_fields, [$student_id, $partner_id]);
+        $stored_values = $pending ? null : squuad_cert_document_fields_stored_values($document, $document_fields, [$student_id, $partner_id]);
 
         if (null !== $stored_values) {
             $field_values = $stored_values;
         } else {
             $field_errors = [];
-            $posted = is_string($_POST['edusystem_document_fields'] ?? null)
-                && (int) $_POST['edusystem_document_fields'] === (int) $document->id;
+            $posted = is_string($_POST['squuad_cert_document_fields'] ?? null)
+                && (int) $_POST['squuad_cert_document_fields'] === (int) $document->id;
             $submitted = $posted
                 && is_string($_POST['_wpnonce'] ?? null)
                 && wp_verify_nonce($_POST['_wpnonce'], 'edusystem_document_fields_' . $document->id);
 
             if ($submitted) {
-                [$field_values, $field_errors] = edusystem_document_fields_values($document_fields, wp_unslash($_POST['document_fields'] ?? []));
+                [$field_values, $field_errors] = squuad_cert_document_fields_values($document_fields, wp_unslash($_POST['document_fields'] ?? []));
             } elseif ($posted) {
                 // Nonce caducado (la página se envió horas después): se avisa y se conservan las respuestas
-                [$field_values] = edusystem_document_fields_values($document_fields, wp_unslash($_POST['document_fields'] ?? []));
+                [$field_values] = squuad_cert_document_fields_values($document_fields, wp_unslash($_POST['document_fields'] ?? []));
                 $field_errors = ['expired' => __('Your session expired. Please check your answers and submit them again.', 'edusystem')];
             }
             if (!$submitted || $field_errors) {
-                include EDUSYSTEM_CERTIFICATION_PATH . 'public/templates/document-fields-form.php';
+                include SQUUAD_CERT_MODULE_PATH . 'public/templates/document-fields-form.php';
                 return;
             }
         }
-        $field_replacements = edusystem_document_fields_replacements($document_fields, $field_values);
+        $field_replacements = squuad_cert_document_fields_replacements($document_fields, $field_values);
     }
 
     $html_parts = [];
@@ -368,12 +368,12 @@ function modal_document_automatic()
     if ($pending && '' !== $html) {
         // Borrador de la solicitud (ADR 0002): datos escapados, marcadores fijos para las firmas y el QR, imágenes
         // incrustadas. Se regenera en cada apertura hasta la primera firma, que lo congela.
-        $request = $request ?: edusystem_signature_request_get_or_create(
+        $request = $request ?: squuad_cert_signature_request_get_or_create(
             (int) $student->id,
             (string) $document->document_identificator,
             ['student_user_id' => $student_id, 'parent_user_id' => $partner_id],
-            edusystem_signature_student_document_id((int) $student->id, (string) $document->document_identificator),
-            edusystem_signature_doc_version_hash((string) $document->document_identificator),
+            squuad_cert_signature_student_document_id((int) $student->id, (string) $document->document_identificator),
+            squuad_cert_signature_doc_version_hash((string) $document->document_identificator),
             (int) $document->id,
             'opened'
         );
@@ -382,36 +382,36 @@ function modal_document_automatic()
         }
         // Variables de firma de cada firmante y reglas de la plantilla (estudiante, representante, firmantes del
         // sistema); los firmantes del sistema que la plantilla no coloca van en un bloque "Firmas" al final
-        $institutional = function_exists('edusystem_signature_signer_replacements') ? edusystem_signature_signer_replacements($request) : [];
-        $content = process_template($html, array_merge(edusystem_signature_escape_replacements($replacements), $institutional));
-        if (function_exists('edusystem_signature_strip_unused_signer_tags')) {
-            $content = edusystem_signature_strip_unused_signer_tags($content);
+        $institutional = function_exists('squuad_cert_signature_signer_replacements') ? squuad_cert_signature_signer_replacements($request) : [];
+        $content = process_template($html, array_merge(squuad_cert_signature_escape_replacements($replacements), $institutional));
+        if (function_exists('squuad_cert_signature_strip_unused_signer_tags')) {
+            $content = squuad_cert_signature_strip_unused_signer_tags($content);
         }
-        if (function_exists('edusystem_signature_append_institutional_block')) {
-            $content = edusystem_signature_append_institutional_block($content, $request);
+        if (function_exists('squuad_cert_signature_append_institutional_block')) {
+            $content = squuad_cert_signature_append_institutional_block($content, $request);
         }
-        $content = edusystem_signature_inline_images($content);
-        if (null === edusystem_signature_request_save_draft((int) $request->id, $content)) {
+        $content = squuad_cert_signature_inline_images($content);
+        if (null === squuad_cert_signature_request_save_draft((int) $request->id, $content)) {
             // Otra petición la congeló entre medias: se muestra el contenido congelado
-            $request = edusystem_signature_request_get((int) $request->id);
-            $content = $request ? edusystem_signature_request_content((int) $request->id) : null;
+            $request = squuad_cert_signature_request_get((int) $request->id);
+            $content = $request ? squuad_cert_signature_request_content((int) $request->id) : null;
             if (null === $content) {
                 return;
             }
         }
-        $request = edusystem_signature_request_get((int) $request->id);
+        $request = squuad_cert_signature_request_get((int) $request->id);
         $legacy_partial = !empty($pending['legacy_partial']) && 1 === (int) $request->round;
         if ($legacy_partial) {
-            edusystem_signature_request_log_event_once((int) $request->id, 'legacy_partial_superseded');
+            squuad_cert_signature_request_log_event_once((int) $request->id, 'legacy_partial_superseded');
         }
-        $html = edusystem_signature_render_content($content, $student, $request);
+        $html = squuad_cert_signature_render_content($content, $student, $request);
         $document_fields = [];
     } else {
         $html = process_template($html, $replacements);
     }
 
     if (!empty($html)) {
-        include EDUSYSTEM_CERTIFICATION_PATH . 'public/templates/create-document-automatic.php';
+        include SQUUAD_CERT_MODULE_PATH . 'public/templates/create-document-automatic.php';
     }
 }
 
@@ -420,45 +420,45 @@ function modal_document_automatic()
  * estudiante o del representante (todos sus hijos): los que le toca firmar, con un botón para abrir ese documento, y
  * los que ya firmó y esperan a otra persona.
  */
-add_action('woocommerce_account_dashboard', 'edusystem_signature_account_documents_to_sign', 1);
-function edusystem_signature_account_documents_to_sign()
+add_action('woocommerce_account_dashboard', 'squuad_cert_signature_account_documents_to_sign', 1);
+function squuad_cert_signature_account_documents_to_sign()
 {
-    if (!function_exists('edusystem_signature_user_documents') || !is_user_logged_in()) {
+    if (!function_exists('squuad_cert_signature_user_documents') || !is_user_logged_in()) {
         return;
     }
     $user = wp_get_current_user();
     $dashboard = wc_get_account_endpoint_url('dashboard');
-    if (function_exists('edusystem_signature_batch_print_notice')) {
-        edusystem_signature_batch_print_notice();
+    if (function_exists('squuad_cert_signature_batch_print_notice')) {
+        squuad_cert_signature_batch_print_notice();
     }
 
     // Firma en lote (ADR 0003, paso 6b): confirmación o resultado del lote, y PDF finales pendientes
-    if (!empty($_GET['edusystem_batch']) && function_exists('edusystem_signature_batch_get')) {
-        $batch = edusystem_signature_batch_get(absint($_GET['edusystem_batch']));
+    if (!empty($_GET['squuad_cert_batch']) && function_exists('squuad_cert_signature_batch_get')) {
+        $batch = squuad_cert_signature_batch_get(absint($_GET['squuad_cert_batch']));
         if ($batch && 'holder' === ($batch->data['kind'] ?? '')) {
             $pdf_requests = 'finished' === $batch->status && !empty($batch->result_data['completed'])
-                ? edusystem_signature_account_pdf_requests($user, array_map('intval', (array) $batch->result_data['completed']))
+                ? squuad_cert_signature_account_pdf_requests($user, array_map('intval', (array) $batch->result_data['completed']))
                 : [];
-            include EDUSYSTEM_CERTIFICATION_PATH . 'public/templates/documents-to-sign-batch.php';
+            include SQUUAD_CERT_MODULE_PATH . 'public/templates/documents-to-sign-batch.php';
             return;
         }
     }
-    if (!empty($_GET['edusystem_pdf']) && function_exists('edusystem_signature_account_pdf_requests')) {
-        $pdf_requests = edusystem_signature_account_pdf_requests($user, [absint($_GET['edusystem_pdf'])]);
+    if (!empty($_GET['squuad_cert_pdf']) && function_exists('squuad_cert_signature_account_pdf_requests')) {
+        $pdf_requests = squuad_cert_signature_account_pdf_requests($user, [absint($_GET['squuad_cert_pdf'])]);
         if ($pdf_requests) {
             echo '<section class="edusystem-documents-to-sign" id="edusystem-documents-to-sign" style="margin-bottom:24px"><h3>' . esc_html__('Final PDF', 'edusystem') . '</h3>';
-            include EDUSYSTEM_CERTIFICATION_PATH . 'public/templates/signature-final-pdf.php';
+            include SQUUAD_CERT_MODULE_PATH . 'public/templates/signature-final-pdf.php';
             echo '</section>';
             return;
         }
     }
 
-    $items = edusystem_signature_user_documents($user);
+    $items = squuad_cert_signature_user_documents($user);
     if (!$items) {
         return;
     }
-    $batchable = function_exists('edusystem_signature_batch_holder_candidates')
-        ? array_map(static fn($row) => (int) $row->id, edusystem_signature_batch_holder_candidates($user))
+    $batchable = function_exists('squuad_cert_signature_batch_holder_candidates')
+        ? array_map(static fn($row) => (int) $row->id, squuad_cert_signature_batch_holder_candidates($user))
         : [];
-    include EDUSYSTEM_CERTIFICATION_PATH . 'public/templates/documents-to-sign.php';
+    include SQUUAD_CERT_MODULE_PATH . 'public/templates/documents-to-sign.php';
 }

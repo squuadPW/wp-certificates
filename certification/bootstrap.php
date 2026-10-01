@@ -10,5 +10,5 @@ declare(strict_types=1);
 
 if (!defined('ABSPATH')) exit;
 
-define('EDUSYSTEM_CERTIFICATION_PATH', EDUSYSTEM_PATH . 'certification/');
-define('EDUSYSTEM_CERTIFICATION_URL', EDUSYSTEM_URL . 'certification/');
+define('SQUUAD_CERT_MODULE_PATH', EDUSYSTEM_PATH . 'certification/');
+define('SQUUAD_CERT_MODULE_URL', EDUSYSTEM_URL . 'certification/');

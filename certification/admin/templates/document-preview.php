@@ -2,7 +2,7 @@
 /**
  * Vista previa en PDF del documento con datos de ejemplo (admin/document-preview.php). El PDF se genera en el
  * navegador con las mismas opciones que el camino real del documento y se muestra en el visor de PDF del navegador.
- * Variables: $preview (edusystem_document_preview_data()).
+ * Variables: $preview (squuad_cert_document_preview_data()).
  */
 if (!defined('ABSPATH')) exit;
 

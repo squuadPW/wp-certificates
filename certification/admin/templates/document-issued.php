@@ -5,7 +5,7 @@
  */
 if (!defined('ABSPATH')) exit;
 
-$can_manage = edusystem_document_issue_can();
+$can_manage = squuad_cert_document_issue_can();
 
 $statuses = [
     'open' => __('Waiting for signatures', 'edusystem'),
@@ -52,9 +52,9 @@ $statuses = [
                                 <details style="margin-top:6px">
                                     <summary style="cursor:pointer;color:#b32d2e;font-weight:600"><?= esc_html__('Decline', 'edusystem') ?></summary>
                                     <form method="post" action="<?= esc_url(admin_url('admin-post.php')) ?>" style="margin-top:6px">
-                                        <input type="hidden" name="action" value="edusystem_issued_decline">
+                                        <input type="hidden" name="action" value="squuad_cert_issued_decline">
                                         <input type="hidden" name="request_id" value="<?= (int) $row->id ?>">
-                                        <?php wp_nonce_field('edusystem_issued_decline_' . (int) $row->id); ?>
+                                        <?php wp_nonce_field('squuad_cert_issued_decline_' . (int) $row->id); ?>
                                         <p style="color:#b32d2e"><strong><?= esc_html__('This action cannot be reverted.', 'edusystem') ?></strong> <?= esc_html__('The signatures of this document will be revoked.', 'edusystem') ?></p>
                                         <p><textarea name="reason" required rows="2" style="width:100%" placeholder="<?= esc_attr__('Reason why it is declined', 'edusystem') ?>"></textarea></p>
                                         <?php if ($has_line) : ?>
@@ -68,9 +68,9 @@ $statuses = [
                                 </details>
                             <?php elseif ($can_manage && $row->book_pending) : ?>
                                 <form method="post" action="<?= esc_url(admin_url('admin-post.php')) ?>">
-                                    <input type="hidden" name="action" value="edusystem_issued_book_decision">
+                                    <input type="hidden" name="action" value="squuad_cert_issued_book_decision">
                                     <input type="hidden" name="request_id" value="<?= (int) $row->id ?>">
-                                    <?php wp_nonce_field('edusystem_issued_book_decision_' . (int) $row->id); ?>
+                                    <?php wp_nonce_field('squuad_cert_issued_book_decision_' . (int) $row->id); ?>
                                     <p><strong><?= esc_html__('Declined: decide what to do with the volume and folio.', 'edusystem') ?></strong><br>
                                         <label><input type="radio" name="book_option" value="keep" required> <?= esc_html__('Issue again with the same volume and folio', 'edusystem') ?></label><br>
                                         <label><input type="radio" name="book_option" value="void" required> <?= esc_html__('Void the volume and folio in the book and issue again with a new one', 'edusystem') ?></label></p>
