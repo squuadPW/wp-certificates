@@ -474,8 +474,10 @@ function assign_certificate_student( $student_id, $template_id, $type, $emission
     }
     $table_certificates = $wpdb->prefix . 'certificates';
 
-    // 1. Obtener detalles del estudiante
-    $student = get_student($student_id); 
+    // 1. Estudiante y su programa: los da el proveedor del titular (EduSystem), no funciones de EduSystem por su nombre
+    $provider = squuad_cert_subject_type('edusystem_student');
+    $subject = ($provider && !empty($provider['book_line_data'])) ? (array) call_user_func($provider['book_line_data'], (int) $student_id, null) : [];
+    $student = $subject['student'] ?? null;
     if( !$student ) return false;
 
     // 2. Obtener detalles del documento
@@ -592,9 +594,10 @@ function assign_certificate_student( $student_id, $template_id, $type, $emission
         }
 
         // 6. Procesar las secciones individualmente
-        $processed_header  = process_template($header, $replacements);
-        $processed_content = process_template($content, $replacements);
-        $processed_footer  = process_template($footer, $replacements);
+        // Motor propio de wp-certificates (mismo comportamiento que el de EduSystem)
+        $processed_header  = squuad_cert_process_template($header, $replacements);
+        $processed_content = squuad_cert_process_template($content, $replacements);
+        $processed_footer  = squuad_cert_process_template($footer, $replacements);
 
         // 7. Lógica del QR Code
         $create_certificate_qr = (
@@ -605,7 +608,7 @@ function assign_certificate_student( $student_id, $template_id, $type, $emission
 
         $qr = ['url' => '', 'image_url' => ''];
         if ($create_certificate_qr) {
-            $qr = apply_filters('create_certificate_edusystem', 'certificate', $document->title, get_name_program_student($student->id), 1, $student, $emission_date);
+            $qr = apply_filters('create_certificate_edusystem', 'certificate', $document->title, (string) ($subject['program'] ?? ''), 1, $student, $emission_date);
         }
 
         // Estructura HTML final con contenedores limpios

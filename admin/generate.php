@@ -104,9 +104,10 @@ function squuad_cert_generate_document(): void
         || false !== strpos((string) $document->header, '{{qrcode}}')
         || false !== strpos((string) $document->footer, '{{qrcode}}');
 
-    $document->content = process_template($document->content, $replacements);
-    $document->header = process_template($document->header, $replacements);
-    $document->footer = process_template($document->footer, $replacements);
+    // Motor propio de wp-certificates (mismo comportamiento que el de EduSystem)
+    $document->content = squuad_cert_process_template($document->content, $replacements);
+    $document->header = squuad_cert_process_template($document->header, $replacements);
+    $document->footer = squuad_cert_process_template($document->footer, $replacements);
 
     $url = ['url' => '', 'image_url' => ''];
     if ($create_certificate_qr) {

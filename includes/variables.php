@@ -63,3 +63,9 @@ function squuad_cert_template_replacements(string $template, int $subject_id, ar
         'failed' => $resolved['failed'],
     ];
 }
+
+/** Motor de plantillas propio de wp-certificates (mismo comportamiento que el de EduSystem). */
+function squuad_cert_process_template($template, $replacements)
+{
+    return \Squuad\Certificados\Template::process($template, $replacements);
+}
