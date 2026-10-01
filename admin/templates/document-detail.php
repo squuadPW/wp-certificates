@@ -85,6 +85,17 @@
                                         <input type="text" name="document_identificator" value="<?= esc_attr($document->document_identificator ?? ''); ?>" required>
                                     </div>
 
+                                    <?php // Variables generales: definidas en el código de wp-certificates, sirven en cualquier sitio (Antigravity/variable.md) ?>
+                                    <div style="font-weight:400;" class="space-offer">
+                                        <b><?= esc_html__('General variables', 'wp-certificates'); ?></b><br>
+                                        <span class="description"><?= esc_html__('Defined by WP Certificates: they work on any site.', 'wp-certificates'); ?></span>
+                                        <ul style="display: grid;grid-template-columns: 1fr 1fr;">
+                                            <?php foreach (\Squuad\Certificados\Variables::general() as $variable_visual => $variable_text) { ?>
+                                                <li><strong><?= esc_html($variable_text) ?></strong>: <?= esc_html($variable_visual) ?></li>
+                                            <?php } ?>
+                                        </ul>
+                                    </div>
+
                                     <div style="font-weight:400;" class="space-offer">
                                         <label
                                             for="variables-select"><b><?= esc_html__('Variables', 'wp-certificates'); ?></b></label><br>

@@ -40,6 +40,7 @@ if ( !class_exists('WP_List_Table') )
 
 require_once WP_C_PATH . 'includes/autoload.php';
 require_once WP_C_PATH . 'includes/contract.php';
+require_once WP_C_PATH . 'includes/variables.php';
 require_once WP_C_PATH . 'public/functions.php';
 require_once WP_C_PATH . 'admin/functions.php';
 
