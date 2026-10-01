@@ -251,6 +251,23 @@ function squuad_cert_variable_create_handle(): void
     exit;
 }
 
+add_action('admin_post_squuad_cert_variables_link', 'squuad_cert_variables_link_handle');
+function squuad_cert_variables_link_handle(): void
+{
+    if (!current_user_can('manage_options')) {
+        wp_die(esc_html__('Sorry, you are not allowed to access this page.', 'wp-certificates'), 403);
+    }
+    check_admin_referer('squuad_cert_variables_link');
+    $linked = \Squuad\Certificados\Variables::link_by_key();
+    squuad_cert_variables_notice(sprintf(
+        /* translators: %d: number of variables */
+        __('%d variables linked to the method with the same key.', 'wp-certificates'),
+        $linked
+    ));
+    wp_safe_redirect(squuad_cert_variables_url());
+    exit;
+}
+
 add_action('admin_post_squuad_cert_method_plugins', 'squuad_cert_method_plugins_handle');
 function squuad_cert_method_plugins_handle(): void
 {

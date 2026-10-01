@@ -122,6 +122,12 @@ $type_labels = [
             </tbody>
         </table>
 
+        <form method="post" action="<?= esc_url(admin_url('admin-post.php')) ?>" style="margin-top: 12px">
+            <input type="hidden" name="action" value="squuad_cert_variables_link">
+            <?php wp_nonce_field('squuad_cert_variables_link'); ?>
+            <button type="submit" class="button"><?= esc_html__('Link variables without a method to the method with the same key', 'wp-certificates') ?></button>
+        </form>
+
         <h2 style="margin-top: 30px"><?= esc_html__('Own plugins that can provide methods', 'wp-certificates') ?></h2>
         <p class="description" style="max-width: 900px">
             <?= esc_html__('Only plugins whose details mention EduSof or Squuad appear here. Check the author and website before enabling one: only enabled plugins can provide methods.', 'wp-certificates') ?>

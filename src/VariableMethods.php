@@ -39,8 +39,9 @@ final class VariableMethods
             'provider' => $provider,
             'key' => $key,
             'plugin' => $plugin,
-            'label' => (string) $definition['label'],
-            'group' => (string) ($definition['group'] ?? ''),
+            // label y group pueden ser funciones: se traducen al mostrarse (no antes de init, WordPress 6.7+)
+            'label' => $definition['label'],
+            'group' => $definition['group'] ?? '',
             'type' => (string) $definition['type'],
             'offered' => (string) ($definition['offered'] ?? 'all'),
             'subject' => (bool) ($definition['subject'] ?? true),
@@ -51,10 +52,22 @@ final class VariableMethods
         return true;
     }
 
-    /** Todos los métodos registrados (de cualquier plugin). */
+    /** Todos los métodos registrados (de cualquier plugin), con descripción y grupo ya como texto. */
     public static function all(): array
     {
-        return self::$methods;
+        return array_map([self::class, 'resolve_texts'], self::$methods);
+    }
+
+    private static function resolve_texts(array $method): array
+    {
+        foreach (['label', 'group'] as $field) {
+            if (is_callable($method[$field])) {
+                $method[$field] = (string) call_user_func($method[$field]);
+            }
+            $method[$field] = (string) $method[$field];
+        }
+
+        return $method;
     }
 
     /**
@@ -62,7 +75,7 @@ final class VariableMethods
      */
     public static function available(): array
     {
-        return array_filter(self::$methods, static function (array $method): bool {
+        return array_filter(self::all(), static function (array $method): bool {
             return OwnPlugins::is_enabled($method['plugin']) && !Quarantine::has($method['id']);
         });
     }
@@ -95,7 +108,8 @@ final class VariableMethods
         if (isset(self::$methods[$provider . '.' . $key])) {
             return 'ya está registrado';
         }
-        if ('' === trim((string) ($definition['label'] ?? ''))) {
+        $label = $definition['label'] ?? '';
+        if (!is_callable($label) && '' === trim((string) $label)) {
             return 'falta la descripción';
         }
         if (!in_array($definition['type'] ?? '', self::TYPES, true)) {

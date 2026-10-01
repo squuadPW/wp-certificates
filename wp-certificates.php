@@ -22,7 +22,8 @@ define('WP_C_REMOTE_INFO_URL', 'https://versions.squuad.com/plugins/wp-certifica
 // 3: log propio {prefix}squuad_cert_log (ADR 0004 de EduSystem, paso 2).
 // 4: variables_document.method, identificador del método que da el valor de la variable (ADR 0005 de EduSystem).
 // 5: las variables generales salen de la lista de la base de datos (siempre están disponibles en el código).
-define('WP_C_DB_VERSION', '5');
+// 6: cada variable de la lista se vincula con el método de su misma clave (ADR 0005 de EduSystem).
+define('WP_C_DB_VERSION', '6');
 
 // get_plugin_data() vive en wp-admin/includes/plugin.php, que en el front no está cargado (antes solo funcionaba
 // porque EduSystem lo cargaba primero)
@@ -294,6 +295,8 @@ function wp_c_maybe_update_db() {
         update_option('wp_c_db_updating', time(), false);
     }
     create_tables_certificates();
+    // Variables de la lista con el método de su misma clave (los proveedores ya se registraron en plugins_loaded)
+    \Squuad\Certificados\Variables::link_by_key();
     update_option('wp_c_db_version', WP_C_DB_VERSION);
     delete_option('wp_c_db_updating');
 }

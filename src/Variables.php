@@ -88,4 +88,40 @@ final class Variables
 
         return $removed;
     }
+
+    /**
+     * Vincula cada variable de la lista sin método con el método disponible que tiene su MISMA clave (p. ej.
+     * {{student_name}} -> edusystem.student_name), si hay exactamente uno. Así las variables existentes siguen igual
+     * pero las resuelve wp-certificates. No toca las que ya tienen método. Devuelve cuántas vinculó.
+     */
+    public static function link_by_key(): int
+    {
+        global $wpdb;
+        $table = $wpdb->prefix . 'variables_document';
+        if ($table !== $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table))) {
+            return 0;
+        }
+        $by_key = [];
+        foreach (VariableMethods::available() as $id => $method) {
+            $by_key[$method['key']][] = $id;
+        }
+        $linked = 0;
+        foreach ((array) $wpdb->get_results("SELECT id, identificator FROM {$table} WHERE method IS NULL OR method = ''") as $row) {
+            $candidates = $by_key[(string) $row->identificator] ?? [];
+            if (1 !== count($candidates)) {
+                if (count($candidates) > 1) {
+                    Log::add(sprintf('Variable %s sin vincular: varios métodos con la misma clave (%s)', $row->identificator, implode(', ', $candidates)), 'variable_link_ambiguous');
+                }
+                continue;
+            }
+            if ($wpdb->update($table, ['method' => $candidates[0]], ['id' => (int) $row->id], ['%s'], ['%d'])) {
+                $linked++;
+            }
+        }
+        if ($linked) {
+            Log::add(sprintf('%d variables vinculadas con el método de su misma clave', $linked), 'variable_linked');
+        }
+
+        return $linked;
+    }
 }
