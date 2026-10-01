@@ -88,8 +88,9 @@ final class VariableMethods
         if (isset(self::$providers[$provider]) && self::$providers[$provider] !== $plugin) {
             return 'el proveedor ' . $provider . ' ya pertenece a ' . self::$providers[$provider];
         }
-        if ('core' === $provider && OwnPlugins::self_file() !== $plugin) {
-            return 'el proveedor core es de wp-certificates';
+        // core está reservado: las variables generales no son métodos elegibles, las calcula wp-certificates siempre
+        if ('core' === $provider) {
+            return 'el proveedor core está reservado para las variables generales';
         }
         if (isset(self::$methods[$provider . '.' . $key])) {
             return 'ya está registrado';
