@@ -80,7 +80,8 @@ add_action('all_admin_notices', [Pair::class, 'notice']);
  * Registra un método de variable (ADR 0005). Llamar dentro de la acción squuad_cert_register_providers, desde el
  * código de un plugin propio. $definition: label (texto o función que lo devuelve, para traducirlo al mostrarse),
  * type ('text'|'html'|'condition'), callback (recibe
- * int $subject_id, array $ctx y devuelve el valor; solo lectura), y opcionales group, offered ('all'|'document'|
+ * int $subject_id, array $ctx y devuelve el valor; solo lectura), y opcionales wrap (va en mayúsculas), group,
+ * offered ('all'|'document'|
  * 'email'), subject (necesita titular, por defecto true) y sensitive.
  */
 function squuad_cert_register_variable_method(string $provider, string $key, array $definition): bool

@@ -531,6 +531,18 @@ function assign_certificate_student( $student_id, $template_id, $type, $emission
             $footer,
         ]);
 
+        // 4. Valores de las variables, resueltos por wp-certificates (ADR 0005 de EduSystem): generales y métodos de
+        // los plugins propios, aislados. Con libro de registro, si una variable falla el documento no se emite (y no se
+        // gasta una línea del libro: se comprueba antes de reservarla).
+        $resolved = squuad_cert_template_replacements($header . $content . $footer, (int) $student->id, ['document' => $document]);
+        if ($resolved['failed'] && !empty($document->book)) {
+            squuad_cert_log(sprintf('Certificado no emitido (documento %d, estudiante %d): variables sin valor %s', (int) $document->id, (int) $student->id, implode(', ', array_keys($resolved['failed']))), 'certificate_not_issued');
+            return false;
+        }
+        $replacements = $resolved['replacements'];
+
+        // Tomo y folio del libro de registro: se reservan ahora y se aplican después de las demás variables, para que
+        // nada los sobrescriba (antes se calculaban y a continuación se borraban al preparar las variables)
         if ( $document->book && function_exists('edusof_insert_certificate_book_line') ) {
             $book_data = edusof_insert_certificate_book_line( $document->book, $student, $type, $title, $emission_date, $program, $course_id );
 
@@ -547,7 +559,7 @@ function assign_certificate_student( $student_id, $template_id, $type, $emission
 
                 $replacements['tomo_folio'] = [
                     'value' => __('Tome: ','wp-certificates').
-                        ($book_data['tomo'] ?? '') .
+                        ($book_data['tomo'] ?? '') . ' ' .
                         __('Folio: ','wp-certificates').
                         ($book_data['folio'] ?? ''),
                     'wrap' => true,
@@ -555,10 +567,6 @@ function assign_certificate_student( $student_id, $template_id, $type, $emission
             }
         }
 
-        // 4. Preparar las variables de reemplazo estándar
-        $replacements = get_replacements_variables($student);
-        // Variables generales del propio documento: {{document_name}} y {{document_code}}
-        $replacements = array_merge($replacements, squuad_cert_document_replacements($document));
         // Campos adicionales del documento (EduSystem): aquí no hay respuestas; así no queda el texto literal {{clave}}
         if (function_exists('edusystem_document_fields_empty_replacements')) {
             $replacements = array_merge(edusystem_document_fields_empty_replacements($document), $replacements);

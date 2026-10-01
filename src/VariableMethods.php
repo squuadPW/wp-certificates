@@ -46,6 +46,8 @@ final class VariableMethods
             'offered' => (string) ($definition['offered'] ?? 'all'),
             'subject' => (bool) ($definition['subject'] ?? true),
             'sensitive' => (bool) ($definition['sensitive'] ?? false),
+            // Formato: el valor va en mayúsculas (<span class="text-uppercase">), como el 'wrap' de process_template()
+            'wrap' => (bool) ($definition['wrap'] ?? false),
             'callback' => $definition['callback'],
         ];
 

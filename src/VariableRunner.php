@@ -44,7 +44,8 @@ final class VariableRunner
                 $failed[$key] = (string) $value;
                 $value = 'condition' === $method['type'] ? false : '';
             }
-            $replacements[$key] = ['value' => self::format($method['type'], $value), 'wrap' => false];
+            // wrap del método: process_template() pone las mayúsculas y cada punto escapa igual que antes
+            $replacements[$key] = ['value' => self::format($method['type'], $value), 'wrap' => 'condition' !== $method['type'] && $method['wrap']];
         }
 
         if ($failed) {
@@ -83,6 +84,19 @@ final class VariableRunner
         $assigned = [];
         foreach ((array) $rows as $row) {
             $assigned[(string) $row->identificator] = (string) $row->method;
+        }
+
+        // Variables de la plantilla que no están en la lista: si un único método disponible tiene su misma clave, se
+        // usa ese (siguen funcionando como antes sin añadirlas a la lista). Las generales nunca son métodos.
+        $general = Variables::general_keys();
+        $by_key = [];
+        foreach (VariableMethods::available() as $id => $method) {
+            $by_key[$method['key']][] = $id;
+        }
+        foreach ($keys as $key) {
+            if (!isset($assigned[$key]) && !in_array($key, $general, true) && 1 === count($by_key[$key] ?? [])) {
+                $assigned[$key] = $by_key[$key][0];
+            }
         }
 
         return $assigned;
