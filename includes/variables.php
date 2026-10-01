@@ -22,3 +22,42 @@ function squuad_cert_document_replacements(object $document): array
         'document_code' => ['value' => $text($document->document_identificator ?? ''), 'wrap' => false],
     ];
 }
+
+// Métodos de las variables generales (ADR 0005, proveedor core): no dependen de ningún otro plugin
+add_action('squuad_cert_register_providers', 'squuad_cert_register_core_variable_methods');
+function squuad_cert_register_core_variable_methods(): void
+{
+    $document = static fn(array $ctx): ?object => isset($ctx['document']) && is_object($ctx['document']) ? $ctx['document'] : null;
+
+    squuad_cert_register_variable_method('core', 'today', [
+        'label' => __("Today's date", 'wp-certificates'),
+        'group' => __('General', 'wp-certificates'),
+        'type' => 'text',
+        'subject' => false,
+        'callback' => static fn(int $subject_id, array $ctx): string => date_i18n('M d, Y'),
+    ]);
+    squuad_cert_register_variable_method('core', 'page_break', [
+        'label' => __('Page break in the PDF', 'wp-certificates'),
+        'group' => __('General', 'wp-certificates'),
+        'type' => 'html',
+        'offered' => 'document',
+        'subject' => false,
+        'callback' => static fn(int $subject_id, array $ctx): string => '<div class="pagebreak"></div>',
+    ]);
+    squuad_cert_register_variable_method('core', 'document_name', [
+        'label' => __('Name of this document', 'wp-certificates'),
+        'group' => __('Document', 'wp-certificates'),
+        'type' => 'text',
+        'offered' => 'document',
+        'subject' => false,
+        'callback' => static fn(int $subject_id, array $ctx): string => (string) ($document($ctx)->title ?? ''),
+    ]);
+    squuad_cert_register_variable_method('core', 'document_code', [
+        'label' => __('Code (identifier) of this document', 'wp-certificates'),
+        'group' => __('Document', 'wp-certificates'),
+        'type' => 'text',
+        'offered' => 'document',
+        'subject' => false,
+        'callback' => static fn(int $subject_id, array $ctx): string => (string) ($document($ctx)->document_identificator ?? ''),
+    ]);
+}

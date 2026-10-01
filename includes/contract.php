@@ -75,3 +75,33 @@ function squuad_cert_boot(): void
 }
 
 add_action('all_admin_notices', [Pair::class, 'notice']);
+
+/**
+ * Registra un método de variable (ADR 0005). Llamar dentro de la acción squuad_cert_register_providers, desde el
+ * código de un plugin propio. $definition: label, type ('text'|'html'|'condition'), callback (recibe
+ * int $subject_id, array $ctx y devuelve el valor; solo lectura), y opcionales group, offered ('all'|'document'|
+ * 'email'), subject (necesita titular, por defecto true) y sensitive.
+ */
+function squuad_cert_register_variable_method(string $provider, string $key, array $definition): bool
+{
+    // El plugin se identifica por el archivo desde el que se llama a esta función, no por lo que declare
+    $caller = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]['file'] ?? '';
+
+    return \Squuad\Certificados\VariableMethods::register($provider, $key, $definition, (string) $caller);
+}
+
+/** Métodos que se pueden asignar a una variable (plugin propio activado, fuera de cuarentena). */
+function squuad_cert_variable_methods(): array
+{
+    return \Squuad\Certificados\VariableMethods::available();
+}
+
+/**
+ * Valores de las variables de una plantilla que tienen método asignado, ejecutados aislados.
+ *
+ * @return array{replacements: array, failed: array} replacements con el formato de process_template()
+ */
+function squuad_cert_resolve_variables(string $template, int $subject_id, array $ctx = []): array
+{
+    return \Squuad\Certificados\VariableRunner::resolve($template, $subject_id, $ctx);
+}

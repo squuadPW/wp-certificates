@@ -7,6 +7,10 @@ declare(strict_types=1);
  *
  * Esta tabla solo es la LISTA que se muestra al escribir una plantilla: editar o eliminar una fila no cambia cómo se
  * calcula la variable al generar un documento (Antigravity/variable.md de EduSystem).
+ *
+ * ADR 0005 de EduSystem: cada variable puede tener un MÉTODO, elegido con un selector entre los que registran los
+ * plugins propios activados (nunca código ni nombres de función escritos a mano). Aquí también se activan los plugins
+ * propios que pueden aportar métodos y se rehabilitan los métodos en cuarentena.
  */
 
 defined('ABSPATH') || exit;
@@ -101,6 +105,14 @@ function squuad_cert_variables_page(): void
     if (in_array($view, ['view', 'edit'], true) && !$variable) {
         $view = '';
     }
+    if (!in_array($view, ['', 'view', 'edit', 'new'], true)) {
+        $view = '';
+    }
+    $methods = \Squuad\Certificados\VariableMethods::all();
+    $available = squuad_cert_variable_methods();
+    $own_plugins = \Squuad\Certificados\OwnPlugins::all();
+    $enabled_plugins = \Squuad\Certificados\OwnPlugins::enabled();
+    $quarantine = \Squuad\Certificados\Quarantine::all();
     $variables = '' === $view ? $wpdb->get_results('SELECT * FROM ' . squuad_cert_variables_table() . ' ORDER BY id ASC') : [];
     $documents = $variable ? squuad_cert_variable_documents((string) $variable->identificator) : [];
     $notice = squuad_cert_variables_notice();
@@ -132,10 +144,16 @@ function squuad_cert_variable_save_handle(): void
         wp_safe_redirect(squuad_cert_variables_url(['view' => 'edit', 'id' => $id]));
         exit;
     }
+    $method = squuad_cert_variable_method_from_post();
+    if (null === $method) {
+        squuad_cert_variables_notice(__('Choose a method from the list.', 'wp-certificates'), false);
+        wp_safe_redirect(squuad_cert_variables_url(['view' => 'edit', 'id' => $id]));
+        exit;
+    }
 
-    $wpdb->update(squuad_cert_variables_table(), ['text' => $text, 'visual' => $visual, 'type' => $type], ['id' => $id], ['%s', '%s', '%s'], ['%d']);
+    $wpdb->update(squuad_cert_variables_table(), ['text' => $text, 'visual' => $visual, 'type' => $type, 'method' => '' === $method ? null : $method], ['id' => $id], ['%s', '%s', '%s', '%s'], ['%d']);
     squuad_cert_log(
-        sprintf('Variable %s (%d) editada: descripción «%s» → «%s», escritura «%s» → «%s», tipo %s → %s', $variable->identificator, $id, $variable->text, $text, $variable->visual, $visual, $variable->type, $type),
+        sprintf('Variable %s (%d) editada: descripción «%s» → «%s», escritura «%s» → «%s», tipo %s → %s, método %s → %s', $variable->identificator, $id, $variable->text, $text, $variable->visual, $visual, $variable->type, $type, $variable->method ?: '—', $method ?: '—'),
         'variable_edited'
     );
     squuad_cert_variables_notice(__('Variable saved.', 'wp-certificates'));
@@ -165,6 +183,103 @@ function squuad_cert_variable_delete_handle(): void
             /* translators: %s: variable, e.g. {{program}} */
             __('Variable %s deleted from the list.', 'wp-certificates'),
             (string) $variable->visual
+        ));
+    }
+    wp_safe_redirect(squuad_cert_variables_url());
+    exit;
+}
+
+/**
+ * Método elegido en el formulario: '' (sin método), el identificador si está disponible, o null si no es válido.
+ * Nunca se acepta un nombre de función escrito a mano: solo identificadores del registro (ADR 0005, regla 3).
+ */
+function squuad_cert_variable_method_from_post(): ?string
+{
+    $method = sanitize_text_field(wp_unslash($_POST['method'] ?? ''));
+    if ('' === $method) {
+        return '';
+    }
+
+    return isset(squuad_cert_variable_methods()[$method]) ? $method : null;
+}
+
+add_action('admin_post_squuad_cert_variable_create', 'squuad_cert_variable_create_handle');
+function squuad_cert_variable_create_handle(): void
+{
+    if (!current_user_can('manage_options')) {
+        wp_die(esc_html__('Sorry, you are not allowed to access this page.', 'wp-certificates'), 403);
+    }
+    check_admin_referer('squuad_cert_variable_create');
+    global $wpdb;
+
+    $back = squuad_cert_variables_url(['view' => 'new']);
+    $key = sanitize_key($_POST['identificator'] ?? '');
+    $text = sanitize_text_field(wp_unslash($_POST['text'] ?? ''));
+    $type = sanitize_key($_POST['type'] ?? '');
+    $method = squuad_cert_variable_method_from_post();
+    $general = array_map(static fn($tag) => trim((string) $tag, '{}'), array_keys(\Squuad\Certificados\Variables::general()));
+
+    if (!preg_match('/^[a-z][a-z0-9_]{1,59}$/', $key)) {
+        $error = __('The key must start with a letter and contain only lowercase letters, numbers and underscores.', 'wp-certificates');
+    } elseif ($wpdb->get_var($wpdb->prepare('SELECT id FROM ' . squuad_cert_variables_table() . ' WHERE identificator = %s', $key))) {
+        $error = __('There is already a variable with that key.', 'wp-certificates');
+    } elseif (in_array($key, $general, true)) {
+        $error = __('That key is a general variable of WP Certificates.', 'wp-certificates');
+    } elseif ('' === $text || !in_array($type, SQUUAD_CERT_VARIABLE_TYPES, true)) {
+        $error = __('Description and where it is offered are required.', 'wp-certificates');
+    } elseif (null === $method || '' === $method) {
+        $error = __('Choose a method from the list.', 'wp-certificates');
+    }
+    if (!empty($error)) {
+        squuad_cert_variables_notice($error, false);
+        wp_safe_redirect($back);
+        exit;
+    }
+
+    $wpdb->insert(squuad_cert_variables_table(), [
+        'text' => $text,
+        'visual' => '{{' . $key . '}}',
+        'identificator' => $key,
+        'type' => $type,
+        'method' => $method,
+        'created_at' => current_time('mysql'),
+    ], ['%s', '%s', '%s', '%s', '%s', '%s']);
+    $id = (int) $wpdb->insert_id;
+    squuad_cert_log(sprintf('Variable %s (%d) creada con el método %s', $key, $id, $method), 'variable_created');
+    squuad_cert_variables_notice(__('Variable created.', 'wp-certificates'));
+    wp_safe_redirect(squuad_cert_variables_url(['view' => 'view', 'id' => $id]));
+    exit;
+}
+
+add_action('admin_post_squuad_cert_method_plugins', 'squuad_cert_method_plugins_handle');
+function squuad_cert_method_plugins_handle(): void
+{
+    if (!current_user_can('manage_options')) {
+        wp_die(esc_html__('Sorry, you are not allowed to access this page.', 'wp-certificates'), 403);
+    }
+    check_admin_referer('squuad_cert_method_plugins');
+
+    $before = \Squuad\Certificados\OwnPlugins::enabled();
+    $after = \Squuad\Certificados\OwnPlugins::set_enabled(array_map('sanitize_text_field', (array) wp_unslash($_POST['plugins'] ?? [])));
+    squuad_cert_log(sprintf('Plugins propios que aportan métodos de variables: %s → %s', implode(', ', $before) ?: '—', implode(', ', $after) ?: '—'), 'variable_method_plugins');
+    squuad_cert_variables_notice(__('Plugins saved.', 'wp-certificates'));
+    wp_safe_redirect(squuad_cert_variables_url());
+    exit;
+}
+
+add_action('admin_post_squuad_cert_method_release', 'squuad_cert_method_release_handle');
+function squuad_cert_method_release_handle(): void
+{
+    if (!current_user_can('manage_options')) {
+        wp_die(esc_html__('Sorry, you are not allowed to access this page.', 'wp-certificates'), 403);
+    }
+    $method = sanitize_text_field(wp_unslash($_POST['method'] ?? ''));
+    check_admin_referer('squuad_cert_method_release_' . $method);
+    if (\Squuad\Certificados\Quarantine::release($method)) {
+        squuad_cert_variables_notice(sprintf(
+            /* translators: %s: method identifier */
+            __('Method %s enabled again.', 'wp-certificates'),
+            $method
         ));
     }
     wp_safe_redirect(squuad_cert_variables_url());
