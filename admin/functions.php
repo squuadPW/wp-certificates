@@ -34,14 +34,10 @@ function wpc_edusystem_signers_active(): bool
     return function_exists('edusystem_signers_enabled') && edusystem_signers_enabled();
 }
 
-/** Registro de una acción sobre firmas: en el log de EduSystem si existe; si no, en el log de PHP. */
+/** Registro de una acción sobre firmas: log propio de wp-certificates (con copia en el de EduSystem si existe). */
 function wpc_log_signature_action(string $message): void
 {
-    if (function_exists('edusystem_set_log')) {
-        edusystem_set_log($message, 'legacy_signature_used');
-    } else {
-        error_log('[wp-certificates] ' . $message);
-    }
+    squuad_cert_log($message, 'legacy_signature_used');
 }
 
 require plugin_dir_path(__FILE__) . 'certificates.php';

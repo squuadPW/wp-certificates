@@ -4,6 +4,7 @@ Plugin Name: WP Certificates
 Description: The WordPress plugin for certificates, certificates and personalized documents of the institution.
 Author: EduSof
 Version: 1.0.29
+Requires EduSystem: 6.0.0
 Author URI: https://edusof.com
 License: GPL2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -18,7 +19,8 @@ define('WP_C_PATH', plugin_dir_path(__FILE__));
 define('WP_C_REMOTE_INFO_URL', 'https://versions.squuad.com/plugins/wp-certificates/info.json');
 // Versión del esquema de tablas: al subirla, create_tables_certificates() se vuelve a ejecutar sin
 // reactivar el plugin (dbDelta solo crea tablas o añade/modifica columnas)
-define('WP_C_DB_VERSION', '2');
+// 3: log propio {prefix}squuad_cert_log (ADR 0004 de EduSystem, paso 2).
+define('WP_C_DB_VERSION', '3');
 
 // get_plugin_data() vive en wp-admin/includes/plugin.php, que en el front no está cargado (antes solo funcionaba
 // porque EduSystem lo cargaba primero)
@@ -27,10 +29,17 @@ if ( !function_exists('get_plugin_data') )
 $plugin_data = get_plugin_data(__FILE__);
 define('WP_C_VERSION', $plugin_data['Version']);
 
+// Contrato con otros plugins (ADR 0004 de EduSystem): versión del contrato (entero; sube solo con cambios
+// incompatibles) y versión mínima de EduSystem, leída de la cabecera "Requires EduSystem"
+define('SQUUAD_CERT_API_VERSION', 1);
+define('WP_C_REQUIRES_EDUSYSTEM', (string) (get_file_data(__FILE__, ['requires_edusystem' => 'Requires EduSystem'])['requires_edusystem'] ?? ''));
+
 // Cargar archivos necesarios
 if ( !class_exists('WP_List_Table') ) 
     require_once(ABSPATH . 'wp-admin/includes/class-wp-list-table.php');
 
+require_once WP_C_PATH . 'includes/autoload.php';
+require_once WP_C_PATH . 'includes/contract.php';
 require_once WP_C_PATH . 'public/functions.php';
 require_once WP_C_PATH . 'admin/functions.php';
 
@@ -251,6 +260,9 @@ function create_tables_certificates() {
         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY (id)
     )" . $charset_collate . ";");
+
+    // Log propio (esquema v3)
+    dbDelta(\Squuad\Certificados\Log::schema($charset_collate));
 
     default_templates();
     default_templates_cards();
