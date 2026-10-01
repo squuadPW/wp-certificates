@@ -1,7 +1,8 @@
 <?php
 /**
- * EduSystem - Certificación: firmas ya guardadas para el modal de firma (AJAX squuad_cert_load_signatures_data). Movido sin
- * cambios desde public/functions/checkout/cart.php (ADR 0004, paso 3c).
+ * Certificación: firmas ya guardadas para el modal de firma (AJAX load_signatures_data). Movido desde
+ * public/functions/checkout/cart.php de EduSystem (ADR 0004, paso 3c). Solo con solicitud (ADR 0002): sin ella no hay
+ * nada que devolver (el camino antiguo por documento y usuario no pasa a wp-certificates).
  */
 
 if (!defined('ABSPATH')) exit;
@@ -9,8 +10,8 @@ if (!defined('ABSPATH')) exit;
 add_action('wp_ajax_load_signatures_data', 'squuad_cert_load_signatures_data');
 
 /**
- * Firmas ya guardadas del estudiante y su representante para un documento (las pinta create-enrollment.js).
- * Solo con sesión; el estudiante y el representante salen del usuario actual, no de la petición.
+ * Firma ya guardada del estudiante en una solicitud (la pinta create-enrollment.js), solo para sus firmantes.
+ * parent_signature va siempre vacía: el representante ya no firma (el JS antiguo la sigue esperando).
  */
 function squuad_cert_load_signatures_data()
 {
@@ -37,37 +38,9 @@ function squuad_cert_load_signatures_data()
         wp_send_json(array(
             'grade_selected' => null,
             'student_signature' => $by_role['student'] ?? [],
-            'parent_signature' => $by_role['parent'] ?? [],
+            'parent_signature' => [],
         ));
     }
 
-    $roles = (array) $current_user->roles;
-    $document = is_string($_POST['document'] ?? null) ? sanitize_text_field(wp_unslash($_POST['document'])) : 'ENROLLMENT';
-    $table_students = $wpdb->prefix . 'students';
-    $student_id = 0;
-    $partner_id = 0;
-
-    if (in_array('student', $roles, true)) {
-        $student = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$table_students} WHERE email = %s", $current_user->user_email));
-        $partner_id = $student ? (int) $student->partner_id : 0;
-        $student_id = $current_user->ID;
-    } elseif (in_array('parent', $roles, true)) {
-        $student = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$table_students} WHERE partner_id = %d", $current_user->ID));
-        $user_student = $student ? get_user_by('email', $student->email) : null;
-        $student_id = $user_student ? $user_student->ID : 0;
-        $partner_id = $current_user->ID;
-    }
-
-    $table_signatures = $wpdb->prefix . 'users_signatures';
-    $query = "SELECT * FROM {$table_signatures} WHERE user_id = %d AND document_id = %s";
-    $student_signature = $student_id ? $wpdb->get_row($wpdb->prepare($query, $student_id, $document)) : null;
-    $parent_signature = $partner_id ? $wpdb->get_row($wpdb->prepare($query, $partner_id, $document)) : null;
-
-    $grade_selected = null;
-    if ($parent_signature) {
-        $grade_selected = $parent_signature->grade_selected ? $parent_signature->grade_selected : null;
-    } else if ($student_signature) {
-        $grade_selected = $student_signature->grade_selected ? $student_signature->grade_selected : null;
-    }
-    wp_send_json(array('grade_selected' => $grade_selected, 'parent_signature' => $parent_signature ? json_decode($parent_signature->signature) : [], 'student_signature' => $student_signature ? json_decode($student_signature->signature) : []));
+    wp_send_json(array('grade_selected' => null, 'parent_signature' => [], 'student_signature' => []));
 }

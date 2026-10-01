@@ -62,8 +62,8 @@ function squuad_cert_signature_request_latest(int $student_id, string $document_
  * crea con la ronda siguiente. Bajo un bloqueo por (sitio, estudiante, documento) y con la clave única
  * (student_id, document_id, round): si dos firmantes abren a la vez, el segundo recibe la del primero.
  *
- * $signers: ['student_user_id' => int, 'parent_user_id' => int] (0 si no aplica; iguales si el estudiante es su
- * propio representante). Quedan fijados en la solicitud. Devuelve null si el esquema no está en v5 o si falla.
+ * $signers: ['student_user_id' => int] (la cuenta del estudiante; el representante no firma, parent_user_id queda 0).
+ * Quedan fijados en la solicitud. Devuelve null si el esquema no está en v5 o si falla.
  */
 function squuad_cert_signature_request_get_or_create(
     int $student_id,
@@ -437,13 +437,13 @@ const SQUUAD_CERT_SIGNATURE_SLOT = '<div data-edusig-slot="signature_section"></
 /** Marcador fijo que sustituye a {{qrcode}} en el contenido. */
 const SQUUAD_CERT_SIGNATURE_QR_SLOT = '<div data-edusig-slot="qrcode"></div>';
 
-/** Rol del usuario en la solicitud según los firmantes fijados en ella: 'student', 'parent' o '' si no firma. */
+/** Puesto del usuario en la solicitud según los firmantes fijados en ella ('student', 'signer:<id>') o '' si no firma. */
 function squuad_cert_signature_request_role(object $request, int $user_id): string
 {
     if (!$user_id) {
         return '';
     }
-    // ADR 0003: hueco del usuario entre los firmantes fijados en la solicitud ('student', 'parent', 'signer:<id>')
+    // ADR 0003: hueco del usuario entre los firmantes fijados en la solicitud ('student', 'signer:<id>')
     if (function_exists('squuad_cert_request_signers')) {
         foreach (squuad_cert_request_signers($request) as $signer) {
             if ($signer['user_id'] === $user_id) {
@@ -452,17 +452,11 @@ function squuad_cert_signature_request_role(object $request, int $user_id): stri
         }
         return '';
     }
-    if ((int) $request->student_user_id === $user_id) {
-        return 'student'; // también si el estudiante es su propio representante
-    }
-    if ((int) $request->parent_user_id === $user_id) {
-        return 'parent';
-    }
-
-    return '';
+    // Solicitud sin firmantes fijados: firma el estudiante (el representante no firma, decisión del 2026-10-01)
+    return (int) $request->student_user_id === $user_id ? 'student' : '';
 }
 
-/** Roles que deben firmar la solicitud: el estudiante y, si es otra persona, su representante. */
+/** Puestos que deben firmar la solicitud; sin firmantes fijados, el estudiante. */
 function squuad_cert_signature_request_required_roles(object $request): array
 {
     if (function_exists('squuad_cert_request_signers')) {
@@ -471,15 +465,7 @@ function squuad_cert_signature_request_required_roles(object $request): array
             array_filter(squuad_cert_request_signers($request), static fn(array $signer): bool => $signer['required'])
         ));
     }
-    $roles = [];
-    if ((int) $request->student_user_id) {
-        $roles[] = 'student';
-    }
-    if ((int) $request->parent_user_id && (int) $request->parent_user_id !== (int) $request->student_user_id) {
-        $roles[] = 'parent';
-    }
-
-    return $roles;
+    return (int) $request->student_user_id ? ['student'] : [];
 }
 
 /** Roles que ya firmaron dentro de la solicitud (firmas vivas con ese request_id). */
@@ -503,7 +489,7 @@ function squuad_cert_signature_request_signed_roles(int $request_id): array
  * solicitudes) su fila de student_documents tiene un archivo y no está declinada. Si la ronda abierta ya tiene la
  * firma del usuario, se pasa al siguiente (falta la del otro firmante).
  *
- * Devuelve ['student', 'document', 'request' (o null), 'student_user_id', 'parent_user_id', 'legacy_partial'] o null.
+ * Devuelve ['student', 'document', 'request' (o null), 'student_user_id', 'legacy_partial'] o null.
  */
 function squuad_cert_signature_pending_for_user(WP_User $user, string $selection = ''): ?array
 {
@@ -544,11 +530,6 @@ function squuad_cert_signature_user_documents(WP_User $user): array
             $students[(int) $student->id] = $student;
         }
     }
-    if (in_array('parent', $roles, true)) {
-        foreach ($wpdb->get_results($wpdb->prepare("SELECT * FROM {$wpdb->prefix}students WHERE partner_id = %d ORDER BY id ASC", $user->ID)) as $student) {
-            $students[(int) $student->id] = $student;
-        }
-    }
     if (!$students) {
         return [];
     }
@@ -562,9 +543,8 @@ function squuad_cert_signature_user_documents(WP_User $user): array
     foreach ($students as $student) {
         $student_user = get_user_by('email', $student->email);
         $student_user_id = $student_user ? (int) $student_user->ID : 0;
-        $parent_user_id = (int) $student->partner_id;
-        $my_role = $student_user_id === (int) $user->ID ? 'student' : ($parent_user_id === (int) $user->ID ? 'parent' : '');
-        if ('' === $my_role) {
+        // Firma solo el estudiante con su propia cuenta (decisión del 2026-10-01)
+        if ($student_user_id !== (int) $user->ID) {
             continue;
         }
 
@@ -584,11 +564,7 @@ function squuad_cert_signature_user_documents(WP_User $user): array
             }
             if (!$in_progress && function_exists('squuad_cert_signing_policy')) {
                 $policy = squuad_cert_signing_policy($document);
-                $self = $student_user_id && $student_user_id === $parent_user_id;
-                $asks_me = $self
-                    ? (squuad_cert_signing_policy_has($policy, 'student') || squuad_cert_signing_policy_has($policy, 'parent'))
-                    : squuad_cert_signing_policy_has($policy, $my_role);
-                if (!$asks_me) {
+                if (!squuad_cert_signing_policy_has($policy, 'student')) {
                     continue;
                 }
             }
@@ -625,10 +601,9 @@ function squuad_cert_signature_user_documents(WP_User $user): array
                 'document' => $document,
                 'request' => ($request && in_array($request->status, SQUUAD_CERT_SIGNATURE_REQUEST_OPEN, true)) ? $request : null,
                 'student_user_id' => $student_user_id,
-                'parent_user_id' => $parent_user_id,
                 // Aviso de "fírmelo de nuevo" durante toda la ronda 1 de un documento con firma del modelo anterior
                 'legacy_partial' => (!$request || 1 === (int) $request->round)
-                    && squuad_cert_signature_has_legacy_partial($student, $document_id, $student_user_id, $parent_user_id),
+                    && squuad_cert_signature_has_legacy_partial($student, $document_id, $student_user_id, 0),
             ];
         }
     }
@@ -742,22 +717,15 @@ function squuad_cert_signature_render_content(string $content, object $student, 
         }
     }
 
-    // Estudiante y representante colocados por separado ({{signature_student}} / {{signature_parent}}): su recuadro
-    // va ahí y {{signature_section}} lleva solo los que no se colocaron (si no se separa nada, sale como siempre)
-    $section = function_exists('squuad_cert_get_signature_section') ? squuad_cert_get_signature_section($student) : '';
-    $placed = [];
-    foreach (['student', 'parent'] as $role) {
-        $marker = '<div data-edusig-slot="' . $role . '"></div>';
-        if (false !== strpos($content, $marker)) {
-            $placed[] = $role;
-            $content = str_replace($marker, function_exists('squuad_cert_signature_pad_box') ? squuad_cert_signature_pad_box($student, $role) : '', $content);
-        }
-    }
-    if ($placed && function_exists('squuad_cert_signature_pad_box')) {
+    // Recuadro del estudiante: donde la plantilla lo coloca ({{signature_student}}) o, si no, en {{signature_section}}.
+    // Un hueco del representante de una solicitud antigua queda vacío (el representante ya no firma).
+    $content = str_replace('<div data-edusig-slot="parent"></div>', '', $content);
+    $marker = '<div data-edusig-slot="student"></div>';
+    $box = squuad_cert_signature_pad_box($student, 'student', $request);
+    $section = $box;
+    if (false !== strpos($content, $marker)) {
+        $content = str_replace($marker, $box, $content);
         $section = '';
-        foreach (array_diff(['student', 'parent'], $placed) as $role) {
-            $section .= squuad_cert_signature_pad_box($student, $role);
-        }
     }
 
     return str_replace(

@@ -1,130 +1,55 @@
 <?php
 /**
- * EduSystem - Certificación: recuadros de firma de los documentos (squuad_cert_get_signature_section, squuad_cert_signature_pad_box,
- * squuad_cert_get_signature_section_fgu). Movido sin cambios desde includes/html-documents.php (ADR 0004, paso 3c).
+ * Certificación: recuadro de firma del estudiante en los documentos (squuad_cert_get_signature_section,
+ * squuad_cert_signature_pad_box). Movido desde includes/html-documents.php de EduSystem (ADR 0004, paso 3c).
+ *
+ * Firma solo el estudiante, con su cuenta de WordPress (decisión del dueño, 2026-10-01): el recuadro muestra el nombre
+ * de esa cuenta, el mismo que queda en el documento firmado. No se consulta la ficha de EduSystem: la cuenta y el
+ * nombre los da el proveedor del titular (holder_slots) o, si ya hay solicitud, los firmantes fijados en ella.
  */
 
 if (!defined('ABSPATH')) exit;
 
-function squuad_cert_get_signature_section($student): string
+/** Nombre de la cuenta que ocupa un puesto: el fijado en la solicitud o, sin solicitud, el que da el proveedor. */
+function squuad_cert_signature_holder_name(object $student, string $slot_key, ?object $request = null): string
 {
-
-    global $current_user;
-    $lastNameParts = array_filter([$student->last_name, $student->middle_last_name]);
-    $firstNameParts = array_filter([$student->name, $student->middle_name]);
-
-    $student_full_name = '';
-
-    if (!empty($lastNameParts)) {
-        $student_full_name .= implode(' ', $lastNameParts);
-    }
-
-    if (!empty($firstNameParts)) {
-        if (!empty($student_full_name)) {
-            $student_full_name .= ', ';
+    if ($request && function_exists('squuad_cert_request_signers')) {
+        foreach (squuad_cert_request_signers($request) as $signer) {
+            if ($slot_key === $signer['slot_key']) {
+                return (string) $signer['name'];
+            }
         }
-        $student_full_name .= implode(' ', $firstNameParts);
     }
-    $student_short_name = implode(' ', array_filter([$student->name, $student->last_name]));
-    $user_partner = get_user_by('id', $student->partner_id);
-    $parent_full_name = $user_partner ? trim($user_partner->first_name . ' ' . $user_partner->last_name) : '';
-    $age = floor((time() - strtotime($student->birth_date)) / 31536000);
-    
-    // Solo se oculta la parte del representante si el estudiante es su propio representante. Antes se ocultaba
-    // cuando entraba el representante, que entonces firmaba en el recuadro del estudiante.
-    $student_user = get_user_by('email', $student->email);
-    $show_parent_info = ($student_user && (int) $student_user->ID === (int) $student->partner_id) ? 0 : 1;
-    ob_start();
-    ?>
-        <input type="hidden" name="auto_signature_student" value="0">
-        <div class="signatures_squares">
-            <div class="signature_square_field">
-                <div>
-                    <div style="padding: 8px; text-align: center"><strong><?= __('Signature of applicant:', 'edusystem') ?></strong>
-                        <br> <?= esc_html($student_full_name) ?>
-                    </div>
-                </div>
-                <div style="position: relative; padding: 8px;" id="signature-pad-student">
-                    <canvas id="signature-student" width="100%" height="200"
-                        style="border: 1px solid gray; margin: auto !important; background-color: #ffff005c"></canvas>
-                    <div id="sign-here-student"
-                        style="pointer-events: none;position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-weight: bold; padding: 10px; color: #4f4e4e7a; font-size: 20px;">
-                        <span><?= __('SIGN HERE', 'edusystem'); ?></span>
-                    </div>
-                </div>
-                <button id="clear-student" style="width: 100%;"><?= __('Clear', 'edusystem'); ?></button>
-                <button id="generate-signature-student" style="width: 100%;"
-                    onclick="autoSignature('signature-pad-student', 'signature-text-student', 'generate-signature-student', 'clear-student')"><?= __('Generate signature automatically', 'edusystem') ?></button>
-                <div style="position: relative; padding: 8px; text-align: center; width: 70%; margin: 8px auto; border-bottom: 1px solid gray; font-family: Great Vibes, cursive; font-size: 28px; display: block; height: 120px; display: none"
-                    id="signature-text-student">
-                    <div style="bottom: 0; position: absolute; text-align: center; width: 100%;">
-                        <?= esc_html($student_short_name) ?>
-                    </div>
-                </div>
-                <button id="clear-student-signature"
-                    style="width: 100%; display: none"><?= __('Cancel', 'edusystem') ?></button>
-            </div>
-            <?php if ($show_parent_info == 1) { ?>
-                <input type="hidden" name="auto_signature_parent" value="0">
-                <div class="signature_square_field">
-                    <div>
-                        <div style="padding: 8px; text-align: center"><strong><?= __('Signature of Parent/Legal Guardian:', 'edusystem') ?></strong>
-                            <br> <?= esc_html($parent_full_name) ?>
-                        </div>
-                    </div>
-                    <div style="position: relative; padding: 8px;" id="signature-pad-parent">
-                        <canvas id="signature-parent" width="100%" height="200"
-                            style="border: 1px solid gray; margin: auto !important;  background-color: #ffff005c"></canvas>
-                        <div id="sign-here-parent"
-                            style="pointer-events: none;position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-weight: bold; padding: 10px; color: #4f4e4e7a; font-size: 20px;">
-                            <span><?= __('SIGN HERE', 'edusystem') ?></span>
-                        </div>
-                    </div>
-                    <button id="clear-parent" style="width: 100%;"><?= __('Clear', 'edusystem') ?></button>
-                    <button id="generate-signature-parent" style="width: 100%;"
-                        onclick="autoSignature('signature-pad-parent', 'signature-text-parent', 'generate-signature-parent', 'clear-parent')"><?= __('Generate signature automatically', 'edusystem') ?></button>
-                    <div style="    position: relative; padding: 8px; text-align: center; width: 70%; margin: 8px auto; border-bottom: 1px solid gray; font-family: Great Vibes, cursive; font-size: 28px; display: block; height: 120px; display: none"
-                        id="signature-text-parent">
-                        <div style="bottom: 0; position: absolute; text-align: center; width: 100%;">
-                            <?= esc_html($parent_full_name) ?>
-                        </div>
-                    </div>
-                    <button id="clear-parent-signature"
-                        style="width: 100%; display: none"><?= __('Cancel', 'edusystem') ?></button>
-                </div>
-            <?php } ?>
-        </div>
-    <?php
+    $provider = function_exists('squuad_cert_subject_type') ? squuad_cert_subject_type('edusystem_student') : null;
+    if ($provider && !empty($provider['holder_slots'])) {
+        foreach ((array) call_user_func($provider['holder_slots'], (int) $student->id, null) as $slot) {
+            if ($slot_key === ($slot['slot_key'] ?? '')) {
+                return (string) ($slot['name'] ?? '');
+            }
+        }
+    }
 
-    return ob_get_clean();
+    return '';
+}
+
+/** {{signature_section}}: el recuadro del estudiante (el único puesto que firma desde Mi Cuenta). */
+function squuad_cert_get_signature_section($student, ?object $request = null): string
+{
+    return squuad_cert_signature_pad_box($student, 'student', $request);
 }
 
 /**
- * Recuadro de firma de un solo firmante, para colocarlo por separado en la plantilla con {{signature_student}} o
- * {{signature_parent}} (ADR 0003, variables de firma por firmante). Mismo marcado e ids que squuad_cert_get_signature_section(),
- * que sigue igual para {{signature_section}}. $role: 'student' o 'parent'. Sin recuadro del representante si el
- * estudiante es su propio representante.
+ * Recuadro de firma de un solo firmante, para colocarlo por separado en la plantilla con {{signature_student}} (ADR
+ * 0003, variables de firma por firmante). $role: solo 'student'; cualquier otro puesto no tiene recuadro aquí (los
+ * firmantes del sistema firman desde su bandeja). El nombre es el de su cuenta de WordPress.
  */
-function squuad_cert_signature_pad_box($student, string $role): string
+function squuad_cert_signature_pad_box($student, string $role, ?object $request = null): string
 {
-    if (!in_array($role, ['student', 'parent'], true)) {
+    if ('student' !== $role) {
         return '';
     }
-    $student_user = get_user_by('email', $student->email);
-    if ('parent' === $role && $student_user && (int) $student_user->ID === (int) $student->partner_id) {
-        return '';
-    }
-    if ('student' === $role) {
-        $last = implode(' ', array_filter([$student->last_name, $student->middle_last_name]));
-        $first = implode(' ', array_filter([$student->name, $student->middle_name]));
-        $full_name = trim($last . ($last && $first ? ', ' : '') . $first);
-        $short_name = implode(' ', array_filter([$student->name, $student->last_name]));
-        $label = __('Signature of applicant:', 'edusystem');
-    } else {
-        $partner = get_user_by('id', $student->partner_id);
-        $full_name = $short_name = $partner ? trim($partner->first_name . ' ' . $partner->last_name) : '';
-        $label = __('Signature of Parent/Legal Guardian:', 'edusystem');
-    }
+    $full_name = $short_name = squuad_cert_signature_holder_name($student, 'student', $request);
+    $label = __('Signature of applicant:', 'edusystem');
     ob_start();
     ?>
         <div class="signatures_squares">
@@ -159,17 +84,4 @@ function squuad_cert_signature_pad_box($student, string $role): string
     <?php
 
     return (string) ob_get_clean();
-}
-
-function squuad_cert_get_signature_section_fgu($student): string
-{
-    ob_start();
-    ?>
-        <div>
-            <div style="padding: 8px; text-align: center"><strong><?= __('Signature of FGU Official:', 'edusystem') ?></strong></div>
-            <img style="width: 160px; margin: 25px auto;" src="http://portal.floridaglobal.university/wp-content/uploads/2025/11/signature-admission-fgu.png" alt="">
-        </div>
-    <?php
-
-    return ob_get_clean();
 }

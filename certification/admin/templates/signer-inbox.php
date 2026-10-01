@@ -53,7 +53,7 @@ $frame = static function (string $html): string {
                     <input type="hidden" name="request_id" value="<?= (int) $request->id ?>">
                     <?php wp_nonce_field('squuad_cert_signer_decline_' . (int) $request->id); ?>
                     <div class="notice notice-error inline" style="margin:0 0 8px"><p><strong><?= esc_html__('This action cannot be reverted.', 'edusystem') ?></strong>
-                        <?= esc_html__('When you decline this document, the signatures of the student and the parent linked to it (if any) will be revoked, and the document can no longer be approved or set back to pending. The user will have to send or sign a new document.', 'edusystem') ?></p></div>
+                        <?= esc_html__('When you decline this document, the signature of the student linked to it (if any) will be revoked, and the document can no longer be approved or set back to pending. The user will have to send or sign a new document.', 'edusystem') ?></p></div>
                     <p><label for="edusystem-decline-reason"><?= esc_html__('Reason why it is declined', 'edusystem') ?></label><br>
                         <textarea id="edusystem-decline-reason" name="reason" required rows="3" style="width:100%"></textarea></p>
                     <p><label><input type="checkbox" name="confirm_irreversible" value="1" required> <?= esc_html__('I understand that declining is final and cannot be reverted.', 'edusystem') ?></label></p>

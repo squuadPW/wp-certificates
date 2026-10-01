@@ -29,17 +29,17 @@ $next = count($positions) + 1;
 <div id="edusystem-document-signers" class="postbox" style="margin-top:20px;display:none">
     <div class="inside">
         <h2 style="padding-left:0"><?= esc_html__('Document signers', 'edusystem') ?></h2>
-        <p class="description" style="max-width:820px"><?= esc_html__('Who signs this document and in which order. Students and parents sign first; then the registered signers of the system. Changes apply to new signature requests; requests already in progress keep their signers.', 'edusystem') ?></p>
+        <p class="description" style="max-width:820px"><?= esc_html__('Who signs this document and in which order. The student signs first; then the registered signers of the system. Changes apply to new signature requests; requests already in progress keep their signers.', 'edusystem') ?></p>
 
         <?php if ('automatic' !== $document->type) : ?>
-            <p class="description" style="max-width:820px"><strong><?= esc_html__('Issued document:', 'edusystem') ?></strong> <?= esc_html__('only the system signers sign it (the student and the parent do not). With at least one signer, "Generate" in the student file becomes "Issue for signature".', 'edusystem') ?></p>
+            <p class="description" style="max-width:820px"><strong><?= esc_html__('Issued document:', 'edusystem') ?></strong> <?= esc_html__('only the system signers sign it (the student does not). With at least one signer, "Generate" in the student file becomes "Issue for signature".', 'edusystem') ?></p>
         <?php endif; ?>
         <?php if ($notice) : ?>
             <div class="notice <?= $notice['ok'] ? 'notice-success' : 'notice-error' ?> inline"><p><?= esc_html($notice['message']) ?></p></div>
         <?php endif; ?>
         <?php if (!$policy['policy_id']) : ?>
             <p><em><?= esc_html('automatic' === $document->type
-                ? __('Not configured yet: by default the student and the parent sign this document.', 'edusystem')
+                ? __('Not configured yet: by default the student signs this document.', 'edusystem')
                 : __('Not configured yet: by default this document does not ask for user signatures.', 'edusystem')) ?></em></p>
         <?php endif; ?>
 
@@ -64,7 +64,6 @@ $next = count($positions) + 1;
                     <?php
                     $in_section = __('Not in the template: it goes in {{signature_section}}.', 'edusystem');
                     $row('student:0', __('Student', 'edusystem'), __('Signs from their own account.', 'edusystem'), isset($positions['student:0']), $positions['student:0'] ?? 1, ['signature_student'], $in_section);
-                    $row('parent:0', __('Parent or guardian', 'edusystem'), __('Signs from their own account. If the student is their own parent, they sign once.', 'edusystem'), isset($positions['parent:0']), $positions['parent:0'] ?? 2, ['signature_parent'], $in_section);
                     foreach ($signers as $signer) {
                         $key = 'signer:' . (int) $signer->id;
                         $detail = trim((string) $signer->charge . ' · ' . (string) $signer->user_email, ' ·');
@@ -81,16 +80,13 @@ $next = count($positions) + 1;
             </table>
             <div class="edusig-help" style="max-width:820px;margin-top:10px;padding:10px 12px;background:#f6f7f7;border:1px solid #dcdcde">
                 <p style="margin-top:0"><strong><?= esc_html__('How to place the signatures in the template', 'edusystem') ?></strong></p>
-                <p><?= $chip('signature_section') // phpcs:ignore ?> <?= esc_html__('All the signatures of the student and the parent that are not placed separately (as before).', 'edusystem') ?></p>
-                <p><?= esc_html__('Each signer separately: use the variables of their row. Signers not placed in the template go in {{signature_section}} (student and parent) or in a signatures block at the end (system signers).', 'edusystem') ?></p>
+                <p><?= $chip('signature_section') // phpcs:ignore ?> <?= esc_html__('The signature of the student when it is not placed separately (as before).', 'edusystem') ?></p>
+                <p><?= esc_html__('Each signer separately: use the variables of their row. Signers not placed in the template go in {{signature_section}} (the student) or in a signatures block at the end (system signers).', 'edusystem') ?></p>
                 <p style="margin-bottom:4px"><strong><?= esc_html__('Template rules', 'edusystem') ?></strong> — <?= esc_html__('the text between the marks is shown only if the rule is met; with ^ , only if it is not:', 'edusystem') ?></p>
                 <ul style="list-style:disc;margin:0 0 0 20px">
-                    <li><code>{{#requires_parent_signature}}</code> … <code>{{/requires_parent_signature}}</code> — <?= esc_html__('the parent signs this document', 'edusystem') ?></li>
-                    <li><code>{{^requires_parent_signature}}</code> … <code>{{/requires_parent_signature}}</code> — <?= esc_html__('the parent does not sign (for example, the student is their own parent)', 'edusystem') ?></li>
-                    <li><code>{{#student_is_own_parent}}</code> … <code>{{/student_is_own_parent}}</code> — <?= esc_html__('the student is their own parent (has both roles and signs once)', 'edusystem') ?></li>
                     <li><code>{{#requires_student_signature}}</code> … <code>{{/requires_student_signature}}</code> — <?= esc_html__('the student signs this document', 'edusystem') ?></li>
                 </ul>
-                <p class="description"><?= esc_html__('Example: {{#requires_parent_signature}}Signature of the parent: {{signature_parent}}{{/requires_parent_signature}} — the parent\'s label and box disappear when the parent does not sign.', 'edusystem') ?></p>
+                <p class="description"><?= esc_html__('The parent no longer signs: in old templates {{signature_parent}} is empty and {{#requires_parent_signature}} and {{#student_is_own_parent}} are never met.', 'edusystem') ?></p>
                 <?php // Variable fija del sistema (definida en el código, no en la tabla variables_document): siempre disponible ?>
                 <p style="margin-bottom:4px"><strong><?= esc_html__('PDF layout', 'edusystem') ?></strong></p>
                 <p style="margin:0"><?= $chip('page_break') // phpcs:ignore ?> <?= esc_html__('Page break: what follows starts on a new page. In automatic documents, lines, paragraphs and table rows are never cut between pages; use it to decide where a section starts.', 'edusystem') ?></p>

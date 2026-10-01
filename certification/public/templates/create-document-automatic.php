@@ -13,8 +13,6 @@
             <div class="modal-body" id="content-pdf">
                 <input class="formdata" autocomplete="off" type="hidden" id="modal_open" name="modal_open" value="1" />
                 <input type="hidden" name="student_user_id" value="<?= $student_id ?>" />
-                <input type="hidden" name="parent_user_id" value="<?= $partner_id ?>" />
-                <input type="hidden" name="show_parent_info" value="<?= $show_parent_info ?>" />
                 <input type="hidden" name="document_id" value="<?= $document->document_identificator ?>">
                 <input type="hidden" name="document_name" value="<?= $document->title ?>">
                 <?php if (!empty($request)) { // solicitud de firma (ADR 0002): el servidor deduce de ella quién firma qué ?>

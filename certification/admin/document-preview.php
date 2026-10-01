@@ -78,7 +78,7 @@ function squuad_cert_document_preview_signers(object $document): array
                 'charge' => __('Position (example)', 'edusystem'),
                 'phase' => 2,
             ];
-        } elseif (in_array($slot['slot_type'], ['student', 'parent'], true)) {
+        } elseif ('student' === $slot['slot_type']) {
             $signers[] = ['slot_key' => $slot['slot_type'], 'signer_id' => 0, 'phase' => 1];
         }
     }
@@ -241,15 +241,14 @@ function squuad_cert_document_preview_replacements(object $document, string $mod
         return $replacements;
     }
 
-    // Firmas: estudiante, representante y firmantes del sistema, cada uno con su recuadro de ejemplo
+    // Firmas: estudiante y firmantes del sistema, cada uno con su recuadro de ejemplo (el representante ya no firma)
     $signers = squuad_cert_document_preview_signers($document);
     $slots = array_column($signers, 'slot_key');
     $has_student = in_array('student', $slots, true);
-    $has_parent = in_array('parent', $slots, true);
     $replacements['signature_student'] = $html($has_student ? squuad_cert_signer_slot_marker('student') : '');
-    $replacements['signature_parent'] = $html($has_parent ? squuad_cert_signer_slot_marker('parent') : '');
+    $replacements['signature_parent'] = $html('');
     $replacements['requires_student_signature'] = $html($has_student ? '1' : '');
-    $replacements['requires_parent_signature'] = $html($has_parent ? '1' : '');
+    $replacements['requires_parent_signature'] = $html('');
     $replacements['student_is_own_parent'] = $html('');
     $n = 0;
     foreach ($signers as $signer) {
@@ -328,7 +327,7 @@ function squuad_cert_document_preview_data(object $document): array
     }
 
     // Recuadros de firma de ejemplo en lugar de los marcadores
-    $labels = ['student' => ['Juan Carlos Pérez Gómez', __('Student', 'edusystem')], 'parent' => ['María Gómez de Pérez', __('Parent or guardian', 'edusystem')]];
+    $labels = ['student' => ['Juan Carlos Pérez Gómez', __('Student', 'edusystem')]];
     $section = '';
     $render = static function (string $text) use (&$section, $signers, $labels): string {
         foreach ($signers as $signer) {

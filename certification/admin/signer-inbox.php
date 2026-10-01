@@ -93,7 +93,7 @@ function squuad_cert_signer_decline_request(int $request_id, string $reason, boo
         return ['ok' => false, 'message' => __('You are not allowed to sign this document.', 'edusystem')];
     }
     if (function_exists('squuad_cert_signature_session_switched_from') && squuad_cert_signature_session_switched_from()) {
-        return ['ok' => false, 'message' => __('Documents cannot be signed from a switched session. The student or parent must sign from their own account.', 'edusystem')];
+        return ['ok' => false, 'message' => __('Documents cannot be signed from a switched session. Each person must sign from their own account.', 'edusystem')];
     }
     if (!in_array($request->status, ['open', 'partially_signed'], true) || !squuad_cert_signature_request_slot_open($request, $slot)) {
         return ['ok' => false, 'message' => __('This document no longer accepts signatures. Please reload the page.', 'edusystem')];
@@ -136,7 +136,7 @@ function squuad_cert_signer_decline_request(int $request_id, string $reason, boo
 
     return ['ok' => true, 'message' => 'issued' === ($request->origin ?? '')
         ? __('The document was declined. The administration will decide how to issue it again.', 'edusystem')
-        : __('The document was declined. The student and the parent were notified.', 'edusystem')];
+        : __('The document was declined. The student was notified.', 'edusystem')];
 }
 
 add_action('admin_post_squuad_cert_signer_decline', 'squuad_cert_signer_inbox_handle_decline');
