@@ -18,7 +18,7 @@ define('WP_C_PATH', plugin_dir_path(__FILE__));
 define('WP_C_REMOTE_INFO_URL', 'https://versions.squuad.com/plugins/wp-certificates/info.json');
 // Versión del esquema de tablas: al subirla, create_tables_certificates() se vuelve a ejecutar sin
 // reactivar el plugin (dbDelta solo crea tablas o añade/modifica columnas)
-define('WP_C_DB_VERSION', '2');
+define('WP_C_DB_VERSION', '3');
 
 // Now you can safely use get_plugin_data()
 $plugin_data = get_plugin_data(__FILE__);
@@ -225,6 +225,7 @@ function create_tables_certificates() {
         html text NULL,
         tomo INT NULL,
         folio INT NULL,
+        enrollment_id INT NULL,
         option_document JSON NULL,
         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY (id)

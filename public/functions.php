@@ -304,7 +304,7 @@ function add_viewport_meta()
 add_action('wp_head', 'add_viewport_meta', 1);
 
 // Plugin B: mi-plugin-receptor.php
-function create_certificate_edusystem_callback($type, $name, $program = '', $template_id, $student, $emission_date, $expiration_date = null)
+function create_certificate_edusystem_callback($type, $name, $program = '', $template_id, $student, $emission_date, $expiration_date = null, $enrollment_id = null)
 {
     global $wpdb;
     $table_certificates = $wpdb->prefix . 'certificates';
@@ -356,15 +356,18 @@ function create_certificate_edusystem_callback($type, $name, $program = '', $tem
         $student_full_name = trim($student_name . ' ' . $student_last_name);
     }
 
-    // 1. Validar si el registro ya existe
-    $existing_record = $wpdb->get_row(
-        $wpdb->prepare(
-            "SELECT id, simple_uuid FROM $table_certificates WHERE type = %s AND name_document = %s AND email = %s",
-            $type,
-            $name,
-            $student->email
-        )
-    );
+    // Inscripción (programs_by_student) a la que pertenece el certificado; sin dato, se reutiliza como antes.
+    $enrollment_id = absint($enrollment_id);
+
+    // 1. Validar si el registro ya existe (por inscripción cuando viene)
+    $existing_sql = "SELECT id, simple_uuid FROM $table_certificates WHERE type = %s AND name_document = %s AND email = %s";
+    $existing_args = [$type, $name, $student->email];
+    if ($enrollment_id) {
+        $existing_sql .= " AND enrollment_id = %d";
+        $existing_args[] = $enrollment_id;    } else {
+        $existing_sql .= " AND enrollment_id IS NULL";
+    }
+    $existing_record = $wpdb->get_row($wpdb->prepare($existing_sql, $existing_args));
 
     if ($existing_record && !empty($existing_record->simple_uuid)) {
         // Si el registro existe, devolvemos su URL y la URL de la imagen.
@@ -386,6 +389,7 @@ function create_certificate_edusystem_callback($type, $name, $program = '', $tem
         'participant_id' => isset($participant_id) ? $participant_id : null,
         'course_id' => isset($course_id) ? $course_id : null,
         'html' => isset($html) ? $html : null,
+        'enrollment_id' => $enrollment_id ?: null,
     ];
 
     $wpdb->insert($table_certificates, $insert_data);
@@ -409,7 +413,7 @@ function create_certificate_edusystem_callback($type, $name, $program = '', $tem
     return ['url' => $url, 'download_url' => $download_url, 'image_url' => $image_url];
 }
 
-add_filter('create_certificate_edusystem', 'create_certificate_edusystem_callback', 10, 7);
+add_filter('create_certificate_edusystem', 'create_certificate_edusystem_callback', 10, 8);
 
 function automatic_documents_loaded() {
     global $wpdb;
@@ -454,7 +458,7 @@ function automatic_documents_last_optimized() {
 
 add_filter('get_first_pending_automatic_document', 'automatic_documents_last_optimized');
 
-function assign_certificate_student( $student_id, $template_id, $type, $emission_date, $expiration_date = null, $program = '', $course_id = '', $user_signature_id = null ) {
+function assign_certificate_student( $student_id, $template_id, $type, $emission_date, $expiration_date = null, $program = '', $course_id = '', $user_signature_id = null, $enrollment_id = null ) {
     global $wpdb;
     $table_certificates = $wpdb->prefix . 'certificates';
 
@@ -475,14 +479,15 @@ function assign_certificate_student( $student_id, $template_id, $type, $emission
         return false;
     }
 
-    $existing_record = $wpdb->get_row(
-        $wpdb->prepare(
-            "SELECT id, simple_uuid FROM $table_certificates WHERE type = %s AND name_document = %s AND email = %s",
-            $type,
-            $document->title,
-            $student->email
-        )
-    );
+    $enrollment_id = absint( $enrollment_id );
+    $existing_sql  = "SELECT id, simple_uuid FROM $table_certificates WHERE type = %s AND name_document = %s AND email = %s";
+    $existing_args = [ $type, $document->title, $student->email ];
+    if ( $enrollment_id ) {
+        $existing_sql .= " AND enrollment_id = %d";
+        $existing_args[] = $enrollment_id;    } else {
+        $existing_sql .= " AND enrollment_id IS NULL";
+    }
+    $existing_record = $wpdb->get_row( $wpdb->prepare( $existing_sql, $existing_args ) );
 
     if ( !$existing_record ) {
         $student_full_name = trim("{$student->name} {$student->middle_name} {$student->last_name} {$student->middle_last_name}");
@@ -575,7 +580,7 @@ function assign_certificate_student( $student_id, $template_id, $type, $emission
 
         $qr = ['url' => '', 'image_url' => ''];
         if ($create_certificate_qr) {
-            $qr = apply_filters('create_certificate_edusystem', 'certificate', $document->title, get_name_program_student($student->id), 1, $student, $emission_date);
+            $qr = apply_filters('create_certificate_edusystem', 'certificate', $document->title, get_name_program_student($student->id), 1, $student, $emission_date, null, $enrollment_id);
         }
 
         // Estructura HTML final con contenedores limpios
@@ -611,6 +616,7 @@ function assign_certificate_student( $student_id, $template_id, $type, $emission
             'html'                => $html_final,
             'tomo'                => $book_data['tomo'] ?? null,
             'folio'               => $book_data['folio'] ?? null,
+            'enrollment_id'       => $enrollment_id ?: null,
             'option_document'     => json_encode($option_document) // Guardamos el tamaño en un JSON estructurado
         ];
 
