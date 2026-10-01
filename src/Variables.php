@@ -39,4 +39,53 @@ final class Variables
             '{{key}}, {{key_list}}' => __('Answers to the additional fields of this document (see "Advanced")', 'wp-certificates'),
         ];
     }
+
+    /**
+     * Claves simples de las variables generales (today, page_break, document_name…), sin las familias _N, _ID ni los
+     * campos adicionales.
+     *
+     * @return string[]
+     */
+    public static function general_keys(): array
+    {
+        $keys = [];
+        foreach (array_keys(self::general()) as $entry) {
+            if (preg_match('/^\{\{([a-z_]+)\}\}$/', $entry, $m)) {
+                $keys[] = $m[1];
+            }
+        }
+
+        return $keys;
+    }
+
+    /**
+     * Las variables generales no están en la lista de la base de datos (variables_document): siempre están disponibles
+     * (decisión del dueño, 2026-10-01). Quita las filas de la tabla cuya clave sea de una variable general; antes guarda
+     * cada fila completa en el log, por si hubiera que recuperarla. No cambia ningún documento: la fila de la lista
+     * nunca interviene al rellenarlo. Devuelve cuántas quitó.
+     */
+    public static function remove_general_from_catalog(): int
+    {
+        global $wpdb;
+        $table = $wpdb->prefix . 'variables_document';
+        $keys = self::general_keys();
+        if (!$keys || $table !== $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table))) {
+            return 0;
+        }
+        $rows = $wpdb->get_results($wpdb->prepare(
+            "SELECT * FROM {$table} WHERE identificator IN (" . implode(',', array_fill(0, count($keys), '%s')) . ')',
+            $keys
+        ));
+        $removed = 0;
+        foreach ((array) $rows as $row) {
+            Log::add(
+                sprintf('Variable general %s (%d) quitada de la lista: siempre está disponible en el código', $row->identificator, $row->id),
+                'variable_general_removed',
+                ['row' => (array) $row]
+            );
+            $removed += (int) $wpdb->delete($table, ['id' => (int) $row->id], ['%d']);
+        }
+
+        return $removed;
+    }
 }

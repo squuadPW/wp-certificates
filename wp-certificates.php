@@ -21,7 +21,8 @@ define('WP_C_REMOTE_INFO_URL', 'https://versions.squuad.com/plugins/wp-certifica
 // reactivar el plugin (dbDelta solo crea tablas o añade/modifica columnas)
 // 3: log propio {prefix}squuad_cert_log (ADR 0004 de EduSystem, paso 2).
 // 4: variables_document.method, identificador del método que da el valor de la variable (ADR 0005 de EduSystem).
-define('WP_C_DB_VERSION', '4');
+// 5: las variables generales salen de la lista de la base de datos (siempre están disponibles en el código).
+define('WP_C_DB_VERSION', '5');
 
 // get_plugin_data() vive en wp-admin/includes/plugin.php, que en el front no está cargado (antes solo funcionaba
 // porque EduSystem lo cargaba primero)
@@ -266,6 +267,9 @@ function create_tables_certificates() {
 
     // Log propio (esquema v3)
     dbDelta(\Squuad\Certificados\Log::schema($charset_collate));
+
+    // Las variables generales no están en la lista de la base de datos (esquema v5): siempre están disponibles
+    \Squuad\Certificados\Variables::remove_general_from_catalog();
 
     default_templates();
     default_templates_cards();
