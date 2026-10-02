@@ -110,7 +110,7 @@ function squuad_cert_schema_signers()
         id INT(11) NOT NULL AUTO_INCREMENT,
         request_id INT(11) NOT NULL,
         position INT(11) NOT NULL DEFAULT 0,
-        slot_key VARCHAR(40) NOT NULL,
+        slot_key VARCHAR(110) NOT NULL,
         user_id BIGINT(20) UNSIGNED NOT NULL DEFAULT 0,
         signer_id INT(11) NOT NULL DEFAULT 0,
         name_snapshot VARCHAR(191) NOT NULL DEFAULT '',

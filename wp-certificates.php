@@ -25,7 +25,9 @@ define('WP_C_REMOTE_INFO_URL', 'https://versions.squuad.com/plugins/wp-certifica
 // 6: cada variable de la lista se vincula con el método de su misma clave (ADR 0005 de EduSystem).
 // 7: documents_certificates.book_line_description, texto de la línea del libro de registro (ADR 0004 de EduSystem).
 // 8: documents_certificates.priority, orden de los documentos automáticos en Mi Cuenta (0 = el más urgente).
-define('WP_C_DB_VERSION', '8');
+// 9: tablas de las firmas propias (squuad_cert_*: solicitudes por cuenta, firmas, anuladas, contenido, eventos,
+//    cadena, firmantes, políticas, lotes y libro) y clave del sitio (ADR 0004 de EduSystem, paso 3b).
+define('WP_C_DB_VERSION', '9');
 
 // get_plugin_data() vive en wp-admin/includes/plugin.php, que en el front no está cargado (antes solo funcionaba
 // porque EduSystem lo cargaba primero)
@@ -278,6 +280,15 @@ function create_tables_certificates() {
 
     // Las variables generales no están en la lista de la base de datos (esquema v5): siempre están disponibles
     \Squuad\Certificados\Variables::remove_general_from_catalog();
+
+    // Firmas (ADR 0004 de EduSystem, paso 3b): tablas propias y clave del sitio. Solo esquema y datos iniciales: el
+    // módulo de firmas (certification/) se carga en el paso 4b-4
+    require_once WP_C_PATH . 'certification/includes/signature-keys.php';
+    require_once WP_C_PATH . 'certification/core/schema/signers.php';
+    require_once WP_C_PATH . 'certification/core/schema/signatures.php';
+    squuad_cert_schema_signers();
+    squuad_cert_schema_signatures();
+    squuad_cert_signatures_install();
 
     default_templates();
     default_templates_cards();

@@ -10,92 +10,13 @@ declare(strict_types=1);
 
 if (!defined('ABSPATH')) exit;
 
+// Claves del sitio (también las usa la instalación del esquema, sin cargar el resto del módulo)
+require_once __DIR__ . '/signature-keys.php';
+
 /** Las columnas de evidencia y las tablas de anuladas y de cadena llegan con la versión 4 del esquema. */
 function squuad_cert_signature_evidence_enabled(): bool
 {
     return version_compare((string) get_option('edusystem_db_version'), '4', '>=');
-}
-
-/**
- * Se ejecuta al final de create_tables() (activación y actualización del esquema). Es idempotente:
- * - el corte se guarda con add_option, así que reactivar el plugin nunca lo mueve;
- * - la fila de cabeza de la cadena se crea una sola vez;
- * - la clave solo se genera si el sitio no tiene ninguna.
- */
-function squuad_cert_signature_integrity_install(): void
-{
-    global $wpdb;
-
-    // Corte: las firmas con id <= a este valor son "antiguas sin huella". En una instalación nueva vale 0.
-    $max_id = (int) $wpdb->get_var("SELECT COALESCE(MAX(id), 0) FROM {$wpdb->prefix}users_signatures");
-    add_option('squuad_cert_signature_legacy_max_id', $max_id, '', 'no');
-
-    $wpdb->query(
-        "INSERT IGNORE INTO {$wpdb->prefix}squuad_cert_chain (id, last_seq, head_fingerprint, updated_at_utc)
-         VALUES (1, 0, '', NULL)"
-    );
-
-    squuad_cert_signature_ensure_key();
-}
-
-/**
- * Claves del sitio guardadas en la BD (opción sin autoload). Nunca se muestran ni se editan desde el admin.
- * Formato: ['current' => key_id, 'keys' => [key_id => ['key' => base64, 'created_at' => UTC, 'created_by' => user_id]]]
- */
-function squuad_cert_signature_stored_keys(): array
-{
-    $stored = get_option('squuad_cert_signature_keys', []);
-    if (!is_array($stored) || empty($stored['keys']) || !is_array($stored['keys'])) {
-        return ['current' => '', 'keys' => []];
-    }
-    return $stored;
-}
-
-/**
- * Genera la clave del sitio si no hay ninguna. El key_id es aleatorio (opt-AAAAMMDD-xxxxxx): si la opción
- * desaparece (restauración parcial, borrado), la clave nueva nunca reutiliza el id de una anterior, así que las
- * huellas firmadas con la clave perdida pasan a "clave desconocida" en lugar de parecer alteradas.
- */
-function squuad_cert_signature_ensure_key(): string
-{
-    $stored = squuad_cert_signature_stored_keys();
-    if ($stored['current'] !== '' && isset($stored['keys'][$stored['current']])) {
-        return $stored['current'];
-    }
-    return squuad_cert_signature_add_key($stored);
-}
-
-/** Crea una clave nueva y la deja como actual; las anteriores se conservan solo para verificar. */
-function squuad_cert_signature_add_key(?array $stored = null): string
-{
-    $stored = $stored ?? squuad_cert_signature_stored_keys();
-    $key_id = 'opt-' . gmdate('Ymd') . '-' . bin2hex(random_bytes(3));
-
-    // La clave que deja de ser la activa queda retirada: solo sirve para verificar lo firmado antes de esta fecha
-    $previous_key_id = (string) ($stored['current'] ?? '');
-    if ('' !== $previous_key_id && isset($stored['keys'][$previous_key_id]) && empty($stored['keys'][$previous_key_id]['retired_at'])) {
-        $stored['keys'][$previous_key_id]['retired_at'] = gmdate('Y-m-d H:i:s');
-    }
-
-    $stored['keys'][$key_id] = [
-        'key' => base64_encode(random_bytes(32)),
-        'created_at' => gmdate('Y-m-d H:i:s'),
-        'created_by' => get_current_user_id(),
-    ];
-    $stored['current'] = $key_id;
-
-    // update_option no cambia el autoload de una opción existente; add_option la crea sin autoload
-    if (get_option('squuad_cert_signature_keys', null) === null) {
-        add_option('squuad_cert_signature_keys', $stored, '', 'no');
-    } else {
-        update_option('squuad_cert_signature_keys', $stored, 'no');
-    }
-
-    if (function_exists('edusystem_set_log')) {
-        edusystem_set_log('Clave de evidencias de firma creada: ' . $key_id, 'signature_key', get_current_user_id());
-    }
-
-    return $key_id;
 }
 
 /**
