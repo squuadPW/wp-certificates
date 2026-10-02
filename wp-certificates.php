@@ -48,6 +48,7 @@ require_once WP_C_PATH . 'includes/contract.php';
 require_once WP_C_PATH . 'includes/variables.php';
 require_once WP_C_PATH . 'includes/book.php';
 require_once WP_C_PATH . 'includes/automatic.php';
+require_once WP_C_PATH . 'includes/signing-roles.php';
 require_once WP_C_PATH . 'public/functions.php';
 require_once WP_C_PATH . 'admin/functions.php';
 
