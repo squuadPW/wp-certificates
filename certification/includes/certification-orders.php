@@ -55,12 +55,16 @@ function squuad_cert_signature_order_has_open_request(int $student_document_id):
     return function_exists('squuad_cert_signature_request_open_for_row') && (bool) squuad_cert_signature_request_open_for_row($student_document_id);
 }
 
-/** Cierra como closed_by_upload la solicitud abierta del requisito. Devuelve 'closed' o 'no_open_request'. */
-function squuad_cert_signature_order_close_by_upload(int $student_document_id, string $file_path, int $user_id, string $reason): string
+/**
+ * Cierra como closed_by_upload la solicitud abierta del requisito. Devuelve 'closed' o 'no_open_request'. $extra: datos
+ * que se sellan en el evento; una orden entregada después de una pausa lleva la huella del archivo (file_sha256), la
+ * fecha y el autor de la subida (ADR 0004, sección 5).
+ */
+function squuad_cert_signature_order_close_by_upload(int $student_document_id, string $file_path, int $user_id, string $reason, array $extra = []): string
 {
     if (!squuad_cert_signature_order_has_open_request($student_document_id)) {
         return 'no_open_request';
     }
 
-    return squuad_cert_signature_request_close_by_upload($student_document_id, $file_path, $user_id, $reason) ? 'closed' : 'failed';
+    return squuad_cert_signature_request_close_by_upload($student_document_id, $file_path, $user_id, $reason, $extra) ? 'closed' : 'failed';
 }

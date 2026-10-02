@@ -893,13 +893,14 @@ function squuad_cert_signature_request_open_for_row(int $external_ref): ?object
  * (evento sellado). Las firmas que ya tuviera la solicitud no se anulan: quedan ligadas a ella. Una solicitud
  * completada no se cierra por subida. Devuelve true si cerró una solicitud.
  */
-function squuad_cert_signature_request_close_by_upload(int $external_ref, string $file_path, int $user_id, string $reason = ''): bool
+function squuad_cert_signature_request_close_by_upload(int $external_ref, string $file_path, int $user_id, string $reason = '', array $extra = []): bool
 {
     $request = squuad_cert_signature_request_open_for_row($external_ref);
     if (!$request) {
         return false;
     }
-    $sha256 = is_readable($file_path) ? (string) hash_file('sha256', $file_path) : '';
+    // La huella del archivo; si ya no está (orden entregada después de una pausa), la que se anotó al subirlo
+    $sha256 = is_readable($file_path) ? (string) hash_file('sha256', $file_path) : (string) ($extra['file_sha256'] ?? '');
 
     return squuad_cert_signature_request_transition((int) $request->id, SQUUAD_CERT_SIGNATURE_REQUEST_OPEN, 'closed_by_upload', [
         'closed_by' => $user_id,
@@ -909,7 +910,7 @@ function squuad_cert_signature_request_close_by_upload(int $external_ref, string
         'uploaded_by' => $user_id,
         'reason' => $reason,
         'signed_roles' => squuad_cert_signature_request_signed_roles((int) $request->id),
-    ]);
+    ] + array_intersect_key($extra, array_flip(['origin', 'during_pause', 'uploaded_at_utc', 'file_sha256'])));
 }
 
 /** Hueco de un firmante institucional pintado: su firma en SVG con la fecha, o "Pendiente de firma". */
