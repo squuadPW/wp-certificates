@@ -103,7 +103,7 @@ function squuad_cert_modal_document_automatic()
         $subject_id,
         (string) $document->document_identificator,
         ['holder_user_id' => $subject_id],
-        squuad_cert_signature_external_ref($subject_id, (string) $document->document_identificator),
+        squuad_cert_signature_external_ref($subject_id, (string) $document->document_identificator, (int) $document->id),
         squuad_cert_signature_doc_version_hash((string) $document->document_identificator),
         (int) $document->id,
         'opened'

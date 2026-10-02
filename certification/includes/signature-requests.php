@@ -98,14 +98,14 @@ function squuad_cert_account_name(int $user_id): string
 }
 
 /**
- * Requisito de EduSystem del documento para la ficha de la cuenta (external_ref del proveedor), o null si la cuenta no
- * es un estudiante o no tiene ese requisito.
+ * Requisito de EduSystem enlazado al documento para la ficha de la cuenta (external_ref del proveedor: el requisito cuya
+ * configuración eligió este documento en «Document template»), o null si no hay.
  */
-function squuad_cert_signature_external_ref(int $user_id, string $document_id): ?int
+function squuad_cert_signature_external_ref(int $user_id, string $document_id, int $document_certificate_id = 0): ?int
 {
     $student_id = squuad_cert_account_student_id($user_id);
     $provider = $student_id && function_exists('squuad_cert_subject_type') ? squuad_cert_subject_type('edusystem_student') : null;
-    $ref = ($provider && !empty($provider['external_ref'])) ? (int) call_user_func($provider['external_ref'], $student_id, $document_id) : 0;
+    $ref = ($provider && !empty($provider['external_ref'])) ? (int) call_user_func($provider['external_ref'], $student_id, $document_id, $document_certificate_id) : 0;
 
     return $ref > 0 ? $ref : null;
 }
@@ -667,7 +667,7 @@ function squuad_cert_signature_user_documents(WP_User $user): array
             }
         } elseif (!$request && $provider && !empty($provider['external_state'])) {
             // Sin solicitudes: requisito de EduSystem ya resuelto por otra vía (subido o aprobado)
-            $ref = squuad_cert_signature_external_ref($subject_id, $document_id);
+            $ref = squuad_cert_signature_external_ref($subject_id, $document_id, (int) $document->id);
             if ($ref && in_array((string) call_user_func($provider['external_state'], $ref), ['uploaded', 'approved'], true)) {
                 continue;
             }
