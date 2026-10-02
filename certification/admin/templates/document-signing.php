@@ -10,7 +10,7 @@ if (!defined('ABSPATH')) exit;
 $chip = static function (string $variable) use ($template_text): string {
     $tag = '{{' . $variable . '}}';
     return '<code class="edusig-var' . (false !== strpos($template_text, $tag) ? ' is-used' : '') . '" data-var="' . esc_attr($tag) . '" title="'
-        . esc_attr__('Click to copy', 'edusystem') . '">' . esc_html($tag) . '</code>';
+        . esc_attr__('Click to copy', 'wp-certificates') . '">' . esc_html($tag) . '</code>';
 };
 $row = static function (string $key, string $label, string $detail, bool $checked, int $position, array $variables = [], string $fallback = '') use ($chip): void {
     ?>
@@ -21,7 +21,7 @@ $row = static function (string $key, string $label, string $detail, bool $checke
             <?= implode(' ', array_map($chip, $variables)) // phpcs:ignore -- marcado escapado en $chip ?>
             <br><span class="edusig-var-status description"></span>
         </td>
-        <td style="width:110px"><input type="number" min="1" max="99" name="slots[<?= esc_attr($key) ?>][position]" value="<?= (int) $position ?>" style="width:70px" aria-label="<?= esc_attr__('Order', 'edusystem') ?>"></td>
+        <td style="width:110px"><input type="number" min="1" max="99" name="slots[<?= esc_attr($key) ?>][position]" value="<?= (int) $position ?>" style="width:70px" aria-label="<?= esc_attr__('Order', 'wp-certificates') ?>"></td>
     </tr>
     <?php
 };
@@ -29,32 +29,32 @@ $next = count($positions) + 1;
 ?>
 <div id="edusystem-document-signers" class="postbox" style="margin-top:20px;display:none">
     <div class="inside">
-        <h2 style="padding-left:0"><?= esc_html__('Document signers', 'edusystem') ?></h2>
-        <p class="description" style="max-width:820px"><?= esc_html__('Who signs this document and in which order. First the roles: every user with a marked role receives their own document and signs it from their own account. Then the registered signers of the system sign every one of those documents. The document is valid when all the signatures are done. Changes apply to new signature requests; requests already in progress keep their signers.', 'edusystem') ?></p>
+        <h2 style="padding-left:0"><?= esc_html__('Document signers', 'wp-certificates') ?></h2>
+        <p class="description" style="max-width:820px"><?= esc_html__('Who signs this document and in which order. First the roles: every user with a marked role receives their own document and signs it from their own account. Then the registered signers of the system sign every one of those documents. The document is valid when all the signatures are done. Changes apply to new signature requests; requests already in progress keep their signers.', 'wp-certificates') ?></p>
 
         <?php if ('automatic' !== $document->type) : ?>
-            <p class="description" style="max-width:820px"><strong><?= esc_html__('Issued document:', 'edusystem') ?></strong> <?= esc_html__('only the system signers sign it (the roles do not). With at least one signer, "Generate" in the student file becomes "Issue for signature".', 'edusystem') ?></p>
+            <p class="description" style="max-width:820px"><strong><?= esc_html__('Issued document:', 'wp-certificates') ?></strong> <?= esc_html__('only the system signers sign it (the roles do not). With at least one signer, "Generate" in the student file becomes "Issue for signature".', 'wp-certificates') ?></p>
         <?php endif; ?>
         <?php if ($notice) : ?>
             <div class="notice <?= $notice['ok'] ? 'notice-success' : 'notice-error' ?> inline"><p><?= esc_html($notice['message']) ?></p></div>
         <?php endif; ?>
         <?php if (!$policy['policy_id']) : ?>
             <p><em><?= esc_html('automatic' === $document->type
-                ? __('Not configured yet: by default the users with the student role sign this document, if that role is active in "Signing roles".', 'edusystem')
-                : __('Not configured yet: by default this document does not ask for user signatures.', 'edusystem')) ?></em></p>
+                ? __('Not configured yet: by default the users with the student role sign this document, if that role is active in "Signing roles".', 'wp-certificates')
+                : __('Not configured yet: by default this document does not ask for user signatures.', 'wp-certificates')) ?></em></p>
         <?php endif; ?>
 
         <form method="post" action="<?= esc_url(admin_url('admin-post.php')) ?>">
             <input type="hidden" name="action" value="squuad_cert_save_signing_policy">
             <input type="hidden" name="document_certificate_id" value="<?= (int) $document->id ?>">
             <?php wp_nonce_field('squuad_cert_save_signing_policy'); ?>
-            <p><label><input type="checkbox" name="requires_signatures" value="1" <?= checked($policy['requires_signatures'], true, false) ?>> <strong><?= esc_html__('This document asks for signatures', 'edusystem') ?></strong></label></p>
+            <p><label><input type="checkbox" name="requires_signatures" value="1" <?= checked($policy['requires_signatures'], true, false) ?>> <strong><?= esc_html__('This document asks for signatures', 'wp-certificates') ?></strong></label></p>
 
             <table class="widefat striped" style="max-width:820px">
-                <thead><tr><th></th><th><?= esc_html__('Signer', 'edusystem') ?></th><th><?= esc_html__('Variables for the template', 'edusystem') ?></th><th><?= esc_html__('Order', 'edusystem') ?></th></tr></thead>
+                <thead><tr><th></th><th><?= esc_html__('Signer', 'wp-certificates') ?></th><th><?= esc_html__('Variables for the template', 'wp-certificates') ?></th><th><?= esc_html__('Order', 'wp-certificates') ?></th></tr></thead>
                 <tbody>
                     <?php
-                    $in_section = __('Not in the template: it goes in {{signature_section}}.', 'edusystem');
+                    $in_section = __('Not in the template: it goes in {{signature_section}}.', 'wp-certificates');
                     $role_position = 1;
                     foreach ($signing_roles as $role_key => $role_name) {
                         $key = 'role:' . $role_key;
@@ -63,49 +63,49 @@ $next = count($positions) + 1;
                             $variables[] = 'signature_student'; // plantillas anteriores
                         }
                         /* translators: %s: name of the role */
-                        $row($key, sprintf(__('Role: %s', 'edusystem'), $role_name), __('Every user with this role receives their own document and signs it from their own account.', 'edusystem'),
+                        $row($key, sprintf(__('Role: %s', 'wp-certificates'), $role_name), __('Every user with this role receives their own document and signs it from their own account.', 'wp-certificates'),
                             isset($positions[$key]), $positions[$key] ?? $role_position, $variables, $in_section);
                         $role_position++;
                     }
                     if (!$signing_roles) {
-                        echo '<tr><td></td><td colspan="3"><em>' . esc_html__('No role can sign yet: mark them in Certification > Signing roles.', 'edusystem') . '</em></td></tr>';
+                        echo '<tr><td></td><td colspan="3"><em>' . esc_html__('No role can sign yet: mark them in Certification > Signing roles.', 'wp-certificates') . '</em></td></tr>';
                     }
                     foreach ($signers as $signer) {
                         $key = 'signer:' . (int) $signer->id;
                         $detail = trim((string) $signer->charge . ' · ' . (string) $signer->user_email, ' ·');
                         if ('invited' === $signer->status) {
-                            $detail .= ' — ' . __('has not registered their signature yet', 'edusystem');
+                            $detail .= ' — ' . __('has not registered their signature yet', 'wp-certificates');
                         }
                         $id = (int) $signer->id;
                         $row($key, (string) $signer->display_name, $detail, isset($positions[$key]), $positions[$key] ?? $next++,
                             ['signature_signer_' . $id, 'signer_name_' . $id, 'signer_charge_' . $id],
-                            __('Not in the template: it goes in the signatures block at the end.', 'edusystem'));
+                            __('Not in the template: it goes in the signatures block at the end.', 'wp-certificates'));
                     }
                     ?>
                 </tbody>
             </table>
             <?php if ($inactive_roles) : ?>
-                <p class="description" style="max-width:820px"><?= esc_html(sprintf(__('This document asked these roles, which are no longer active in "Signing roles": %s. Requests in progress keep them; when you save, they are removed.', 'edusystem'), implode(', ', $inactive_roles))) ?></p>
+                <p class="description" style="max-width:820px"><?= esc_html(sprintf(__('This document asked these roles, which are no longer active in "Signing roles": %s. Requests in progress keep them; when you save, they are removed.', 'wp-certificates'), implode(', ', $inactive_roles))) ?></p>
             <?php endif; ?>
             <div class="edusig-help" style="max-width:820px;margin-top:10px;padding:10px 12px;background:#f6f7f7;border:1px solid #dcdcde">
-                <p style="margin-top:0"><strong><?= esc_html__('How to place the signatures in the template', 'edusystem') ?></strong></p>
-                <p><?= $chip('signature_section') // phpcs:ignore ?> <?= esc_html__('The signatures of the roles that are not placed separately (as before).', 'edusystem') ?></p>
-                <p><?= esc_html__('Each signer separately: use the variables of their row. Signers not placed in the template go in {{signature_section}} (roles) or in a signatures block at the end (system signers).', 'edusystem') ?></p>
-                <p style="margin-bottom:4px"><strong><?= esc_html__('Template rules', 'edusystem') ?></strong> — <?= esc_html__('the text between the marks is shown only if the rule is met; with ^ , only if it is not:', 'edusystem') ?></p>
+                <p style="margin-top:0"><strong><?= esc_html__('How to place the signatures in the template', 'wp-certificates') ?></strong></p>
+                <p><?= $chip('signature_section') // phpcs:ignore ?> <?= esc_html__('The signatures of the roles that are not placed separately (as before).', 'wp-certificates') ?></p>
+                <p><?= esc_html__('Each signer separately: use the variables of their row. Signers not placed in the template go in {{signature_section}} (roles) or in a signatures block at the end (system signers).', 'wp-certificates') ?></p>
+                <p style="margin-bottom:4px"><strong><?= esc_html__('Template rules', 'wp-certificates') ?></strong> — <?= esc_html__('the text between the marks is shown only if the rule is met; with ^ , only if it is not:', 'wp-certificates') ?></p>
                 <ul style="list-style:disc;margin:0 0 0 20px">
-                    <li><code>{{#requires_student_signature}}</code> … <code>{{/requires_student_signature}}</code> — <?= esc_html__('the student signs this document', 'edusystem') ?></li>
+                    <li><code>{{#requires_student_signature}}</code> … <code>{{/requires_student_signature}}</code> — <?= esc_html__('the student signs this document', 'wp-certificates') ?></li>
                 </ul>
-                <p class="description"><?= esc_html__('The parent no longer signs: in old templates {{signature_parent}} is empty and {{#requires_parent_signature}} and {{#student_is_own_parent}} are never met.', 'edusystem') ?></p>
+                <p class="description"><?= esc_html__('The parent no longer signs: in old templates {{signature_parent}} is empty and {{#requires_parent_signature}} and {{#student_is_own_parent}} are never met.', 'wp-certificates') ?></p>
                 <?php // Variable fija del sistema (definida en el código, no en la tabla variables_document): siempre disponible ?>
-                <p style="margin-bottom:4px"><strong><?= esc_html__('PDF layout', 'edusystem') ?></strong></p>
-                <p style="margin:0"><?= $chip('page_break') // phpcs:ignore ?> <?= esc_html__('Page break: what follows starts on a new page. In automatic documents, lines, paragraphs and table rows are never cut between pages; use it to decide where a section starts.', 'edusystem') ?></p>
+                <p style="margin-bottom:4px"><strong><?= esc_html__('PDF layout', 'wp-certificates') ?></strong></p>
+                <p style="margin:0"><?= $chip('page_break') // phpcs:ignore ?> <?= esc_html__('Page break: what follows starts on a new page. In automatic documents, lines, paragraphs and table rows are never cut between pages; use it to decide where a section starts.', 'wp-certificates') ?></p>
             </div>
             <?php if (!$signers) : ?>
-                <p class="description"><?= esc_html__('There are no registered signers yet. Invite them from Certification > Users and signatures.', 'edusystem') ?></p>
+                <p class="description"><?= esc_html__('There are no registered signers yet. Invite them from Certification > Users and signatures.', 'wp-certificates') ?></p>
             <?php elseif (!$inbox) : ?>
-                <p class="description"><?= esc_html__('Registered signers are saved in the configuration and will be required once their "Documents to sign" panel is active.', 'edusystem') ?></p>
+                <p class="description"><?= esc_html__('Registered signers are saved in the configuration and will be required once their "Documents to sign" panel is active.', 'wp-certificates') ?></p>
             <?php endif; ?>
-            <p><button type="submit" class="button button-primary"><?= esc_html__('Save document signers', 'edusystem') ?></button></p>
+            <p><button type="submit" class="button button-primary"><?= esc_html__('Save document signers', 'wp-certificates') ?></button></p>
         </form>
     </div>
 </div>
@@ -127,7 +127,7 @@ $next = count($positions) + 1;
             return;
         }
         const texts = {
-            used: <?= wp_json_encode(__('✓ In the template', 'edusystem')) ?>
+            used: <?= wp_json_encode(__('✓ In the template', 'wp-certificates')) ?>
         };
         // Texto actual de la plantilla (cabecera, contenido y pie), desde el editor visual o el de texto
         const templateText = function () {

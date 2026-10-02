@@ -69,7 +69,7 @@ add_action('admin_post_squuad_cert_save_signing_policy', 'squuad_cert_document_s
 function squuad_cert_document_signing_handle_save(): void
 {
     if (!current_user_can(SQUUAD_CERT_MANAGE_SIGNING_POLICIES_CAP)) {
-        wp_die(esc_html__('You do not have permission to configure document signers.', 'edusystem'), 403);
+        wp_die(esc_html__('You do not have permission to configure document signers.', 'wp-certificates'), 403);
     }
     check_admin_referer('squuad_cert_save_signing_policy');
     $document_id = absint($_POST['document_certificate_id'] ?? 0);
@@ -129,7 +129,7 @@ function squuad_cert_document_issue_handle(): void
     $document_certificate_id = absint($_POST['document_certificate_id'] ?? 0);
     check_admin_referer('squuad_cert_issue_document_' . $student_id . '_' . $document_certificate_id);
     if (!squuad_cert_document_issue_can($student_id)) {
-        wp_die(esc_html__('You do not have permission to manage admissions.', 'edusystem'), 403);
+        wp_die(esc_html__('You do not have permission to manage admissions.', 'wp-certificates'), 403);
     }
     $result = squuad_cert_signature_issue_document($student_id, $document_certificate_id);
     squuad_cert_signers_notice($result['message'], $result['ok']);
@@ -176,7 +176,7 @@ function squuad_cert_document_issue_reserve_book_line($entry, object $student, o
     }
     $row = squuad_cert_book_entry_insert((int) $student->id, (int) $document->id, (int) $document->book, ['id' => $line['line_id']] + $line);
     if (!$row) {
-        return new WP_Error('squuad_cert_book', __('The registry book did not assign a volume and folio (connection or book error). The document was not issued; try again.', 'edusystem'));
+        return new WP_Error('squuad_cert_book', __('The registry book did not assign a volume and folio (connection or book error). The document was not issued; try again.', 'wp-certificates'));
     }
 
     return $row;
@@ -187,7 +187,7 @@ function squuad_cert_document_issue_void_book_line(object $entry, string $reason
 {
     $voided = squuad_cert_book_void_line((int) $entry->line_id, $reason);
     if (is_wp_error($voided)) {
-        return ['ok' => false, 'message' => sprintf(__('The registry book could not void the volume and folio: %s', 'edusystem'), $voided->get_error_message())];
+        return ['ok' => false, 'message' => sprintf(__('The registry book could not void the volume and folio: %s', 'wp-certificates'), $voided->get_error_message())];
     }
     squuad_cert_book_entry_mark_void((int) $entry->id, $reason);
 
@@ -216,13 +216,13 @@ function squuad_cert_document_issue_resolve_book(object $request, object $entry,
     ]);
     $reissued = squuad_cert_signature_issue_document((int) $request->subject_id, (int) $request->document_certificate_id, 'keep' === $option ? (int) $entry->id : 0);
     if (!$reissued['ok']) {
-        return ['ok' => false, 'message' => sprintf(__('Declined, but the document could not be issued again: %s', 'edusystem'), $reissued['message'])];
+        return ['ok' => false, 'message' => sprintf(__('Declined, but the document could not be issued again: %s', 'wp-certificates'), $reissued['message'])];
     }
     $new_entry = squuad_cert_book_entry_get((int) (squuad_cert_signature_request_get((int) $reissued['request_id'])->book_entry_id ?? 0));
 
     return ['ok' => true, 'message' => sprintf(
         /* translators: 1: volume, 2: folio */
-        __('Declined and issued again with volume %1$d, folio %2$d. The signers will find it in "Documents to sign".', 'edusystem'),
+        __('Declined and issued again with volume %1$d, folio %2$d. The signers will find it in "Documents to sign".', 'wp-certificates'),
         (int) ($new_entry->tomo ?? 0),
         (int) ($new_entry->folio ?? 0)
     )];
@@ -236,7 +236,7 @@ function squuad_cert_document_issued_decline_handle(): void
     check_admin_referer('squuad_cert_issued_decline_' . $request_id);
     $request = squuad_cert_signature_request_get($request_id);
     if (!squuad_cert_document_issue_can($request ? (int) $request->subject_id : 0)) {
-        wp_die(esc_html__('You do not have permission to manage admissions.', 'edusystem'), 403);
+        wp_die(esc_html__('You do not have permission to manage admissions.', 'wp-certificates'), 403);
     }
     $reason = sanitize_textarea_field(wp_unslash($_POST['reason'] ?? ''));
     $option = sanitize_key($_POST['book_option'] ?? '');
@@ -244,11 +244,11 @@ function squuad_cert_document_issued_decline_handle(): void
     $entry = $entry && 'active' === $entry->status ? $entry : null;
 
     if (!$request || 'issued' !== $request->origin) {
-        $result = ['ok' => false, 'message' => __('This document can no longer be declined. Please reload the page.', 'edusystem')];
+        $result = ['ok' => false, 'message' => __('This document can no longer be declined. Please reload the page.', 'wp-certificates')];
     } elseif ('' === trim($reason) || empty($_POST['confirm_irreversible'])) {
-        $result = ['ok' => false, 'message' => __('To decline a document you must write the reason and accept that the action cannot be reverted.', 'edusystem')];
+        $result = ['ok' => false, 'message' => __('To decline a document you must write the reason and accept that the action cannot be reverted.', 'wp-certificates')];
     } elseif ($entry && !in_array($option, ['keep', 'void'], true)) {
-        $result = ['ok' => false, 'message' => __('Choose whether to keep or void the volume and folio.', 'edusystem')];
+        $result = ['ok' => false, 'message' => __('Choose whether to keep or void the volume and folio.', 'wp-certificates')];
     } else {
         $result = squuad_cert_signature_issued_decline($request_id, $reason);
         if ($result['ok'] && $entry) {
@@ -268,18 +268,18 @@ function squuad_cert_document_issued_book_decision_handle(): void
     check_admin_referer('squuad_cert_issued_book_decision_' . $request_id);
     $request = squuad_cert_signature_request_get($request_id);
     if (!squuad_cert_document_issue_can($request ? (int) $request->subject_id : 0)) {
-        wp_die(esc_html__('You do not have permission to manage admissions.', 'edusystem'), 403);
+        wp_die(esc_html__('You do not have permission to manage admissions.', 'wp-certificates'), 403);
     }
     $option = sanitize_key($_POST['book_option'] ?? '');
     $reason = sanitize_textarea_field(wp_unslash($_POST['reason'] ?? ''));
     $entry = $request ? squuad_cert_book_entry_pending_decision((int) $request->subject_id, (int) $request->document_certificate_id) : null;
 
     if (!$entry || (int) $entry->declined_request_id !== $request_id) {
-        $result = ['ok' => false, 'message' => __('There is no pending decision for this document. Please reload the page.', 'edusystem')];
+        $result = ['ok' => false, 'message' => __('There is no pending decision for this document. Please reload the page.', 'wp-certificates')];
     } elseif (!in_array($option, ['keep', 'void'], true)) {
-        $result = ['ok' => false, 'message' => __('Choose whether to keep or void the volume and folio.', 'edusystem')];
+        $result = ['ok' => false, 'message' => __('Choose whether to keep or void the volume and folio.', 'wp-certificates')];
     } elseif ('void' === $option && '' === trim($reason)) {
-        $result = ['ok' => false, 'message' => __('Write why the volume and folio are voided.', 'edusystem')];
+        $result = ['ok' => false, 'message' => __('Write why the volume and folio are voided.', 'wp-certificates')];
     } else {
         $result = squuad_cert_document_issue_resolve_book($request, $entry, $option, '' !== trim($reason) ? $reason : (string) $request->decline_reason);
     }
@@ -344,12 +344,12 @@ function squuad_cert_missing_letter_conversion_notice(): void
     }
     ?>
     <div class="notice notice-info">
-        <p><strong><?= esc_html__('Missing documents commitment letter', 'edusystem') ?></strong><br>
-            <?= esc_html__('This site uses the old fixed letter. Convert it into an automatic document: it will be editable here, signed with the new signature system (frozen content, consent, "Documents to sign"). Like every automatic document, it is shown while the student has not signed it. Letters already signed keep their validity and are not asked again.', 'edusystem') ?></p>
+        <p><strong><?= esc_html__('Missing documents commitment letter', 'wp-certificates') ?></strong><br>
+            <?= esc_html__('This site uses the old fixed letter. Convert it into an automatic document: it will be editable here, signed with the new signature system (frozen content, consent, "Documents to sign"). Like every automatic document, it is shown while the student has not signed it. Letters already signed keep their validity and are not asked again.', 'wp-certificates') ?></p>
         <form method="post" action="<?= esc_url(admin_url('admin-post.php')) ?>">
             <input type="hidden" name="action" value="squuad_cert_convert_missing_letter">
             <?php wp_nonce_field('squuad_cert_convert_missing_letter'); ?>
-            <p><button type="submit" class="button button-primary"><?= esc_html__('Convert the letter into an automatic document', 'edusystem') ?></button></p>
+            <p><button type="submit" class="button button-primary"><?= esc_html__('Convert the letter into an automatic document', 'wp-certificates') ?></button></p>
         </form>
     </div>
     <?php
@@ -362,10 +362,10 @@ function squuad_cert_missing_letter_convert_handle(): void
 
     check_admin_referer('squuad_cert_convert_missing_letter');
     if (!current_user_can(SQUUAD_CERT_MANAGE_SIGNING_POLICIES_CAP)) {
-        wp_die(esc_html__('You do not have permission to configure document signers.', 'edusystem'), 403);
+        wp_die(esc_html__('You do not have permission to configure document signers.', 'wp-certificates'), 403);
     }
     if (!squuad_cert_missing_letter_conversion_available()) {
-        squuad_cert_signers_notice(__('The letter was already converted or is not used on this site.', 'edusystem'), false);
+        squuad_cert_signers_notice(__('The letter was already converted or is not used on this site.', 'wp-certificates'), false);
         wp_safe_redirect(admin_url('admin.php?page=add_admin_form_documents_content'));
         exit;
     }
@@ -398,7 +398,7 @@ function squuad_cert_missing_letter_convert_handle(): void
     ]);
     $document_id = (int) $wpdb->insert_id;
     if (!$inserted || !$document_id) {
-        squuad_cert_signers_notice(__('The letter could not be converted. Please try again.', 'edusystem'), false);
+        squuad_cert_signers_notice(__('The letter could not be converted. Please try again.', 'wp-certificates'), false);
         wp_safe_redirect(admin_url('admin.php?page=add_admin_form_documents_content'));
         exit;
     }
@@ -416,7 +416,7 @@ function squuad_cert_missing_letter_convert_handle(): void
         ]);
     }
     squuad_cert_log(sprintf('Carta de documentos faltantes convertida en el documento automático %d por el usuario %d', $document_id, get_current_user_id()), 'signing_policy');
-    squuad_cert_signers_notice(__('The letter is now an automatic document. Review its text below; like every automatic document, it is shown while the student has not signed it.', 'edusystem'), true);
+    squuad_cert_signers_notice(__('The letter is now an automatic document. Review its text below; like every automatic document, it is shown while the student has not signed it.', 'wp-certificates'), true);
     wp_safe_redirect(add_query_arg([
         'page' => 'add_admin_form_documents_content',
         'section_tab' => 'document_detail',
@@ -490,19 +490,19 @@ function squuad_cert_legacy_signatures_migration_notify(): void
 
     $site = wp_specialchars_decode((string) get_bloginfo('name'), ENT_QUOTES);
     $list = implode("\n", array_map(static fn($document): string => '- ' . $document->title, $documents));
-    $subject = sprintf(__('[%s] Security change: documents that require a signature', 'edusystem'), $site);
-    $intro = __('For security, documents can no longer be signed with signature images uploaded to "Users and signatures". Only the responsible person can sign, from their own account: nobody can sign on behalf of someone else.', 'edusystem');
+    $subject = sprintf(__('[%s] Security change: documents that require a signature', 'wp-certificates'), $site);
+    $intro = __('For security, documents can no longer be signed with signature images uploaded to "Users and signatures". Only the responsible person can sign, from their own account: nobody can sign on behalf of someone else.', 'wp-certificates');
     $sent = 0;
     foreach ($owners as $user) {
-        $body = sprintf(__('Hello %s,', 'edusystem'), $user->display_name) . "\n\n" . $intro . "\n\n"
-            . __('These documents require a signature and are disabled until the administration configures who signs them:', 'edusystem') . "\n" . $list . "\n\n"
-            . __('If you are responsible for signing them, the administration will invite you to register your own signature. Documents already signed keep their validity.', 'edusystem') . "\n";
+        $body = sprintf(__('Hello %s,', 'wp-certificates'), $user->display_name) . "\n\n" . $intro . "\n\n"
+            . __('These documents require a signature and are disabled until the administration configures who signs them:', 'wp-certificates') . "\n" . $list . "\n\n"
+            . __('If you are responsible for signing them, the administration will invite you to register your own signature. Documents already signed keep their validity.', 'wp-certificates') . "\n";
         $sent += (int) wp_mail($user->user_email, $subject, $body);
     }
     foreach ($admins as $user) {
-        $body = sprintf(__('Hello %s,', 'edusystem'), $user->display_name) . "\n\n" . $intro . "\n\n"
-            . __('These documents require a signature and are disabled until you configure who signs them:', 'edusystem') . "\n" . $list . "\n\n"
-            . __('What to do: 1) in Users and signatures, invite the responsible persons to register their own signature; 2) in Certification > Documents, open each document and choose its signers in "Document signers"; 3) from the student file, use "Issue for signature". Documents already signed keep their validity.', 'edusystem') . "\n"
+        $body = sprintf(__('Hello %s,', 'wp-certificates'), $user->display_name) . "\n\n" . $intro . "\n\n"
+            . __('These documents require a signature and are disabled until you configure who signs them:', 'wp-certificates') . "\n" . $list . "\n\n"
+            . __('What to do: 1) in Users and signatures, invite the responsible persons to register their own signature; 2) in Certification > Documents, open each document and choose its signers in "Document signers"; 3) from the student file, use "Issue for signature". Documents already signed keep their validity.', 'wp-certificates') . "\n"
             . admin_url('admin.php?page=add_admin_form_documents_content') . "\n";
         $sent += (int) wp_mail($user->user_email, $subject, $body);
     }
@@ -533,8 +533,8 @@ function squuad_cert_legacy_signatures_admin_notice(): void
     }
     ?>
     <div class="notice notice-warning">
-        <p><strong><?= esc_html__('Documents that require a signature are disabled until you configure who signs them', 'edusystem') ?></strong><br>
-            <?= esc_html__('For security, nobody can sign on behalf of someone else: signature images are no longer used. Choose the signers of each document; they will sign from their own account.', 'edusystem') ?></p>
+        <p><strong><?= esc_html__('Documents that require a signature are disabled until you configure who signs them', 'wp-certificates') ?></strong><br>
+            <?= esc_html__('For security, nobody can sign on behalf of someone else: signature images are no longer used. Choose the signers of each document; they will sign from their own account.', 'wp-certificates') ?></p>
         <ul style="list-style:disc;margin-left:20px">
             <?php foreach ($documents as $document) : ?>
                 <li><a href="<?= esc_url(add_query_arg(['page' => 'add_admin_form_documents_content', 'section_tab' => 'document_detail', 'document_id' => (int) $document->id], admin_url('admin.php')) . '#edusystem-document-signers') ?>"><?= esc_html((string) $document->title) ?></a></li>
@@ -543,7 +543,7 @@ function squuad_cert_legacy_signatures_admin_notice(): void
         <form method="post" action="<?= esc_url(admin_url('admin-post.php')) ?>">
             <input type="hidden" name="action" value="squuad_cert_legacy_signatures_dismiss">
             <?php wp_nonce_field('squuad_cert_legacy_signatures_dismiss'); ?>
-            <p><button type="submit" class="button-link"><?= esc_html__('Hide this notice', 'edusystem') ?></button></p>
+            <p><button type="submit" class="button-link"><?= esc_html__('Hide this notice', 'wp-certificates') ?></button></p>
         </form>
     </div>
     <?php
@@ -554,7 +554,7 @@ function squuad_cert_legacy_signatures_dismiss_handle(): void
 {
     check_admin_referer('squuad_cert_legacy_signatures_dismiss');
     if (!current_user_can(SQUUAD_CERT_MANAGE_SIGNING_POLICIES_CAP)) {
-        wp_die(esc_html__('You do not have permission to configure document signers.', 'edusystem'), 403);
+        wp_die(esc_html__('You do not have permission to configure document signers.', 'wp-certificates'), 403);
     }
     update_option(SQUUAD_CERT_LEGACY_SIGNATURES_DISMISSED, gmdate('Y-m-d H:i:s'), false);
     squuad_cert_log(sprintf('Aviso de documentos sin firmantes ocultado por el usuario %d', get_current_user_id()), 'signing_policy');

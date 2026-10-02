@@ -44,7 +44,7 @@ function squuad_cert_signature_pad_box(string $slot_key, ?object $request = null
     }
     $full_name = $short_name = squuad_cert_signature_holder_name($slot_key, $request);
     /* translators: %s: name of the role */
-    $label = sprintf(__('Signature (%s):', 'edusystem'), squuad_cert_holder_slot_label($slot_key));
+    $label = sprintf(__('Signature (%s):', 'wp-certificates'), squuad_cert_holder_slot_label($slot_key));
     // El recuadro conserva los ids «student» (signature-pad-student…) que usa create-enrollment.js para cualquier rol
     $role = 'student';
     ob_start();
@@ -62,12 +62,12 @@ function squuad_cert_signature_pad_box(string $slot_key, ?object $request = null
                         style="border: 1px solid gray; margin: auto !important; background-color: #ffff005c"></canvas>
                     <div id="sign-here-<?= esc_attr($role) ?>"
                         style="pointer-events: none;position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-weight: bold; padding: 10px; color: #4f4e4e7a; font-size: 20px;">
-                        <span><?= esc_html__('SIGN HERE', 'edusystem') ?></span>
+                        <span><?= esc_html__('SIGN HERE', 'wp-certificates') ?></span>
                     </div>
                 </div>
-                <button id="clear-<?= esc_attr($role) ?>" style="width: 100%;"><?= esc_html__('Clear', 'edusystem') ?></button>
+                <button id="clear-<?= esc_attr($role) ?>" style="width: 100%;"><?= esc_html__('Clear', 'wp-certificates') ?></button>
                 <button id="generate-signature-<?= esc_attr($role) ?>" style="width: 100%;"
-                    onclick="autoSignature('signature-pad-<?= esc_attr($role) ?>', 'signature-text-<?= esc_attr($role) ?>', 'generate-signature-<?= esc_attr($role) ?>', 'clear-<?= esc_attr($role) ?>')"><?= esc_html__('Generate signature automatically', 'edusystem') ?></button>
+                    onclick="autoSignature('signature-pad-<?= esc_attr($role) ?>', 'signature-text-<?= esc_attr($role) ?>', 'generate-signature-<?= esc_attr($role) ?>', 'clear-<?= esc_attr($role) ?>')"><?= esc_html__('Generate signature automatically', 'wp-certificates') ?></button>
                 <div style="position: relative; padding: 8px; text-align: center; width: 70%; margin: 8px auto; border-bottom: 1px solid gray; font-family: Great Vibes, cursive; font-size: 28px; display: block; height: 120px; display: none"
                     id="signature-text-<?= esc_attr($role) ?>">
                     <div style="bottom: 0; position: absolute; text-align: center; width: 100%;">
@@ -75,7 +75,7 @@ function squuad_cert_signature_pad_box(string $slot_key, ?object $request = null
                     </div>
                 </div>
                 <button id="clear-<?= esc_attr($role) ?>-signature"
-                    style="width: 100%; display: none"><?= esc_html__('Cancel', 'edusystem') ?></button>
+                    style="width: 100%; display: none"><?= esc_html__('Cancel', 'wp-certificates') ?></button>
             </div>
         </div>
     <?php

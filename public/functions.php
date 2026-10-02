@@ -12,6 +12,7 @@ function wp_certificates_scripts() {
     // Script JS
     if (str_contains(home_url($wp->request), 'card')) {
         wp_enqueue_script( 'my-card-script', plugins_url('wp-certificates') . '/public/assets/js/my-card.js', ['jquery'], $version, true );
+        wp_localize_script('my-card-script', 'squuadCertCard', ['shareError' => __('Error sharing. Do you want to download the image?', 'wp-certificates')]);
     }
 
     wp_enqueue_script('qrcode-js', plugins_url('wp-certificates') . '/public/assets/js/qrcode.min.js');
@@ -60,7 +61,7 @@ function add_certification_link($items, $args)
         // Nuevo elemento SIN cerrar </li>
         $new_item = '<li class="menu-item"><a href="'
             . esc_url(get_permalink(get_option('woocommerce_myaccount_page_id'))) . '/my-card">'
-            . esc_html__('ID Card', 'form-plugin')
+            . esc_html__('ID Card', 'wp-certificates')
             . '</a>';
 
         // Dividir los items existentes

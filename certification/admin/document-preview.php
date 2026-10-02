@@ -74,8 +74,8 @@ function squuad_cert_document_preview_signers(object $document): array
                 'slot_key' => squuad_cert_signer_slot_key((int) $slot['signer_id']),
                 'signer_id' => (int) $slot['signer_id'],
                 /* translators: %d: number of the signer in the document */
-                'name' => sprintf(__('Signer %d (example)', 'edusystem'), $n),
-                'charge' => __('Position (example)', 'edusystem'),
+                'name' => sprintf(__('Signer %d (example)', 'wp-certificates'), $n),
+                'charge' => __('Position (example)', 'wp-certificates'),
                 'phase' => 2,
             ];
         } elseif ('role' === $slot['slot_type']) {
@@ -148,8 +148,8 @@ function squuad_cert_document_preview_replacements(object $document, string $mod
         'nacionality' => $text('Venezuelan'),
         'birth_date' => $text('05/14/2008'),
         'gender' => $text('male'),
-        'program' => $text(__('Example program', 'edusystem')),
-        'career_mention' => $text(__('Example career - Example mention', 'edusystem')),
+        'program' => $text(__('Example program', 'wp-certificates')),
+        'career_mention' => $text(__('Example career - Example mention', 'wp-certificates')),
         'name_term_student_entered' => $text('Fall 2025'),
         'year_term_student_entered' => $text('2025'),
         'start_term_student_entered' => $text('08/18/2025'),
@@ -176,7 +176,7 @@ function squuad_cert_document_preview_replacements(object $document, string $mod
         'ethinicity_selected' => $html('HISPANIC'), // valor de ejemplo fijo (no se llama a EduSystem)
         'language_selected' => $html('ENGLISH'),
         'page_break' => $html('<div class="pagebreak"></div>'),
-        'missing_documents' => $html('<ul style="list-style:none;padding-left:0"><li>' . esc_html__('Example document 1', 'edusystem') . '</li><li>' . esc_html__('Example document 2', 'edusystem') . '</li></ul>'),
+        'missing_documents' => $html('<ul style="list-style:none;padding-left:0"><li>' . esc_html__('Example document 1', 'wp-certificates') . '</li><li>' . esc_html__('Example document 2', 'wp-certificates') . '</li></ul>'),
         'show_parent_info' => $html('1'),
         'parent_full_name' => $text($parent),
         'parent_email' => $text('parent@example.com'),
@@ -210,7 +210,7 @@ function squuad_cert_document_preview_replacements(object $document, string $mod
         'payment_method_table' => $html(squuad_cert_document_preview_plain_table(['Payment method', 'Amount'], [['Credit card', '$1,200.00'], ['Bank transfer', '$800.00']])),
         'payment_plan_table' => $html(squuad_cert_document_preview_plain_table(['Concept', 'Date', 'Amount'], [['Registration fee', '08/01/2025', '$150.00'], ['Installment 1', '09/01/2025', '$500.00'], ['Installment 2', '10/01/2025', '$500.00']])),
         'educational_background_information' => $html(squuad_cert_document_preview_plain_table(['Institution', 'City / Country', 'Title', 'Year'], [['Example High School', 'Caracas / Venezuela', 'High School Diploma', '2024']])),
-        'admission_requirements_table' => $html('<ul style="list-style-type: none; padding-left: 0; margin-top: 0"><li style="margin-bottom: 5px">✓ ' . esc_html__('Example requirement 1', 'edusystem') . '</li><li style="margin-bottom: 5px">✓ ' . esc_html__('Example requirement 2', 'edusystem') . '</li></ul>'),
+        'admission_requirements_table' => $html('<ul style="list-style-type: none; padding-left: 0; margin-top: 0"><li style="margin-bottom: 5px">✓ ' . esc_html__('Example requirement 1', 'wp-certificates') . '</li><li style="margin-bottom: 5px">✓ ' . esc_html__('Example requirement 2', 'wp-certificates') . '</li></ul>'),
     ];
 
     // Campos adicionales del documento: la primera opción marcada o un texto de ejemplo
@@ -221,7 +221,7 @@ function squuad_cert_document_preview_replacements(object $document, string $mod
             $values[$field['key']] = squuad_cert_document_field_has_options($field['type'])
                 ? ('checkbox' === $field['type'] ? array_slice($field['options'], 0, 1) : ($field['options'][0] ?? ''))
                 /* translators: %s: label of the additional field */
-                : sprintf(__('%s (example)', 'edusystem'), $field['label']);
+                : sprintf(__('%s (example)', 'wp-certificates'), $field['label']);
         }
         $replacements = array_merge(squuad_cert_document_fields_replacements($fields, $values), $replacements);
     }
@@ -233,9 +233,9 @@ function squuad_cert_document_preview_replacements(object $document, string $mod
     // heredada solo existe si el documento la pide y el sitio aún la permite
     if ('generate' === $mode) {
         if (!empty($document->signature_required)) {
-            $replacements['user_sign'] = $text(__('Signer (example)', 'edusystem'));
-            $replacements['position_user_charge'] = $text(__('Position (example)', 'edusystem'));
-            $replacements['signature'] = $html(squuad_cert_document_preview_signature_box(__('Signer (example)', 'edusystem')));
+            $replacements['user_sign'] = $text(__('Signer (example)', 'wp-certificates'));
+            $replacements['position_user_charge'] = $text(__('Position (example)', 'wp-certificates'));
+            $replacements['signature'] = $html(squuad_cert_document_preview_signature_box(__('Signer (example)', 'wp-certificates')));
         }
         $replacements['qrcode'] = $html('<div id="qrcode"></div>');
 

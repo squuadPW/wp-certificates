@@ -122,7 +122,7 @@ function add_certificates_page_admin()
         // add_submenu_page('add_admin_form_certificates_content', esc_html__('Certificates', 'wp-certificates'), esc_html__('Certificates', 'wp-certificates'), 'manager_certificates_templates', 'add_admin_form_certificates_templates_content', 'add_admin_form_certificates_templates_content', 10);
         // «Users and signatures» lo registra el módulo de firmas (certification/admin/signers.php), en esta misma URL
         add_submenu_page('add_admin_form_certificates_content', esc_html__('ID card', 'wp-certificates'), esc_html__('ID card', 'wp-certificates'), 'manager_id_card', 'add_admin_form_cards_content', 'add_admin_form_cards_content', 10);
-        add_submenu_page('add_admin_form_certificates_content', esc_html__('Configuration', 'wp-Configuration'), esc_html__('Configuration', 'wp-certificates'), 'manager_configuration_certificates', 'add_admin_form_configuration_options_certificates_content', 'add_admin_form_configuration_options_certificates_content', 10);
+        add_submenu_page('add_admin_form_certificates_content', esc_html__('Configuration', 'wp-certificates'), esc_html__('Configuration', 'wp-certificates'), 'manager_configuration_certificates', 'add_admin_form_configuration_options_certificates_content', 'add_admin_form_configuration_options_certificates_content', 10);
         remove_submenu_page('add_admin_form_certificates_content', 'add_admin_form_certificates_content');
     }
 }
@@ -164,9 +164,9 @@ add_action('document_view', function ($document) {
         <div class="group-input" >
             <label for="document_template">
 
-                <b><?= __('Document template','edusystem'); ?></b>
+                <b><?= __('Document template','wp-certificates'); ?></b>
                 <select name="document_template" >
-                    <option value='' <?php selected( $document_template,'' ) ?> ><?= __('Select option','edusystem');?></option>
+                    <option value='' <?php selected( $document_template,'' ) ?> ><?= __('Select option','wp-certificates');?></option>
                     
                     <?php foreach( $documents_certificates as $document_certificate ): ?>
                         <option value='<?= $document_certificate->id ?>' <?php selected( $document_template, $document_certificate->id ) ?> ><?= $document_certificate->title ?></option>
@@ -179,7 +179,7 @@ add_action('document_view', function ($document) {
             <label for="downloadable_document">
                     
                 <input type="checkbox" name="downloadable_document" value="1" <?php checked( $downloadable_document, 1 ) ?>    >
-                <?= __('Downloadable document','edusystem'); ?>
+                <?= __('Downloadable document','wp-certificates'); ?>
                 
             </label>
         </div> 

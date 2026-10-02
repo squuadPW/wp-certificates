@@ -1,8 +1,8 @@
 <div class="wrap">
     <?php if (isset($card) && !empty($card)): ?>
-        <h2 style="margin-bottom:15px;"><?= esc_html__('Card Details', 'aes'); ?></h2>
+        <h2 style="margin-bottom:15px;"><?= esc_html__('Card Details', 'wp-certificates'); ?></h2>
     <?php else: ?>
-        <h2 style="margin-bottom:15px;"><?= esc_html__('Add Card', 'aes'); ?></h2>
+        <h2 style="margin-bottom:15px;"><?= esc_html__('Add Card', 'wp-certificates'); ?></h2>
     <?php endif; ?>
 
     <?php if (isset($_COOKIE['message']) && !empty($_COOKIE['message'])) { ?>
@@ -19,7 +19,7 @@
     <?php } ?>
     <!-- <div style="display:flex;width:100%;">
         <a class="button button-outline-primary"
-            href="<?= admin_url('admin.php?page=add_admin_form_cards_content'); ?>"><?= esc_html__('Back', 'aes'); ?></a>
+            href="<?= admin_url('admin.php?page=add_admin_form_cards_content'); ?>"><?= esc_html__('Back', 'wp-certificates'); ?></a>
     </div> -->
 
     <div id="dashboard-widgets" class="metabox-holder">
@@ -34,11 +34,11 @@
                             <div>
                                 <h3
                                     style="margin-top:20px;margin-bottom:0px;text-align:center; border-bottom: 1px solid #8080805c;">
-                                    <b><?= esc_html__('Card details', 'aes'); ?></b>
+                                    <b><?= esc_html__('Card details', 'wp-certificates'); ?></b>
                                 </h3>
                                 <div style="display: flex; justify-content: space-evenly; margin: 18px;">
                                     <div style="font-weight:400; text-align: center">
-                                        <label for="input_id"><b><?= esc_html__('Name', 'aes'); ?></b><span
+                                        <label for="input_id"><b><?= esc_html__('Name', 'wp-certificates'); ?></b><span
                                                 class="text-danger">*</span></label><br>
                                         <input type="text" name="name" value="<?= $card->name; ?>">
                                         <input type="hidden" name="card_id" value="<?= $card->id; ?>">
@@ -46,19 +46,19 @@
                                 </div>
                                 <div style="display: flex; justify-content: space-evenly; margin: 18px;">
                                     <div style="font-weight:400; text-align: start">
-                                        <label for="input_id"><b><?= esc_html__('Main side', 'aes'); ?></b><span
+                                        <label for="input_id"><b><?= esc_html__('Main side', 'wp-certificates'); ?></b><span
                                                 class="text-danger">*</span></label><br>
                                         <input type="file" name="main_side">
                                     </div>
                                     <div style="font-weight:400; text-align: start">
-                                        <label for="input_id"><b><?= esc_html__('Rear side', 'aes'); ?></b><span
+                                        <label for="input_id"><b><?= esc_html__('Rear side', 'wp-certificates'); ?></b><span
                                                 class="text-danger">*</span></label><br>
                                         <input type="file" name="rear_side">
                                     </div>
                                 </div>
                                 <h3
                                     style="margin-top:20px;margin-bottom:0px;text-align:center; border-bottom: 1px solid #8080805c;">
-                                    <b><?= esc_html__('Preview', 'aes'); ?></b>
+                                    <b><?= esc_html__('Preview', 'wp-certificates'); ?></b>
                                 </h3>
                                 <div style="display: flex; justify-content: space-evenly; margin: 18px;">
                                     <div style="font-weight:400; text-align: start">
@@ -77,12 +77,12 @@
                             <?php if (isset($card) && !empty($card)): ?>
                                 <div style="margin-top:20px;display:flex;flex-direction:row;justify-content:end;gap:5px;">
                                     <button type="submit"
-                                        class="button button-primary"><?= esc_html__('Saves changes', 'aes'); ?></button>
+                                        class="button button-primary"><?= esc_html__('Saves changes', 'wp-certificates'); ?></button>
                                 </div>
                             <?php else: ?>
                                 <div style="margin-top:20px;display:flex;flex-direction:row;justify-content:end;gap:5px;">
                                     <button type="submit"
-                                        class="button button-primary"><?= esc_html__('Add Card', 'aes'); ?></button>
+                                        class="button button-primary"><?= esc_html__('Add Card', 'wp-certificates'); ?></button>
                                 </div>
                             <?php endif; ?>
                         </form>

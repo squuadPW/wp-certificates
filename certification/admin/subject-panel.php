@@ -69,36 +69,36 @@ function squuad_cert_render_subject_panel(string $type, int $id, array $ctx = []
     ob_start();
     ?>
     <div>
-        <h3><?= esc_html__('Signed documents', 'edusystem') ?></h3>
+        <h3><?= esc_html__('Signed documents', 'wp-certificates') ?></h3>
         <?php if ($rows) : ?>
             <div class="status-grid-wrapper">
                 <div class="status-grid header-row">
-                    <div class="status-item header"><strong><?= esc_html__('Document', 'edusystem') ?></strong></div>
-                    <div class="status-item header"><strong><?= esc_html__('Signed by', 'edusystem') ?></strong></div>
-                    <div class="status-item header"><strong><?= esc_html__('Date', 'edusystem') ?></strong></div>
-                    <div class="status-item header"><strong><?= esc_html__('Integrity', 'edusystem') ?></strong></div>
-                    <div class="status-item header"><strong><?= esc_html__('Context', 'edusystem') ?></strong></div>
+                    <div class="status-item header"><strong><?= esc_html__('Document', 'wp-certificates') ?></strong></div>
+                    <div class="status-item header"><strong><?= esc_html__('Signed by', 'wp-certificates') ?></strong></div>
+                    <div class="status-item header"><strong><?= esc_html__('Date', 'wp-certificates') ?></strong></div>
+                    <div class="status-item header"><strong><?= esc_html__('Integrity', 'wp-certificates') ?></strong></div>
+                    <div class="status-item header"><strong><?= esc_html__('Context', 'wp-certificates') ?></strong></div>
                 </div>
                 <?php foreach ($rows as ['row' => $row, 'legacy' => $legacy]) :
                     $signer = get_userdata((int) $row->user_id);
                     $signed_by = $signer ? squuad_cert_account_name((int) $row->user_id) : '#' . (int) $row->user_id;
                     if (!$legacy && !empty($row->signer_role)) {
-                        $signed_by .= ' (' . (squuad_cert_is_holder_slot((string) $row->signer_role) ? squuad_cert_holder_slot_label((string) $row->signer_role) : __('System signer', 'edusystem')) . ')';
+                        $signed_by .= ' (' . (squuad_cert_is_holder_slot((string) $row->signer_role) ? squuad_cert_holder_slot_label((string) $row->signer_role) : __('System signer', 'wp-certificates')) . ')';
                     }
                     $integrity = $legacy ? 'legacy' : squuad_cert_signature_verify_row($row);
                     $context = squuad_cert_signature_context_labels($row);
                     ?>
                     <div class="status-grid data-row">
-                        <div class="status-item data" data-colname="<?= esc_attr__('Document', 'edusystem') ?>"><?= esc_html((string) $row->document_id) ?></div>
-                        <div class="status-item data" data-colname="<?= esc_attr__('Signed by', 'edusystem') ?>"><?= esc_html($signed_by) ?></div>
-                        <div class="status-item data" data-colname="<?= esc_attr__('Date', 'edusystem') ?>"><?= esc_html(mysql2date(get_option('date_format'), (string) $row->created_at)) ?></div>
-                        <div class="status-item data" data-colname="<?= esc_attr__('Integrity', 'edusystem') ?>"><?= esc_html(squuad_cert_signature_integrity_label($integrity)) ?></div>
-                        <div class="status-item data" data-colname="<?= esc_attr__('Context', 'edusystem') ?>"><?= $context ? esc_html(implode(' · ', $context)) : '—' ?></div>
+                        <div class="status-item data" data-colname="<?= esc_attr__('Document', 'wp-certificates') ?>"><?= esc_html((string) $row->document_id) ?></div>
+                        <div class="status-item data" data-colname="<?= esc_attr__('Signed by', 'wp-certificates') ?>"><?= esc_html($signed_by) ?></div>
+                        <div class="status-item data" data-colname="<?= esc_attr__('Date', 'wp-certificates') ?>"><?= esc_html(mysql2date(get_option('date_format'), (string) $row->created_at)) ?></div>
+                        <div class="status-item data" data-colname="<?= esc_attr__('Integrity', 'wp-certificates') ?>"><?= esc_html(squuad_cert_signature_integrity_label($integrity)) ?></div>
+                        <div class="status-item data" data-colname="<?= esc_attr__('Context', 'wp-certificates') ?>"><?= $context ? esc_html(implode(' · ', $context)) : '—' ?></div>
                     </div>
                 <?php endforeach; ?>
             </div>
         <?php else : ?>
-            <div><strong><?= esc_html__('There are no signed files', 'edusystem') ?></strong></div>
+            <div><strong><?= esc_html__('There are no signed files', 'wp-certificates') ?></strong></div>
         <?php endif; ?>
     </div>
     <?php
@@ -119,21 +119,21 @@ function squuad_cert_render_document_actions(string $type, int $id, object $docu
     ob_start();
     if (squuad_cert_signature_issue_signers($document) && squuad_cert_document_issue_can($id)) : ?>
         <form method="post" action="<?= esc_url(admin_url('admin-post.php')) ?>" style="display:inline"
-            onsubmit="return confirm(<?= esc_attr(wp_json_encode(__('The document will be generated now with the current data and frozen; the signers will sign it from their panel. Continue?', 'edusystem'))) ?>);">
+            onsubmit="return confirm(<?= esc_attr(wp_json_encode(__('The document will be generated now with the current data and frozen; the signers will sign it from their panel. Continue?', 'wp-certificates'))) ?>);">
             <input type="hidden" name="action" value="squuad_cert_issue_document">
             <input type="hidden" name="student_id" value="<?= (int) $id ?>">
             <input type="hidden" name="document_certificate_id" value="<?= (int) $document->id ?>">
             <?php wp_nonce_field('squuad_cert_issue_document_' . (int) $id . '_' . (int) $document->id); ?>
-            <button type="submit" class="button button-success"><?= esc_html__('Issue for signature', 'edusystem') ?></button>
+            <button type="submit" class="button button-success"><?= esc_html__('Issue for signature', 'wp-certificates') ?></button>
         </form>
     <?php elseif (!empty($document->signature_required) && squuad_cert_third_party_signatures_blocked()) : ?>
-        <span class="description"><?= esc_html__('Requires signatures: configure its signers to issue it for signature.', 'edusystem') ?></span>
+        <span class="description"><?= esc_html__('Requires signatures: configure its signers to issue it for signature.', 'wp-certificates') ?></span>
         <?php if (current_user_can(SQUUAD_CERT_MANAGE_SIGNING_POLICIES_CAP)) : ?>
-            <a class="button" href="<?= esc_url(add_query_arg(['page' => 'add_admin_form_documents_content', 'section_tab' => 'document_detail', 'document_id' => (int) $document->id], admin_url('admin.php')) . '#edusystem-document-signers') ?>"><?= esc_html__('Configure signers', 'edusystem') ?></a>
+            <a class="button" href="<?= esc_url(add_query_arg(['page' => 'add_admin_form_documents_content', 'section_tab' => 'document_detail', 'document_id' => (int) $document->id], admin_url('admin.php')) . '#edusystem-document-signers') ?>"><?= esc_html__('Configure signers', 'wp-certificates') ?></a>
         <?php endif; ?>
     <?php else : ?>
         <button type="button" data-documentcertificate="<?= (int) $document->id ?>" data-signaturerequired="<?= (int) $document->signature_required ?>"
-            class="button download-document-certificate button-success"><?= esc_html__('Generate', 'edusystem') ?></button>
+            class="button download-document-certificate button-success"><?= esc_html__('Generate', 'wp-certificates') ?></button>
     <?php endif;
 
     return (string) ob_get_clean();

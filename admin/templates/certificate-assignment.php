@@ -57,7 +57,7 @@
                             </div>
 
                             <div style="display:flex;width:100%;justify-content:end;">
-                                <button class="button button-primary" type="submit"><?= __('Save Changes','edusystem'); ?></button>
+                                <button class="button button-primary" type="submit"><?= __('Save Changes','wp-certificates'); ?></button>
                             </div>
 
                         </form>

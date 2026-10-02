@@ -24,7 +24,7 @@ function squuad_cert_signer_registration_handle(): void
     $invitation = squuad_cert_signer_invitation_by_token($token);
     $user = $invitation ? get_userdata((int) $invitation->user_id) : null;
     if (!$invitation || !$user || 0 !== strcasecmp((string) $user->user_email, (string) $invitation->email_at_invite)) {
-        squuad_cert_signer_registration_render(__('This invitation is not valid or has expired. Ask the administration to send it again.', 'edusystem'));
+        squuad_cert_signer_registration_render(__('This invitation is not valid or has expired. Ask the administration to send it again.', 'wp-certificates'));
     }
     // La cuenta ya tiene contraseña: el enlace no vuelve a servir para crearla, solo lleva al acceso
     if (!get_user_meta($user->ID, 'squuad_cert_signer_needs_password', true)) {
@@ -38,11 +38,11 @@ function squuad_cert_signer_registration_handle(): void
         $password = (string) wp_unslash($_POST['password'] ?? '');
         $repeat = (string) wp_unslash($_POST['password_repeat'] ?? '');
         if (!$nonce_ok) {
-            $error = __('Your session expired. Please try again.', 'edusystem');
+            $error = __('Your session expired. Please try again.', 'wp-certificates');
         } elseif (strlen($password) < 10) {
-            $error = __('The password must have at least 10 characters.', 'edusystem');
+            $error = __('The password must have at least 10 characters.', 'wp-certificates');
         } elseif ($password !== $repeat) {
-            $error = __('The passwords do not match.', 'edusystem');
+            $error = __('The passwords do not match.', 'wp-certificates');
         } else {
             wp_set_password($password, $user->ID);
             delete_user_meta($user->ID, 'squuad_cert_signer_needs_password');
@@ -68,7 +68,7 @@ function squuad_cert_signer_registration_render(string $message, ?WP_User $user 
     <meta charset="<?php bloginfo('charset'); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
-    <title><?= esc_html(sprintf(__('Register your signature — %s', 'edusystem'), $site)) ?></title>
+    <title><?= esc_html(sprintf(__('Register your signature — %s', 'wp-certificates'), $site)) ?></title>
     <style>
         body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#f0f0f1;color:#1d2327;margin:0;padding:40px 16px}
         .box{max-width:420px;margin:0 auto;background:#fff;border:1px solid #c3c4c7;border-radius:6px;padding:24px}
@@ -84,17 +84,17 @@ function squuad_cert_signer_registration_render(string $message, ?WP_User $user 
         <?php if (!$user) : ?>
             <p><?= esc_html($message) ?></p>
         <?php else : ?>
-            <p><?= esc_html(sprintf(__('Hello %s. Create your password to access your account; then you will draw your signature.', 'edusystem'), $user->display_name)) ?></p>
+            <p><?= esc_html(sprintf(__('Hello %s. Create your password to access your account; then you will draw your signature.', 'wp-certificates'), $user->display_name)) ?></p>
             <?php if ($error) : ?><div class="error"><?= esc_html($error) ?></div><?php endif; ?>
             <form method="post">
                 <?php wp_nonce_field('squuad_cert_signer_register_' . $invitation_id); ?>
-                <label><?= esc_html__('Email', 'edusystem') ?></label>
+                <label><?= esc_html__('Email', 'wp-certificates') ?></label>
                 <input type="email" value="<?= esc_attr($user->user_email) ?>" readonly disabled>
-                <label for="password"><?= esc_html__('Password', 'edusystem') ?></label>
+                <label for="password"><?= esc_html__('Password', 'wp-certificates') ?></label>
                 <input type="password" id="password" name="password" required minlength="10" autocomplete="new-password">
-                <label for="password_repeat"><?= esc_html__('Repeat the password', 'edusystem') ?></label>
+                <label for="password_repeat"><?= esc_html__('Repeat the password', 'wp-certificates') ?></label>
                 <input type="password" id="password_repeat" name="password_repeat" required minlength="10" autocomplete="new-password">
-                <button type="submit"><?= esc_html__('Create password and continue', 'edusystem') ?></button>
+                <button type="submit"><?= esc_html__('Create password and continue', 'wp-certificates') ?></button>
             </form>
         <?php endif; ?>
     </div>

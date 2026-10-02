@@ -475,15 +475,15 @@ function squuad_cert_signature_chain_fingerprint_at(int $seq): ?string
 function squuad_cert_signature_integrity_label(string $status): string
 {
     $labels = [
-        'verified' => __('Verified', 'edusystem'),
-        'altered' => __('Altered', 'edusystem'),
-        'retired_key' => __('Signed with a retired key', 'edusystem'),
-        'content_altered' => __('Signed content altered', 'edusystem'),
-        'chain_broken' => __('Chain broken', 'edusystem'),
-        'unknown_key' => __('Unknown key', 'edusystem'),
-        'legacy' => __('Legacy, no fingerprint', 'edusystem'),
-        'error' => __('No fingerprint (error)', 'edusystem'),
-        'missing' => __('No fingerprint', 'edusystem'),
+        'verified' => __('Verified', 'wp-certificates'),
+        'altered' => __('Altered', 'wp-certificates'),
+        'retired_key' => __('Signed with a retired key', 'wp-certificates'),
+        'content_altered' => __('Signed content altered', 'wp-certificates'),
+        'chain_broken' => __('Chain broken', 'wp-certificates'),
+        'unknown_key' => __('Unknown key', 'wp-certificates'),
+        'legacy' => __('Legacy, no fingerprint', 'wp-certificates'),
+        'error' => __('No fingerprint (error)', 'wp-certificates'),
+        'missing' => __('No fingerprint', 'wp-certificates'),
     ];
 
     return $labels[$status] ?? $status;
@@ -497,21 +497,21 @@ function squuad_cert_signature_context_labels(object $row): array
 {
     $labels = [];
     if ('["automatic"]' === (string) $row->signature) {
-        $labels[] = __('Automatic (typed name)', 'edusystem');
+        $labels[] = __('Automatic (typed name)', 'wp-certificates');
     }
     if (!empty($row->fingerprint)) {
         if ((int) $row->switched_from) {
-            $labels[] = sprintf(__('Switched session by user %d', 'edusystem'), (int) $row->switched_from);
+            $labels[] = sprintf(__('Switched session by user %d', 'wp-certificates'), (int) $row->switched_from);
         }
         if ((int) $row->actor_user_id && (int) $row->actor_user_id !== (int) $row->user_id) {
             $actor = get_userdata((int) $row->actor_user_id);
             $labels[] = sprintf(
-                __('Signed from the account of %s', 'edusystem'),
+                __('Signed from the account of %s', 'wp-certificates'),
                 $actor ? $actor->display_name : '#' . (int) $row->actor_user_id
             );
         }
         if (untrailingslashit((string) $row->site_url) !== untrailingslashit(get_site_url())) {
-            $labels[] = __('Signed on another site', 'edusystem');
+            $labels[] = __('Signed on another site', 'wp-certificates');
         }
     }
 

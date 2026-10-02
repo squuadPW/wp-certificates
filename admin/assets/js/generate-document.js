@@ -68,7 +68,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // Rechazado por el servidor (firma no válida, documento inexistente...): se muestra el motivo
         if (XHR.status !== 200) {
           const response = this.response;
-          alert((response && typeof response.data === "string" && response.data) || "The document could not be generated.");
+          alert((response && typeof response.data === "string" && response.data) || squuadCertGenerate.i18n.failed);
           if (typeof restoreButtonsCertificates === "function") restoreButtonsCertificates(false);
           return;
         }

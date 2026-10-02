@@ -7,35 +7,35 @@
 if (!defined('ABSPATH')) exit;
 
 $modes = [
-    'automatic' => __('As the final PDF of the signature request (A4, portrait).', 'edusystem'),
-    'issued' => __('As the document issued for signature, with the format of the document.', 'edusystem'),
-    'generate' => __('As "Generate" in the student file, with the format of the document.', 'edusystem'),
+    'automatic' => __('As the final PDF of the signature request (A4, portrait).', 'wp-certificates'),
+    'issued' => __('As the document issued for signature, with the format of the document.', 'wp-certificates'),
+    'generate' => __('As "Generate" in the student file, with the format of the document.', 'wp-certificates'),
 ];
 // Pie del PDF de las solicitudes de firma, con valores de ejemplo (el real lleva el número, la ronda y la huella)
-$fingerprint = sprintf(__('Signature request #%1$d, round %2$d · Content fingerprint (SHA-256): %3$s', 'edusystem'), 123, 1, hash('sha256', 'example'));
+$fingerprint = sprintf(__('Signature request #%1$d, round %2$d · Content fingerprint (SHA-256): %3$s', 'wp-certificates'), 123, 1, hash('sha256', 'example'));
 ?>
 <div id="edusystem-document-preview" style="max-width:1100px;margin:24px auto 0">
     <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
-        <h2 style="margin:0"><?= esc_html__('Preview', 'edusystem') ?></h2>
+        <h2 style="margin:0"><?= esc_html__('Preview', 'wp-certificates') ?></h2>
         <div>
             <span id="edusystem-preview-status" class="description" aria-live="polite"></span>
-            <button type="button" class="button" id="edusystem-preview-refresh"><?= esc_html__('Update preview', 'edusystem') ?></button>
+            <button type="button" class="button" id="edusystem-preview-refresh"><?= esc_html__('Update preview', 'wp-certificates') ?></button>
         </div>
     </div>
     <p class="description" style="margin:6px 0 10px">
         <?= esc_html($modes[$preview['mode']]) ?>
-        <?= esc_html__('All the variables show example data, never real data. It shows the saved version: save your changes to see them.', 'edusystem') ?>
+        <?= esc_html__('All the variables show example data, never real data. It shows the saved version: save your changes to see them.', 'wp-certificates') ?>
     </p>
     <?php if ($preview['signature_blocked']) : ?>
-        <div class="notice notice-warning inline"><p><?= esc_html__('This document asks for signature images: it can no longer be generated this way. Configure its signers so that each person signs from their own account.', 'edusystem') ?></p></div>
+        <div class="notice notice-warning inline"><p><?= esc_html__('This document asks for signature images: it can no longer be generated this way. Configure its signers so that each person signs from their own account.', 'wp-certificates') ?></p></div>
     <?php endif; ?>
     <?php if ($preview['unknown']) : ?>
         <div class="notice notice-warning inline"><p>
-            <?= esc_html__('These variables do not exist and will appear as text in the document:', 'edusystem') ?>
+            <?= esc_html__('These variables do not exist and will appear as text in the document:', 'wp-certificates') ?>
             <?= esc_html(implode(', ', array_map(static fn($key) => '{{' . $key . '}}', $preview['unknown']))) ?>
         </p></div>
     <?php endif; ?>
-    <iframe id="edusystem-preview-frame" title="<?= esc_attr__('Preview of the document in PDF', 'edusystem') ?>"
+    <iframe id="edusystem-preview-frame" title="<?= esc_attr__('Preview of the document in PDF', 'wp-certificates') ?>"
         style="display:block;width:100%;height:85vh;border:1px solid #c3c4c7;background:#525659"></iframe>
 </div>
 <?php // Fuera de pantalla el envoltorio, no el origen: html2pdf clona el origen y lo pinta con el ancho útil de la página ?>
@@ -51,9 +51,9 @@ $fingerprint = sprintf(__('Signature request #%1$d, round %2$d · Content finger
         const data = <?= wp_json_encode($preview, JSON_HEX_TAG | JSON_HEX_AMP) ?>;
         const fingerprint = <?= wp_json_encode($fingerprint, JSON_HEX_TAG | JSON_HEX_AMP) ?>;
         const texts = {
-            generating: <?= wp_json_encode(__('Generating the PDF…', 'edusystem')) ?>,
-            done: <?= wp_json_encode(__('PDF ready.', 'edusystem')) ?>,
-            fail: <?= wp_json_encode(__('The preview could not be generated.', 'edusystem')) ?>
+            generating: <?= wp_json_encode(__('Generating the PDF…', 'wp-certificates')) ?>,
+            done: <?= wp_json_encode(__('PDF ready.', 'wp-certificates')) ?>,
+            fail: <?= wp_json_encode(__('The preview could not be generated.', 'wp-certificates')) ?>
         };
         const frame = document.getElementById("edusystem-preview-frame");
         const holder = document.getElementById("edusystem-preview-holder");

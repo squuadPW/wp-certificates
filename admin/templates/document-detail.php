@@ -26,7 +26,7 @@
     <?php endif; ?>
     <div style="display:flex;width:100%;">
         <a class="button button-outline-primary"
-            href="<?= admin_url('admin.php?page=add_admin_form_documents_content'); ?>"><?= esc_html__('Back') ?></a>
+            href="<?= admin_url('admin.php?page=add_admin_form_documents_content'); ?>"><?= esc_html__('Back', 'wp-certificates') ?></a>
     </div>
 
     <?php if (empty($document)): ?>

@@ -16,7 +16,7 @@
 
   <div class="card" style="max-width: 90% !important;">
     <div class="card-header">
-      <h3><?= esc_html__('Settings', 'aes'); ?></h3>
+      <h3><?= esc_html__('Settings', 'wp-certificates'); ?></h3>
     </div>
     <div class="card-body-configuration">
 
@@ -26,23 +26,23 @@
         <div>
           <div class="form-group" style="padding: 0px 10px 10px 10px;">
             <label
-              for="email_coordination"><?= esc_html__('URL of the site where you will be redirected to show its validity.', 'aes'); ?>
+              for="email_coordination"><?= esc_html__('URL of the site where you will be redirected to show its validity.', 'wp-certificates'); ?>
               <span>(https://xxx.xxx.xxx/)</span></label> <br>
             <input class="full-input" name="validation_url" type="text" id="validation_url"
               value="<?= get_option('validation_url'); ?>" required>
           </div>
           <div class="form-group" style="padding: 0px 10px 10px 10px;">
-            <label for="email_academic_management"><?= esc_html__('Image of QR URL', 'aes'); ?></label> <br>
+            <label for="email_academic_management"><?= esc_html__('Image of QR URL', 'wp-certificates'); ?></label> <br>
             <input class="full-input" name="image_qr_url" type="text" id="image_qr_url"
               value="<?= get_option('image_qr_url'); ?>" required>
           </div>
           <div class="form-group" style="padding: 10px">
             <input type="checkbox" id="disable-idcard" name="disable_idcard" <?php echo get_option('disable_idcard') == 'on' ? 'checked' : '' ?>>
-            <label for="disable-idcard"><?= __('Disable ID Card'); ?></label>
+            <label for="disable-idcard"><?= __('Disable ID Card', 'wp-certificates'); ?></label>
           </div>
         </div>
         <div class="form-group" id="save-configuration" style="text-align: center">
-          <button type="submit" class="btn btn-primary"><?= esc_html__('Save settings', 'aes'); ?></button>
+          <button type="submit" class="btn btn-primary"><?= esc_html__('Save settings', 'wp-certificates'); ?></button>
         </div>
       </form>
     </div>

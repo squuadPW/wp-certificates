@@ -22,7 +22,7 @@ function squuad_cert_signer_inbox_menu(): void
         return;
     }
     $count = count(squuad_cert_signer_inbox(get_current_user_id()));
-    $title = __('Documents to sign', 'edusystem');
+    $title = __('Documents to sign', 'wp-certificates');
     $menu = $count ? $title . ' <span class="awaiting-mod">' . (int) $count . '</span>' : $title;
     add_menu_page($title, $menu, SQUUAD_CERT_SIGN_DOCUMENTS_CAP, SQUUAD_CERT_SIGNER_INBOX_PAGE, 'squuad_cert_signer_inbox_page', 'dashicons-edit-page', 3);
 }
@@ -45,9 +45,9 @@ function squuad_cert_signer_inbox_pending_notice(): void
     }
     printf(
         '<div class="notice notice-info"><p>%s <a href="%s">%s</a></p></div>',
-        esc_html(sprintf(_n('You have %d document waiting for your signature.', 'You have %d documents waiting for your signature.', $count, 'edusystem'), $count)),
+        esc_html(sprintf(_n('You have %d document waiting for your signature.', 'You have %d documents waiting for your signature.', $count, 'wp-certificates'), $count)),
         esc_url(add_query_arg('page', SQUUAD_CERT_SIGNER_INBOX_PAGE, admin_url('admin.php'))),
-        esc_html__('Review and sign', 'edusystem')
+        esc_html__('Review and sign', 'wp-certificates')
     );
 }
 
@@ -57,7 +57,7 @@ function squuad_cert_signer_inbox_handle_sign(): void
     $request_id = absint($_POST['request_id'] ?? 0);
     check_admin_referer('squuad_cert_sign_as_signer_' . $request_id);
     if (!current_user_can(SQUUAD_CERT_SIGN_DOCUMENTS_CAP)) {
-        wp_die(esc_html__('You are not allowed to sign this document.', 'edusystem'), 403);
+        wp_die(esc_html__('You are not allowed to sign this document.', 'wp-certificates'), 403);
     }
     $result = squuad_cert_signature_sign_as_signer(
         $request_id,
@@ -90,16 +90,16 @@ function squuad_cert_signer_decline_request(int $request_id, string $reason, boo
     $slot = $request ? squuad_cert_signature_request_role($request, $user_id) : '';
     $signer = squuad_cert_signer_by_user($user_id);
     if (!$request || 0 !== strpos($slot, 'signer:') || !$signer || 'active' !== $signer->status) {
-        return ['ok' => false, 'message' => __('You are not allowed to sign this document.', 'edusystem')];
+        return ['ok' => false, 'message' => __('You are not allowed to sign this document.', 'wp-certificates')];
     }
     if (function_exists('squuad_cert_signature_session_switched_from') && squuad_cert_signature_session_switched_from()) {
-        return ['ok' => false, 'message' => __('Documents cannot be signed from a switched session. Each person must sign from their own account.', 'edusystem')];
+        return ['ok' => false, 'message' => __('Documents cannot be signed from a switched session. Each person must sign from their own account.', 'wp-certificates')];
     }
     if (!in_array($request->status, ['open', 'partially_signed'], true) || !squuad_cert_signature_request_slot_open($request, $slot)) {
-        return ['ok' => false, 'message' => __('This document no longer accepts signatures. Please reload the page.', 'edusystem')];
+        return ['ok' => false, 'message' => __('This document no longer accepts signatures. Please reload the page.', 'wp-certificates')];
     }
     if (!$confirmed || '' === trim($reason)) {
-        return ['ok' => false, 'message' => __('To decline a document you must write the reason and accept that the action cannot be reverted.', 'edusystem')];
+        return ['ok' => false, 'message' => __('To decline a document you must write the reason and accept that the action cannot be reverted.', 'wp-certificates')];
     }
 
     // wp-certificates hace su parte: anula las firmas de la solicitud y la cierra como declinada. El requisito, sus
@@ -121,8 +121,8 @@ function squuad_cert_signer_decline_request(int $request_id, string $reason, boo
     ]);
 
     return ['ok' => true, 'message' => 'issued' === ($request->origin ?? '')
-        ? __('The document was declined. The administration will decide how to issue it again.', 'edusystem')
-        : __('The document was declined. The student was notified.', 'edusystem')];
+        ? __('The document was declined. The administration will decide how to issue it again.', 'wp-certificates')
+        : __('The document was declined. The student was notified.', 'wp-certificates')];
 }
 
 add_action('admin_post_squuad_cert_signer_decline', 'squuad_cert_signer_inbox_handle_decline');
@@ -131,7 +131,7 @@ function squuad_cert_signer_inbox_handle_decline(): void
     $request_id = absint($_POST['request_id'] ?? 0);
     check_admin_referer('squuad_cert_signer_decline_' . $request_id);
     if (!current_user_can(SQUUAD_CERT_SIGN_DOCUMENTS_CAP)) {
-        wp_die(esc_html__('You are not allowed to sign this document.', 'edusystem'), 403);
+        wp_die(esc_html__('You are not allowed to sign this document.', 'wp-certificates'), 403);
     }
     $result = squuad_cert_signer_decline_request(
         $request_id,
@@ -149,7 +149,7 @@ function squuad_cert_signer_inbox_handle_batch_prepare(): void
 {
     check_admin_referer('squuad_cert_signer_batch_prepare');
     if (!current_user_can(SQUUAD_CERT_SIGN_DOCUMENTS_CAP)) {
-        wp_die(esc_html__('You are not allowed to sign this document.', 'edusystem'), 403);
+        wp_die(esc_html__('You are not allowed to sign this document.', 'wp-certificates'), 403);
     }
     $result = squuad_cert_signature_batch_prepare(array_map('absint', (array) ($_POST['request_ids'] ?? [])));
     if (!$result['ok']) {
@@ -166,7 +166,7 @@ function squuad_cert_signer_inbox_handle_batch_confirm(): void
     $batch_id = absint($_POST['batch_id'] ?? 0);
     check_admin_referer('squuad_cert_signer_batch_confirm_' . $batch_id);
     if (!current_user_can(SQUUAD_CERT_SIGN_DOCUMENTS_CAP)) {
-        wp_die(esc_html__('You are not allowed to sign this document.', 'edusystem'), 403);
+        wp_die(esc_html__('You are not allowed to sign this document.', 'wp-certificates'), 403);
     }
     $result = squuad_cert_signature_batch_confirm(
         $batch_id,

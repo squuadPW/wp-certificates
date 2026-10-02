@@ -10,7 +10,7 @@ defined('ABSPATH') || exit;
     <div id='documentcertificate-modal' class='modal' style='display:none'>
         <div class='modal-content' style="width: 70%;">
             <div class="modal-header">
-                <h3 style="font-size:20px;"><?= esc_html__('Generate Document', 'edusystem') ?></h3>
+                <h3 style="font-size:20px;"><?= esc_html__('Generate Document', 'wp-certificates') ?></h3>
                 <span id="documentcertificate-exit-icon" class="modal-close"><span
                         class="dashicons dashicons-no-alt"></span></span>
             </div>
@@ -20,9 +20,9 @@ defined('ABSPATH') || exit;
             </div>
             <div class="modal-footer">
                 <button id="documentcertificate-button" type="button"
-                    class="button button-outline-primary modal-close"><?= esc_html__('Generate', 'edusystem') ?></button>
+                    class="button button-outline-primary modal-close"><?= esc_html__('Generate', 'wp-certificates') ?></button>
                 <button id="documentcertificate-exit-button" type="button"
-                    class="button button-danger modal-close"><?= esc_html__('Exit', 'edusystem') ?></button>
+                    class="button button-danger modal-close"><?= esc_html__('Exit', 'wp-certificates') ?></button>
             </div>
         </div>
     </div>
@@ -38,8 +38,8 @@ defined('ABSPATH') || exit;
 
         </div>
         <div class="modal-footer" style="text-align: center; display: block">
-            <button type="button" class="button button-danger" id="close-modal-grades"><?= __('Close', 'edusystem') ?></button>
-            <button type="button" class="button button-primary" id="download-grades"><?= __('Download', 'edusystem') ?></button>
+            <button type="button" class="button button-danger" id="close-modal-grades"><?= __('Close', 'wp-certificates') ?></button>
+            <button type="button" class="button button-primary" id="download-grades"><?= __('Download', 'wp-certificates') ?></button>
         </div>
     </div>
 </div>

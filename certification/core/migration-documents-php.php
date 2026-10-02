@@ -238,7 +238,7 @@ function squuad_cert_notice_documents_php_pending()
 
     echo '<div class="notice notice-warning"><p>' . esc_html(sprintf(
         /* translators: %s: IDs de documentos */
-        __('These documents contain PHP code that is no longer executed and must be replaced with variables: %s', 'edusystem'),
+        __('These documents contain PHP code that is no longer executed and must be replaced with variables: %s', 'wp-certificates'),
         implode(', ', array_map('intval', $pending))
     )) . '</p></div>';
 }

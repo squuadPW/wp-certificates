@@ -1,0 +1,2931 @@
+# Copyright (C) 2026 EduSof
+# This file is distributed under the GPL2.
+msgid ""
+msgstr ""
+"Project-Id-Version: WP Certificates 1.0.29\n"
+"Report-Msgid-Bugs-To: https://edusof.com\n"
+"Last-Translator: EduSof\n"
+"Language-Team: EduSof\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-10-02T23:47:50+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: wp-certificates\n"
+
+#. Plugin Name of the plugin
+#: wp-certificates.php
+msgid "WP Certificates"
+msgstr ""
+
+#. Description of the plugin
+#: wp-certificates.php
+msgid "The WordPress plugin for certificates, certificates and personalized documents of the institution."
+msgstr ""
+
+#. Author of the plugin
+#: wp-certificates.php
+msgid "EduSof"
+msgstr ""
+
+#. Author URI of the plugin
+#: wp-certificates.php
+msgid "https://edusof.com"
+msgstr ""
+
+#: admin/cards.php:48
+msgid "Card adjusted successfully."
+msgstr ""
+
+#: admin/cards.php:52
+#: admin/certificates.php:18
+msgid "Certification deleted successfully."
+msgstr ""
+
+#: admin/cards.php:89
+#: admin/documents.php:395
+msgid "View Details"
+msgstr ""
+
+#: admin/cards.php:110
+msgid "Certificate"
+msgstr ""
+
+#: admin/cards.php:111
+#: admin/certificates.php:202
+#: certification/admin/templates/signature-integrity.php:117
+#: certification/admin/templates/signers.php:47
+#: certification/admin/templates/signers.php:91
+#: certification/admin/templates/signers.php:137
+msgid "User"
+msgstr ""
+
+#: admin/cards.php:112
+#: admin/documents.php:421
+#: admin/templates/document-detail.php:309
+#: admin/templates/variables.php:83
+msgid "Actions"
+msgstr ""
+
+#: admin/certificates.php:14
+msgid "Certification adjusted successfully."
+msgstr ""
+
+#: admin/certificates.php:58
+msgid "Template adjusted successfully."
+msgstr ""
+
+#: admin/certificates.php:62
+msgid "Template deleted successfully."
+msgstr ""
+
+#: admin/certificates.php:87
+msgid "This document requires signatures: it cannot be issued here. Configure its signers and issue it for signature from the student file; each responsible person signs from their own account."
+msgstr ""
+
+#: admin/certificates.php:94
+msgid "An error occurred while trying to issue the certificate"
+msgstr ""
+
+#: admin/certificates.php:124
+msgid "There have been problems issuing certificates to the following students:"
+msgstr ""
+
+#: admin/certificates.php:128
+msgid "The certificates have been successfully issued"
+msgstr ""
+
+#: admin/certificates.php:200
+#: admin/templates/document-detail.php:5
+#: certification/admin/subject-panel.php:76
+#: certification/admin/subject-panel.php:92
+#: certification/admin/templates/document-issued.php:26
+#: certification/admin/templates/signature-integrity.php:116
+#: certification/admin/templates/signer-inbox.php:12
+#: certification/admin/templates/signer-inbox.php:130
+#: certification/admin/templates/signer-inbox.php:176
+#: certification/admin/templates/signer-inbox.php:201
+#: certification/admin/templates/signer-inbox.php:239
+#: certification/public/templates/documents-to-sign-batch.php:21
+#: certification/public/templates/documents-to-sign-batch.php:29
+#: certification/public/templates/documents-to-sign-batch.php:87
+#: certification/public/templates/documents-to-sign.php:22
+#: certification/public/templates/documents-to-sign.php:38
+msgid "Document"
+msgstr ""
+
+#: admin/certificates.php:201
+#: admin/templates/document-detail.php:46
+msgid "Code"
+msgstr ""
+
+#: admin/certificates.php:204
+msgid "Emission date"
+msgstr ""
+
+#: admin/certificates.php:205
+msgid "Expiration date"
+msgstr ""
+
+#: admin/certificates.php:331
+msgid "Name of template"
+msgstr ""
+
+#: admin/certificates.php:332
+#: admin/templates/variables.php:80
+#: admin/templates/variables.php:198
+#: admin/templates/variables.php:227
+#: admin/templates/variables.php:271
+msgid "Description"
+msgstr ""
+
+#: admin/certificates.php:333
+#: admin/templates/document-detail.php:80
+#: admin/templates/template-certificates-detail.php:37
+#: certification/admin/templates/signers.php:22
+msgid "Active"
+msgstr ""
+
+#: admin/documents.php:54
+#: admin/documents.php:339
+msgid "You are not allowed to do this."
+msgstr ""
+
+#: admin/documents.php:73
+msgid "The name and the code are required."
+msgstr ""
+
+#: admin/documents.php:78
+#, php-format
+msgid "There is already a document with the code %s."
+msgstr ""
+
+#: admin/documents.php:100
+#: admin/documents.php:204
+msgid "Error saving document."
+msgstr ""
+
+#: admin/documents.php:102
+msgid "Document created as inactive. Complete it and activate it when it is ready."
+msgstr ""
+
+#: admin/documents.php:319
+msgid "Document adjusted successfully."
+msgstr ""
+
+#: admin/documents.php:320
+msgid "Some additional fields were not saved:"
+msgstr ""
+
+#: admin/documents.php:323
+#, php-format
+msgid "The registry book line cannot use %s: they are assigned when the line is reserved. Remove them, or the document will not be issued."
+msgstr ""
+
+#: admin/documents.php:347
+msgid "Document deleted successfully."
+msgstr ""
+
+#: admin/documents.php:418
+#: admin/templates/card-detail.php:41
+#: admin/templates/document-detail.php:41
+#: admin/templates/document-detail.php:84
+#: certification/public/templates/documents-to-sign.php:23
+#: certification/public/templates/documents-to-sign.php:39
+#: public/templates/my-card.php:51
+msgid "Name"
+msgstr ""
+
+#: admin/documents.php:419
+#: certification/admin/templates/document-issued.php:30
+#: certification/admin/templates/signers.php:93
+#: certification/public/templates/documents-to-sign.php:24
+#: certification/public/templates/documents-to-sign.php:40
+msgid "Status"
+msgstr ""
+
+#: admin/documents.php:420
+msgid "Created at"
+msgstr ""
+
+#: admin/documents.php:547
+#: admin/templates/document-detail.php:304
+msgid "Label"
+msgstr ""
+
+#: admin/documents.php:549
+#: admin/templates/document-detail.php:305
+#: admin/templates/signing-roles.php:24
+#: admin/templates/variables.php:191
+#: admin/templates/variables.php:225
+#: admin/templates/variables.php:260
+msgid "Key"
+msgstr ""
+
+#: admin/documents.php:555
+#: admin/templates/document-detail.php:237
+#: admin/templates/document-detail.php:306
+msgid "Type"
+msgstr ""
+
+#: admin/documents.php:561
+#: admin/templates/document-detail.php:307
+msgid "Options (one per line)"
+msgstr ""
+
+#: admin/documents.php:562
+#: admin/templates/document-detail.php:308
+msgid "Required"
+msgstr ""
+
+#: admin/documents.php:563
+msgid "Remove"
+msgstr ""
+
+#: admin/functions.php:67
+#: admin/functions.php:169
+msgid "Select option"
+msgstr ""
+
+#: admin/functions.php:108
+#: admin/functions.php:109
+msgid "Certification"
+msgstr ""
+
+#: admin/functions.php:116
+msgid "Student certificates"
+msgstr ""
+
+#: admin/functions.php:116
+msgid "Student certificate"
+msgstr ""
+
+#: admin/functions.php:117
+#: admin/templates/list-documents.php:4
+#: admin/templates/variables.php:48
+#: includes/permissions.php:24
+msgid "Documents"
+msgstr ""
+
+#: admin/functions.php:120
+#: admin/templates/certificate-assignment.php:5
+#: includes/permissions.php:25
+msgid "Certificate assignment"
+msgstr ""
+
+#: admin/functions.php:124
+#: includes/permissions.php:27
+msgid "ID card"
+msgstr ""
+
+#: admin/functions.php:125
+#: includes/permissions.php:28
+msgid "Configuration"
+msgstr ""
+
+#: admin/functions.php:167
+msgid "Document template"
+msgstr ""
+
+#: admin/functions.php:182
+msgid "Downloadable document"
+msgstr ""
+
+#: admin/generate.php:35
+msgid "The document could not be generated."
+msgstr ""
+
+#: admin/generate.php:50
+msgid "Students are not available (EduSystem is not active)."
+msgstr ""
+
+#: admin/generate.php:54
+#: certification/admin/document-signing.php:132
+#: certification/admin/document-signing.php:239
+#: certification/admin/document-signing.php:271
+msgid "You do not have permission to manage admissions."
+msgstr ""
+
+#: admin/generate.php:60
+#: certification/includes/signers.php:1673
+msgid "The student or the document does not exist."
+msgstr ""
+
+#: admin/generate.php:68
+msgid "This document requires signatures: it can no longer be generated with signature images. Configure its signers (Certification > Documents > Document signers) and issue it for signature; each responsible person signs from their own account."
+msgstr ""
+
+#: admin/permissions.php:21
+#: admin/permissions.php:22
+#: admin/templates/permissions.php:10
+#: includes/permissions.php:35
+msgid "Permissions"
+msgstr ""
+
+#: admin/permissions.php:32
+#: admin/permissions.php:48
+#: admin/signing-roles.php:48
+#: admin/signing-roles.php:61
+#: admin/variables.php:99
+#: admin/variables.php:127
+#: admin/variables.php:168
+#: admin/variables.php:210
+#: admin/variables.php:258
+#: admin/variables.php:275
+#: admin/variables.php:291
+msgid "Sorry, you are not allowed to access this page."
+msgstr ""
+
+#: admin/permissions.php:53
+msgid "That role does not exist."
+msgstr ""
+
+#: admin/permissions.php:57
+msgid "Permissions saved."
+msgstr ""
+
+#: admin/permissions.php:57
+#: admin/signing-roles.php:71
+#: certification/includes/signers.php:818
+msgid "No changes."
+msgstr ""
+
+#: admin/signing-roles.php:21
+#: admin/signing-roles.php:22
+#: admin/templates/signing-roles.php:10
+#: includes/permissions.php:34
+msgid "Signing roles"
+msgstr ""
+
+#: admin/signing-roles.php:70
+msgid "Signing roles saved. Signature requests already in progress keep their signers."
+msgstr ""
+
+#: admin/templates/card-detail.php:3
+msgid "Card Details"
+msgstr ""
+
+#: admin/templates/card-detail.php:5
+#: admin/templates/card-detail.php:85
+msgid "Add Card"
+msgstr ""
+
+#: admin/templates/card-detail.php:22
+#: admin/templates/document-detail.php:29
+#: admin/templates/template-certificates-detail.php:19
+msgid "Back"
+msgstr ""
+
+#: admin/templates/card-detail.php:37
+msgid "Card details"
+msgstr ""
+
+#: admin/templates/card-detail.php:49
+msgid "Main side"
+msgstr ""
+
+#: admin/templates/card-detail.php:54
+msgid "Rear side"
+msgstr ""
+
+#: admin/templates/card-detail.php:61
+#: admin/templates/document-detail.php:351
+#: admin/templates/template-certificates-detail.php:64
+#: certification/admin/templates/document-preview.php:19
+#: public/templates/certificates.php:37
+msgid "Preview"
+msgstr ""
+
+#: admin/templates/card-detail.php:80
+#: admin/templates/document-detail.php:326
+msgid "Saves changes"
+msgstr ""
+
+#: admin/templates/certificate-assignment.php:33
+msgid "Select Certificate"
+msgstr ""
+
+#: admin/templates/certificate-assignment.php:36
+msgid "Select a certificate"
+msgstr ""
+
+#: admin/templates/certificate-assignment.php:46
+msgid "Select Students"
+msgstr ""
+
+#: admin/templates/certificate-assignment.php:60
+msgid "Save Changes"
+msgstr ""
+
+#: admin/templates/configuration-options.php:19
+msgid "Settings"
+msgstr ""
+
+#: admin/templates/configuration-options.php:29
+msgid "URL of the site where you will be redirected to show its validity."
+msgstr ""
+
+#: admin/templates/configuration-options.php:35
+msgid "Image of QR URL"
+msgstr ""
+
+#: admin/templates/configuration-options.php:41
+msgid "Disable ID Card"
+msgstr ""
+
+#: admin/templates/configuration-options.php:45
+msgid "Save settings"
+msgstr ""
+
+#: admin/templates/document-detail.php:3
+msgid "Document details"
+msgstr ""
+
+#: admin/templates/document-detail.php:24
+#, php-format
+msgid "This automatic document will not be shown in My Account: %s. It must ask someone to sign it (a signature variable in the template and signers in \"Document signers\") or have additional fields."
+msgstr ""
+
+#: admin/templates/document-detail.php:38
+msgid "New document"
+msgstr ""
+
+#: admin/templates/document-detail.php:39
+msgid "The document is created as inactive. Then you will be taken to its page to complete the content, the format and the rest of the settings, and to activate it."
+msgstr ""
+
+#: admin/templates/document-detail.php:49
+msgid "Unique. It is saved in capital letters with hyphens (e.g. OFFICIAL-TRANSCRIPT) and cannot be repeated."
+msgstr ""
+
+#: admin/templates/document-detail.php:52
+msgid "Create document"
+msgstr ""
+
+#: admin/templates/document-detail.php:72
+msgid "Document Information"
+msgstr ""
+
+#: admin/templates/document-detail.php:90
+msgid "Identifier (can be the name of the document)"
+msgstr ""
+
+#: admin/templates/document-detail.php:97
+msgid "General variables"
+msgstr ""
+
+#: admin/templates/document-detail.php:98
+msgid "Defined by WP Certificates: they work on any site."
+msgstr ""
+
+#: admin/templates/document-detail.php:108
+#: admin/templates/variables.php:53
+#: admin/variables.php:29
+#: admin/variables.php:30
+#: includes/permissions.php:33
+msgid "Variables"
+msgstr ""
+
+#: admin/templates/document-detail.php:117
+msgid "Header"
+msgstr ""
+
+#: admin/templates/document-detail.php:131
+msgid "Content"
+msgstr ""
+
+#: admin/templates/document-detail.php:145
+msgid "Footer"
+msgstr ""
+
+#: admin/templates/document-detail.php:163
+msgid "This document will require signatures"
+msgstr ""
+
+#: admin/templates/document-detail.php:171
+msgid "This document requires that the student be a graduate"
+msgstr ""
+
+#: admin/templates/document-detail.php:179
+msgid "This document has margins (on all sides)"
+msgstr ""
+
+#: admin/templates/document-detail.php:183
+msgid "ID Requirement for the admin (ID requisito)"
+msgstr ""
+
+#: admin/templates/document-detail.php:188
+msgid "Type file"
+msgstr ""
+
+#: admin/templates/document-detail.php:193
+msgid "Certificate book"
+msgstr ""
+
+#: admin/templates/document-detail.php:195
+msgid "Select a book"
+msgstr ""
+
+#: admin/templates/document-detail.php:211
+msgid "Registry book line description"
+msgstr ""
+
+#: admin/templates/document-detail.php:213
+#, php-format
+msgid "Text of the line registered in the book when the document is issued. It accepts the same variables as the document, except {{tomo}}, {{folio}}, {{tomo_folio}} and {{qrcode}}, and is sent as plain text (maximum %d characters). If a variable has no value, the document is not issued. Empty: the text shown as an example is used."
+msgstr ""
+
+#: admin/templates/document-detail.php:217
+msgid "Orientation"
+msgstr ""
+
+#: admin/templates/document-detail.php:219
+msgid "Portrait"
+msgstr ""
+
+#: admin/templates/document-detail.php:220
+msgid "Landscape"
+msgstr ""
+
+#: admin/templates/document-detail.php:225
+msgid "Paper Format"
+msgstr ""
+
+#: admin/templates/document-detail.php:239
+msgid "Managed"
+msgstr ""
+
+#: admin/templates/document-detail.php:240
+msgid "Automatic"
+msgstr ""
+
+#: admin/templates/document-detail.php:245
+msgid "Unit"
+msgstr ""
+
+#: admin/templates/document-detail.php:256
+msgid "Width size"
+msgstr ""
+
+#: admin/templates/document-detail.php:261
+msgid "Height size"
+msgstr ""
+
+#: admin/templates/document-detail.php:267
+msgid "Is required"
+msgstr ""
+
+#: admin/templates/document-detail.php:272
+msgid "Is visible in documents page?"
+msgstr ""
+
+#: admin/templates/document-detail.php:276
+msgid "Priority"
+msgstr ""
+
+#: admin/templates/document-detail.php:278
+msgid "Order in My Account when several automatic documents are pending: 0 is the most urgent; with the same priority, the oldest first."
+msgstr ""
+
+#: admin/templates/document-detail.php:284
+msgid "When saving, all existing signatures will be deleted."
+msgstr ""
+
+#: admin/templates/document-detail.php:294
+msgid "Advanced"
+msgstr ""
+
+#: admin/templates/document-detail.php:296
+msgid "Additional fields"
+msgstr ""
+
+#: admin/templates/document-detail.php:298
+msgid "They are requested before generating the document and the answers are only used to fill it in (they are only stored while the document is partially signed). Use {{key}} in the document to print the answer and, in fields with options, {{key_list}} to print all the options with (✓) on the selected ones. If the key is left empty, it is created from the label."
+msgstr ""
+
+#: admin/templates/document-detail.php:318
+msgid "+ Add field"
+msgstr ""
+
+#: admin/templates/document-detail.php:331
+msgid "Add document"
+msgstr ""
+
+#: admin/templates/generate-modal.php:13
+msgid "Generate Document"
+msgstr ""
+
+#: admin/templates/generate-modal.php:23
+#: certification/admin/subject-panel.php:136
+msgid "Generate"
+msgstr ""
+
+#: admin/templates/generate-modal.php:25
+msgid "Exit"
+msgstr ""
+
+#: admin/templates/generate-modal.php:41
+msgid "Close"
+msgstr ""
+
+#: admin/templates/generate-modal.php:42
+msgid "Download"
+msgstr ""
+
+#: admin/templates/list-certificates.php:4
+#: includes/permissions.php:23
+#: public/functions.php:40
+#: public/templates/certificates.php:8
+msgid "Certificates"
+msgstr ""
+
+#: admin/templates/list-certificates.php:20
+#: admin/templates/list-template-certificates.php:20
+#: certification/admin/templates/signers.php:41
+msgid "Search"
+msgstr ""
+
+#: admin/templates/list-certificates.php:21
+#: admin/templates/list-template-certificates.php:21
+msgid "Search for Student"
+msgstr ""
+
+#: admin/templates/list-documents.php:8
+msgid "Add Document"
+msgstr ""
+
+#: admin/templates/list-template-certificates.php:4
+msgid "Templates of certification"
+msgstr ""
+
+#: admin/templates/permissions.php:14
+msgid "Choose a role and mark the certification permissions it has. Every change is saved in the log. The administrator always keeps this screen."
+msgstr ""
+
+#: admin/templates/permissions.php:18
+#: admin/templates/signing-roles.php:23
+msgid "Role"
+msgstr ""
+
+#: admin/templates/permissions.php:24
+msgid "Show"
+msgstr ""
+
+#: admin/templates/permissions.php:32
+msgid "Permission"
+msgstr ""
+
+#: admin/templates/permissions.php:32
+msgid "What it allows"
+msgstr ""
+
+#: admin/templates/permissions.php:44
+#: admin/templates/signing-roles.php:42
+#: admin/templates/template-certificates-detail.php:55
+#: certification/public/templates/create-document-automatic.php:55
+#: public/templates/select-nacionality.php:20
+msgid "Save"
+msgstr ""
+
+#: admin/templates/signing-roles.php:14
+msgid "Mark the roles that can sign documents. Each marked role appears in \"Document signers\" of every document, with its own variable for the template. When a document asks a role to sign, every user with that role receives their own document and signs it from their own account; the system signers of the document sign after them."
+msgstr ""
+
+#: admin/templates/signing-roles.php:25
+msgid "Users"
+msgstr ""
+
+#: admin/templates/signing-roles.php:26
+msgid "Variable for the template"
+msgstr ""
+
+#: admin/templates/signing-roles.php:41
+msgid "Unmarking a role does not change the signature requests already in progress: they keep their signers."
+msgstr ""
+
+#: admin/templates/template-certificates-detail.php:25
+msgid "Template content"
+msgstr ""
+
+#: admin/templates/variables.php:27
+msgid "— No method —"
+msgstr ""
+
+#: admin/templates/variables.php:27
+msgid "— Choose a method —"
+msgstr ""
+
+#. translators: %s: method
+#: admin/templates/variables.php:39
+#, php-format
+msgid "Unavailable: %s"
+msgstr ""
+
+#: admin/templates/variables.php:47
+msgid "Documents and emails"
+msgstr ""
+
+#: admin/templates/variables.php:49
+msgid "Emails"
+msgstr ""
+
+#: admin/templates/variables.php:55
+msgid "Add variable"
+msgstr ""
+
+#: admin/templates/variables.php:58
+#: certification/admin/templates/signer-inbox.php:30
+#: certification/admin/templates/signer-inbox.php:122
+#: certification/public/templates/documents-to-sign-batch.php:13
+msgid "Back to the list"
+msgstr ""
+
+#: admin/templates/variables.php:67
+msgid "Administrators only."
+msgstr ""
+
+#: admin/templates/variables.php:68
+msgid "The value of a variable is given by a method written in the code of an own plugin (EduSof or Squuad) and chosen from a list. No code is ever written or stored here. Changes are recorded in the log."
+msgstr ""
+
+#: admin/templates/variables.php:73
+msgid "Variables saved in the database: this is the list shown when writing a document template. Editing or deleting a variable only changes this list; it does not change how the variable is filled in when a document is generated."
+msgstr ""
+
+#: admin/templates/variables.php:79
+msgid "Variable"
+msgstr ""
+
+#: admin/templates/variables.php:81
+#: admin/templates/variables.php:202
+#: admin/templates/variables.php:228
+#: admin/templates/variables.php:275
+msgid "Offered in"
+msgstr ""
+
+#: admin/templates/variables.php:82
+#: admin/templates/variables.php:229
+msgid "Method"
+msgstr ""
+
+#: admin/templates/variables.php:88
+msgid "There are no variables in the database."
+msgstr ""
+
+#: admin/templates/variables.php:98
+#: admin/templates/variables.php:229
+msgid "No method (calculated by EduSystem as before)"
+msgstr ""
+
+#: admin/templates/variables.php:102
+msgid "In quarantine"
+msgstr ""
+
+#: admin/templates/variables.php:102
+msgid "Unavailable"
+msgstr ""
+
+#: admin/templates/variables.php:106
+msgid "View"
+msgstr ""
+
+#: admin/templates/variables.php:107
+#: admin/templates/variables.php:250
+msgid "Edit"
+msgstr ""
+
+#. translators: %s: variable
+#: admin/templates/variables.php:111
+#, php-format
+msgid "Delete %s from the list? Documents that already use it are not changed."
+msgstr ""
+
+#: admin/templates/variables.php:117
+msgid "Delete"
+msgstr ""
+
+#: admin/templates/variables.php:128
+msgid "Link variables without a method to the method with the same key"
+msgstr ""
+
+#: admin/templates/variables.php:131
+msgid "Own plugins that can provide methods"
+msgstr ""
+
+#: admin/templates/variables.php:133
+msgid "Only plugins whose details mention EduSof or Squuad appear here. Check the author and website before enabling one: only enabled plugins can provide methods."
+msgstr ""
+
+#: admin/templates/variables.php:141
+msgid "Enabled"
+msgstr ""
+
+#: admin/templates/variables.php:142
+msgid "Plugin"
+msgstr ""
+
+#: admin/templates/variables.php:143
+msgid "Author"
+msgstr ""
+
+#: admin/templates/variables.php:144
+msgid "Methods"
+msgstr ""
+
+#: admin/templates/variables.php:152
+#: admin/templates/variables.php:241
+msgid "inactive"
+msgstr ""
+
+#: admin/templates/variables.php:159
+msgid "Save plugins"
+msgstr ""
+
+#: admin/templates/variables.php:163
+msgid "Methods in quarantine"
+msgstr ""
+
+#: admin/templates/variables.php:164
+msgid "These methods stopped a request (memory, time or exit) and are not executed again until they are enabled. Fix the plugin before enabling them."
+msgstr ""
+
+#: admin/templates/variables.php:176
+msgid "Enable again"
+msgstr ""
+
+#: admin/templates/variables.php:194
+msgid "Lowercase letters, numbers and underscores. In the template it is written {{key}}."
+msgstr ""
+
+#: admin/templates/variables.php:212
+#: admin/templates/variables.php:285
+msgid "Method that gives the value"
+msgstr ""
+
+#: admin/templates/variables.php:215
+msgid "Methods of the enabled own plugins."
+msgstr ""
+
+#: admin/templates/variables.php:219
+msgid "Create variable"
+msgstr ""
+
+#: admin/templates/variables.php:224
+msgid "ID"
+msgstr ""
+
+#: admin/templates/variables.php:226
+#: admin/templates/variables.php:267
+msgid "How it is written"
+msgstr ""
+
+#: admin/templates/variables.php:230
+#: certification/admin/templates/signature-integrity.php:48
+msgid "Created"
+msgstr ""
+
+#: admin/templates/variables.php:232
+msgid "Documents that use it"
+msgstr ""
+
+#: admin/templates/variables.php:235
+msgid "No document template uses it."
+msgstr ""
+
+#: admin/templates/variables.php:263
+msgid "The key is what the code fills in when a document is generated: it cannot be changed here."
+msgstr ""
+
+#: admin/templates/variables.php:288
+msgid "Without a method, the value is calculated as before (EduSystem)."
+msgstr ""
+
+#: admin/templates/variables.php:292
+msgid "Save variable"
+msgstr ""
+
+#: admin/variables.php:135
+msgid "The variable does not exist."
+msgstr ""
+
+#: admin/variables.php:143
+msgid "Description, how it is written and where it is offered are required."
+msgstr ""
+
+#: admin/variables.php:149
+#: admin/variables.php:231
+msgid "Choose a method from the list."
+msgstr ""
+
+#: admin/variables.php:159
+msgid "Variable saved."
+msgstr ""
+
+#. translators: %s: variable, e.g. {{program}}
+#: admin/variables.php:184
+#, php-format
+msgid "Variable %s deleted from the list."
+msgstr ""
+
+#: admin/variables.php:223
+msgid "The key must start with a letter and contain only lowercase letters, numbers and underscores."
+msgstr ""
+
+#: admin/variables.php:225
+msgid "There is already a variable with that key."
+msgstr ""
+
+#: admin/variables.php:227
+msgid "That key is a general variable of WP Certificates."
+msgstr ""
+
+#: admin/variables.php:229
+msgid "Description and where it is offered are required."
+msgstr ""
+
+#: admin/variables.php:249
+msgid "Variable created."
+msgstr ""
+
+#. translators: %d: number of variables
+#: admin/variables.php:264
+#, php-format
+msgid "%d variables linked to the method with the same key."
+msgstr ""
+
+#: admin/variables.php:282
+msgid "Plugins saved."
+msgstr ""
+
+#. translators: %s: method identifier
+#: admin/variables.php:298
+#, php-format
+msgid "Method %s enabled again."
+msgstr ""
+
+#. translators: %d: number of the signer in the document
+#: certification/admin/document-preview.php:77
+#, php-format
+msgid "Signer %d (example)"
+msgstr ""
+
+#: certification/admin/document-preview.php:78
+#: certification/admin/document-preview.php:237
+msgid "Position (example)"
+msgstr ""
+
+#: certification/admin/document-preview.php:151
+msgid "Example program"
+msgstr ""
+
+#: certification/admin/document-preview.php:152
+msgid "Example career - Example mention"
+msgstr ""
+
+#: certification/admin/document-preview.php:179
+msgid "Example document 1"
+msgstr ""
+
+#: certification/admin/document-preview.php:179
+msgid "Example document 2"
+msgstr ""
+
+#: certification/admin/document-preview.php:213
+msgid "Example requirement 1"
+msgstr ""
+
+#: certification/admin/document-preview.php:213
+msgid "Example requirement 2"
+msgstr ""
+
+#. translators: %s: label of the additional field
+#: certification/admin/document-preview.php:224
+#, php-format
+msgid "%s (example)"
+msgstr ""
+
+#: certification/admin/document-preview.php:236
+#: certification/admin/document-preview.php:238
+msgid "Signer (example)"
+msgstr ""
+
+#: certification/admin/document-signing.php:72
+#: certification/admin/document-signing.php:365
+#: certification/admin/document-signing.php:557
+msgid "You do not have permission to configure document signers."
+msgstr ""
+
+#: certification/admin/document-signing.php:179
+#: includes/book.php:141
+msgid "The registry book did not assign a volume and folio (connection or book error). The document was not issued; try again."
+msgstr ""
+
+#: certification/admin/document-signing.php:190
+#, php-format
+msgid "The registry book could not void the volume and folio: %s"
+msgstr ""
+
+#: certification/admin/document-signing.php:219
+#, php-format
+msgid "Declined, but the document could not be issued again: %s"
+msgstr ""
+
+#. translators: 1: volume, 2: folio
+#: certification/admin/document-signing.php:225
+#, php-format
+msgid "Declined and issued again with volume %1$d, folio %2$d. The signers will find it in \"Documents to sign\"."
+msgstr ""
+
+#: certification/admin/document-signing.php:247
+#: certification/includes/signers.php:1974
+#: certification/includes/signers.php:1984
+msgid "This document can no longer be declined. Please reload the page."
+msgstr ""
+
+#: certification/admin/document-signing.php:249
+#: certification/admin/signer-inbox.php:102
+msgid "To decline a document you must write the reason and accept that the action cannot be reverted."
+msgstr ""
+
+#: certification/admin/document-signing.php:251
+#: certification/admin/document-signing.php:280
+msgid "Choose whether to keep or void the volume and folio."
+msgstr ""
+
+#: certification/admin/document-signing.php:278
+msgid "There is no pending decision for this document. Please reload the page."
+msgstr ""
+
+#: certification/admin/document-signing.php:282
+msgid "Write why the volume and folio are voided."
+msgstr ""
+
+#: certification/admin/document-signing.php:347
+msgid "Missing documents commitment letter"
+msgstr ""
+
+#: certification/admin/document-signing.php:348
+msgid "This site uses the old fixed letter. Convert it into an automatic document: it will be editable here, signed with the new signature system (frozen content, consent, \"Documents to sign\"). Like every automatic document, it is shown while the student has not signed it. Letters already signed keep their validity and are not asked again."
+msgstr ""
+
+#: certification/admin/document-signing.php:352
+msgid "Convert the letter into an automatic document"
+msgstr ""
+
+#: certification/admin/document-signing.php:368
+msgid "The letter was already converted or is not used on this site."
+msgstr ""
+
+#: certification/admin/document-signing.php:401
+msgid "The letter could not be converted. Please try again."
+msgstr ""
+
+#: certification/admin/document-signing.php:419
+msgid "The letter is now an automatic document. Review its text below; like every automatic document, it is shown while the student has not signed it."
+msgstr ""
+
+#: certification/admin/document-signing.php:493
+#, php-format
+msgid "[%s] Security change: documents that require a signature"
+msgstr ""
+
+#: certification/admin/document-signing.php:494
+msgid "For security, documents can no longer be signed with signature images uploaded to \"Users and signatures\". Only the responsible person can sign, from their own account: nobody can sign on behalf of someone else."
+msgstr ""
+
+#: certification/admin/document-signing.php:497
+#: certification/admin/document-signing.php:503
+#: certification/includes/signers.php:414
+#: certification/includes/signers.php:2062
+#, php-format
+msgid "Hello %s,"
+msgstr ""
+
+#: certification/admin/document-signing.php:498
+msgid "These documents require a signature and are disabled until the administration configures who signs them:"
+msgstr ""
+
+#: certification/admin/document-signing.php:499
+msgid "If you are responsible for signing them, the administration will invite you to register your own signature. Documents already signed keep their validity."
+msgstr ""
+
+#: certification/admin/document-signing.php:504
+msgid "These documents require a signature and are disabled until you configure who signs them:"
+msgstr ""
+
+#: certification/admin/document-signing.php:505
+msgid "What to do: 1) in Users and signatures, invite the responsible persons to register their own signature; 2) in Certification > Documents, open each document and choose its signers in \"Document signers\"; 3) from the student file, use \"Issue for signature\". Documents already signed keep their validity."
+msgstr ""
+
+#: certification/admin/document-signing.php:536
+msgid "Documents that require a signature are disabled until you configure who signs them"
+msgstr ""
+
+#: certification/admin/document-signing.php:537
+msgid "For security, nobody can sign on behalf of someone else: signature images are no longer used. Choose the signers of each document; they will sign from their own account."
+msgstr ""
+
+#: certification/admin/document-signing.php:546
+msgid "Hide this notice"
+msgstr ""
+
+#: certification/admin/signature-integrity.php:30
+#: certification/admin/signature-integrity.php:31
+#: certification/admin/templates/signature-integrity.php:20
+#: includes/permissions.php:32
+msgid "Signature integrity"
+msgstr ""
+
+#: certification/admin/signature-integrity.php:43
+#: certification/admin/signature-integrity.php:103
+msgid "You do not have permission to manage signature integrity."
+msgstr ""
+
+#: certification/admin/signer-inbox.php:25
+#: certification/admin/templates/signer-inbox.php:16
+#: certification/public/templates/documents-to-sign.php:15
+msgid "Documents to sign"
+msgstr ""
+
+#: certification/admin/signer-inbox.php:48
+#, php-format
+msgid "You have %d document waiting for your signature."
+msgid_plural "You have %d documents waiting for your signature."
+msgstr[0] ""
+msgstr[1] ""
+
+#: certification/admin/signer-inbox.php:50
+#: certification/admin/templates/signer-inbox.php:215
+msgid "Review and sign"
+msgstr ""
+
+#: certification/admin/signer-inbox.php:60
+#: certification/admin/signer-inbox.php:93
+#: certification/admin/signer-inbox.php:134
+#: certification/admin/signer-inbox.php:152
+#: certification/admin/signer-inbox.php:169
+#: certification/includes/signers.php:1165
+#: certification/includes/signers.php:1173
+#: certification/includes/signers.php:1301
+#: certification/includes/signers.php:1309
+#: certification/includes/signers.php:1533
+#: certification/includes/signers.php:1540
+#: certification/public/functions/checkout/cart-signatures.php:29
+#: certification/public/functions/documents-signature.php:52
+#: certification/public/functions/documents-signature.php:72
+msgid "You are not allowed to sign this document."
+msgstr ""
+
+#: certification/admin/signer-inbox.php:96
+#: certification/includes/signers.php:1168
+#: certification/includes/signers.php:1304
+#: certification/includes/signers.php:1389
+#: certification/includes/signers.php:1536
+#: certification/public/functions/documents-signature.php:41
+msgid "Documents cannot be signed from a switched session. Each person must sign from their own account."
+msgstr ""
+
+#: certification/admin/signer-inbox.php:99
+#: certification/includes/signers.php:1176
+#: certification/includes/signers.php:1543
+#: certification/public/functions/documents-signature.php:75
+msgid "This document no longer accepts signatures. Please reload the page."
+msgstr ""
+
+#: certification/admin/signer-inbox.php:124
+msgid "The document was declined. The administration will decide how to issue it again."
+msgstr ""
+
+#: certification/admin/signer-inbox.php:125
+msgid "The document was declined. The student was notified."
+msgstr ""
+
+#: certification/admin/signers.php:35
+#: certification/admin/signers.php:36
+#: certification/admin/templates/signers.php:28
+#: includes/permissions.php:26
+msgid "Users and signatures"
+msgstr ""
+
+#: certification/admin/signers.php:43
+#: certification/admin/templates/signers.php:85
+msgid "Signers"
+msgstr ""
+
+#: certification/admin/signers.php:49
+#: certification/admin/templates/my-signature.php:8
+#: certification/admin/templates/signer-inbox.php:25
+msgid "My signature"
+msgstr ""
+
+#: certification/admin/signers.php:72
+msgid "You do not have permission to manage signers."
+msgstr ""
+
+#: certification/admin/signers.php:89
+msgid "The user does not exist."
+msgstr ""
+
+#: certification/admin/signers.php:115
+#: certification/admin/signers.php:148
+msgid "The signer does not exist."
+msgstr ""
+
+#: certification/admin/signers.php:135
+msgid "Invitation revoked."
+msgstr ""
+
+#: certification/admin/signers.php:135
+msgid "The invitation was not pending."
+msgstr ""
+
+#: certification/admin/signers.php:155
+msgid "Signer suspended."
+msgstr ""
+
+#: certification/admin/signers.php:155
+msgid "Signer reactivated."
+msgstr ""
+
+#: certification/admin/subject-panel.php:72
+msgid "Signed documents"
+msgstr ""
+
+#: certification/admin/subject-panel.php:77
+#: certification/admin/subject-panel.php:93
+msgid "Signed by"
+msgstr ""
+
+#: certification/admin/subject-panel.php:78
+#: certification/admin/subject-panel.php:94
+msgid "Date"
+msgstr ""
+
+#: certification/admin/subject-panel.php:79
+#: certification/admin/subject-panel.php:95
+#: certification/admin/templates/signature-integrity.php:80
+#: certification/admin/templates/signature-integrity.php:119
+msgid "Integrity"
+msgstr ""
+
+#: certification/admin/subject-panel.php:80
+#: certification/admin/subject-panel.php:96
+#: certification/admin/templates/signature-integrity.php:101
+msgid "Context"
+msgstr ""
+
+#: certification/admin/subject-panel.php:86
+msgid "System signer"
+msgstr ""
+
+#: certification/admin/subject-panel.php:101
+msgid "There are no signed files"
+msgstr ""
+
+#: certification/admin/subject-panel.php:122
+msgid "The document will be generated now with the current data and frozen; the signers will sign it from their panel. Continue?"
+msgstr ""
+
+#: certification/admin/subject-panel.php:127
+#: includes/permissions.php:31
+msgid "Issue for signature"
+msgstr ""
+
+#: certification/admin/subject-panel.php:130
+msgid "Requires signatures: configure its signers to issue it for signature."
+msgstr ""
+
+#: certification/admin/subject-panel.php:132
+msgid "Configure signers"
+msgstr ""
+
+#: certification/admin/templates/document-issued.php:11
+#: certification/admin/templates/document-issued.php:12
+msgid "Waiting for signatures"
+msgstr ""
+
+#: certification/admin/templates/document-issued.php:13
+msgid "Signed; the final PDF is pending"
+msgstr ""
+
+#: certification/admin/templates/document-issued.php:14
+msgid "Completed"
+msgstr ""
+
+#: certification/admin/templates/document-issued.php:15
+msgid "Declined"
+msgstr ""
+
+#: certification/admin/templates/document-issued.php:19
+msgid "Documents issued for signature"
+msgstr ""
+
+#: certification/admin/templates/document-issued.php:27
+msgid "Issued"
+msgstr ""
+
+#: certification/admin/templates/document-issued.php:28
+#: certification/admin/templates/signature-integrity.php:80
+msgid "Signatures"
+msgstr ""
+
+#: certification/admin/templates/document-issued.php:29
+msgid "Volume / Folio"
+msgstr ""
+
+#: certification/admin/templates/document-issued.php:36
+#, php-format
+msgid "round %d"
+msgstr ""
+
+#: certification/admin/templates/document-issued.php:41
+#: certification/admin/templates/document-issued.php:61
+#, php-format
+msgid "Volume %1$d · Folio %2$d"
+msgstr ""
+
+#: certification/admin/templates/document-issued.php:42
+msgid "Voided in the book"
+msgstr ""
+
+#: certification/admin/templates/document-issued.php:48
+#: certification/admin/templates/signer-inbox.php:144
+msgid "View document"
+msgstr ""
+
+#: certification/admin/templates/document-issued.php:53
+#: certification/admin/templates/document-issued.php:66
+#: certification/admin/templates/signer-inbox.php:60
+msgid "Decline"
+msgstr ""
+
+#: certification/admin/templates/document-issued.php:58
+#: certification/admin/templates/signer-inbox.php:55
+msgid "This action cannot be reverted."
+msgstr ""
+
+#: certification/admin/templates/document-issued.php:58
+msgid "The signatures of this document will be revoked."
+msgstr ""
+
+#: certification/admin/templates/document-issued.php:59
+#: certification/admin/templates/signer-inbox.php:57
+msgid "Reason why it is declined"
+msgstr ""
+
+#: certification/admin/templates/document-issued.php:62
+msgid "Revoke the signatures and keep the same volume and folio (the document is issued again with them)"
+msgstr ""
+
+#: certification/admin/templates/document-issued.php:63
+msgid "Revoke the signatures and void the volume and folio in the book (the document is issued again with a new one)"
+msgstr ""
+
+#: certification/admin/templates/document-issued.php:65
+#: certification/admin/templates/signer-inbox.php:59
+msgid "I understand that declining is final and cannot be reverted."
+msgstr ""
+
+#: certification/admin/templates/document-issued.php:74
+msgid "Declined: decide what to do with the volume and folio."
+msgstr ""
+
+#: certification/admin/templates/document-issued.php:75
+msgid "Issue again with the same volume and folio"
+msgstr ""
+
+#: certification/admin/templates/document-issued.php:76
+msgid "Void the volume and folio in the book and issue again with a new one"
+msgstr ""
+
+#: certification/admin/templates/document-issued.php:77
+msgid "Reason for voiding (required to void)"
+msgstr ""
+
+#: certification/admin/templates/document-issued.php:78
+msgid "Apply"
+msgstr ""
+
+#: certification/admin/templates/document-preview.php:10
+msgid "As the final PDF of the signature request (A4, portrait)."
+msgstr ""
+
+#: certification/admin/templates/document-preview.php:11
+msgid "As the document issued for signature, with the format of the document."
+msgstr ""
+
+#: certification/admin/templates/document-preview.php:12
+msgid "As \"Generate\" in the student file, with the format of the document."
+msgstr ""
+
+#: certification/admin/templates/document-preview.php:15
+#: certification/admin/templates/signer-inbox.php:32
+#: certification/admin/templates/signer-inbox.php:75
+#: certification/public/templates/create-document-automatic.php:40
+#: certification/public/templates/signature-final-pdf.php:22
+#, php-format
+msgid "Signature request #%1$d, round %2$d · Content fingerprint (SHA-256): %3$s"
+msgstr ""
+
+#: certification/admin/templates/document-preview.php:22
+msgid "Update preview"
+msgstr ""
+
+#: certification/admin/templates/document-preview.php:27
+msgid "All the variables show example data, never real data. It shows the saved version: save your changes to see them."
+msgstr ""
+
+#: certification/admin/templates/document-preview.php:30
+msgid "This document asks for signature images: it can no longer be generated this way. Configure its signers so that each person signs from their own account."
+msgstr ""
+
+#: certification/admin/templates/document-preview.php:34
+msgid "These variables do not exist and will appear as text in the document:"
+msgstr ""
+
+#: certification/admin/templates/document-preview.php:38
+msgid "Preview of the document in PDF"
+msgstr ""
+
+#: certification/admin/templates/document-preview.php:54
+msgid "Generating the PDF…"
+msgstr ""
+
+#: certification/admin/templates/document-preview.php:55
+msgid "PDF ready."
+msgstr ""
+
+#: certification/admin/templates/document-preview.php:56
+msgid "The preview could not be generated."
+msgstr ""
+
+#: certification/admin/templates/document-signing.php:13
+msgid "Click to copy"
+msgstr ""
+
+#: certification/admin/templates/document-signing.php:24
+#: certification/admin/templates/document-signing.php:54
+msgid "Order"
+msgstr ""
+
+#: certification/admin/templates/document-signing.php:32
+#: includes/permissions.php:30
+msgid "Document signers"
+msgstr ""
+
+#: certification/admin/templates/document-signing.php:33
+msgid "Who signs this document and in which order. First the roles: every user with a marked role receives their own document and signs it from their own account. Then the registered signers of the system sign every one of those documents. The document is valid when all the signatures are done. Changes apply to new signature requests; requests already in progress keep their signers."
+msgstr ""
+
+#: certification/admin/templates/document-signing.php:36
+msgid "Issued document:"
+msgstr ""
+
+#: certification/admin/templates/document-signing.php:36
+msgid "only the system signers sign it (the roles do not). With at least one signer, \"Generate\" in the student file becomes \"Issue for signature\"."
+msgstr ""
+
+#: certification/admin/templates/document-signing.php:43
+msgid "Not configured yet: by default the users with the student role sign this document, if that role is active in \"Signing roles\"."
+msgstr ""
+
+#: certification/admin/templates/document-signing.php:44
+msgid "Not configured yet: by default this document does not ask for user signatures."
+msgstr ""
+
+#: certification/admin/templates/document-signing.php:51
+msgid "This document asks for signatures"
+msgstr ""
+
+#: certification/admin/templates/document-signing.php:54
+#: certification/includes/signers.php:200
+msgid "Signer"
+msgstr ""
+
+#: certification/admin/templates/document-signing.php:54
+msgid "Variables for the template"
+msgstr ""
+
+#: certification/admin/templates/document-signing.php:57
+msgid "Not in the template: it goes in {{signature_section}}."
+msgstr ""
+
+#. translators: %s: name of the role
+#: certification/admin/templates/document-signing.php:66
+#, php-format
+msgid "Role: %s"
+msgstr ""
+
+#. translators: %s: name of the role
+#: certification/admin/templates/document-signing.php:66
+msgid "Every user with this role receives their own document and signs it from their own account."
+msgstr ""
+
+#: certification/admin/templates/document-signing.php:71
+msgid "No role can sign yet: mark them in Certification > Signing roles."
+msgstr ""
+
+#: certification/admin/templates/document-signing.php:77
+msgid "has not registered their signature yet"
+msgstr ""
+
+#: certification/admin/templates/document-signing.php:82
+msgid "Not in the template: it goes in the signatures block at the end."
+msgstr ""
+
+#: certification/admin/templates/document-signing.php:88
+#, php-format
+msgid "This document asked these roles, which are no longer active in \"Signing roles\": %s. Requests in progress keep them; when you save, they are removed."
+msgstr ""
+
+#: certification/admin/templates/document-signing.php:91
+msgid "How to place the signatures in the template"
+msgstr ""
+
+#: certification/admin/templates/document-signing.php:92
+msgid "The signatures of the roles that are not placed separately (as before)."
+msgstr ""
+
+#: certification/admin/templates/document-signing.php:93
+msgid "Each signer separately: use the variables of their row. Signers not placed in the template go in {{signature_section}} (roles) or in a signatures block at the end (system signers)."
+msgstr ""
+
+#: certification/admin/templates/document-signing.php:94
+msgid "Template rules"
+msgstr ""
+
+#: certification/admin/templates/document-signing.php:94
+msgid "the text between the marks is shown only if the rule is met; with ^ , only if it is not:"
+msgstr ""
+
+#: certification/admin/templates/document-signing.php:96
+msgid "the student signs this document"
+msgstr ""
+
+#: certification/admin/templates/document-signing.php:98
+msgid "The parent no longer signs: in old templates {{signature_parent}} is empty and {{#requires_parent_signature}} and {{#student_is_own_parent}} are never met."
+msgstr ""
+
+#: certification/admin/templates/document-signing.php:100
+msgid "PDF layout"
+msgstr ""
+
+#: certification/admin/templates/document-signing.php:101
+msgid "Page break: what follows starts on a new page. In automatic documents, lines, paragraphs and table rows are never cut between pages; use it to decide where a section starts."
+msgstr ""
+
+#: certification/admin/templates/document-signing.php:104
+msgid "There are no registered signers yet. Invite them from Certification > Users and signatures."
+msgstr ""
+
+#: certification/admin/templates/document-signing.php:106
+msgid "Registered signers are saved in the configuration and will be required once their \"Documents to sign\" panel is active."
+msgstr ""
+
+#: certification/admin/templates/document-signing.php:108
+msgid "Save document signers"
+msgstr ""
+
+#: certification/admin/templates/document-signing.php:130
+msgid "✓ In the template"
+msgstr ""
+
+#: certification/admin/templates/my-signature.php:15
+#: certification/includes/signers.php:515
+msgid "A signature cannot be registered from a switched session."
+msgstr ""
+
+#: certification/admin/templates/my-signature.php:17
+msgid "You are not a signer of this system."
+msgstr ""
+
+#: certification/admin/templates/my-signature.php:19
+msgid "Your signer account is suspended. Contact the administration."
+msgstr ""
+
+#: certification/admin/templates/my-signature.php:23
+#, php-format
+msgid "Charge: %s"
+msgstr ""
+
+#: certification/admin/templates/my-signature.php:27
+msgid "Your registered signature"
+msgstr ""
+
+#: certification/admin/templates/my-signature.php:29
+#, php-format
+msgid "Registered on %s. Changing it does not modify documents you already signed."
+msgstr ""
+
+#: certification/admin/templates/my-signature.php:33
+msgid "Replace your signature"
+msgstr ""
+
+#: certification/admin/templates/my-signature.php:33
+#: certification/public/templates/documents-to-sign-batch.php:42
+msgid "Draw your signature"
+msgstr ""
+
+#: certification/admin/templates/my-signature.php:39
+#: certification/includes/html-signatures.php:68
+#: certification/public/templates/documents-to-sign-batch.php:45
+msgid "Clear"
+msgstr ""
+
+#: certification/admin/templates/my-signature.php:41
+msgid "Confirm your password"
+msgstr ""
+
+#: certification/admin/templates/my-signature.php:43
+msgid "Replace my signature"
+msgstr ""
+
+#: certification/admin/templates/my-signature.php:43
+msgid "Register my signature"
+msgstr ""
+
+#: certification/admin/templates/my-signature.php:56
+#: certification/includes/signers.php:536
+msgid "Draw your signature in the box before saving."
+msgstr ""
+
+#: certification/admin/templates/signature-integrity.php:21
+msgid "Evidence of the signatures: every new signature is sealed with a fingerprint chained to the previous one, so any later change or deletion in the database can be detected."
+msgstr ""
+
+#: certification/admin/templates/signature-integrity.php:24
+msgid "Verification completed."
+msgstr ""
+
+#: certification/admin/templates/signature-integrity.php:26
+msgid "A new key was created. New signatures use it; previous signatures are still verified with their own key."
+msgstr ""
+
+#: certification/admin/templates/signature-integrity.php:30
+msgid "The database has not been updated yet. An administrator must open the admin once so the update runs; until then signatures are saved without fingerprint."
+msgstr ""
+
+#: certification/admin/templates/signature-integrity.php:33
+msgid "Signing key"
+msgstr ""
+
+#: certification/admin/templates/signature-integrity.php:37
+msgid "Active key"
+msgstr ""
+
+#: certification/admin/templates/signature-integrity.php:41
+msgid "Level"
+msgstr ""
+
+#: certification/admin/templates/signature-integrity.php:43
+msgid "Reinforced: key defined in wp-config.php"
+msgstr ""
+
+#: certification/admin/templates/signature-integrity.php:44
+msgid "Automatic: key generated by the plugin and stored in the database"
+msgstr ""
+
+#: certification/admin/templates/signature-integrity.php:53
+msgid "Keys kept for verification"
+msgstr ""
+
+#: certification/admin/templates/signature-integrity.php:58
+msgid "The key is never shown. Rotate it if you suspect someone could read the database: new signatures will use a new key and previous ones keep being verified with theirs."
+msgstr ""
+
+#: certification/admin/templates/signature-integrity.php:60
+msgid "This site signs with the key of wp-config.php; rotating here only affects the automatic key."
+msgstr ""
+
+#: certification/admin/templates/signature-integrity.php:62
+msgid "Rotate key"
+msgstr ""
+
+#: certification/admin/templates/signature-integrity.php:62
+msgid "Create a new signing key? New signatures will use it."
+msgstr ""
+
+#: certification/admin/templates/signature-integrity.php:64
+msgid "Chain verification"
+msgstr ""
+
+#: certification/admin/templates/signature-integrity.php:66
+msgid "The chain has not been verified yet."
+msgstr ""
+
+#. translators: 1: date, 2: user
+#: certification/admin/templates/signature-integrity.php:71
+#, php-format
+msgid "Last verification: %1$s by %2$s."
+msgstr ""
+
+#: certification/admin/templates/signature-integrity.php:76
+msgid "The head of the chain does not match its last link: signatures may have been deleted."
+msgstr ""
+
+#. translators: 1: active signatures, 2: revoked signatures, 3: last link
+#: certification/admin/templates/signature-integrity.php:94
+#, php-format
+msgid "%1$d active signatures, %2$d revoked (kept after a rejection), last link of the chain: %3$d."
+msgstr ""
+
+#: certification/admin/templates/signature-integrity.php:104
+#: certification/admin/templates/signature-integrity.php:143
+#: certification/includes/signature-integrity.php:500
+msgid "Automatic (typed name)"
+msgstr ""
+
+#: certification/admin/templates/signature-integrity.php:105
+msgid "Signed from the account of another person"
+msgstr ""
+
+#: certification/admin/templates/signature-integrity.php:106
+msgid "Switched session"
+msgstr ""
+
+#: certification/admin/templates/signature-integrity.php:107
+#: certification/includes/signature-integrity.php:514
+msgid "Signed on another site"
+msgstr ""
+
+#: certification/admin/templates/signature-integrity.php:112
+msgid "Signatures to review"
+msgstr ""
+
+#: certification/admin/templates/signature-integrity.php:115
+#: certification/admin/templates/signers.php:94
+#: certification/admin/templates/signers.php:137
+msgid "Signature"
+msgstr ""
+
+#: certification/admin/templates/signature-integrity.php:118
+msgid "Document owner"
+msgstr ""
+
+#: certification/admin/templates/signature-integrity.php:124
+msgid "revoked"
+msgstr ""
+
+#: certification/admin/templates/signature-integrity.php:135
+msgid "Verify now"
+msgstr ""
+
+#: certification/admin/templates/signature-integrity.php:136
+msgid "Also available from the command line: wp squuad-cert firmas verificar"
+msgstr ""
+
+#: certification/admin/templates/signature-integrity.php:138
+msgid "Legacy signatures (before the fingerprint)"
+msgstr ""
+
+#: certification/admin/templates/signature-integrity.php:139
+msgid "Signatures saved by the previous system (users_signatures) have no fingerprint and are only read here. Nothing is changed: this is a read-only diagnosis so each institution can decide what to do with them."
+msgstr ""
+
+#: certification/admin/templates/signature-integrity.php:142
+msgid "Legacy signatures"
+msgstr ""
+
+#: certification/admin/templates/signature-integrity.php:144
+msgid "User no longer exists"
+msgstr ""
+
+#: certification/admin/templates/signature-integrity.php:147
+msgid "Export CSV"
+msgstr ""
+
+#: certification/admin/templates/signer-inbox.php:24
+#: certification/includes/signers.php:1192
+#: certification/includes/signers.php:1312
+msgid "Register your signature before signing documents."
+msgstr ""
+
+#: certification/admin/templates/signer-inbox.php:42
+msgid "Your registered signature will be applied to this document:"
+msgstr ""
+
+#: certification/admin/templates/signer-inbox.php:46
+msgid "Sign this document"
+msgstr ""
+
+#: certification/admin/templates/signer-inbox.php:50
+msgid "Decline this document"
+msgstr ""
+
+#: certification/admin/templates/signer-inbox.php:56
+msgid "When you decline this document, the signature of the student linked to it (if any) will be revoked, and the document can no longer be approved or set back to pending. The user will have to send or sign a new document."
+msgstr ""
+
+#: certification/admin/templates/signer-inbox.php:64
+#: certification/public/templates/signature-final-pdf.php:11
+msgid "Generating the final PDF…"
+msgstr ""
+
+#: certification/admin/templates/signer-inbox.php:111
+#: certification/public/templates/signature-final-pdf.php:33
+msgid "The final PDF was generated and saved."
+msgstr ""
+
+#: certification/admin/templates/signer-inbox.php:112
+#: certification/admin/templates/signer-inbox.php:114
+#: certification/public/templates/signature-final-pdf.php:34
+msgid "The final PDF could not be saved."
+msgstr ""
+
+#: certification/admin/templates/signer-inbox.php:119
+msgid "Status:"
+msgstr ""
+
+#: certification/admin/templates/signer-inbox.php:125
+#: certification/admin/templates/signer-inbox.php:221
+#: certification/public/templates/documents-to-sign-batch.php:16
+#: certification/public/templates/documents-to-sign.php:53
+msgid "Sign selected documents"
+msgstr ""
+
+#: certification/admin/templates/signer-inbox.php:126
+#: certification/public/templates/documents-to-sign-batch.php:17
+msgid "Review the list. Each document keeps its own signature and its own record; any document that changed or no longer waits for your signature is skipped."
+msgstr ""
+
+#: certification/admin/templates/signer-inbox.php:131
+#: certification/admin/templates/signer-inbox.php:176
+#: certification/admin/templates/signer-inbox.php:202
+#: certification/admin/templates/signer-inbox.php:239
+#: certification/public/templates/documents-to-sign-batch.php:22
+#: certification/public/templates/documents-to-sign-batch.php:30
+#: certification/public/templates/documents-to-sign-batch.php:87
+msgid "Student"
+msgstr ""
+
+#: certification/admin/templates/signer-inbox.php:132
+#: certification/admin/templates/signer-inbox.php:203
+msgid "Round"
+msgstr ""
+
+#: certification/admin/templates/signer-inbox.php:133
+#: certification/public/templates/documents-to-sign-batch.php:23
+#: certification/public/templates/documents-to-sign-batch.php:31
+msgid "Content fingerprint"
+msgstr ""
+
+#: certification/admin/templates/signer-inbox.php:154
+msgid "Your registered signature will be applied to each document:"
+msgstr ""
+
+#: certification/admin/templates/signer-inbox.php:159
+#: certification/public/templates/documents-to-sign-batch.php:48
+msgid "Confirm with your password"
+msgstr ""
+
+#. translators: %d: number of documents
+#: certification/admin/templates/signer-inbox.php:163
+#: certification/public/templates/documents-to-sign-batch.php:53
+#, php-format
+msgid "Sign %d document"
+msgid_plural "Sign %d documents"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %s: expiry date and time
+#: certification/admin/templates/signer-inbox.php:168
+#: certification/public/templates/documents-to-sign-batch.php:58
+#, php-format
+msgid "This selection expires on %s."
+msgstr ""
+
+#: certification/admin/templates/signer-inbox.php:173
+#: certification/public/templates/documents-to-sign-batch.php:84
+msgid "Batch result"
+msgstr ""
+
+#: certification/admin/templates/signer-inbox.php:176
+#: certification/public/templates/documents-to-sign-batch.php:87
+msgid "Result"
+msgstr ""
+
+#: certification/admin/templates/signer-inbox.php:180
+#: certification/includes/signers.php:1585
+#: certification/public/templates/documents-to-sign-batch.php:91
+msgid "Signed. All signatures are complete."
+msgstr ""
+
+#: certification/admin/templates/signer-inbox.php:180
+#: certification/includes/signers.php:1586
+#: certification/public/templates/documents-to-sign-batch.php:91
+msgid "Signed. Waiting for the remaining signatures."
+msgstr ""
+
+#: certification/admin/templates/signer-inbox.php:184
+#: certification/public/templates/documents-to-sign-batch.php:95
+msgid "Skipped:"
+msgstr ""
+
+#: certification/admin/templates/signer-inbox.php:189
+#: certification/includes/signers.php:1386
+#: certification/public/templates/documents-to-sign-batch.php:105
+msgid "This batch expired. Select the documents again."
+msgstr ""
+
+#: certification/admin/templates/signer-inbox.php:189
+#: certification/includes/signers.php:1382
+#: certification/includes/signers.php:1411
+#: certification/public/templates/documents-to-sign-batch.php:105
+msgid "This batch was already processed."
+msgstr ""
+
+#: certification/admin/templates/signer-inbox.php:193
+msgid "There are no documents waiting for your signature."
+msgstr ""
+
+#: certification/admin/templates/signer-inbox.php:200
+msgid "Select all"
+msgstr ""
+
+#: certification/admin/templates/signer-inbox.php:204
+msgid "Waiting since"
+msgstr ""
+
+#. translators: %d: maximum number of documents per batch
+#: certification/admin/templates/signer-inbox.php:224
+#, php-format
+msgid "Up to %d documents at once. You will review the list and confirm with your password."
+msgstr ""
+
+#: certification/admin/templates/signer-inbox.php:237
+msgid "Signed documents waiting for the final PDF"
+msgstr ""
+
+#: certification/admin/templates/signer-inbox.php:245
+#: certification/public/templates/documents-to-sign.php:45
+msgid "Generate PDF"
+msgstr ""
+
+#: certification/admin/templates/signers.php:21
+msgid "Invited"
+msgstr ""
+
+#: certification/admin/templates/signers.php:23
+msgid "Suspended"
+msgstr ""
+
+#: certification/admin/templates/signers.php:24
+msgid "Retired"
+msgstr ""
+
+#: certification/admin/templates/signers.php:29
+msgid "Signers of the system (directors, coordinators...). Each one registers their own signature from their account after an invitation: nobody can upload the signature of another person. Students and parents sign their own documents and do not need an invitation."
+msgstr ""
+
+#: certification/admin/templates/signers.php:36
+msgid "Invite a signer"
+msgstr ""
+
+#: certification/admin/templates/signers.php:39
+#: certification/admin/templates/signers.php:40
+msgid "Search by name or email"
+msgstr ""
+
+#: certification/admin/templates/signers.php:47
+#: certification/admin/templates/signers.php:77
+#: certification/public/functions/signer-registration.php:91
+msgid "Email"
+msgstr ""
+
+#: certification/admin/templates/signers.php:47
+#: certification/admin/templates/signers.php:78
+#: certification/admin/templates/signers.php:92
+#: certification/admin/templates/signers.php:137
+msgid "Charge"
+msgstr ""
+
+#: certification/admin/templates/signers.php:58
+msgid "Charge (e.g. Academic Director)"
+msgstr ""
+
+#: certification/admin/templates/signers.php:59
+msgid "Invite"
+msgstr ""
+
+#: certification/admin/templates/signers.php:67
+msgid "No user with that name or email (students and parents are not listed). You can invite the person to register:"
+msgstr ""
+
+#: certification/admin/templates/signers.php:72
+msgid "Invite someone without an account"
+msgstr ""
+
+#: certification/admin/templates/signers.php:76
+msgid "Full name"
+msgstr ""
+
+#: certification/admin/templates/signers.php:79
+msgid "Send invitation to register"
+msgstr ""
+
+#: certification/admin/templates/signers.php:81
+msgid "An account with the Signer role is created (it can only access its own signature and the documents requested from it) and the person receives an email to create a password and draw the signature. The link expires in 72 hours."
+msgstr ""
+
+#: certification/admin/templates/signers.php:87
+msgid "There are no signers yet."
+msgstr ""
+
+#: certification/admin/templates/signers.php:95
+msgid "Invitation"
+msgstr ""
+
+#: certification/admin/templates/signers.php:104
+msgid "Registered by the user"
+msgstr ""
+
+#: certification/admin/templates/signers.php:107
+#, php-format
+msgid "Pending until %s"
+msgstr ""
+
+#: certification/admin/templates/signers.php:109
+msgid "Expired or revoked"
+msgstr ""
+
+#: certification/admin/templates/signers.php:115
+msgid "Resend invitation"
+msgstr ""
+
+#: certification/admin/templates/signers.php:118
+msgid "Revoke invitation"
+msgstr ""
+
+#: certification/admin/templates/signers.php:118
+msgid "Revoke this invitation?"
+msgstr ""
+
+#: certification/admin/templates/signers.php:121
+msgid "Reactivate"
+msgstr ""
+
+#: certification/admin/templates/signers.php:123
+msgid "Suspend"
+msgstr ""
+
+#: certification/admin/templates/signers.php:123
+msgid "Suspend this signer? Signed documents do not change."
+msgstr ""
+
+#: certification/admin/templates/signers.php:134
+msgid "Legacy signatures (uploaded images)"
+msgstr ""
+
+#: certification/admin/templates/signers.php:135
+msgid "Signature images uploaded by an administrator before this system. Documents already issued with them remain valid; they are kept unchanged. Invite each person so that they register their own signature."
+msgstr ""
+
+#: certification/admin/templates/signers.php:143
+msgid "Legacy (image uploaded by an administrator)"
+msgstr ""
+
+#: certification/admin/templates/signers.php:146
+msgid "Invite this user"
+msgstr ""
+
+#. translators: %s: IDs de documentos
+#: certification/core/migration-documents-php.php:241
+#, php-format
+msgid "These documents contain PHP code that is no longer executed and must be replaced with variables: %s"
+msgstr ""
+
+#: certification/includes/document-fields.php:21
+msgid "Text"
+msgstr ""
+
+#: certification/includes/document-fields.php:22
+msgid "Text area"
+msgstr ""
+
+#: certification/includes/document-fields.php:23
+msgid "Single choice (radio)"
+msgstr ""
+
+#: certification/includes/document-fields.php:24
+msgid "Multiple choice (checkboxes)"
+msgstr ""
+
+#: certification/includes/document-fields.php:25
+msgid "Drop-down list"
+msgstr ""
+
+#: certification/includes/document-fields.php:123
+#, php-format
+msgid "The field \"%s\" needs a label."
+msgstr ""
+
+#: certification/includes/document-fields.php:134
+#, php-format
+msgid "The field \"%s\" needs a key (lowercase letters, numbers and _)."
+msgstr ""
+
+#: certification/includes/document-fields.php:138
+#, php-format
+msgid "The key \"%s\" must start with a letter and only use lowercase letters, numbers and _."
+msgstr ""
+
+#: certification/includes/document-fields.php:142
+#, php-format
+msgid "The field \"%s\" has an invalid type."
+msgstr ""
+
+#: certification/includes/document-fields.php:146
+#, php-format
+msgid "The key \"%s\" is already a system variable; choose another one."
+msgstr ""
+
+#: certification/includes/document-fields.php:151
+#, php-format
+msgid "The key \"%s\" is repeated."
+msgstr ""
+
+#: certification/includes/document-fields.php:164
+#, php-format
+msgid "The field \"%s\" needs at least one option (one per line)."
+msgstr ""
+
+#: certification/includes/document-fields.php:266
+#: public/templates/select-nacionality.php:11
+msgid "Select an option"
+msgstr ""
+
+#: certification/includes/document-fields.php:312
+#, php-format
+msgid "\"%s\" is required."
+msgstr ""
+
+#. translators: %s: name of the role
+#: certification/includes/html-signatures.php:47
+#, php-format
+msgid "Signature (%s):"
+msgstr ""
+
+#: certification/includes/html-signatures.php:65
+msgid "SIGN HERE"
+msgstr ""
+
+#: certification/includes/html-signatures.php:70
+msgid "Generate signature automatically"
+msgstr ""
+
+#: certification/includes/html-signatures.php:78
+msgid "Cancel"
+msgstr ""
+
+#: certification/includes/signature-integrity.php:478
+msgid "Verified"
+msgstr ""
+
+#: certification/includes/signature-integrity.php:479
+msgid "Altered"
+msgstr ""
+
+#: certification/includes/signature-integrity.php:480
+msgid "Signed with a retired key"
+msgstr ""
+
+#: certification/includes/signature-integrity.php:481
+msgid "Signed content altered"
+msgstr ""
+
+#: certification/includes/signature-integrity.php:482
+msgid "Chain broken"
+msgstr ""
+
+#: certification/includes/signature-integrity.php:483
+msgid "Unknown key"
+msgstr ""
+
+#: certification/includes/signature-integrity.php:484
+msgid "Legacy, no fingerprint"
+msgstr ""
+
+#: certification/includes/signature-integrity.php:485
+msgid "No fingerprint (error)"
+msgstr ""
+
+#: certification/includes/signature-integrity.php:486
+msgid "No fingerprint"
+msgstr ""
+
+#: certification/includes/signature-integrity.php:504
+#, php-format
+msgid "Switched session by user %d"
+msgstr ""
+
+#: certification/includes/signature-integrity.php:509
+#, php-format
+msgid "Signed from the account of %s"
+msgstr ""
+
+#: certification/includes/signature-requests.php:841
+msgid "I agree to sign this document electronically. I understand that my electronic signature has the same validity as my handwritten signature, that it is recorded with the date, the time and the details of my connection, and that the signed document cannot be modified."
+msgstr ""
+
+#: certification/includes/signature-requests.php:928
+msgid "Pending signature"
+msgstr ""
+
+#: certification/includes/signers.php:244
+msgid "I register this drawing as my electronic signature. I understand that it will only be used when I expressly sign each document requested from me, that each use is recorded with the date, the time and the details of my connection, and that nobody else can use it."
+msgstr ""
+
+#: certification/includes/signers.php:334
+#: certification/includes/signers.php:775
+msgid "The signers module is not available yet."
+msgstr ""
+
+#: certification/includes/signers.php:337
+msgid "Students and parents cannot be invited as signers."
+msgstr ""
+
+#: certification/includes/signers.php:357
+msgid "The signer could not be saved."
+msgstr ""
+
+#: certification/includes/signers.php:360
+#: certification/includes/signers.php:526
+msgid "This signer is suspended."
+msgstr ""
+
+#: certification/includes/signers.php:369
+msgid "Too many invitations were sent to this user today. Try again tomorrow."
+msgstr ""
+
+#: certification/includes/signers.php:400
+#, php-format
+msgid "Invitation sent to %s."
+msgstr ""
+
+#: certification/includes/signers.php:401
+msgid "The invitation was created, but the email could not be sent."
+msgstr ""
+
+#: certification/includes/signers.php:413
+#, php-format
+msgid "[%s] Invitation to register your signature"
+msgstr ""
+
+#: certification/includes/signers.php:415
+#, php-format
+msgid "%s invites you to register your electronic signature to sign the documents that require it."
+msgstr ""
+
+#: certification/includes/signers.php:417
+msgid "Open this link to create your password and then draw your signature:"
+msgstr ""
+
+#: certification/includes/signers.php:418
+msgid "Sign in with your account and draw your signature here:"
+msgstr ""
+
+#: certification/includes/signers.php:420
+#, php-format
+msgid "The link expires in %d hours and can only be used once. If you were not expecting this invitation, ignore this email."
+msgstr ""
+
+#: certification/includes/signers.php:434
+msgid "Write a valid name and email."
+msgstr ""
+
+#: certification/includes/signers.php:437
+msgid "That email already has an account: search for it and invite it from the results."
+msgstr ""
+
+#: certification/includes/signers.php:512
+msgid "You are not allowed to register a signature."
+msgstr ""
+
+#: certification/includes/signers.php:520
+msgid "You do not have a pending signer invitation."
+msgstr ""
+
+#: certification/includes/signers.php:523
+msgid "This invitation was sent to another email."
+msgstr ""
+
+#: certification/includes/signers.php:529
+#: certification/includes/signers.php:1401
+msgid "The password is not correct."
+msgstr ""
+
+#: certification/includes/signers.php:532
+msgid "You must accept registering your signature."
+msgstr ""
+
+#: certification/includes/signers.php:562
+msgid "Your signature could not be saved."
+msgstr ""
+
+#: certification/includes/signers.php:592
+msgid "Your signature was registered."
+msgstr ""
+
+#: certification/includes/signers.php:806
+msgid "Choose at least one signer, or mark that the document does not require signatures."
+msgstr ""
+
+#: certification/includes/signers.php:855
+msgid "Document signers saved. They apply to new signature requests; requests already in progress keep their signers."
+msgstr ""
+
+#: certification/includes/signers.php:1146
+#: certification/includes/signers.php:1188
+#: certification/includes/signers.php:1555
+#: certification/public/functions/assets.php:47
+#: certification/public/functions/documents-signature.php:102
+msgid "To sign, you must accept signing the document electronically."
+msgstr ""
+
+#: certification/includes/signers.php:1179
+#: certification/includes/signers.php:1546
+#: certification/public/functions/documents-signature.php:95
+msgid "You already signed this document."
+msgstr ""
+
+#: certification/includes/signers.php:1182
+#: certification/includes/signers.php:1549
+#: certification/public/functions/documents-signature.php:78
+msgid "This document is still waiting for previous signatures."
+msgstr ""
+
+#: certification/includes/signers.php:1185
+#: certification/includes/signers.php:1552
+#: certification/public/functions/documents-signature.php:105
+#: certification/public/functions/documents-signature.php:165
+msgid "The document was updated while you had it open. Please reload the page and review it again before signing."
+msgstr ""
+
+#: certification/includes/signers.php:1212
+#: certification/includes/signers.php:1574
+#: certification/public/functions/documents-signature.php:123
+msgid "Your signature could not be saved. Please reload the page and try again."
+msgstr ""
+
+#: certification/includes/signers.php:1225
+msgid "Signed. All signatures are complete: the final PDF is being generated."
+msgstr ""
+
+#: certification/includes/signers.php:1226
+msgid "Signed. The document is waiting for the remaining signatures."
+msgstr ""
+
+#. translators: %d: number of documents
+#: certification/includes/signers.php:1246
+#, php-format
+msgid "I agree to sign electronically, with the signature I draw on this page, the following %d document:"
+msgid_plural "I agree to sign electronically, with the signature I draw on this page, the following %d documents:"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %d: number of documents
+#: certification/includes/signers.php:1248
+#, php-format
+msgid "I agree to sign electronically, with my registered signature, the following %d document:"
+msgid_plural "I agree to sign electronically, with my registered signature, the following %d documents:"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: 1: position, 2: document title, 3: student name, 4: round, 5: short content fingerprint
+#: certification/includes/signers.php:1254
+#, php-format
+msgid "%1$d. %2$s — %3$s — round %4$d — fingerprint %5$s"
+msgstr ""
+
+#: certification/includes/signers.php:1262
+msgid "I understand that each signature has the same validity as my handwritten signature, that it is recorded with the date, the time and the details of my connection, and that the signed documents cannot be modified."
+msgstr ""
+
+#: certification/includes/signers.php:1317
+msgid "Select at least one document to sign."
+msgstr ""
+
+#. translators: %d: maximum number of documents per batch
+#: certification/includes/signers.php:1321
+#, php-format
+msgid "You can sign at most %d documents at once."
+msgstr ""
+
+#: certification/includes/signers.php:1339
+msgid "None of the selected documents is waiting for your signature. Please reload the page."
+msgstr ""
+
+#: certification/includes/signers.php:1357
+msgid "The batch could not be prepared. Please try again."
+msgstr ""
+
+#: certification/includes/signers.php:1379
+msgid "This batch does not exist."
+msgstr ""
+
+#: certification/includes/signers.php:1393
+msgid "To sign, you must accept signing the documents electronically."
+msgstr ""
+
+#: certification/includes/signers.php:1398
+#: certification/public/templates/documents-to-sign-batch.php:50
+msgid "Draw your signature before signing."
+msgstr ""
+
+#. translators: 1: signed documents, 2: skipped documents
+#: certification/includes/signers.php:1451
+#, php-format
+msgid "Batch finished: %1$d signed, %2$d skipped."
+msgstr ""
+
+#: certification/includes/signers.php:1676
+msgid "Documents cannot be issued from a switched session."
+msgstr ""
+
+#: certification/includes/signers.php:1679
+#: certification/includes/signers.php:1719
+msgid "This document has no system signers configured. Configure its signers or generate it as before."
+msgstr ""
+
+#: certification/includes/signers.php:1683
+msgid "This document was already issued for this student and is waiting for signatures."
+msgstr ""
+
+#: certification/includes/signers.php:1693
+msgid "That volume and folio cannot be reused."
+msgstr ""
+
+#: certification/includes/signers.php:1696
+msgid "The previous issue of this document was declined and still holds its volume and folio: choose in \"Documents issued for signature\" whether to keep them or void them."
+msgstr ""
+
+#: certification/includes/signers.php:1712
+msgid "The document could not be issued. Please try again."
+msgstr ""
+
+#: certification/includes/signers.php:1726
+msgid "The registry book did not assign a volume and folio. The document was not issued."
+msgstr ""
+
+#. translators: %s: list of variables
+#: certification/includes/signers.php:1744
+#, php-format
+msgid "The document was not issued: these variables could not be filled in: %s."
+msgstr ""
+
+#. translators: 1: volume number, 2: folio number
+#: certification/includes/signers.php:1763
+#, php-format
+msgid "Volume: %1$d Folio: %2$d"
+msgstr ""
+
+#: certification/includes/signers.php:1780
+msgid "The document is too large or could not be saved. Please try again."
+msgstr ""
+
+#: certification/includes/signers.php:1813
+msgid "Document issued for signature. Each signer will find it in \"Documents to sign\"."
+msgstr ""
+
+#: certification/includes/signers.php:1987
+msgid "The document was declined and its signatures were revoked."
+msgstr ""
+
+#: certification/includes/signers.php:2061
+#, php-format
+msgid "[%1$s] Document waiting for your signature: %2$s"
+msgstr ""
+
+#: certification/includes/signers.php:2063
+#, php-format
+msgid "The document \"%s\" is waiting for your signature."
+msgstr ""
+
+#: certification/includes/signers.php:2064
+msgid "Sign in with your own account and open \"Documents to sign\" to review it and sign it:"
+msgstr ""
+
+#: certification/includes/signers.php:2065
+msgid "Only you can sign it: nobody else can sign on your behalf."
+msgstr ""
+
+#: certification/public/functions/account/dashboard-signatures.php:78
+msgid "Your session expired. Please check your answers and submit them again."
+msgstr ""
+
+#: certification/public/functions/account/dashboard-signatures.php:171
+#: certification/public/templates/documents-to-sign-batch.php:100
+msgid "Final PDF"
+msgstr ""
+
+#: certification/public/functions/assets.php:43
+msgid "Pending: the student must sign from their own account"
+msgstr ""
+
+#: certification/public/functions/assets.php:44
+msgid "Pending: the parent or guardian must sign from their own account"
+msgstr ""
+
+#: certification/public/functions/assets.php:45
+msgid "To continue, please sign in your area or generate your signature automatically."
+msgstr ""
+
+#: certification/public/functions/assets.php:46
+msgid "Your signature is saved. The document will be completed when the other person signs from their own account."
+msgstr ""
+
+#: certification/public/functions/assets.php:48
+msgid "To proceed with your document, please select the last grade you completed"
+msgstr ""
+
+#: certification/public/functions/assets.php:49
+#: certification/public/templates/create-document-automatic.php:72
+msgid "The document could not be saved. Please reload the page and try again."
+msgstr ""
+
+#. translators: %s: name of the document (in lower case)
+#: certification/public/functions/assets.php:51
+#, php-format
+msgid "Generate %s"
+msgstr ""
+
+#: certification/public/functions/assets.php:52
+msgid "missing document"
+msgstr ""
+
+#: certification/public/functions/assets.php:53
+msgid "enrollment"
+msgstr ""
+
+#: certification/public/functions/checkout/cart-signatures.php:21
+#: certification/public/functions/documents-signature.php:31
+msgid "Your session expired. Please reload the page."
+msgstr ""
+
+#: certification/public/functions/documents-signature.php:86
+msgid "You can only sign your own part of the document."
+msgstr ""
+
+#: certification/public/functions/documents-signature.php:141
+msgid "The document was updated while you had it open. Please reload the page and review it again before saving."
+msgstr ""
+
+#: certification/public/functions/documents-signature.php:162
+msgid "The document can only be completed when everyone has signed from their own account."
+msgstr ""
+
+#: certification/public/functions/documents-signature.php:198
+msgid "This document was already completed. Please reload the page."
+msgstr ""
+
+#: certification/public/functions/signer-registration.php:27
+msgid "This invitation is not valid or has expired. Ask the administration to send it again."
+msgstr ""
+
+#: certification/public/functions/signer-registration.php:41
+msgid "Your session expired. Please try again."
+msgstr ""
+
+#: certification/public/functions/signer-registration.php:43
+msgid "The password must have at least 10 characters."
+msgstr ""
+
+#: certification/public/functions/signer-registration.php:45
+msgid "The passwords do not match."
+msgstr ""
+
+#: certification/public/functions/signer-registration.php:71
+#, php-format
+msgid "Register your signature — %s"
+msgstr ""
+
+#: certification/public/functions/signer-registration.php:87
+#, php-format
+msgid "Hello %s. Create your password to access your account; then you will draw your signature."
+msgstr ""
+
+#: certification/public/functions/signer-registration.php:93
+msgid "Password"
+msgstr ""
+
+#: certification/public/functions/signer-registration.php:95
+msgid "Repeat the password"
+msgstr ""
+
+#: certification/public/functions/signer-registration.php:97
+msgid "Create password and continue"
+msgstr ""
+
+#: certification/public/templates/create-document-automatic.php:31
+msgid "This document was updated to the new signature system: please sign it again. Everyone who has to sign it must do so from their own account."
+msgstr ""
+
+#: certification/public/templates/document-fields-form.php:24
+msgid "Before continuing, complete the following information. It will be used to fill in the document."
+msgstr ""
+
+#: certification/public/templates/document-fields-form.php:37
+msgid "Continue"
+msgstr ""
+
+#: certification/public/templates/documents-to-sign-batch.php:43
+msgid "It will be applied to each document of the list."
+msgstr ""
+
+#: certification/public/templates/documents-to-sign.php:9
+msgid "Waiting for your signature"
+msgstr ""
+
+#: certification/public/templates/documents-to-sign.php:10
+msgid "Signed by you; waiting for other signatures"
+msgstr ""
+
+#: certification/public/templates/documents-to-sign.php:11
+msgid "Signed by everyone; the final PDF is pending"
+msgstr ""
+
+#: certification/public/templates/documents-to-sign.php:21
+#: certification/public/templates/documents-to-sign.php:34
+msgid "Select"
+msgstr ""
+
+#: certification/public/templates/documents-to-sign.php:43
+msgid "Sign"
+msgstr ""
+
+#: certification/public/templates/documents-to-sign.php:54
+msgid "Only documents that someone else already signed can be signed together. You will review the list, draw your signature once and confirm with your password."
+msgstr ""
+
+#: includes/automatic.php:70
+msgid "its template has no signature variable"
+msgstr ""
+
+#: includes/automatic.php:73
+msgid "\"Document signers\" does not ask anyone to sign it"
+msgstr ""
+
+#: includes/automatic.php:75
+msgid "it has no additional fields"
+msgstr ""
+
+#: includes/book.php:105
+msgid "The document has no registry book."
+msgstr ""
+
+#: includes/book.php:112
+#, php-format
+msgid "The registry book line could not be filled (variables without value: %s). The document was not issued."
+msgstr ""
+
+#: includes/book.php:117
+msgid "The registry book line is empty. The document was not issued."
+msgstr ""
+
+#: includes/book.php:122
+#, php-format
+msgid "The registry book line is longer than %d characters. The document was not issued."
+msgstr ""
+
+#: includes/book.php:127
+msgid "The registry book is not available on this site. The document was not issued."
+msgstr ""
+
+#: includes/book.php:158
+msgid "The registry book is not available on this site."
+msgstr ""
+
+#: includes/book.php:162
+msgid "The registry book could not void the line."
+msgstr ""
+
+#: includes/permissions.php:23
+msgid "Student certificates."
+msgstr ""
+
+#: includes/permissions.php:24
+msgid "Create and edit the documents (templates, book, priority)."
+msgstr ""
+
+#: includes/permissions.php:25
+msgid "Assign certificates to students."
+msgstr ""
+
+#: includes/permissions.php:26
+msgid "See the system signers."
+msgstr ""
+
+#: includes/permissions.php:27
+msgid "Student ID cards."
+msgstr ""
+
+#: includes/permissions.php:28
+msgid "Certification configuration."
+msgstr ""
+
+#: includes/permissions.php:29
+msgid "Manage signers"
+msgstr ""
+
+#: includes/permissions.php:29
+msgid "Invite, suspend and remove system signers."
+msgstr ""
+
+#: includes/permissions.php:30
+msgid "Choose who signs each document and in which order."
+msgstr ""
+
+#: includes/permissions.php:31
+msgid "Issue documents for signature from a student file, and decline them."
+msgstr ""
+
+#: includes/permissions.php:32
+msgid "Verify the signature chain and rotate the key."
+msgstr ""
+
+#: includes/permissions.php:33
+msgid "Edit the variable list and choose the method of each variable."
+msgstr ""
+
+#: includes/permissions.php:34
+msgid "Choose which roles can sign documents."
+msgstr ""
+
+#: includes/permissions.php:35
+msgid "Give these permissions to the roles (this screen)."
+msgstr ""
+
+#: public/endpoint.php:23
+#: public/endpoint.php:48
+msgid "Certificate not found"
+msgstr ""
+
+#: public/endpoint.php:40
+msgid "Certificate found"
+msgstr ""
+
+#: public/endpoint.php:54
+msgid "The certificate_id parameter is missing."
+msgstr ""
+
+#: public/functions.php:15
+msgid "Error sharing. Do you want to download the image?"
+msgstr ""
+
+#: public/functions.php:34
+msgid "ID Card"
+msgstr ""
+
+#: public/functions.php:569
+msgid "Tome: "
+msgstr ""
+
+#: public/functions.php:571
+msgid "Folio: "
+msgstr ""
+
+#: public/templates/certificates.php:46
+msgid "Issued:"
+msgstr ""
+
+#: public/templates/certificates.php:47
+msgid "Expires:"
+msgstr ""
+
+#: public/templates/certificates.php:51
+msgid "Does not expire"
+msgstr ""
+
+#: public/templates/certificates.php:60
+msgid "View Fullscreen"
+msgstr ""
+
+#: public/templates/certificates.php:140
+msgid "Download HTML (PDF View)"
+msgstr ""
+
+#: public/templates/certificates.php:157
+#: public/templates/my-card.php:134
+msgid "Download PDF"
+msgstr ""
+
+#: public/templates/certificates.php:165
+msgid "You don't have certificates"
+msgstr ""
+
+#: public/templates/my-card.php:5
+msgid "My ID"
+msgstr ""
+
+#: public/templates/my-card.php:10
+msgid "Request ID Card"
+msgstr ""
+
+#: public/templates/my-card.php:27
+msgid "You do not yet have a photo to use on the ID card, please check its status in the documents screen"
+msgstr ""
+
+#: public/templates/my-card.php:29
+msgid "here"
+msgstr ""
+
+#: public/templates/my-card.php:57
+msgid "High School"
+msgstr ""
+
+#: public/templates/my-card.php:79
+msgid "ID Number"
+msgstr ""
+
+#: public/templates/my-card.php:89
+#: public/templates/select-nacionality.php:4
+#: public/templates/select-nacionality.php:9
+msgid "Nacionality"
+msgstr ""
+
+#: public/templates/my-card.php:99
+msgid "Date of birth"
+msgstr ""
+
+#: public/templates/my-card.php:111
+msgid "Emission"
+msgstr ""
+
+#: public/templates/my-card.php:121
+msgid "Expiration"
+msgstr ""
+
+#: public/templates/my-card.php:136
+msgid "Share"
+msgstr ""
+
+#: src/Pair.php:64
+msgid "Certification is paused."
+msgstr ""
+
+#. translators: 1: installed EduSystem version, 2: required EduSystem version
+#: src/Pair.php:67
+#, php-format
+msgid "WP Certificates needs EduSystem %2$s or later and this site has EduSystem %1$s. Update EduSystem: until then, documents and signatures are paused (nothing is lost)."
+msgstr ""
+
+#: src/Variables.php:26
+msgid "Name of this document"
+msgstr ""
+
+#: src/Variables.php:27
+msgid "Code (identifier) of this document"
+msgstr ""
+
+#: src/Variables.php:28
+msgid "Today's date"
+msgstr ""
+
+#: src/Variables.php:29
+msgid "Page break in the PDF"
+msgstr ""
+
+#: src/Variables.php:30
+msgid "Signatures of the roles not placed separately (empty when the document does not ask for signatures)"
+msgstr ""
+
+#: src/Variables.php:31
+msgid "QR code to validate the document"
+msgstr ""
+
+#: src/Variables.php:32
+msgid "Volume of the registry book"
+msgstr ""
+
+#: src/Variables.php:33
+msgid "Folio of the registry book"
+msgstr ""
+
+#: src/Variables.php:34
+msgid "Volume and folio of the registry book"
+msgstr ""
+
+#: src/Variables.php:35
+msgid "Signature of the institutional signer"
+msgstr ""
+
+#: src/Variables.php:36
+msgid "Name of the institutional signer"
+msgstr ""
+
+#: src/Variables.php:37
+msgid "Position of the institutional signer"
+msgstr ""
+
+#: src/Variables.php:38
+msgid "Signature, name and position of institutional signer number N"
+msgstr ""
+
+#: src/Variables.php:39
+msgid "Signature, name and position of a system signer (see \"Document signers\")"
+msgstr ""
+
+#: src/Variables.php:40
+msgid "Answers to the additional fields of this document (see \"Advanced\")"
+msgstr ""

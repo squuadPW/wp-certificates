@@ -32,21 +32,21 @@ function squuad_cert_signers_menu(): void
         $position = array_search('add_admin_form_cards_content', array_column($submenu[SQUUAD_CERT_SIGNERS_PARENT], 2), true);
         add_submenu_page(
             SQUUAD_CERT_SIGNERS_PARENT,
-            __('Users and signatures', 'edusystem'),
-            __('Users and signatures', 'edusystem'),
+            __('Users and signatures', 'wp-certificates'),
+            __('Users and signatures', 'wp-certificates'),
             'manager_users_signatures_certificate',
             SQUUAD_CERT_SIGNERS_PAGE,
             'squuad_cert_signers_page',
             false === $position ? null : (int) $position
         );
     } else {
-        add_submenu_page(SQUUAD_CERT_SIGNERS_PARENT, __('Signers', 'edusystem'), __('Signers', 'edusystem'), SQUUAD_CERT_MANAGE_SIGNERS_CAP, SQUUAD_CERT_SIGNERS_PAGE, 'squuad_cert_signers_page', 30);
+        add_submenu_page(SQUUAD_CERT_SIGNERS_PARENT, __('Signers', 'wp-certificates'), __('Signers', 'wp-certificates'), SQUUAD_CERT_MANAGE_SIGNERS_CAP, SQUUAD_CERT_SIGNERS_PAGE, 'squuad_cert_signers_page', 30);
     }
 
     // "Mi firma" para quien es firmante o tiene una invitación pendiente
     $user_id = get_current_user_id();
     if (squuad_cert_signer_by_user($user_id) || squuad_cert_signer_pending_invitation($user_id)) {
-        add_menu_page(__('My signature', 'edusystem'), __('My signature', 'edusystem'), 'read', 'squuad-cert-my-signature', 'squuad_cert_my_signature_page', 'dashicons-edit', 3);
+        add_menu_page(__('My signature', 'wp-certificates'), __('My signature', 'wp-certificates'), 'read', 'squuad-cert-my-signature', 'squuad_cert_my_signature_page', 'dashicons-edit', 3);
     }
 }
 
@@ -69,7 +69,7 @@ function squuad_cert_signers_take_notice(): ?array
 function squuad_cert_signers_check_manage(string $action): void
 {
     if (!current_user_can(SQUUAD_CERT_MANAGE_SIGNERS_CAP)) {
-        wp_die(esc_html__('You do not have permission to manage signers.', 'edusystem'), 403);
+        wp_die(esc_html__('You do not have permission to manage signers.', 'wp-certificates'), 403);
     }
     check_admin_referer($action);
 }
@@ -86,7 +86,7 @@ function squuad_cert_signers_handle_invite(): void
     squuad_cert_signers_check_manage('squuad_cert_signer_invite');
     $user = get_userdata(absint($_POST['user_id'] ?? 0));
     $charge = sanitize_text_field(wp_unslash($_POST['charge'] ?? ''));
-    $result = $user ? squuad_cert_signer_invite($user, $charge) : ['ok' => false, 'message' => __('The user does not exist.', 'edusystem')];
+    $result = $user ? squuad_cert_signer_invite($user, $charge) : ['ok' => false, 'message' => __('The user does not exist.', 'wp-certificates')];
     squuad_cert_signers_notice($result['message'], $result['ok']);
     squuad_cert_signers_back();
 }
@@ -112,7 +112,7 @@ function squuad_cert_signers_handle_resend(): void
     $user = $signer ? get_userdata((int) $signer->user_id) : null;
     $result = $user
         ? squuad_cert_signer_invite($user, (string) $signer->charge, (bool) get_user_meta($user->ID, 'squuad_cert_signer_needs_password', true))
-        : ['ok' => false, 'message' => __('The signer does not exist.', 'edusystem')];
+        : ['ok' => false, 'message' => __('The signer does not exist.', 'wp-certificates')];
     squuad_cert_signers_notice($result['message'], $result['ok']);
     squuad_cert_signers_back();
 }
@@ -132,7 +132,7 @@ function squuad_cert_signers_handle_revoke(): void
     if ($revoked) {
         squuad_cert_log(sprintf('Invitación de firmante %d revocada', absint($_POST['invitation_id'] ?? 0)), 'signer_invitation');
     }
-    squuad_cert_signers_notice($revoked ? __('Invitation revoked.', 'edusystem') : __('The invitation was not pending.', 'edusystem'), (bool) $revoked);
+    squuad_cert_signers_notice($revoked ? __('Invitation revoked.', 'wp-certificates') : __('The invitation was not pending.', 'wp-certificates'), (bool) $revoked);
     squuad_cert_signers_back();
 }
 
@@ -145,14 +145,14 @@ function squuad_cert_signers_handle_status(): void
     $signer = squuad_cert_signer_get(absint($_POST['signer_id'] ?? 0));
     $suspend = 'suspend' === ($_POST['change'] ?? '');
     if (!$signer) {
-        squuad_cert_signers_notice(__('The signer does not exist.', 'edusystem'), false);
+        squuad_cert_signers_notice(__('The signer does not exist.', 'wp-certificates'), false);
         squuad_cert_signers_back();
     }
     // Suspender no cambia nada firmado: solo impide firmar hasta reactivar
     $new_status = $suspend ? 'suspended' : (squuad_cert_user_signature_active((int) $signer->user_id) ? 'active' : 'invited');
     $wpdb->update($wpdb->prefix . 'squuad_cert_signers', ['status' => $new_status, 'updated_at_utc' => gmdate('Y-m-d H:i:s')], ['id' => (int) $signer->id]);
     squuad_cert_signature_request_log_event(0, $suspend ? 'signer_suspended' : 'signer_reactivated', ['signer_id' => (int) $signer->id, 'user_id' => (int) $signer->user_id]);
-    squuad_cert_signers_notice($suspend ? __('Signer suspended.', 'edusystem') : __('Signer reactivated.', 'edusystem'), true);
+    squuad_cert_signers_notice($suspend ? __('Signer suspended.', 'wp-certificates') : __('Signer reactivated.', 'wp-certificates'), true);
     squuad_cert_signers_back();
 }
 

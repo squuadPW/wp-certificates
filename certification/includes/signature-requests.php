@@ -838,7 +838,7 @@ const SQUUAD_CERT_SIGNATURE_CONSENT_CURRENT = 'v1';
 function squuad_cert_signature_consent_text(string $version): ?string
 {
     $texts = [
-        'v1' => __('I agree to sign this document electronically. I understand that my electronic signature has the same validity as my handwritten signature, that it is recorded with the date, the time and the details of my connection, and that the signed document cannot be modified.', 'edusystem'),
+        'v1' => __('I agree to sign this document electronically. I understand that my electronic signature has the same validity as my handwritten signature, that it is recorded with the date, the time and the details of my connection, and that the signed document cannot be modified.', 'wp-certificates'),
     ];
 
     return $texts[$version] ?? null;
@@ -925,7 +925,7 @@ function squuad_cert_signature_render_slot_box(object $request, array $signer): 
     ));
     if (!$row) {
         return '<div style="height:90px;display:flex;align-items:center;justify-content:center;color:#888;border:1px dashed #bbb">'
-            . esc_html__('Pending signature', 'edusystem') . '</div>';
+            . esc_html__('Pending signature', 'wp-certificates') . '</div>';
     }
 
     return squuad_cert_signature_svg((string) $row->signature, $signer['name'])

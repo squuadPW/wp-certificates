@@ -197,7 +197,7 @@ add_action('admin_init', 'squuad_cert_signers_register_roles');
 function squuad_cert_signers_register_roles(): void
 {
     if (!get_role(SQUUAD_CERT_SIGNER_ROLE)) {
-        add_role(SQUUAD_CERT_SIGNER_ROLE, __('Signer', 'edusystem'), ['read' => true, SQUUAD_CERT_SIGN_DOCUMENTS_CAP => true]);
+        add_role(SQUUAD_CERT_SIGNER_ROLE, __('Signer', 'wp-certificates'), ['read' => true, SQUUAD_CERT_SIGN_DOCUMENTS_CAP => true]);
     }
     $admin = get_role('administrator');
     if ($admin && !$admin->has_cap(SQUUAD_CERT_MANAGE_SIGNERS_CAP)) {
@@ -241,7 +241,7 @@ function squuad_cert_signer_user_is_eligible(WP_User $user): bool
 /** Texto del consentimiento para registrar la firma propia (versión v1-perfil), traducido. */
 function squuad_cert_signer_profile_consent_text(): string
 {
-    return __('I register this drawing as my electronic signature. I understand that it will only be used when I expressly sign each document requested from me, that each use is recorded with the date, the time and the details of my connection, and that nobody else can use it.', 'edusystem');
+    return __('I register this drawing as my electronic signature. I understand that it will only be used when I expressly sign each document requested from me, that each use is recorded with the date, the time and the details of my connection, and that nobody else can use it.', 'wp-certificates');
 }
 
 /** HMAC del token de una invitación con la clave del sitio (en la BD nunca se guarda el token). */
@@ -331,10 +331,10 @@ function squuad_cert_signer_invite(WP_User $user, string $charge, bool $new_acco
     global $wpdb;
 
     if (!squuad_cert_signers_enabled()) {
-        return ['ok' => false, 'message' => __('The signers module is not available yet.', 'edusystem')];
+        return ['ok' => false, 'message' => __('The signers module is not available yet.', 'wp-certificates')];
     }
     if (!squuad_cert_signer_user_is_eligible($user)) {
-        return ['ok' => false, 'message' => __('Students and parents cannot be invited as signers.', 'edusystem')];
+        return ['ok' => false, 'message' => __('Students and parents cannot be invited as signers.', 'wp-certificates')];
     }
     $charge = mb_substr(trim($charge), 0, 191);
     $now = gmdate('Y-m-d H:i:s');
@@ -354,10 +354,10 @@ function squuad_cert_signer_invite(WP_User $user, string $charge, bool $new_acco
         $wpdb->update($wpdb->prefix . 'squuad_cert_signers', ['charge' => $charge, 'updated_at_utc' => $now], ['id' => (int) $signer->id]);
     }
     if (!$signer) {
-        return ['ok' => false, 'message' => __('The signer could not be saved.', 'edusystem')];
+        return ['ok' => false, 'message' => __('The signer could not be saved.', 'wp-certificates')];
     }
     if ('suspended' === $signer->status || 'retired' === $signer->status) {
-        return ['ok' => false, 'message' => __('This signer is suspended.', 'edusystem')];
+        return ['ok' => false, 'message' => __('This signer is suspended.', 'wp-certificates')];
     }
 
     // Reenvío: la invitación anterior deja de valer
@@ -366,7 +366,7 @@ function squuad_cert_signer_invite(WP_User $user, string $charge, bool $new_acco
         $user->ID
     ));
     if ($previous >= 5) {
-        return ['ok' => false, 'message' => __('Too many invitations were sent to this user today. Try again tomorrow.', 'edusystem')];
+        return ['ok' => false, 'message' => __('Too many invitations were sent to this user today. Try again tomorrow.', 'wp-certificates')];
     }
     $wpdb->query($wpdb->prepare(
         "UPDATE {$wpdb->prefix}squuad_cert_signer_invitations SET status = 'revoked', revoked_at_utc = UTC_TIMESTAMP(), revoked_by = %d
@@ -397,8 +397,8 @@ function squuad_cert_signer_invite(WP_User $user, string $charge, bool $new_acco
     squuad_cert_log(sprintf('Invitación de firmante %d enviada al usuario %d (%s)%s', $invitation_id, $user->ID, $user->user_email, $sent ? '' : ' — el correo falló'), 'signer_invitation');
 
     return ['ok' => true, 'message' => $sent
-        ? sprintf(__('Invitation sent to %s.', 'edusystem'), $user->user_email)
-        : __('The invitation was created, but the email could not be sent.', 'edusystem')];
+        ? sprintf(__('Invitation sent to %s.', 'wp-certificates'), $user->user_email)
+        : __('The invitation was created, but the email could not be sent.', 'wp-certificates')];
 }
 
 /** Correo de invitación: sin datos de alumnos ni inicio de sesión automático. */
@@ -410,14 +410,14 @@ function squuad_cert_signer_send_invitation_email(WP_User $user, string $token, 
         : add_query_arg(['page' => 'squuad-cert-my-signature'], admin_url('admin.php'));
     $hours = SQUUAD_CERT_SIGNER_INVITATION_HOURS;
 
-    $subject = sprintf(__('[%s] Invitation to register your signature', 'edusystem'), $site);
-    $body = sprintf(__('Hello %s,', 'edusystem'), $user->display_name) . "\n\n"
-        . sprintf(__('%s invites you to register your electronic signature to sign the documents that require it.', 'edusystem'), $site) . "\n\n"
+    $subject = sprintf(__('[%s] Invitation to register your signature', 'wp-certificates'), $site);
+    $body = sprintf(__('Hello %s,', 'wp-certificates'), $user->display_name) . "\n\n"
+        . sprintf(__('%s invites you to register your electronic signature to sign the documents that require it.', 'wp-certificates'), $site) . "\n\n"
         . ($new_account
-            ? __('Open this link to create your password and then draw your signature:', 'edusystem')
-            : __('Sign in with your account and draw your signature here:', 'edusystem'))
+            ? __('Open this link to create your password and then draw your signature:', 'wp-certificates')
+            : __('Sign in with your account and draw your signature here:', 'wp-certificates'))
         . "\n" . $link . "\n\n"
-        . sprintf(__('The link expires in %d hours and can only be used once. If you were not expecting this invitation, ignore this email.', 'edusystem'), $hours) . "\n";
+        . sprintf(__('The link expires in %d hours and can only be used once. If you were not expecting this invitation, ignore this email.', 'wp-certificates'), $hours) . "\n";
 
     return (bool) wp_mail($user->user_email, $subject, $body);
 }
@@ -431,10 +431,10 @@ function squuad_cert_signer_invite_new_account(string $name, string $email, stri
     $email = sanitize_email($email);
     $name = sanitize_text_field($name);
     if (!is_email($email) || '' === $name) {
-        return ['ok' => false, 'message' => __('Write a valid name and email.', 'edusystem')];
+        return ['ok' => false, 'message' => __('Write a valid name and email.', 'wp-certificates')];
     }
     if (email_exists($email)) {
-        return ['ok' => false, 'message' => __('That email already has an account: search for it and invite it from the results.', 'edusystem')];
+        return ['ok' => false, 'message' => __('That email already has an account: search for it and invite it from the results.', 'wp-certificates')];
     }
     $login = sanitize_user(current(explode('@', $email)), true) ?: 'signer';
     $base = $login;
@@ -509,31 +509,31 @@ function squuad_cert_user_signature_register(string $strokes_json_input, string 
 
     $user = wp_get_current_user();
     if (!$user->ID || !squuad_cert_signers_enabled()) {
-        return ['ok' => false, 'message' => __('You are not allowed to register a signature.', 'edusystem')];
+        return ['ok' => false, 'message' => __('You are not allowed to register a signature.', 'wp-certificates')];
     }
     if (function_exists('squuad_cert_signature_session_switched_from') && squuad_cert_signature_session_switched_from()) {
-        return ['ok' => false, 'message' => __('A signature cannot be registered from a switched session.', 'edusystem')];
+        return ['ok' => false, 'message' => __('A signature cannot be registered from a switched session.', 'wp-certificates')];
     }
     $signer = squuad_cert_signer_by_user((int) $user->ID);
     $invitation = squuad_cert_signer_pending_invitation((int) $user->ID);
     if (!$signer || (!$invitation && 'active' !== $signer->status)) {
-        return ['ok' => false, 'message' => __('You do not have a pending signer invitation.', 'edusystem')];
+        return ['ok' => false, 'message' => __('You do not have a pending signer invitation.', 'wp-certificates')];
     }
     if ($invitation && 0 !== strcasecmp((string) $invitation->email_at_invite, (string) $user->user_email)) {
-        return ['ok' => false, 'message' => __('This invitation was sent to another email.', 'edusystem')];
+        return ['ok' => false, 'message' => __('This invitation was sent to another email.', 'wp-certificates')];
     }
     if (in_array($signer->status, ['suspended', 'retired'], true)) {
-        return ['ok' => false, 'message' => __('This signer is suspended.', 'edusystem')];
+        return ['ok' => false, 'message' => __('This signer is suspended.', 'wp-certificates')];
     }
     if (!wp_check_password($password, $user->user_pass, $user->ID)) {
-        return ['ok' => false, 'message' => __('The password is not correct.', 'edusystem')];
+        return ['ok' => false, 'message' => __('The password is not correct.', 'wp-certificates')];
     }
     if (!$consent) {
-        return ['ok' => false, 'message' => __('You must accept registering your signature.', 'edusystem')];
+        return ['ok' => false, 'message' => __('You must accept registering your signature.', 'wp-certificates')];
     }
     $strokes = squuad_cert_signer_normalize_strokes(json_decode($strokes_json_input, true));
     if (null === $strokes) {
-        return ['ok' => false, 'message' => __('Draw your signature in the box before saving.', 'edusystem')];
+        return ['ok' => false, 'message' => __('Draw your signature in the box before saving.', 'wp-certificates')];
     }
 
     $key = squuad_cert_signature_current_key();
@@ -559,7 +559,7 @@ function squuad_cert_user_signature_register(string $strokes_json_input, string 
     ]);
     $signature_id = (int) $wpdb->insert_id;
     if (!$signature_id) {
-        return ['ok' => false, 'message' => __('Your signature could not be saved.', 'edusystem')];
+        return ['ok' => false, 'message' => __('Your signature could not be saved.', 'wp-certificates')];
     }
     if ($previous) {
         $wpdb->update($wpdb->prefix . 'squuad_cert_signer_signatures', ['status' => 'replaced', 'replaced_by' => $signature_id], ['id' => (int) $previous->id]);
@@ -589,7 +589,7 @@ function squuad_cert_user_signature_register(string $strokes_json_input, string 
     ], (int) $user->ID);
     squuad_cert_log(sprintf('Firma propia %d registrada por el usuario %d%s', $signature_id, $user->ID, $previous ? ' (sustituye a la ' . (int) $previous->id . ')' : ''), 'signer_signature');
 
-    return ['ok' => true, 'message' => __('Your signature was registered.', 'edusystem')];
+    return ['ok' => true, 'message' => __('Your signature was registered.', 'wp-certificates')];
 }
 
 /* ---------------------------------------------------------------------------------------------------------------
@@ -772,7 +772,7 @@ function squuad_cert_signing_policy_save(int $document_certificate_id, bool $req
     global $wpdb;
 
     if (!squuad_cert_signers_enabled() || $document_certificate_id <= 0) {
-        return ['ok' => false, 'message' => __('The signers module is not available yet.', 'edusystem')];
+        return ['ok' => false, 'message' => __('The signers module is not available yet.', 'wp-certificates')];
     }
     $clean = [];
     $seen = [];
@@ -803,7 +803,7 @@ function squuad_cert_signing_policy_save(int $document_certificate_id, bool $req
         $clean[$i]['position'] = $i + 1;
     }
     if ($requires && !$clean) {
-        return ['ok' => false, 'message' => __('Choose at least one signer, or mark that the document does not require signatures.', 'edusystem')];
+        return ['ok' => false, 'message' => __('Choose at least one signer, or mark that the document does not require signatures.', 'wp-certificates')];
     }
     if (!$requires) {
         $clean = [];
@@ -815,7 +815,7 @@ function squuad_cert_signing_policy_save(int $document_certificate_id, bool $req
         $document_certificate_id
     ));
     if ($current && hash_equals((string) $current->policy_sha256, $hash)) {
-        return ['ok' => true, 'message' => __('No changes.', 'edusystem')];
+        return ['ok' => true, 'message' => __('No changes.', 'wp-certificates')];
     }
 
     $wpdb->query($wpdb->prepare(
@@ -852,7 +852,7 @@ function squuad_cert_signing_policy_save(int $document_certificate_id, bool $req
     squuad_cert_log(sprintf('Firmantes del documento %d cambiados (política %d): %s', $document_certificate_id, $policy_id,
             $requires ? implode(', ', array_map(static fn(array $slot): string => $slot['slot_type'] . ('role' === $slot['slot_type'] ? ':' . $slot['role'] : ($slot['signer_id'] ? ':' . $slot['signer_id'] : '')), $clean)) : 'no pide firmas'), 'signing_policy');
 
-    return ['ok' => true, 'message' => __('Document signers saved. They apply to new signature requests; requests already in progress keep their signers.', 'edusystem')];
+    return ['ok' => true, 'message' => __('Document signers saved. They apply to new signature requests; requests already in progress keep their signers.', 'wp-certificates')];
 }
 
 /* ---------------------------------------------------------------------------------------------------------------
@@ -1143,7 +1143,7 @@ function squuad_cert_signature_sign_as_signer(int $request_id, string $shown_sha
 {
     $consent = squuad_cert_signature_consent_evidence($consent_version);
     if (null === $consent) {
-        return ['ok' => false, 'message' => __('To sign, you must accept signing the document electronically.', 'edusystem'), 'completed' => false];
+        return ['ok' => false, 'message' => __('To sign, you must accept signing the document electronically.', 'wp-certificates'), 'completed' => false];
     }
 
     return squuad_cert_signature_sign_as_signer_with($request_id, $shown_sha256, $consent);
@@ -1162,34 +1162,34 @@ function squuad_cert_signature_sign_as_signer_with(int $request_id, string $show
     $fail = static fn(string $message): array => ['ok' => false, 'message' => $message, 'completed' => false];
 
     if (!$request || !$user_id) {
-        return $fail(__('You are not allowed to sign this document.', 'edusystem'));
+        return $fail(__('You are not allowed to sign this document.', 'wp-certificates'));
     }
     if (function_exists('squuad_cert_signature_session_switched_from') && squuad_cert_signature_session_switched_from()) {
-        return $fail(__('Documents cannot be signed from a switched session. Each person must sign from their own account.', 'edusystem'));
+        return $fail(__('Documents cannot be signed from a switched session. Each person must sign from their own account.', 'wp-certificates'));
     }
     $slot_key = squuad_cert_signature_request_role($request, $user_id);
     $signer = squuad_cert_signer_by_user($user_id);
     if (0 !== strpos($slot_key, 'signer:') || !$signer || 'active' !== $signer->status) {
-        return $fail(__('You are not allowed to sign this document.', 'edusystem'));
+        return $fail(__('You are not allowed to sign this document.', 'wp-certificates'));
     }
     if (!in_array($request->status, ['open', 'partially_signed'], true) || null === $request->frozen_at_utc) {
-        return $fail(__('This document no longer accepts signatures. Please reload the page.', 'edusystem'));
+        return $fail(__('This document no longer accepts signatures. Please reload the page.', 'wp-certificates'));
     }
     if (in_array($slot_key, squuad_cert_signature_request_signed_roles($request_id), true)) {
-        return $fail(__('You already signed this document.', 'edusystem'));
+        return $fail(__('You already signed this document.', 'wp-certificates'));
     }
     if (!squuad_cert_signature_request_slot_open($request, $slot_key)) {
-        return $fail(__('This document is still waiting for previous signatures.', 'edusystem'));
+        return $fail(__('This document is still waiting for previous signatures.', 'wp-certificates'));
     }
     if (!hash_equals((string) $request->content_sha256, strtolower($shown_sha256))) {
-        return $fail(__('The document was updated while you had it open. Please reload the page and review it again before signing.', 'edusystem'));
+        return $fail(__('The document was updated while you had it open. Please reload the page and review it again before signing.', 'wp-certificates'));
     }
     if (empty($consent['consent_version']) || empty($consent['consent_sha256'])) {
-        return $fail(__('To sign, you must accept signing the document electronically.', 'edusystem'));
+        return $fail(__('To sign, you must accept signing the document electronically.', 'wp-certificates'));
     }
     $profile = squuad_cert_user_signature_active($user_id);
     if (!$profile || !hash_equals((string) $profile->strokes_sha256, hash('sha256', (string) $profile->strokes))) {
-        return $fail(__('Register your signature before signing documents.', 'edusystem'));
+        return $fail(__('Register your signature before signing documents.', 'wp-certificates'));
     }
 
     $signature_id = squuad_cert_signature_insert([
@@ -1209,7 +1209,7 @@ function squuad_cert_signature_sign_as_signer_with(int $request_id, string $show
         'consent_sha256' => (string) $consent['consent_sha256'],
     ], (string) $request->subject_type);
     if (!$signature_id) {
-        return $fail(__('Your signature could not be saved. Please reload the page and try again.', 'edusystem'));
+        return $fail(__('Your signature could not be saved. Please reload the page and try again.', 'wp-certificates'));
     }
     squuad_cert_signature_request_log_event((int) $request->id, 'signed', [
         'role' => $slot_key,
@@ -1222,8 +1222,8 @@ function squuad_cert_signature_sign_as_signer_with(int $request_id, string $show
     squuad_cert_signature_request_transition((int) $request->id, ['open', 'partially_signed'], $all_signed ? 'signed' : 'partially_signed');
 
     return ['ok' => true, 'message' => $all_signed
-        ? __('Signed. All signatures are complete: the final PDF is being generated.', 'edusystem')
-        : __('Signed. The document is waiting for the remaining signatures.', 'edusystem'), 'completed' => $all_signed];
+        ? __('Signed. All signatures are complete: the final PDF is being generated.', 'wp-certificates')
+        : __('Signed. The document is waiting for the remaining signatures.', 'wp-certificates'), 'completed' => $all_signed];
 }
 
 /* ---------------------------------------------------------------------------------------------------------------
@@ -1243,15 +1243,15 @@ function squuad_cert_signature_batch_consent_text(array $items, bool $drawn = fa
     $lines = [sprintf(
         $drawn
             /* translators: %d: number of documents */
-            ? _n('I agree to sign electronically, with the signature I draw on this page, the following %d document:', 'I agree to sign electronically, with the signature I draw on this page, the following %d documents:', count($items), 'edusystem')
+            ? _n('I agree to sign electronically, with the signature I draw on this page, the following %d document:', 'I agree to sign electronically, with the signature I draw on this page, the following %d documents:', count($items), 'wp-certificates')
             /* translators: %d: number of documents */
-            : _n('I agree to sign electronically, with my registered signature, the following %d document:', 'I agree to sign electronically, with my registered signature, the following %d documents:', count($items), 'edusystem'),
+            : _n('I agree to sign electronically, with my registered signature, the following %d document:', 'I agree to sign electronically, with my registered signature, the following %d documents:', count($items), 'wp-certificates'),
         count($items)
     )];
     foreach (array_values($items) as $i => $item) {
         $lines[] = sprintf(
             /* translators: 1: position, 2: document title, 3: student name, 4: round, 5: short content fingerprint */
-            __('%1$d. %2$s — %3$s — round %4$d — fingerprint %5$s', 'edusystem'),
+            __('%1$d. %2$s — %3$s — round %4$d — fingerprint %5$s', 'wp-certificates'),
             $i + 1,
             $item['title'],
             $item['student'],
@@ -1259,7 +1259,7 @@ function squuad_cert_signature_batch_consent_text(array $items, bool $drawn = fa
             substr($item['content_sha256'], 0, 12)
         );
     }
-    $lines[] = __('I understand that each signature has the same validity as my handwritten signature, that it is recorded with the date, the time and the details of my connection, and that the signed documents cannot be modified.', 'edusystem');
+    $lines[] = __('I understand that each signature has the same validity as my handwritten signature, that it is recorded with the date, the time and the details of my connection, and that the signed documents cannot be modified.', 'wp-certificates');
 
     return implode("\n", $lines);
 }
@@ -1298,27 +1298,27 @@ function squuad_cert_signature_batch_prepare(array $request_ids, string $kind = 
     $fail = static fn(string $message): array => ['ok' => false, 'message' => $message, 'batch_id' => 0];
     $holder = 'holder' === $kind;
     if (!$user_id) {
-        return $fail(__('You are not allowed to sign this document.', 'edusystem'));
+        return $fail(__('You are not allowed to sign this document.', 'wp-certificates'));
     }
     if (function_exists('squuad_cert_signature_session_switched_from') && squuad_cert_signature_session_switched_from()) {
-        return $fail(__('Documents cannot be signed from a switched session. Each person must sign from their own account.', 'edusystem'));
+        return $fail(__('Documents cannot be signed from a switched session. Each person must sign from their own account.', 'wp-certificates'));
     }
     if (!$holder) {
         $signer = squuad_cert_signer_by_user($user_id);
         if (!$signer || 'active' !== $signer->status) {
-            return $fail(__('You are not allowed to sign this document.', 'edusystem'));
+            return $fail(__('You are not allowed to sign this document.', 'wp-certificates'));
         }
         if (!squuad_cert_user_signature_active($user_id)) {
-            return $fail(__('Register your signature before signing documents.', 'edusystem'));
+            return $fail(__('Register your signature before signing documents.', 'wp-certificates'));
         }
     }
     $wanted = array_values(array_unique(array_filter(array_map('intval', $request_ids))));
     if (!$wanted) {
-        return $fail(__('Select at least one document to sign.', 'edusystem'));
+        return $fail(__('Select at least one document to sign.', 'wp-certificates'));
     }
     if (count($wanted) > SQUUAD_CERT_SIGNATURE_BATCH_MAX) {
         /* translators: %d: maximum number of documents per batch */
-        return $fail(sprintf(__('You can sign at most %d documents at once.', 'edusystem'), SQUUAD_CERT_SIGNATURE_BATCH_MAX));
+        return $fail(sprintf(__('You can sign at most %d documents at once.', 'wp-certificates'), SQUUAD_CERT_SIGNATURE_BATCH_MAX));
     }
 
     // Solo lo que el servidor considera pendiente de este usuario, en el orden de su lista
@@ -1336,7 +1336,7 @@ function squuad_cert_signature_batch_prepare(array $request_ids, string $kind = 
         ];
     }
     if (!$items) {
-        return $fail(__('None of the selected documents is waiting for your signature. Please reload the page.', 'edusystem'));
+        return $fail(__('None of the selected documents is waiting for your signature. Please reload the page.', 'wp-certificates'));
     }
 
     $manifest_sha256 = hash('sha256', implode("\n", array_map(static fn($i) => $i['request_id'] . ':' . $i['content_sha256'], $items)));
@@ -1354,7 +1354,7 @@ function squuad_cert_signature_batch_prepare(array $request_ids, string $kind = 
         'expires_at_utc' => gmdate('Y-m-d H:i:s', $now + SQUUAD_CERT_SIGNATURE_BATCH_MINUTES * MINUTE_IN_SECONDS),
     ]);
     if (!$inserted) {
-        return $fail(__('The batch could not be prepared. Please try again.', 'edusystem'));
+        return $fail(__('The batch could not be prepared. Please try again.', 'wp-certificates'));
     }
     $batch_id = (int) $wpdb->insert_id;
 
@@ -1376,29 +1376,29 @@ function squuad_cert_signature_batch_confirm(int $batch_id, string $password, st
     $fail = static fn(string $message): array => ['ok' => false, 'message' => $message, 'signed' => [], 'skipped' => [], 'completed' => []];
     $batch = squuad_cert_signature_batch_get($batch_id);
     if (!$batch || !$user->exists()) {
-        return $fail(__('This batch does not exist.', 'edusystem'));
+        return $fail(__('This batch does not exist.', 'wp-certificates'));
     }
     if ('prepared' !== $batch->status) {
-        return $fail(__('This batch was already processed.', 'edusystem'));
+        return $fail(__('This batch was already processed.', 'wp-certificates'));
     }
     if (strtotime($batch->expires_at_utc . ' UTC') < time()) {
         $wpdb->update("{$wpdb->prefix}squuad_cert_batches", ['status' => 'expired'], ['id' => $batch_id, 'status' => 'prepared']);
-        return $fail(__('This batch expired. Select the documents again.', 'edusystem'));
+        return $fail(__('This batch expired. Select the documents again.', 'wp-certificates'));
     }
     if (function_exists('squuad_cert_signature_session_switched_from') && squuad_cert_signature_session_switched_from()) {
-        return $fail(__('Documents cannot be signed from a switched session. Each person must sign from their own account.', 'edusystem'));
+        return $fail(__('Documents cannot be signed from a switched session. Each person must sign from their own account.', 'wp-certificates'));
     }
     if (!hash_equals((string) $batch->consent_sha256, strtolower($accepted_consent_sha256))
         || !hash_equals((string) $batch->consent_sha256, hash('sha256', (string) $batch->data['consent_text']))) {
-        return $fail(__('To sign, you must accept signing the documents electronically.', 'edusystem'));
+        return $fail(__('To sign, you must accept signing the documents electronically.', 'wp-certificates'));
     }
     $holder = 'holder' === ($batch->data['kind'] ?? 'signer');
     $strokes = $holder ? squuad_cert_signer_normalize_strokes($drawn_strokes) : null;
     if ($holder && null === $strokes) {
-        return $fail(__('Draw your signature before signing.', 'edusystem'));
+        return $fail(__('Draw your signature before signing.', 'wp-certificates'));
     }
     if ('' === $password || !wp_check_password($password, $user->user_pass, $user->ID)) {
-        return $fail(__('The password is not correct.', 'edusystem'));
+        return $fail(__('The password is not correct.', 'wp-certificates'));
     }
 
     // Una sola ejecución por lote
@@ -1408,7 +1408,7 @@ function squuad_cert_signature_batch_confirm(int $batch_id, string $password, st
         $user->ID
     ));
     if (1 !== (int) $claimed) {
-        return $fail(__('This batch was already processed.', 'edusystem'));
+        return $fail(__('This batch was already processed.', 'wp-certificates'));
     }
 
     $items = (array) $batch->data['items'];
@@ -1448,7 +1448,7 @@ function squuad_cert_signature_batch_confirm(int $batch_id, string $password, st
 
     $message = sprintf(
         /* translators: 1: signed documents, 2: skipped documents */
-        __('Batch finished: %1$d signed, %2$d skipped.', 'edusystem'),
+        __('Batch finished: %1$d signed, %2$d skipped.', 'wp-certificates'),
         count($signed),
         count($skipped)
     );
@@ -1530,29 +1530,29 @@ function squuad_cert_signature_sign_as_holder_with(int $request_id, string $show
     $fail = static fn(string $message): array => ['ok' => false, 'message' => $message, 'completed' => false];
 
     if (!$request || !$user_id) {
-        return $fail(__('You are not allowed to sign this document.', 'edusystem'));
+        return $fail(__('You are not allowed to sign this document.', 'wp-certificates'));
     }
     if (function_exists('squuad_cert_signature_session_switched_from') && squuad_cert_signature_session_switched_from()) {
-        return $fail(__('Documents cannot be signed from a switched session. Each person must sign from their own account.', 'edusystem'));
+        return $fail(__('Documents cannot be signed from a switched session. Each person must sign from their own account.', 'wp-certificates'));
     }
     $role = squuad_cert_signature_request_role($request, $user_id);
     if (!squuad_cert_is_holder_slot($role)) {
-        return $fail(__('You are not allowed to sign this document.', 'edusystem'));
+        return $fail(__('You are not allowed to sign this document.', 'wp-certificates'));
     }
     if (!in_array($request->status, ['open', 'partially_signed'], true) || null === $request->frozen_at_utc) {
-        return $fail(__('This document no longer accepts signatures. Please reload the page.', 'edusystem'));
+        return $fail(__('This document no longer accepts signatures. Please reload the page.', 'wp-certificates'));
     }
     if (in_array($role, squuad_cert_signature_request_signed_roles($request_id), true)) {
-        return $fail(__('You already signed this document.', 'edusystem'));
+        return $fail(__('You already signed this document.', 'wp-certificates'));
     }
     if (!squuad_cert_signature_request_slot_open($request, $role)) {
-        return $fail(__('This document is still waiting for previous signatures.', 'edusystem'));
+        return $fail(__('This document is still waiting for previous signatures.', 'wp-certificates'));
     }
     if (!hash_equals((string) $request->content_sha256, strtolower($shown_sha256))) {
-        return $fail(__('The document was updated while you had it open. Please reload the page and review it again before signing.', 'edusystem'));
+        return $fail(__('The document was updated while you had it open. Please reload the page and review it again before signing.', 'wp-certificates'));
     }
     if ('' === $strokes_json || empty($consent['consent_version']) || empty($consent['consent_sha256'])) {
-        return $fail(__('To sign, you must accept signing the document electronically.', 'edusystem'));
+        return $fail(__('To sign, you must accept signing the document electronically.', 'wp-certificates'));
     }
 
     $signature_id = squuad_cert_signature_insert([
@@ -1571,7 +1571,7 @@ function squuad_cert_signature_sign_as_holder_with(int $request_id, string $show
         'consent_sha256' => (string) $consent['consent_sha256'],
     ], (string) $request->subject_type);
     if (!$signature_id) {
-        return $fail(__('Your signature could not be saved. Please reload the page and try again.', 'edusystem'));
+        return $fail(__('Your signature could not be saved. Please reload the page and try again.', 'wp-certificates'));
     }
     squuad_cert_signature_request_log_event((int) $request->id, 'signed', [
         'role' => $role,
@@ -1582,8 +1582,8 @@ function squuad_cert_signature_sign_as_holder_with(int $request_id, string $show
     squuad_cert_signature_request_transition((int) $request->id, ['open', 'partially_signed'], $all_signed ? 'signed' : 'partially_signed');
 
     return ['ok' => true, 'message' => $all_signed
-        ? __('Signed. All signatures are complete.', 'edusystem')
-        : __('Signed. Waiting for the remaining signatures.', 'edusystem'), 'completed' => $all_signed] + ['notified' => squuad_cert_signer_notify_open_slots((int) $request->id)];
+        ? __('Signed. All signatures are complete.', 'wp-certificates')
+        : __('Signed. Waiting for the remaining signatures.', 'wp-certificates'), 'completed' => $all_signed] + ['notified' => squuad_cert_signer_notify_open_slots((int) $request->id)];
 }
 
 /* ---------------------------------------------------------------------------------------------------------------
@@ -1670,17 +1670,17 @@ function squuad_cert_signature_issue_document(int $student_id, int $document_cer
     $student = $subject['student'] ?? null;
     $document = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}documents_certificates WHERE id = %d", $document_certificate_id));
     if (!$student || !$document || !$user_id) {
-        return $fail(__('The student or the document does not exist.', 'edusystem'));
+        return $fail(__('The student or the document does not exist.', 'wp-certificates'));
     }
     if (function_exists('squuad_cert_signature_session_switched_from') && squuad_cert_signature_session_switched_from()) {
-        return $fail(__('Documents cannot be issued from a switched session.', 'edusystem'));
+        return $fail(__('Documents cannot be issued from a switched session.', 'wp-certificates'));
     }
     if (!squuad_cert_signature_issue_signers($document)) {
-        return $fail(__('This document has no system signers configured. Configure its signers or generate it as before.', 'edusystem'));
+        return $fail(__('This document has no system signers configured. Configure its signers or generate it as before.', 'wp-certificates'));
     }
     $latest = squuad_cert_signature_issued_latest($student_id, $document_certificate_id);
     if ($latest && in_array($latest->status, SQUUAD_CERT_SIGNATURE_REQUEST_OPEN, true) && null !== $latest->frozen_at_utc) {
-        return $fail(__('This document was already issued for this student and is waiting for signatures.', 'edusystem'));
+        return $fail(__('This document was already issued for this student and is waiting for signatures.', 'wp-certificates'));
     }
 
     // Tomo y folio (paso 8b): la línea reservada que se reutiliza, o ninguna decisión pendiente sobre la anterior
@@ -1690,10 +1690,10 @@ function squuad_cert_signature_issue_document(int $student_id, int $document_cer
         $entry = squuad_cert_book_entry_get($reuse_book_entry_id);
         if (!$uses_book || !$entry || 'active' !== $entry->status || (int) $entry->student_id !== $student_id
             || (int) $entry->document_certificate_id !== $document_certificate_id) {
-            return $fail(__('That volume and folio cannot be reused.', 'edusystem'));
+            return $fail(__('That volume and folio cannot be reused.', 'wp-certificates'));
         }
     } elseif ($uses_book && squuad_cert_book_entry_pending_decision($student_id, $document_certificate_id)) {
-        return $fail(__('The previous issue of this document was declined and still holds its volume and folio: choose in "Documents issued for signature" whether to keep them or void them.', 'edusystem'));
+        return $fail(__('The previous issue of this document was declined and still holds its volume and folio: choose in "Documents issued for signature" whether to keep them or void them.', 'wp-certificates'));
     }
 
     $parts = ['header' => (string) $document->header, 'content' => (string) $document->content, 'footer' => (string) $document->footer];
@@ -1709,21 +1709,21 @@ function squuad_cert_signature_issue_document(int $student_id, int $document_cer
         SQUUAD_CERT_SUBJECT_STUDENT
     );
     if (!$request) {
-        return $fail(__('The document could not be issued. Please try again.', 'edusystem'));
+        return $fail(__('The document could not be issued. Please try again.', 'wp-certificates'));
     }
     $has_signers = false;
     foreach (squuad_cert_request_signers($request) as $signer) {
         $has_signers = $has_signers || $signer['phase'] >= 2;
     }
     if (!$has_signers) {
-        return $fail(__('This document has no system signers configured. Configure its signers or generate it as before.', 'edusystem'));
+        return $fail(__('This document has no system signers configured. Configure its signers or generate it as before.', 'wp-certificates'));
     }
 
     // Línea nueva del libro: la reserva la capa admin (API de libros de EduSof) con el filtro; sin ella no se emite
     if ($uses_book && !$entry) {
         $entry = apply_filters('squuad_cert_issue_book_entry', null, $student, $document, $request);
         if (is_wp_error($entry) || !is_object($entry) || empty($entry->id)) {
-            return $fail(is_wp_error($entry) ? $entry->get_error_message() : __('The registry book did not assign a volume and folio. The document was not issued.', 'edusystem'));
+            return $fail(is_wp_error($entry) ? $entry->get_error_message() : __('The registry book did not assign a volume and folio. The document was not issued.', 'wp-certificates'));
         }
     }
 
@@ -1741,7 +1741,7 @@ function squuad_cert_signature_issue_document(int $student_id, int $document_cer
     if ($resolved['failed']) {
         return $fail(sprintf(
             /* translators: %s: list of variables */
-            __('The document was not issued: these variables could not be filled in: %s.', 'edusystem'),
+            __('The document was not issued: these variables could not be filled in: %s.', 'wp-certificates'),
             implode(', ', array_keys($resolved['failed']))
         ));
     }
@@ -1760,7 +1760,7 @@ function squuad_cert_signature_issue_document(int $student_id, int $document_cer
         $replacements['tomo'] = ['value' => (string) (int) $entry->tomo, 'wrap' => true];
         $replacements['folio'] = ['value' => (string) (int) $entry->folio, 'wrap' => true];
         /* translators: 1: volume number, 2: folio number */
-        $replacements['tomo_folio'] = ['value' => esc_html(sprintf(__('Volume: %1$d Folio: %2$d', 'edusystem'), (int) $entry->tomo, (int) $entry->folio)), 'wrap' => true];
+        $replacements['tomo_folio'] = ['value' => esc_html(sprintf(__('Volume: %1$d Folio: %2$d', 'wp-certificates'), (int) $entry->tomo, (int) $entry->folio)), 'wrap' => true];
     }
 
     foreach ($parts as $key => $part) {
@@ -1777,7 +1777,7 @@ function squuad_cert_signature_issue_document(int $student_id, int $document_cer
 
     $sha256 = squuad_cert_signature_request_save_draft((int) $request->id, $html);
     if (null === $sha256 || !squuad_cert_signature_request_freeze((int) $request->id, $sha256, $user_id)) {
-        return $fail(__('The document is too large or could not be saved. Please try again.', 'edusystem'));
+        return $fail(__('The document is too large or could not be saved. Please try again.', 'wp-certificates'));
     }
     if ($entry) {
         $wpdb->update($wpdb->prefix . 'squuad_cert_requests', ['book_entry_id' => (int) $entry->id], ['id' => (int) $request->id]);
@@ -1810,7 +1810,7 @@ function squuad_cert_signature_issue_document(int $student_id, int $document_cer
 
     squuad_cert_signer_notify_open_slots((int) $request->id);
 
-    return ['ok' => true, 'message' => __('Document issued for signature. Each signer will find it in "Documents to sign".', 'edusystem'), 'request_id' => (int) $request->id];
+    return ['ok' => true, 'message' => __('Document issued for signature. Each signer will find it in "Documents to sign".', 'wp-certificates'), 'request_id' => (int) $request->id];
 }
 
 /** Documentos emitidos para firma de un estudiante (todas las rondas), con título y firmas dadas / exigidas. */
@@ -1971,7 +1971,7 @@ function squuad_cert_signature_issued_decline(int $request_id, string $reason): 
 
     $request = squuad_cert_signature_request_get($request_id);
     if (!$request || 'issued' !== $request->origin || !in_array($request->status, ['open', 'partially_signed', 'signed', 'completed'], true)) {
-        return ['ok' => false, 'message' => __('This document can no longer be declined. Please reload the page.', 'edusystem')];
+        return ['ok' => false, 'message' => __('This document can no longer be declined. Please reload the page.', 'wp-certificates')];
     }
     $ids = $wpdb->get_col($wpdb->prepare("SELECT id FROM {$wpdb->prefix}squuad_cert_signatures WHERE request_id = %d", $request_id));
     squuad_cert_revoke_signatures($ids, sprintf('Documento emitido declinado: %s', $reason), get_current_user_id());
@@ -1981,10 +1981,10 @@ function squuad_cert_signature_issued_decline(int $request_id, string $reason): 
         'decline_reason' => $reason,
     ]);
     if (!$declined) {
-        return ['ok' => false, 'message' => __('This document can no longer be declined. Please reload the page.', 'edusystem')];
+        return ['ok' => false, 'message' => __('This document can no longer be declined. Please reload the page.', 'wp-certificates')];
     }
 
-    return ['ok' => true, 'message' => __('The document was declined and its signatures were revoked.', 'edusystem')];
+    return ['ok' => true, 'message' => __('The document was declined and its signatures were revoked.', 'wp-certificates')];
 }
 
 /* ---------------------------------------------------------------------------------------------------------------
@@ -2058,11 +2058,11 @@ function squuad_cert_signer_notify_open_slots(int $request_id): int
         if (!$user || !$user->user_email) {
             continue;
         }
-        $subject = sprintf(__('[%1$s] Document waiting for your signature: %2$s', 'edusystem'), $site, $title);
-        $body = sprintf(__('Hello %s,', 'edusystem'), $user->display_name) . "\n\n"
-            . sprintf(__('The document "%s" is waiting for your signature.', 'edusystem'), $title) . "\n\n"
-            . __('Sign in with your own account and open "Documents to sign" to review it and sign it:', 'edusystem') . "\n" . $link . "\n\n"
-            . __('Only you can sign it: nobody else can sign on your behalf.', 'edusystem') . "\n";
+        $subject = sprintf(__('[%1$s] Document waiting for your signature: %2$s', 'wp-certificates'), $site, $title);
+        $body = sprintf(__('Hello %s,', 'wp-certificates'), $user->display_name) . "\n\n"
+            . sprintf(__('The document "%s" is waiting for your signature.', 'wp-certificates'), $title) . "\n\n"
+            . __('Sign in with your own account and open "Documents to sign" to review it and sign it:', 'wp-certificates') . "\n" . $link . "\n\n"
+            . __('Only you can sign it: nobody else can sign on your behalf.', 'wp-certificates') . "\n";
         $mailed = (bool) wp_mail($user->user_email, $subject, $body);
         squuad_cert_signature_request_log_event($request_id, 'signer_notified', ['role' => $slot, 'user_id' => (int) $user->ID, 'mailed' => $mailed]);
         $sent++;

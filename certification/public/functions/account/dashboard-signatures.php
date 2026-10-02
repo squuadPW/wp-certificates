@@ -75,7 +75,7 @@ function squuad_cert_modal_document_automatic()
         } elseif ($posted) {
             // Nonce caducado (la página se envió horas después): se avisa y se conservan las respuestas
             [$field_values] = squuad_cert_document_fields_values($document_fields, wp_unslash($_POST['document_fields'] ?? []));
-            $field_errors = ['expired' => __('Your session expired. Please check your answers and submit them again.', 'edusystem')];
+            $field_errors = ['expired' => __('Your session expired. Please check your answers and submit them again.', 'wp-certificates')];
         }
         if (!$submitted || $field_errors) {
             include SQUUAD_CERT_MODULE_PATH . 'public/templates/document-fields-form.php';
@@ -168,7 +168,7 @@ function squuad_cert_signature_account_documents_to_sign()
     if (!empty($_GET['squuad_cert_pdf']) && function_exists('squuad_cert_signature_account_pdf_requests')) {
         $pdf_requests = squuad_cert_signature_account_pdf_requests($user, [absint($_GET['squuad_cert_pdf'])]);
         if ($pdf_requests) {
-            echo '<section class="edusystem-documents-to-sign" id="edusystem-documents-to-sign" style="margin-bottom:24px"><h3>' . esc_html__('Final PDF', 'edusystem') . '</h3>';
+            echo '<section class="edusystem-documents-to-sign" id="edusystem-documents-to-sign" style="margin-bottom:24px"><h3>' . esc_html__('Final PDF', 'wp-certificates') . '</h3>';
             include SQUUAD_CERT_MODULE_PATH . 'public/templates/signature-final-pdf.php';
             echo '</section>';
             return;

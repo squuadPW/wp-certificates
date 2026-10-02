@@ -18,11 +18,11 @@ if (!defined('ABSPATH')) exit;
 function squuad_cert_document_field_types()
 {
     return [
-        'text' => __('Text', 'edusystem'),
-        'textarea' => __('Text area', 'edusystem'),
-        'radio' => __('Single choice (radio)', 'edusystem'),
-        'checkbox' => __('Multiple choice (checkboxes)', 'edusystem'),
-        'select' => __('Drop-down list', 'edusystem'),
+        'text' => __('Text', 'wp-certificates'),
+        'textarea' => __('Text area', 'wp-certificates'),
+        'radio' => __('Single choice (radio)', 'wp-certificates'),
+        'checkbox' => __('Multiple choice (checkboxes)', 'wp-certificates'),
+        'select' => __('Drop-down list', 'wp-certificates'),
     ];
 }
 
@@ -120,7 +120,7 @@ function squuad_cert_sanitize_document_fields($rows)
             continue; // fila vacía
         }
         if ('' === $label) {
-            $errors[] = sprintf(__('The field "%s" needs a label.', 'edusystem'), $key);
+            $errors[] = sprintf(__('The field "%s" needs a label.', 'wp-certificates'), $key);
             continue;
         }
         $derived = '' === $key;
@@ -131,24 +131,24 @@ function squuad_cert_sanitize_document_fields($rows)
 
         // Clave derivada de una etiqueta sin letras latinas («¿?», «年级»): se pide que la escriban
         if ('' === $key || ($derived && !squuad_cert_document_field_key_is_valid($key))) {
-            $errors[] = sprintf(__('The field "%s" needs a key (lowercase letters, numbers and _).', 'edusystem'), $label);
+            $errors[] = sprintf(__('The field "%s" needs a key (lowercase letters, numbers and _).', 'wp-certificates'), $label);
             continue;
         }
         if (!squuad_cert_document_field_key_is_valid($key)) {
-            $errors[] = sprintf(__('The key "%s" must start with a letter and only use lowercase letters, numbers and _.', 'edusystem'), $key);
+            $errors[] = sprintf(__('The key "%s" must start with a letter and only use lowercase letters, numbers and _.', 'wp-certificates'), $key);
             continue;
         }
         if (!array_key_exists($type, squuad_cert_document_field_types())) {
-            $errors[] = sprintf(__('The field "%s" has an invalid type.', 'edusystem'), $label);
+            $errors[] = sprintf(__('The field "%s" has an invalid type.', 'wp-certificates'), $label);
             continue;
         }
         if (in_array($key, $reserved, true) || in_array($key . '_list', $reserved, true)) {
-            $errors[] = sprintf(__('The key "%s" is already a system variable; choose another one.', 'edusystem'), $key);
+            $errors[] = sprintf(__('The key "%s" is already a system variable; choose another one.', 'wp-certificates'), $key);
             continue;
         }
         // Un campo «x» también ocupa la variable {{x_list}}: tampoco puede existir otro campo «x_list»
         if (isset($fields[$key]) || isset($fields[$key . '_list']) || isset($fields[preg_replace('/_list$/', '', $key)])) {
-            $errors[] = sprintf(__('The key "%s" is repeated.', 'edusystem'), $key);
+            $errors[] = sprintf(__('The key "%s" is repeated.', 'wp-certificates'), $key);
             continue;
         }
 
@@ -161,7 +161,7 @@ function squuad_cert_sanitize_document_fields($rows)
                 }
             }
             if (!$options) {
-                $errors[] = sprintf(__('The field "%s" needs at least one option (one per line).', 'edusystem'), $label);
+                $errors[] = sprintf(__('The field "%s" needs at least one option (one per line).', 'wp-certificates'), $label);
                 continue;
             }
         }
@@ -263,7 +263,7 @@ function squuad_cert_render_document_fields($fields, $values = [])
                 $html .= '<textarea class="form-control" id="' . esc_attr($id) . '" name="' . esc_attr($name) . '" rows="4"' . $required_attr . '>' . esc_textarea($value) . '</textarea>';
             } elseif ('select' === $field['type']) {
                 $html .= '<select class="form-control" id="' . esc_attr($id) . '" name="' . esc_attr($name) . '"' . $required_attr . '>';
-                $html .= '<option value="">' . esc_html__('Select an option', 'edusystem') . '</option>';
+                $html .= '<option value="">' . esc_html__('Select an option', 'wp-certificates') . '</option>';
                 foreach ($field['options'] as $option) {
                     $html .= '<option value="' . esc_attr($option) . '"' . selected($value, $option, false) . '>' . esc_html($option) . '</option>';
                 }
@@ -309,7 +309,7 @@ function squuad_cert_document_fields_values($fields, $input)
         }
 
         if ($field['required'] && (is_array($value) ? !$value : '' === trim($value))) {
-            $errors[$key] = sprintf(__('"%s" is required.', 'edusystem'), $field['label']);
+            $errors[$key] = sprintf(__('"%s" is required.', 'wp-certificates'), $field['label']);
         }
         $values[$key] = $value;
     }

@@ -168,7 +168,7 @@ if (share_card) {
     } catch (error) {
       console.error("Error sharing:", error);
       // Fallback para descarga si falla el share
-      if (confirm("Error al compartir. ¿Quieres descargar la imagen?")) {
+      if (confirm((window.squuadCertCard && squuadCertCard.shareError) || "Error sharing. Do you want to download the image?")) {
         // Código de descarga aquí
       }
     }

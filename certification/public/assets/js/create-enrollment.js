@@ -233,7 +233,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
                 document.getElementById("please_select_grade").style.display = "block";
                 document.getElementById("select_grade").style.color = "red";
                 document.getElementById("select_grade").scrollIntoView({ behavior: "smooth" });
-                alert("To proceed with your document, please select the last grade you completed");
+                alert(signaturesText("selectGrade"));
                 return;
             }
 
@@ -412,7 +412,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
             // Rechazada (sesión caducada, sin permiso, PDF o respuestas inválidas): se avisa y se puede reintentar
             if (XHR.status !== 200 || !response || !response.success) {
                 const message = response && typeof response.data === "string" ? response.data : "";
-                alert(message || "The document could not be saved. Please reload the page and try again.");
+                alert(message || signaturesText("saveFailed"));
                 const button = document.getElementById("saveSignatures");
                 if (button) button.disabled = false;
                 return;
@@ -607,7 +607,8 @@ function autoSignature(hide, show, button_hide, clear_hide = null) {
     const button = document.getElementById("saveSignatures");
     if (button && myRole && (!twoSigners || otherSigned)) {
         const title = document.querySelector("input[name=document_name]");
-        button.innerHTML = "Generate " + (title ? title.value.toLowerCase() : (document.querySelector("input[name=document_id]") && document.querySelector("input[name=document_id]").value !== "ENROLLMENT" ? "missing document" : "enrollment"));
+        const name = title ? title.value.toLowerCase() : (document.querySelector("input[name=document_id]") && document.querySelector("input[name=document_id]").value !== "ENROLLMENT" ? signaturesText("missingDocument") : signaturesText("enrollment"));
+        button.textContent = signaturesText("generate").replace("%s", name);
     }
 }
 

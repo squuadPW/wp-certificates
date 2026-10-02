@@ -28,7 +28,7 @@
                 <?php } ?>
                 <?php if (!empty($legacy_partial)) { ?>
                     <div class="edusystem-signature-notice" style="margin:0 0 12px;padding:10px 12px;border-left:4px solid #dba617;background:#fcf9e8;" data-html2canvas-ignore="true">
-                        <?= esc_html__('This document was updated to the new signature system: please sign it again. Everyone who has to sign it must do so from their own account.', 'edusystem') ?>
+                        <?= esc_html__('This document was updated to the new signature system: please sign it again. Everyone who has to sign it must do so from their own account.', 'wp-certificates') ?>
                     </div>
                 <?php } ?>
                 <?php if (!empty($document_fields)) { // respuestas de los campos adicionales: se guardan con una firma parcial ?>
@@ -37,7 +37,7 @@
                 <?= $html ?>
                 <?php if (!empty($request)) { // queda impreso en el PDF: une el documento a su solicitud y a su contenido ?>
                     <p class="edusystem-signature-footprint" style="margin-top:16px;font-size:9px;color:#666;word-break:break-all;">
-                        <?= esc_html(sprintf(__('Signature request #%1$d, round %2$d · Content fingerprint (SHA-256): %3$s', 'edusystem'), (int) $request->id, (int) $request->round, $request->content_sha256)) ?>
+                        <?= esc_html(sprintf(__('Signature request #%1$d, round %2$d · Content fingerprint (SHA-256): %3$s', 'wp-certificates'), (int) $request->id, (int) $request->round, $request->content_sha256)) ?>
                     </p>
                 <?php } ?>
             </div>
@@ -52,7 +52,7 @@
                         <?= esc_html(squuad_cert_signature_consent_text(SQUUAD_CERT_SIGNATURE_CONSENT_CURRENT)) ?>
                     </label>
                 <?php } ?>
-                <button type="button" class="submit button-create-enrollment" id="saveSignatures"><?= __('Save', 'edusystem') ?></button>
+                <button type="button" class="submit button-create-enrollment" id="saveSignatures"><?= __('Save', 'wp-certificates') ?></button>
             </div>
         </div>
     </div>
@@ -69,7 +69,7 @@
                 const withPdf = <?= wp_json_encode(empty($required_slots)) ?>;
                 const ajaxUrl = (window.ajax_object && window.ajax_object.ajax_url) || <?= wp_json_encode(admin_url('admin-ajax.php')) ?>;
                 const field = (name) => { const input = document.querySelector(`input[name="${name}"]`); return input ? input.value : ""; };
-                const fail = (message) => { alert(message || <?= wp_json_encode(__('The document could not be saved. Please reload the page and try again.', 'edusystem')) ?>); button.disabled = false; };
+                const fail = (message) => { alert(message || <?= wp_json_encode(__('The document could not be saved. Please reload the page and try again.', 'wp-certificates')) ?>); button.disabled = false; };
                 const send = (pdf) => {
                     const data = new FormData();
                     data.append("action", "create_enrollment_document");

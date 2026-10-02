@@ -27,8 +27,8 @@ function squuad_cert_signature_integrity_menu(): void
 {
     add_submenu_page(
         SQUUAD_CERT_SIGNERS_PARENT,
-        __('Signature integrity', 'edusystem'),
-        __('Signature integrity', 'edusystem'),
+        __('Signature integrity', 'wp-certificates'),
+        __('Signature integrity', 'wp-certificates'),
         SQUUAD_CERT_SIGNATURE_INTEGRITY_CAP,
         'squuad-cert-signature-integrity',
         'squuad_cert_signature_integrity_page',
@@ -40,7 +40,7 @@ function squuad_cert_signature_integrity_menu(): void
 function squuad_cert_signature_integrity_check_request(string $action): void
 {
     if (!current_user_can(SQUUAD_CERT_SIGNATURE_INTEGRITY_CAP)) {
-        wp_die(esc_html__('You do not have permission to manage signature integrity.', 'edusystem'), 403);
+        wp_die(esc_html__('You do not have permission to manage signature integrity.', 'wp-certificates'), 403);
     }
     check_admin_referer($action);
 }
@@ -100,7 +100,7 @@ function squuad_cert_signature_integrity_handle_csv(): void
 function squuad_cert_signature_integrity_page(): void
 {
     if (!current_user_can(SQUUAD_CERT_SIGNATURE_INTEGRITY_CAP)) {
-        wp_die(esc_html__('You do not have permission to manage signature integrity.', 'edusystem'), 403);
+        wp_die(esc_html__('You do not have permission to manage signature integrity.', 'wp-certificates'), 403);
     }
 
     $enabled = squuad_cert_signature_evidence_enabled();

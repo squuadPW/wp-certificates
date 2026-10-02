@@ -40,11 +40,17 @@ function squuad_cert_signature_public_assets(): void
         'nonce' => wp_create_nonce('edusystem_signatures'),
         'currentUserId' => get_current_user_id(),
         'i18n' => [
-            'pendingStudent' => __('Pending: the student must sign from their own account', 'edusystem'),
-            'pendingParent' => __('Pending: the parent or guardian must sign from their own account', 'edusystem'),
-            'signYourPart' => __('To continue, please sign in your area or generate your signature automatically.', 'edusystem'),
-            'waitingOther' => __('Your signature is saved. The document will be completed when the other person signs from their own account.', 'edusystem'),
-            'consentRequired' => __('To sign, you must accept signing the document electronically.', 'edusystem'),
+            'pendingStudent' => __('Pending: the student must sign from their own account', 'wp-certificates'),
+            'pendingParent' => __('Pending: the parent or guardian must sign from their own account', 'wp-certificates'),
+            'signYourPart' => __('To continue, please sign in your area or generate your signature automatically.', 'wp-certificates'),
+            'waitingOther' => __('Your signature is saved. The document will be completed when the other person signs from their own account.', 'wp-certificates'),
+            'consentRequired' => __('To sign, you must accept signing the document electronically.', 'wp-certificates'),
+            'selectGrade' => __('To proceed with your document, please select the last grade you completed', 'wp-certificates'),
+            'saveFailed' => __('The document could not be saved. Please reload the page and try again.', 'wp-certificates'),
+            /* translators: %s: name of the document (in lower case) */
+            'generate' => __('Generate %s', 'wp-certificates'),
+            'missingDocument' => __('missing document', 'wp-certificates'),
+            'enrollment' => __('enrollment', 'wp-certificates'),
         ],
     ]);
     wp_enqueue_script('create-enrollment');

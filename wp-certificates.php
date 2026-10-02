@@ -9,6 +9,7 @@ Author URI: https://edusof.com
 License: GPL2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain: wp-certificates
+Domain Path: /languages
 */
 
 // Evitar acceso directo
@@ -58,6 +59,12 @@ require_once WP_C_PATH . 'includes/permissions.php';
 // EDUSYSTEM_CERTIFICATION_PATH al arrancar (nunca dos módulos de firma a la vez). En plugins_loaded, cuando todos los
 // plugins ya están cargados, para no depender del orden de carga.
 add_action('plugins_loaded', 'squuad_cert_load_signature_module', 1);
+
+// Traducciones propias (languages/): todo el plugin, también el módulo de firmas, usa el dominio wp-certificates
+add_action('plugins_loaded', 'squuad_cert_load_textdomain');
+function squuad_cert_load_textdomain() {
+    load_plugin_textdomain('wp-certificates', false, dirname(plugin_basename(__FILE__)) . '/languages');
+}
 function squuad_cert_load_signature_module() {
     if (defined('EDUSYSTEM_CERTIFICATION_PATH') || defined('SQUUAD_CERT_MODULE_PATH')) {
         return;

@@ -32,6 +32,7 @@ function squuad_cert_generate_scripts(): void
         'url' => admin_url('admin-ajax.php'),
         'action' => 'generate_document',
         'nonce' => wp_create_nonce('squuad_cert_generate'),
+        'i18n' => ['failed' => __('The document could not be generated.', 'wp-certificates')],
     ]);
 }
 
@@ -50,13 +51,13 @@ function squuad_cert_generate_document(): void
     }
     // Mismo permiso que antes: administrador con permiso de Admisión (edición o lectura)
     if (!call_user_func($provider['can_act'], get_current_user_id(), $student_id, 'generate')) {
-        wp_send_json_error(['message' => __('You do not have permission to manage admissions.', 'edusystem')], 403);
+        wp_send_json_error(['message' => __('You do not have permission to manage admissions.', 'wp-certificates')], 403);
     }
     $subject = (array) call_user_func($provider['book_line_data'], $student_id, null);
     $student = $subject['student'] ?? null;
     $document = get_document_detail($document_certificate_id);
     if (!$student || !$document) {
-        wp_send_json_error(__('The student or the document does not exist.', 'edusystem'), 404);
+        wp_send_json_error(__('The student or the document does not exist.', 'wp-certificates'), 404);
     }
     $emission_date = (new DateTime('now', new DateTimeZone('UTC')))->format('Y-m-d');
 
@@ -64,7 +65,7 @@ function squuad_cert_generate_document(): void
     // para firma. Siempre, sin depender de otra comprobación: las firmas-imagen se retiraron (ADR 0004)
     if ($document->signature_required) {
         squuad_cert_log(sprintf('Generar con firma-imagen bloqueado: documento %d, estudiante %d, usuario %d', (int) $document->id, (int) $student->id, get_current_user_id()), 'signature_blocked');
-        wp_send_json_error(__('This document requires signatures: it can no longer be generated with signature images. Configure its signers (Certification > Documents > Document signers) and issue it for signature; each responsible person signs from their own account.', 'edusystem'), 409);
+        wp_send_json_error(__('This document requires signatures: it can no longer be generated with signature images. Configure its signers (Certification > Documents > Document signers) and issue it for signature; each responsible person signs from their own account.', 'wp-certificates'), 409);
     }
 
     // Valores de las variables: los resuelve wp-certificates (ADR 0005 de EduSystem)

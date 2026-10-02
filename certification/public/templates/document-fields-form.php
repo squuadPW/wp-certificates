@@ -21,7 +21,7 @@
                 <?php wp_nonce_field('edusystem_document_fields_' . $document->id); ?>
 
                 <h3 style="font-weight: 600; margin: 0 0 0.5rem"><?= esc_html($document->title) ?></h3>
-                <p style="margin-top: 0"><?= esc_html__('Before continuing, complete the following information. It will be used to fill in the document.', 'edusystem') ?></p>
+                <p style="margin-top: 0"><?= esc_html__('Before continuing, complete the following information. It will be used to fill in the document.', 'wp-certificates') ?></p>
 
                 <?php if ($field_errors) { ?>
                     <div id="document-fields-errors" role="alert" style="color: #b32d2e; margin-bottom: 1rem">
@@ -34,7 +34,7 @@
                 <?= squuad_cert_render_document_fields($document_fields, $field_values) ?>
 
                 <div style="text-align: center; margin-top: 2rem">
-                    <button type="submit" class="submit button-create-enrollment"><?= esc_html__('Continue', 'edusystem') ?></button>
+                    <button type="submit" class="submit button-create-enrollment"><?= esc_html__('Continue', 'wp-certificates') ?></button>
                 </div>
             </form>
         </div>
