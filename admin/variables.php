@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 /**
  * Certificación > Variables: las variables del catálogo guardadas en la base de datos ({prefix}variables_document).
- * Solo el administrador del sitio (manage_options). Permite ver, editar y eliminar cada variable.
+ * Solo quien tiene squuad_cert_manage_variables (por defecto, el administrator). Permite ver, editar y eliminar cada variable.
  *
  * Esta tabla solo es la LISTA que se muestra al escribir una plantilla: editar o eliminar una fila no cambia cómo se
  * calcula la variable al generar un documento (Antigravity/variable.md de EduSystem).
@@ -28,7 +28,7 @@ function squuad_cert_variables_menu(): void
         'add_admin_form_certificates_content',
         esc_html__('Variables', 'wp-certificates'),
         esc_html__('Variables', 'wp-certificates'),
-        'manage_options',
+        'squuad_cert_manage_variables',
         SQUUAD_CERT_VARIABLES_PAGE,
         'squuad_cert_variables_page'
     );
@@ -95,7 +95,7 @@ function squuad_cert_variables_notice(?string $message = null, bool $ok = true):
 
 function squuad_cert_variables_page(): void
 {
-    if (!current_user_can('manage_options')) {
+    if (!current_user_can('squuad_cert_manage_variables')) {
         wp_die(esc_html__('Sorry, you are not allowed to access this page.', 'wp-certificates'), 403);
     }
     global $wpdb;
@@ -123,7 +123,7 @@ function squuad_cert_variables_page(): void
 add_action('admin_post_squuad_cert_variable_save', 'squuad_cert_variable_save_handle');
 function squuad_cert_variable_save_handle(): void
 {
-    if (!current_user_can('manage_options')) {
+    if (!current_user_can('squuad_cert_manage_variables')) {
         wp_die(esc_html__('Sorry, you are not allowed to access this page.', 'wp-certificates'), 403);
     }
     $id = absint($_POST['id'] ?? 0);
@@ -164,7 +164,7 @@ function squuad_cert_variable_save_handle(): void
 add_action('admin_post_squuad_cert_variable_delete', 'squuad_cert_variable_delete_handle');
 function squuad_cert_variable_delete_handle(): void
 {
-    if (!current_user_can('manage_options')) {
+    if (!current_user_can('squuad_cert_manage_variables')) {
         wp_die(esc_html__('Sorry, you are not allowed to access this page.', 'wp-certificates'), 403);
     }
     $id = absint($_POST['id'] ?? 0);
@@ -206,7 +206,7 @@ function squuad_cert_variable_method_from_post(): ?string
 add_action('admin_post_squuad_cert_variable_create', 'squuad_cert_variable_create_handle');
 function squuad_cert_variable_create_handle(): void
 {
-    if (!current_user_can('manage_options')) {
+    if (!current_user_can('squuad_cert_manage_variables')) {
         wp_die(esc_html__('Sorry, you are not allowed to access this page.', 'wp-certificates'), 403);
     }
     check_admin_referer('squuad_cert_variable_create');
@@ -254,7 +254,7 @@ function squuad_cert_variable_create_handle(): void
 add_action('admin_post_squuad_cert_variables_link', 'squuad_cert_variables_link_handle');
 function squuad_cert_variables_link_handle(): void
 {
-    if (!current_user_can('manage_options')) {
+    if (!current_user_can('squuad_cert_manage_variables')) {
         wp_die(esc_html__('Sorry, you are not allowed to access this page.', 'wp-certificates'), 403);
     }
     check_admin_referer('squuad_cert_variables_link');
@@ -271,7 +271,7 @@ function squuad_cert_variables_link_handle(): void
 add_action('admin_post_squuad_cert_method_plugins', 'squuad_cert_method_plugins_handle');
 function squuad_cert_method_plugins_handle(): void
 {
-    if (!current_user_can('manage_options')) {
+    if (!current_user_can('squuad_cert_manage_variables')) {
         wp_die(esc_html__('Sorry, you are not allowed to access this page.', 'wp-certificates'), 403);
     }
     check_admin_referer('squuad_cert_method_plugins');
@@ -287,7 +287,7 @@ function squuad_cert_method_plugins_handle(): void
 add_action('admin_post_squuad_cert_method_release', 'squuad_cert_method_release_handle');
 function squuad_cert_method_release_handle(): void
 {
-    if (!current_user_can('manage_options')) {
+    if (!current_user_can('squuad_cert_manage_variables')) {
         wp_die(esc_html__('Sorry, you are not allowed to access this page.', 'wp-certificates'), 403);
     }
     $method = sanitize_text_field(wp_unslash($_POST['method'] ?? ''));

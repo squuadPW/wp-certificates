@@ -105,17 +105,21 @@ function squuad_cert_document_signing_handle_save(): void
  * ------------------------------------------------------------------------------------------------------------ */
 
 /**
- * ¿Puede el usuario actual emitir (o declinar) documentos para firma de esta ficha? Lo decide el proveedor del titular
- * (can_act 'issue'); sin proveedor, solo el administrador del sitio.
+ * ¿Puede el usuario actual emitir (o declinar) documentos para firma de esta ficha? Hace falta el permiso «Emitir para
+ * firma» (squuad_cert_issue_documents, Certificación > Permisos) y, si el titular tiene proveedor, que este lo deje
+ * actuar sobre esa ficha (can_act 'issue').
  */
 function squuad_cert_document_issue_can(int $student_id = 0): bool
 {
+    if (!current_user_can('squuad_cert_issue_documents')) {
+        return false;
+    }
     $provider = $student_id && function_exists('squuad_cert_subject_type') ? squuad_cert_subject_type(SQUUAD_CERT_SUBJECT_STUDENT) : null;
     if ($provider && !empty($provider['can_act'])) {
         return (bool) call_user_func($provider['can_act'], get_current_user_id(), $student_id, 'issue');
     }
 
-    return current_user_can('manage_options');
+    return true;
 }
 
 add_action('admin_post_squuad_cert_issue_document', 'squuad_cert_document_issue_handle');

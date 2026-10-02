@@ -27,7 +27,8 @@ define('WP_C_REMOTE_INFO_URL', 'https://versions.squuad.com/plugins/wp-certifica
 // 8: documents_certificates.priority, orden de los documentos automáticos en Mi Cuenta (0 = el más urgente).
 // 9: tablas de las firmas propias (squuad_cert_*: solicitudes por cuenta, firmas, anuladas, contenido, eventos,
 //    cadena, firmantes, políticas, lotes y libro) y clave del sitio (ADR 0004 de EduSystem, paso 3b).
-define('WP_C_DB_VERSION', '9');
+// 10: permisos propios de certificación (squuad_cert_*); concesión inicial una sola vez (includes/permissions.php).
+define('WP_C_DB_VERSION', '10');
 
 // get_plugin_data() vive en wp-admin/includes/plugin.php, que en el front no está cargado (antes solo funcionaba
 // porque EduSystem lo cargaba primero)
@@ -51,6 +52,7 @@ require_once WP_C_PATH . 'includes/variables.php';
 require_once WP_C_PATH . 'includes/book.php';
 require_once WP_C_PATH . 'includes/automatic.php';
 require_once WP_C_PATH . 'includes/signing-roles.php';
+require_once WP_C_PATH . 'includes/permissions.php';
 
 // Módulo de firmas (ADR 0004 de EduSystem, paso 4b-4): solo si EduSystem no carga el suyo, que define
 // EDUSYSTEM_CERTIFICATION_PATH al arrancar (nunca dos módulos de firma a la vez). En plugins_loaded, cuando todos los
@@ -300,6 +302,8 @@ function create_tables_certificates() {
     squuad_cert_schema_signers();
     squuad_cert_schema_signatures();
     squuad_cert_signatures_install();
+    // Permisos propios de certificación (Certificación > Permisos)
+    squuad_cert_permissions_install();
 
     default_templates();
     default_templates_cards();

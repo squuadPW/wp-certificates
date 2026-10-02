@@ -221,10 +221,21 @@ function squuad_cert_signers_allow_admin_access($prevent)
     return $prevent;
 }
 
-/** ¿Puede este usuario ser firmante? Cualquiera que no sea estudiante ni representante (ellos firman lo suyo). */
+/**
+ * Roles que no pueden ser firmantes del sistema: los de Certificación > Signing roles (firman lo suyo, como dueños del
+ * documento) y siempre el rol student.
+ *
+ * @return string[]
+ */
+function squuad_cert_signer_excluded_roles(): array
+{
+    return array_values(array_unique(array_merge(squuad_cert_signing_roles(), ['student'])));
+}
+
+/** ¿Puede este usuario ser firmante del sistema? Cualquiera que no tenga uno de los roles que firman lo suyo. */
 function squuad_cert_signer_user_is_eligible(WP_User $user): bool
 {
-    return !array_intersect((array) $user->roles, ['student', 'parent']);
+    return !array_intersect((array) $user->roles, squuad_cert_signer_excluded_roles());
 }
 
 /** Texto del consentimiento para registrar la firma propia (versión v1-perfil), traducido. */

@@ -192,7 +192,7 @@ function squuad_cert_signers_page(): void
         $query = new WP_User_Query([
             'search' => '*' . $search . '*',
             'search_columns' => ['user_email', 'display_name', 'user_login', 'user_nicename'],
-            'role__not_in' => ['student', 'parent'],
+            'role__not_in' => squuad_cert_signer_excluded_roles(),
             'number' => 20,
             'orderby' => 'display_name',
         ]);

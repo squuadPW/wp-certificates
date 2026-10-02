@@ -47,6 +47,7 @@ require plugin_dir_path(__FILE__) . 'users-signatures.php';
 require plugin_dir_path(__FILE__) . 'documents.php';
 require plugin_dir_path(__FILE__) . 'variables.php';
 require plugin_dir_path(__FILE__) . 'signing-roles.php';
+require plugin_dir_path(__FILE__) . 'permissions.php';
 require plugin_dir_path(__FILE__) . 'generate.php';
 
 add_action('wp_enqueue_scripts', 'certificates_scripts');

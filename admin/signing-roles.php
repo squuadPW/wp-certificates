@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 /**
- * Certificación > Roles que firman: el administrador del sitio (manage_options) marca qué roles pueden firmar
+ * Certificación > Roles que firman: quien tiene squuad_cert_manage_signing_roles (por defecto, el administrator) marca qué roles pueden firmar
  * documentos (includes/signing-roles.php). Lista todos los roles del sitio, también los que crean otros plugins.
  */
 
@@ -20,7 +20,7 @@ function squuad_cert_signing_roles_menu(): void
         'add_admin_form_certificates_content',
         esc_html__('Signing roles', 'wp-certificates'),
         esc_html__('Signing roles', 'wp-certificates'),
-        'manage_options',
+        'squuad_cert_manage_signing_roles',
         SQUUAD_CERT_SIGNING_ROLES_PAGE,
         'squuad_cert_signing_roles_page'
     );
@@ -44,7 +44,7 @@ function squuad_cert_signing_roles_notice(?string $message = null, bool $ok = tr
 
 function squuad_cert_signing_roles_page(): void
 {
-    if (!current_user_can('manage_options')) {
+    if (!current_user_can('squuad_cert_manage_signing_roles')) {
         wp_die(esc_html__('Sorry, you are not allowed to access this page.', 'wp-certificates'), 403);
     }
     $roles = squuad_cert_site_roles();
@@ -57,7 +57,7 @@ function squuad_cert_signing_roles_page(): void
 add_action('admin_post_squuad_cert_signing_roles_save', 'squuad_cert_signing_roles_save_handle');
 function squuad_cert_signing_roles_save_handle(): void
 {
-    if (!current_user_can('manage_options')) {
+    if (!current_user_can('squuad_cert_manage_signing_roles')) {
         wp_die(esc_html__('Sorry, you are not allowed to access this page.', 'wp-certificates'), 403);
     }
     check_admin_referer('squuad_cert_signing_roles_save');
