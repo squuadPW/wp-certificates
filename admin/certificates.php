@@ -81,9 +81,9 @@ function admin_certificate_assignment_content () {
         $emission_date = current_time('mysql'); 
 
         // Nadie firma por otro (EduSystem, ADR 0003 paso 10): los documentos que exigen firma se emiten para firma
-        // desde la ficha del estudiante en EduSystem, no aquí
+        // desde la ficha del estudiante, no aquí. Siempre: las firmas-imagen se retiraron (ADR 0004)
         $certificate_document = $certificate_id && function_exists('get_document_detail') ? get_document_detail($certificate_id) : null;
-        if ( $certificate_document && !empty($certificate_document->signature_required) && wpc_third_party_signatures_blocked() ) {
+        if ( $certificate_document && !empty($certificate_document->signature_required) ) {
             setcookie('message-error', __('This document requires signatures: it cannot be issued here. Configure its signers and issue it for signature from the student file; each responsible person signs from their own account.', 'wp-certificates'), time() + 10, '/');
             wp_redirect(admin_url('admin.php?page=admin_certificate_assignment_content'));
             exit;

@@ -13,16 +13,12 @@ document.addEventListener("DOMContentLoaded", function () {
     button.addEventListener("click", function () {
       restoreButtonsCertificates(true);
 
-      let signature_required = this.dataset.signaturerequired;
       document.querySelector("input[name=document_certificate_id]").value =
         this.dataset.documentcertificate;
 
-      if (signature_required == 1) {
-        const modal = document.getElementById("documentcertificate-modal");
-        modal.style.display = "block";
-      } else {
-        document.getElementById("documentcertificate-button").click();
-      }
+      // Sin ventana para elegir firma-imagen (retirada, ADR 0004): un documento que exige firma se emite para firma y el
+      // servidor lo rechaza aquí
+      document.getElementById("documentcertificate-button").click();
     });
   });
 
@@ -51,9 +47,6 @@ document.addEventListener("DOMContentLoaded", function () {
       let document_certificate_id = document.querySelector(
         "input[name=document_certificate_id]"
       ).value;
-      let user_signature_id = document.querySelector(
-        "select[name=user_signature_id]"
-      ).value;
       let student_id = document.querySelector(
         "input[name=student_document_certificate_id]"
       ).value;
@@ -67,8 +60,6 @@ document.addEventListener("DOMContentLoaded", function () {
           squuadCertGenerate.action + "&_ajax_nonce=" + squuadCertGenerate.nonce +
           "&document_certificate_id=" +
           document_certificate_id +
-          "&user_signature_id=" +
-          user_signature_id +
           "&student_id=" +
           student_id
       );
@@ -335,11 +326,9 @@ document.addEventListener("DOMContentLoaded", function () {
       const input = document.querySelector(
         "input[name='document_certificate_id']"
       );
-      const select = document.querySelector("select[name='user_signature_id']");
       const qrcode = document.getElementById("qrcode");
 
       if (input) input.value = "";
-      if (select) select.value = "";
       if (qrcode) qrcode.innerHTML = "";
 
       restoreButtonsCertificates(false);

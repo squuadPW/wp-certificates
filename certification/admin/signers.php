@@ -4,11 +4,10 @@ declare(strict_types=1);
 /**
  * EduSystem - Firmantes del sistema en el admin (ADR 0003, paso 3).
  *
- * - "Users and signatures" (menú Certification de wp-certificates): con el esquema v6, EduSystem sustituye el
- *   contenido de esa misma página (mismo menú y URL) por la gestión de firmantes: buscar usuarios por nombre o
- *   correo, invitarlos (o invitar a quien no tiene cuenta a registrarse), reenviar, revocar y suspender. Las
- *   firmas-imagen heredadas se listan en solo lectura con "Invitar a este usuario". Las acciones antiguas de
- *   wp-certificates (guardar/borrar sin nonce) dejan de estar disponibles.
+ * - "Users and signatures" (menú Certification, misma URL que la antigua pantalla de firmas-imagen, retirada en el
+ *   ADR 0004): gestión de firmantes: buscar usuarios por nombre o correo, invitarlos (o invitar a quien no tiene
+ *   cuenta a registrarse), reenviar, revocar y suspender. Las firmas-imagen heredadas se listan en solo lectura con
+ *   "Invitar a este usuario".
  * - "Mi firma": cada firmante registra su propia firma (dibujada, con contraseña y consentimiento).
  */
 
@@ -26,18 +25,11 @@ function squuad_cert_signers_menu(): void
         return;
     }
 
-    // Sustituir el contenido de "Users and signatures" de wp-certificates, en su misma URL
-    $exists = false;
-    foreach ((array) ($submenu[SQUUAD_CERT_SIGNERS_PARENT] ?? []) as $item) {
-        if (($item[2] ?? '') === SQUUAD_CERT_SIGNERS_PAGE) {
-            $exists = true;
-            break;
-        }
-    }
-    if ($exists) {
-        $hook = get_plugin_page_hookname(SQUUAD_CERT_SIGNERS_PAGE, SQUUAD_CERT_SIGNERS_PARENT);
-        remove_all_actions($hook);
-        remove_submenu_page(SQUUAD_CERT_SIGNERS_PARENT, SQUUAD_CERT_SIGNERS_PAGE);
+    // "Users and signatures": la gestión de firmantes, en la URL de la pantalla antigua de firmas-imagen (retirada, ADR
+    // 0004). Con el menú Certificación visible va en su sitio; si no (p. ej. suscripción caducada), como "Signers"
+    if (!empty($submenu[SQUUAD_CERT_SIGNERS_PARENT])) {
+        // En el sitio de siempre: antes de "ID card"
+        $position = array_search('add_admin_form_cards_content', array_column($submenu[SQUUAD_CERT_SIGNERS_PARENT], 2), true);
         add_submenu_page(
             SQUUAD_CERT_SIGNERS_PARENT,
             __('Users and signatures', 'edusystem'),
@@ -45,10 +37,9 @@ function squuad_cert_signers_menu(): void
             'manager_users_signatures_certificate',
             SQUUAD_CERT_SIGNERS_PAGE,
             'squuad_cert_signers_page',
-            10
+            false === $position ? null : (int) $position
         );
     } else {
-        // Sin el menú «Users and signatures» (p. ej. suscripción caducada): la gestión va bajo Certificación
         add_submenu_page(SQUUAD_CERT_SIGNERS_PARENT, __('Signers', 'edusystem'), __('Signers', 'edusystem'), SQUUAD_CERT_MANAGE_SIGNERS_CAP, SQUUAD_CERT_SIGNERS_PAGE, 'squuad_cert_signers_page', 30);
     }
 

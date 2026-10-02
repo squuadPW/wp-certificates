@@ -5,7 +5,7 @@ declare(strict_types=1);
  * «Generar» un documento desde la ficha del estudiante (Admisión de EduSystem). ADR 0004 de EduSystem: todo documento
  * configurado en Certificación > Documentos lo genera wp-certificates; EduSystem solo muestra el botón.
  *
- * - squuad_cert_render_generate_modal(): las ventanas (firma heredada y vista del documento con descarga en PDF).
+ * - squuad_cert_render_generate_modal(): la ventana con la vista del documento y la descarga en PDF.
  * - El script admin/assets/js/generate-document.js, solo en la ficha del estudiante.
  * - AJAX generate_document: devuelve el documento rellenado. Movido desde edusystem/admin/admission/ajax.php; el titular
  *   (estudiante) y sus permisos los da el proveedor de EduSystem, y los valores los resuelve wp-certificates.
@@ -18,7 +18,6 @@ const SQUUAD_CERT_GENERATE_SUBJECT = 'edusystem_student';
 /** Ventanas de «Generar» en la ficha del estudiante. */
 function squuad_cert_render_generate_modal(int $student_id): void
 {
-    $users_signatures_certificates = function_exists('get_users_signatures_certificates') ? get_users_signatures_certificates() : [];
     include WP_C_PATH . 'admin/templates/generate-modal.php';
 }
 
@@ -43,7 +42,6 @@ function squuad_cert_generate_document(): void
 
     $student_id = absint($_POST['student_id'] ?? 0);
     $document_certificate_id = absint($_POST['document_certificate_id'] ?? 0);
-    $user_signature_id = absint($_POST['user_signature_id'] ?? 0);
 
     // El titular lo aporta el proveedor de EduSystem: sin él no hay estudiantes
     $provider = squuad_cert_subject_type(SQUUAD_CERT_GENERATE_SUBJECT);
@@ -62,42 +60,18 @@ function squuad_cert_generate_document(): void
     }
     $emission_date = (new DateTime('now', new DateTimeZone('UTC')))->format('Y-m-d');
 
-    // Nadie firma por otro (ADR 0003 de EduSystem, paso 10): un documento que exige firma no se genera con firmas-imagen
-    if ($document->signature_required && wpc_third_party_signatures_blocked()) {
+    // Nadie firma por otro (ADR 0003 de EduSystem, paso 10): un documento que exige firma no se genera aquí, se emite
+    // para firma. Siempre, sin depender de otra comprobación: las firmas-imagen se retiraron (ADR 0004)
+    if ($document->signature_required) {
         squuad_cert_log(sprintf('Generar con firma-imagen bloqueado: documento %d, estudiante %d, usuario %d', (int) $document->id, (int) $student->id, get_current_user_id()), 'signature_blocked');
         wp_send_json_error(__('This document requires signatures: it can no longer be generated with signature images. Configure its signers (Certification > Documents > Document signers) and issue it for signature; each responsible person signs from their own account.', 'edusystem'), 409);
     }
-    // Firma-imagen heredada, leída con SQL preparado (ADR 0003 de EduSystem, paso 0)
-    $signature = function_exists('squuad_cert_legacy_institutional_signature') ? squuad_cert_legacy_institutional_signature($user_signature_id) : null;
-    if ($document->signature_required && !$signature) {
-        wp_send_json_error(__('Select a valid signature for this document.', 'edusystem'), 400);
-    }
-    $user_signature = $signature ? get_user_by('id', (int) $signature->user_id) : null;
 
     // Valores de las variables: los resuelve wp-certificates (ADR 0005 de EduSystem)
     $replacements = squuad_cert_template_replacements($document->header . $document->content . $document->footer, (int) $student->id, ['document' => $document, 'certificate_id' => $document->id])['replacements'];
     // Campos adicionales del documento: aquí no hay respuestas; así no queda el texto literal {{clave}}
     if (function_exists('squuad_cert_document_fields_empty_replacements')) {
         $replacements = array_merge(squuad_cert_document_fields_empty_replacements($document), $replacements);
-    }
-
-    if ($document->signature_required && $signature) {
-        // Cada uso de una firma heredada queda registrado: qué firma, quién la eligió, estudiante y documento
-        wpc_log_signature_action(sprintf(
-            'Firma institucional heredada %d (usuario %d) usada por el usuario %d en el documento %d del estudiante %d',
-            (int) $signature->id,
-            (int) $signature->user_id,
-            get_current_user_id(),
-            (int) $document->id,
-            (int) $student->id
-        ));
-        $user_sign = $user_signature ? $user_signature->first_name . ' ' . $user_signature->last_name : '';
-        $replacements['user_sign'] = ['value' => $user_sign, 'wrap' => true];
-        $replacements['position_user_charge'] = ['value' => $signature->charge, 'wrap' => true];
-        $replacements['signature'] = [
-            'value' => '<img style="width: auto !important; height: 100px !important;" src="' . wp_get_attachment_url($signature->attach_id) . '"/>',
-            'wrap' => false,
-        ];
     }
 
     $create_certificate_qr = false !== strpos((string) $document->content, '{{qrcode}}')

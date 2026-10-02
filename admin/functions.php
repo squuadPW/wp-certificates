@@ -96,19 +96,6 @@ function admin_wp_certificates_scripts()
         wp_enqueue_script('documents', plugins_url('wp-certificates') . '/admin/assets/js/documents.js', array('jquery'), $version, true);
     }
 
-    if (isset($_GET['page']) && !empty($_GET['page']) && $_GET['page'] == 'add_admin_form_users_signatures_certificate_list_content') {
-        wp_enqueue_style('select2', 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css');
-        wp_enqueue_script('select2', 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js', ['jquery']);
-
-        // Especifica jQuery como dependencia y usa la versión empaquetada con WordPress
-        wp_enqueue_script(
-            'pensum',
-            plugins_url('wp-certificates') . '/admin/assets/js/user_signatures.js',
-            ['jquery', 'select2'], // Asegura que jQuery y Select2 se carguen primero
-            $version,
-            true
-        );
-    }
 }
 
 add_action('admin_enqueue_scripts', 'admin_wp_certificates_scripts', 3);
@@ -133,7 +120,7 @@ function add_certificates_page_admin()
             add_submenu_page('add_admin_form_certificates_content', esc_html__('Certificate assignment', 'wp-certificates'), esc_html__('Certificate assignment', 'wp-certificates'), 'manager_certificate_assignment', 'admin_certificate_assignment_content', 'admin_certificate_assignment_content', 10);
         }
         // add_submenu_page('add_admin_form_certificates_content', esc_html__('Certificates', 'wp-certificates'), esc_html__('Certificates', 'wp-certificates'), 'manager_certificates_templates', 'add_admin_form_certificates_templates_content', 'add_admin_form_certificates_templates_content', 10);
-        add_submenu_page('add_admin_form_certificates_content', esc_html__('Users and signatures', 'wp-certificates'), esc_html__('Users and signatures', 'wp-certificates'), 'manager_users_signatures_certificate', 'add_admin_form_users_signatures_certificate_list_content', 'add_admin_form_users_signatures_certificate_list_content', 10);
+        // «Users and signatures» lo registra el módulo de firmas (certification/admin/signers.php), en esta misma URL
         add_submenu_page('add_admin_form_certificates_content', esc_html__('ID card', 'wp-certificates'), esc_html__('ID card', 'wp-certificates'), 'manager_id_card', 'add_admin_form_cards_content', 'add_admin_form_cards_content', 10);
         add_submenu_page('add_admin_form_certificates_content', esc_html__('Configuration', 'wp-Configuration'), esc_html__('Configuration', 'wp-certificates'), 'manager_configuration_certificates', 'add_admin_form_configuration_options_certificates_content', 'add_admin_form_configuration_options_certificates_content', 10);
         remove_submenu_page('add_admin_form_certificates_content', 'add_admin_form_certificates_content');

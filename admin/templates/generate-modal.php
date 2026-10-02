@@ -1,8 +1,8 @@
 <?php
 /**
- * «Generar» un documento desde la ficha del estudiante: ventana para elegir la firma-imagen heredada y ventana con el
- * documento y el botón de descarga en PDF. Movido sin cambios desde edusystem/admin/templates/student-details.php y
- * document-export.php (ADR 0004 de EduSystem). Variables: $student_id, $users_signatures_certificates.
+ * «Generar» un documento desde la ficha del estudiante: datos del documento a generar (#documentcertificate-modal, ya
+ * no se muestra) y ventana con el documento y el botón de descarga en PDF. Movido desde edusystem/admin/templates/student-details.php y document-export.php (ADR 0004 de
+ * EduSystem); sin el selector de firma-imagen, que se retiró. Variables: $student_id.
  * Los textos conservan el dominio de traducción de EduSystem hasta que se porten a wp-certificates.
  */
 defined('ABSPATH') || exit;
@@ -17,18 +17,6 @@ defined('ABSPATH') || exit;
             <div class="modal-body" style="padding:10px;">
                 <input type="hidden" name="document_certificate_id">
                 <input type="hidden" name="student_document_certificate_id" value="<?= (int) $student_id ?>">
-                <div>
-                    <label for="user_signature_id"><?= esc_html__('Who signed this document', 'edusystem') ?></label><br>
-                    <select name="user_signature_id" required>
-                        <option value="" selected><?= esc_html__('Assigns an user', 'edusystem') ?></option>
-                        <?php foreach ($users_signatures_certificates as $user) {
-                            $user_loaded = get_user_by('id', $user->user_id);
-                        ?>
-                            <option value="<?= $user->id ?>"><?= $user_loaded->first_name ?> <?= $user_loaded->last_name ?>
-                                (<?= $user->charge ?>)</option>
-                        <?php } ?>
-                    </select>
-                </div>
             </div>
             <div class="modal-footer">
                 <button id="documentcertificate-button" type="button"
