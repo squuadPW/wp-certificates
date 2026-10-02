@@ -124,7 +124,7 @@ function squuad_cert_request_signers_fix(object $request, array $signers, int $d
         $document_certificate_id
     )) : null;
     $policy = $document ? squuad_cert_signing_policy($document) : [
-        'slots' => [['slot_type' => 'student', 'signer_id' => 0]],
+        'slots' => [['slot_type' => 'role', 'signer_id' => 0, 'role' => 'student']],
         'policy_sha256' => null,
     ];
     // Un documento automático sin variable de firma no pide firma aunque el panel tenga firmantes: solo lo rellena el
@@ -135,7 +135,8 @@ function squuad_cert_request_signers_fix(object $request, array $signers, int $d
 
     $slots = [];
     foreach ($policy['slots'] as $policy_slot) {
-        if ('student' === $policy_slot['slot_type'] && $student_user_id) {
+        // Rol student: el puesto del estudiante (los demás roles reciben su propio documento a partir del paso 3c)
+        if ('role' === $policy_slot['slot_type'] && 'student' === $policy_slot['role'] && $student_user_id) {
             $slots[] = ['slot_key' => 'student', 'user_id' => $student_user_id, 'signer_id' => 0, 'charge' => '', 'phase' => 1];
         } elseif ('signer' === $policy_slot['slot_type'] && squuad_cert_signer_inbox_enabled()) {
             // Firmantes institucionales: fase 2 (después del estudiante), cuando ya tienen su panel. Un hueco 'parent'
@@ -627,15 +628,27 @@ function squuad_cert_signing_policy(object $document): array
     )) : null;
 
     if ($row) {
-        $slots = array_map(static fn($slot): array => [
-            'slot_type' => (string) $slot->slot_type,
-            'signer_id' => (int) $slot->signer_id,
-            'position' => (int) $slot->position,
-            'required' => (bool) $slot->required,
-        ], $wpdb->get_results($wpdb->prepare(
+        $slots = [];
+        foreach ((array) $wpdb->get_results($wpdb->prepare(
             "SELECT * FROM {$wpdb->prefix}squuad_cert_signing_slots WHERE policy_id = %d ORDER BY position ASC, id ASC",
             $row->id
-        )));
+        )) as $slot) {
+            // Puestos de antes de la firma por roles: 'student' es el rol student; 'parent' ya no firma
+            $type = (string) $slot->slot_type;
+            $role = (string) ($slot->role_key ?? '');
+            if ('student' === $type) {
+                [$type, $role] = ['role', 'student'];
+            } elseif (!in_array($type, ['role', 'signer'], true)) {
+                continue;
+            }
+            $slots[] = [
+                'slot_type' => $type,
+                'signer_id' => (int) $slot->signer_id,
+                'role' => $role,
+                'position' => (int) $slot->position,
+                'required' => (bool) $slot->required,
+            ];
+        }
 
         return [
             'document_certificate_id' => $document_certificate_id,
@@ -647,8 +660,9 @@ function squuad_cert_signing_policy(object $document): array
     }
 
     $automatic = 'automatic' === ($document->type ?? '');
-    $slots = $automatic ? [
-        ['slot_type' => 'student', 'signer_id' => 0, 'position' => 1, 'required' => true],
+    // Sin configurar, un automático lo firma el rol student si está entre los roles que pueden firmar
+    $slots = $automatic && squuad_cert_signing_role_enabled('student') ? [
+        ['slot_type' => 'role', 'signer_id' => 0, 'role' => 'student', 'position' => 1, 'required' => true],
     ] : [];
 
     return [
@@ -666,18 +680,21 @@ function squuad_cert_signing_policy_hash(int $document_certificate_id, bool $req
     return hash('sha256', (string) wp_json_encode([
         'document_certificate_id' => $document_certificate_id,
         'requires_signatures' => $requires,
-        'slots' => array_map(static fn(array $slot): array => [$slot['slot_type'], (int) $slot['signer_id'], (int) $slot['position']], $slots),
+        'slots' => array_map(static fn(array $slot): array => [$slot['slot_type'], (int) $slot['signer_id'], (int) $slot['position'], (string) ($slot['role'] ?? '')], $slots),
     ]));
 }
 
-/** ¿La política incluye este tipo de hueco ('student', 'signer')? */
+/**
+ * ¿La política incluye este puesto? $slot_type: 'signer' (algún firmante del sistema), 'role' (algún rol) o 'student'
+ * (el rol student; se mantiene mientras el resto del módulo pasa a la firma por roles, pasos 3c y 3d).
+ */
 function squuad_cert_signing_policy_has(array $policy, string $slot_type): bool
 {
     if (!$policy['requires_signatures']) {
         return false;
     }
     foreach ($policy['slots'] as $slot) {
-        if ($slot['slot_type'] === $slot_type) {
+        if ($slot['slot_type'] === $slot_type || ('student' === $slot_type && 'role' === $slot['slot_type'] && 'student' === $slot['role'])) {
             return true;
         }
     }
@@ -685,10 +702,23 @@ function squuad_cert_signing_policy_has(array $policy, string $slot_type): bool
     return false;
 }
 
+/** Roles que la política pide que firmen (claves de rol), en orden. */
+function squuad_cert_signing_policy_roles(array $policy): array
+{
+    if (!$policy['requires_signatures']) {
+        return [];
+    }
+
+    return array_values(array_map(
+        static fn(array $slot): string => (string) $slot['role'],
+        array_filter($policy['slots'], static fn(array $slot): bool => 'role' === $slot['slot_type'])
+    ));
+}
+
 /**
  * Guarda una versión nueva de la política de un documento (la anterior queda como no vigente, nunca se borra) y deja
- * un evento sellado. $slots: [['slot_type' => 'student'|'signer', 'signer_id', 'position']]. Solo firmantes
- * registrados que no estén suspendidos. Devuelve ['ok', 'message'].
+ * un evento sellado. $slots: [['slot_type' => 'role'|'signer', 'role', 'signer_id', 'position']]. Solo roles marcados
+ * en Certificación > Signing roles y firmantes registrados que no estén suspendidos. Devuelve ['ok', 'message'].
  */
 function squuad_cert_signing_policy_save(int $document_certificate_id, bool $requires, array $slots): array
 {
@@ -702,7 +732,9 @@ function squuad_cert_signing_policy_save(int $document_certificate_id, bool $req
     foreach ($slots as $slot) {
         $type = (string) ($slot['slot_type'] ?? '');
         $signer_id = 'signer' === $type ? (int) ($slot['signer_id'] ?? 0) : 0;
-        if (!in_array($type, ['student', 'signer'], true) || ('signer' === $type && !$signer_id)) {
+        $role = 'role' === $type ? (string) ($slot['role'] ?? '') : '';
+        if (!in_array($type, ['role', 'signer'], true) || ('signer' === $type && !$signer_id)
+            || ('role' === $type && !squuad_cert_signing_role_enabled($role))) {
             continue;
         }
         if ('signer' === $type) {
@@ -711,14 +743,15 @@ function squuad_cert_signing_policy_save(int $document_certificate_id, bool $req
                 continue;
             }
         }
-        $key = $type . ':' . $signer_id;
+        $key = $type . ':' . ('role' === $type ? $role : $signer_id);
         if (isset($seen[$key])) {
             continue;
         }
         $seen[$key] = true;
-        $clean[] = ['slot_type' => $type, 'signer_id' => $signer_id, 'position' => (int) ($slot['position'] ?? 0)];
+        $clean[] = ['slot_type' => $type, 'signer_id' => $signer_id, 'role' => $role, 'position' => (int) ($slot['position'] ?? 0)];
     }
-    usort($clean, static fn(array $a, array $b): int => [$a['position'], $a['slot_type'] === 'signer'] <=> [$b['position'], $b['slot_type'] === 'signer']);
+    // Los roles firman primero y los firmantes del sistema después; dentro de cada grupo, por el orden elegido
+    usort($clean, static fn(array $a, array $b): int => [$a['slot_type'] === 'signer', $a['position']] <=> [$b['slot_type'] === 'signer', $b['position']]);
     foreach ($clean as $i => $slot) {
         $clean[$i]['position'] = $i + 1;
     }
@@ -757,6 +790,7 @@ function squuad_cert_signing_policy_save(int $document_certificate_id, bool $req
             'position' => $slot['position'],
             'slot_type' => $slot['slot_type'],
             'signer_id' => $slot['signer_id'],
+            'role_key' => $slot['role'],
             'required' => 1,
         ]);
     }
@@ -966,6 +1000,11 @@ function squuad_cert_signature_signer_replacements(object $request): array
     }
     $has_student = in_array('student', $slots, true);
     $replacements['signature_student'] = ['value' => $has_student ? squuad_cert_signer_slot_marker('student') : '', 'wrap' => false];
+    // Firma por roles: {{signature_role_<rol>}} de cada rol activo. El rol student usa el puesto del estudiante; los
+    // demás roles quedan vacíos hasta que reciban su propio documento (paso 3c)
+    foreach (squuad_cert_signing_roles() as $role) {
+        $replacements[squuad_cert_signing_role_variable($role)] = ['value' => 'student' === $role ? $replacements['signature_student']['value'] : '', 'wrap' => false];
+    }
     $replacements['signature_parent'] = ['value' => '', 'wrap' => false];
     $replacements['requires_student_signature'] = ['value' => $has_student, 'wrap' => false];
     $replacements['requires_parent_signature'] = ['value' => false, 'wrap' => false];

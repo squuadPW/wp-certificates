@@ -1,7 +1,8 @@
 <?php
 /**
  * Panel "Firmantes del documento" (admin/document-signing.php). Variables: $document, $policy, $positions,
- * $signers, $notice, $inbox, $template_text.
+ * $signing_roles (roles activos: clave => nombre), $inactive_roles, $signers, $notice, $inbox, $template_text.
+ * Arriba, una fila por rol activo en Certificación > Signing roles; debajo, los firmantes del sistema.
  */
 if (!defined('ABSPATH')) exit;
 
@@ -29,17 +30,17 @@ $next = count($positions) + 1;
 <div id="edusystem-document-signers" class="postbox" style="margin-top:20px;display:none">
     <div class="inside">
         <h2 style="padding-left:0"><?= esc_html__('Document signers', 'edusystem') ?></h2>
-        <p class="description" style="max-width:820px"><?= esc_html__('Who signs this document and in which order. The student signs first; then the registered signers of the system. Changes apply to new signature requests; requests already in progress keep their signers.', 'edusystem') ?></p>
+        <p class="description" style="max-width:820px"><?= esc_html__('Who signs this document and in which order. First the roles: every user with a marked role receives their own document and signs it from their own account. Then the registered signers of the system sign every one of those documents. The document is valid when all the signatures are done. Changes apply to new signature requests; requests already in progress keep their signers.', 'edusystem') ?></p>
 
         <?php if ('automatic' !== $document->type) : ?>
-            <p class="description" style="max-width:820px"><strong><?= esc_html__('Issued document:', 'edusystem') ?></strong> <?= esc_html__('only the system signers sign it (the student does not). With at least one signer, "Generate" in the student file becomes "Issue for signature".', 'edusystem') ?></p>
+            <p class="description" style="max-width:820px"><strong><?= esc_html__('Issued document:', 'edusystem') ?></strong> <?= esc_html__('only the system signers sign it (the roles do not). With at least one signer, "Generate" in the student file becomes "Issue for signature".', 'edusystem') ?></p>
         <?php endif; ?>
         <?php if ($notice) : ?>
             <div class="notice <?= $notice['ok'] ? 'notice-success' : 'notice-error' ?> inline"><p><?= esc_html($notice['message']) ?></p></div>
         <?php endif; ?>
         <?php if (!$policy['policy_id']) : ?>
             <p><em><?= esc_html('automatic' === $document->type
-                ? __('Not configured yet: by default the student signs this document.', 'edusystem')
+                ? __('Not configured yet: by default the users with the student role sign this document, if that role is active in "Signing roles".', 'edusystem')
                 : __('Not configured yet: by default this document does not ask for user signatures.', 'edusystem')) ?></em></p>
         <?php endif; ?>
 
@@ -54,7 +55,21 @@ $next = count($positions) + 1;
                 <tbody>
                     <?php
                     $in_section = __('Not in the template: it goes in {{signature_section}}.', 'edusystem');
-                    $row('student:0', __('Student', 'edusystem'), __('Signs from their own account.', 'edusystem'), isset($positions['student:0']), $positions['student:0'] ?? 1, ['signature_student'], $in_section);
+                    $role_position = 1;
+                    foreach ($signing_roles as $role_key => $role_name) {
+                        $key = 'role:' . $role_key;
+                        $variables = [squuad_cert_signing_role_variable((string) $role_key)];
+                        if ('student' === $role_key) {
+                            $variables[] = 'signature_student'; // plantillas anteriores
+                        }
+                        /* translators: %s: name of the role */
+                        $row($key, sprintf(__('Role: %s', 'edusystem'), $role_name), __('Every user with this role receives their own document and signs it from their own account.', 'edusystem'),
+                            isset($positions[$key]), $positions[$key] ?? $role_position, $variables, $in_section);
+                        $role_position++;
+                    }
+                    if (!$signing_roles) {
+                        echo '<tr><td></td><td colspan="3"><em>' . esc_html__('No role can sign yet: mark them in Certification > Signing roles.', 'edusystem') . '</em></td></tr>';
+                    }
                     foreach ($signers as $signer) {
                         $key = 'signer:' . (int) $signer->id;
                         $detail = trim((string) $signer->charge . ' · ' . (string) $signer->user_email, ' ·');
@@ -69,10 +84,13 @@ $next = count($positions) + 1;
                     ?>
                 </tbody>
             </table>
+            <?php if ($inactive_roles) : ?>
+                <p class="description" style="max-width:820px"><?= esc_html(sprintf(__('This document asked these roles, which are no longer active in "Signing roles": %s. Requests in progress keep them; when you save, they are removed.', 'edusystem'), implode(', ', $inactive_roles))) ?></p>
+            <?php endif; ?>
             <div class="edusig-help" style="max-width:820px;margin-top:10px;padding:10px 12px;background:#f6f7f7;border:1px solid #dcdcde">
                 <p style="margin-top:0"><strong><?= esc_html__('How to place the signatures in the template', 'edusystem') ?></strong></p>
-                <p><?= $chip('signature_section') // phpcs:ignore ?> <?= esc_html__('The signature of the student when it is not placed separately (as before).', 'edusystem') ?></p>
-                <p><?= esc_html__('Each signer separately: use the variables of their row. Signers not placed in the template go in {{signature_section}} (the student) or in a signatures block at the end (system signers).', 'edusystem') ?></p>
+                <p><?= $chip('signature_section') // phpcs:ignore ?> <?= esc_html__('The signatures of the roles that are not placed separately (as before).', 'edusystem') ?></p>
+                <p><?= esc_html__('Each signer separately: use the variables of their row. Signers not placed in the template go in {{signature_section}} (roles) or in a signatures block at the end (system signers).', 'edusystem') ?></p>
                 <p style="margin-bottom:4px"><strong><?= esc_html__('Template rules', 'edusystem') ?></strong> — <?= esc_html__('the text between the marks is shown only if the rule is met; with ^ , only if it is not:', 'edusystem') ?></p>
                 <ul style="list-style:disc;margin:0 0 0 20px">
                     <li><code>{{#requires_student_signature}}</code> … <code>{{/requires_student_signature}}</code> — <?= esc_html__('the student signs this document', 'edusystem') ?></li>

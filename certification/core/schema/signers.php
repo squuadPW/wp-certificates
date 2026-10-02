@@ -98,9 +98,10 @@ function squuad_cert_schema_signers()
         position INT(11) NOT NULL DEFAULT 0,
         slot_type VARCHAR(10) NOT NULL,
         signer_id INT(11) NOT NULL DEFAULT 0,
+        role_key VARCHAR(100) NOT NULL DEFAULT '',
         required TINYINT(1) NOT NULL DEFAULT 1,
         PRIMARY KEY (id),
-        UNIQUE KEY policy_slot (policy_id,slot_type,signer_id))$charset_collate;"
+        UNIQUE KEY policy_slot (policy_id,slot_type,signer_id,role_key))$charset_collate;"
     );
 
     // Firmantes fijados en cada solicitud (generaliza student_user_id/parent_user_id); se sellan en el evento created

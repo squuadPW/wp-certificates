@@ -92,6 +92,8 @@ function squuad_cert_document_fields_reserved_keys()
         if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table_variables)) === $table_variables) {
             $reserved = array_merge($reserved, $wpdb->get_col("SELECT identificator FROM {$table_variables}"));
         }
+        // Variables de firma de los roles ({{signature_role_<rol>}}), según los roles activos
+        $reserved = array_merge($reserved, array_map('squuad_cert_signing_role_variable', squuad_cert_signing_roles()));
     }
 
     return $reserved;

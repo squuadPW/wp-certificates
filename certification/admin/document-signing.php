@@ -45,8 +45,13 @@ function squuad_cert_document_signing_panel(): void
     $policy = squuad_cert_signing_policy($document);
     $positions = [];
     foreach ($policy['slots'] as $slot) {
-        $positions[$slot['slot_type'] . ':' . $slot['signer_id']] = $slot['position'];
+        $positions[$slot['slot_type'] . ':' . ('role' === $slot['slot_type'] ? $slot['role'] : $slot['signer_id'])] = $slot['position'];
     }
+    // Roles que pueden firmar (Certificación > Signing roles): una fila por rol, encima de los firmantes del sistema
+    $site_roles = squuad_cert_site_roles();
+    $signing_roles = array_intersect_key($site_roles, array_flip(squuad_cert_signing_roles()));
+    // Roles que la política pedía pero ya no están activos: se avisa; al guardar se quitan
+    $inactive_roles = array_diff(squuad_cert_signing_policy_roles($policy), array_keys($signing_roles));
     $signers = $wpdb->get_results(
         "SELECT s.*, u.display_name, u.user_email FROM {$wpdb->prefix}squuad_cert_signers s
          LEFT JOIN {$wpdb->users} u ON u.ID = s.user_id
@@ -75,9 +80,12 @@ function squuad_cert_document_signing_handle_save(): void
         if (empty($slot['enabled'])) {
             continue;
         }
-        $key = sanitize_text_field((string) $key);
-        [$type, $signer_id] = array_pad(explode(':', $key, 2), 2, '0');
-        $slots[] = ['slot_type' => $type, 'signer_id' => (int) $signer_id, 'position' => (int) ($slot['position'] ?? 0)];
+        // 'role:<clave del rol>' (la clave puede tener espacios) o 'signer:<id>'
+        $key = sanitize_text_field(wp_unslash((string) $key));
+        [$type, $value] = array_pad(explode(':', $key, 2), 2, '');
+        $slots[] = 'role' === $type
+            ? ['slot_type' => 'role', 'role' => $value, 'signer_id' => 0, 'position' => (int) ($slot['position'] ?? 0)]
+            : ['slot_type' => $type, 'role' => '', 'signer_id' => (int) $value, 'position' => (int) ($slot['position'] ?? 0)];
     }
 
     $result = squuad_cert_signing_policy_save($document_id, $requires, $slots);

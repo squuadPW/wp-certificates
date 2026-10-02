@@ -78,8 +78,9 @@ function squuad_cert_document_preview_signers(object $document): array
                 'charge' => __('Position (example)', 'edusystem'),
                 'phase' => 2,
             ];
-        } elseif ('student' === $slot['slot_type']) {
-            $signers[] = ['slot_key' => $slot['slot_type'], 'signer_id' => 0, 'phase' => 1];
+        } elseif ('role' === $slot['slot_type'] && 'student' === $slot['role']) {
+            // Rol student: el puesto del estudiante (los demás roles, a partir del paso 3c)
+            $signers[] = ['slot_key' => 'student', 'signer_id' => 0, 'phase' => 1];
         }
     }
 
@@ -246,6 +247,9 @@ function squuad_cert_document_preview_replacements(object $document, string $mod
     $slots = array_column($signers, 'slot_key');
     $has_student = in_array('student', $slots, true);
     $replacements['signature_student'] = $html($has_student ? squuad_cert_signer_slot_marker('student') : '');
+    foreach (squuad_cert_signing_roles() as $role) {
+        $replacements[squuad_cert_signing_role_variable($role)] = $html('student' === $role && $has_student ? squuad_cert_signer_slot_marker('student') : '');
+    }
     $replacements['signature_parent'] = $html('');
     $replacements['requires_student_signature'] = $html($has_student ? '1' : '');
     $replacements['requires_parent_signature'] = $html('');
