@@ -328,10 +328,11 @@ function squuad_cert_signature_insert(array $data, int $subject_id, string $sign
     }
 
     squuad_cert_log(sprintf(
-        'Firma %d registrada: %s, puesto %s del documento de la cuenta %d, desde la cuenta del usuario %d (eslabón %d)',
+        'Firma %d registrada: %s, puesto %s del documento del titular %s/%d, desde la cuenta del usuario %d (eslabón %d)',
         $inserted,
         $row['document_id'],
         $signer_role,
+        $subject_type,
         $subject_id,
         $row['actor_user_id'],
         $row['chain_seq']
