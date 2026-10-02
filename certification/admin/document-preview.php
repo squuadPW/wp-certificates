@@ -78,9 +78,9 @@ function squuad_cert_document_preview_signers(object $document): array
                 'charge' => __('Position (example)', 'edusystem'),
                 'phase' => 2,
             ];
-        } elseif ('role' === $slot['slot_type'] && 'student' === $slot['role']) {
-            // Rol student: el puesto del estudiante (los demás roles, a partir del paso 3c)
-            $signers[] = ['slot_key' => 'student', 'signer_id' => 0, 'phase' => 1];
+        } elseif ('role' === $slot['slot_type']) {
+            // Cada rol del panel: el recuadro de quien recibe el documento con ese rol (cada uno ve solo el suyo)
+            $signers[] = ['slot_key' => 'role:' . $slot['role'], 'signer_id' => 0, 'phase' => 1];
         }
     }
 
@@ -242,16 +242,16 @@ function squuad_cert_document_preview_replacements(object $document, string $mod
         return $replacements;
     }
 
-    // Firmas: estudiante y firmantes del sistema, cada uno con su recuadro de ejemplo (el representante ya no firma)
+    // Firmas: los roles del panel y los firmantes del sistema, cada uno con su recuadro de ejemplo
     $signers = squuad_cert_document_preview_signers($document);
     $slots = array_column($signers, 'slot_key');
-    $has_student = in_array('student', $slots, true);
-    $replacements['signature_student'] = $html($has_student ? squuad_cert_signer_slot_marker('student') : '');
     foreach (squuad_cert_signing_roles() as $role) {
-        $replacements[squuad_cert_signing_role_variable($role)] = $html('student' === $role && $has_student ? squuad_cert_signer_slot_marker('student') : '');
+        $replacements[squuad_cert_signing_role_variable($role)] = $html(in_array('role:' . $role, $slots, true) ? squuad_cert_signer_slot_marker('role:' . $role) : '');
     }
+    $replacements['signature_student'] = $html(in_array('role:student', $slots, true) ? squuad_cert_signer_slot_marker('role:student') : '');
     $replacements['signature_parent'] = $html('');
-    $replacements['requires_student_signature'] = $html($has_student ? '1' : '');
+    $has_role = (bool) array_filter($slots, 'squuad_cert_is_holder_slot');
+    $replacements['requires_student_signature'] = $html($has_role ? '1' : '');
     $replacements['requires_parent_signature'] = $html('');
     $replacements['student_is_own_parent'] = $html('');
     $n = 0;
@@ -330,8 +330,11 @@ function squuad_cert_document_preview_data(object $document): array
         }
     }
 
-    // Recuadros de firma de ejemplo en lugar de los marcadores
-    $labels = ['student' => ['Juan Carlos Pérez Gómez', __('Student', 'edusystem')]];
+    // Recuadros de firma de ejemplo en lugar de los marcadores: uno por rol del panel (al generar sin panel, el del rol student)
+    $labels = [];
+    foreach ('generate' === $mode ? ['role:student'] : array_filter(array_column($signers, 'slot_key'), 'squuad_cert_is_holder_slot') as $slot_key) {
+        $labels[$slot_key] = ['Juan Carlos Pérez Gómez', squuad_cert_holder_slot_label($slot_key)];
+    }
     $section = '';
     $render = static function (string $text) use (&$section, $signers, $labels): string {
         foreach ($signers as $signer) {

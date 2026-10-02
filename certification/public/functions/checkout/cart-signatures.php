@@ -37,7 +37,8 @@ function squuad_cert_load_signatures_data()
         }
         wp_send_json(array(
             'grade_selected' => null,
-            'student_signature' => $by_role['student'] ?? [],
+            // Firma de quien recibe el documento (su puesto 'role:<rol>'): el JS la pinta en el recuadro «student»
+            'student_signature' => $by_role[squuad_cert_request_holder_slot($request)] ?? [],
             'parent_signature' => [],
         ));
     }

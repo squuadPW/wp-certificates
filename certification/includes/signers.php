@@ -129,14 +129,19 @@ function squuad_cert_request_signers_fix(object $request, array $signers, int $d
         $policy['slots'] = [];
     }
 
+    // Puesto de quien recibe el documento (firma por roles, paso 3d): el primer rol de la política que tenga su cuenta.
+    // Una cuenta con varios roles de la política firma una sola vez
+    $holder = $student_user_id ? get_userdata($student_user_id) : false;
+    $holder_role = $holder ? squuad_cert_signing_policy_role_for_user($policy + ['requires_signatures' => true], $holder) : '';
+
     $slots = [];
     foreach ($policy['slots'] as $policy_slot) {
-        // Rol student: el puesto del estudiante (los demás roles reciben su propio documento a partir del paso 3c)
-        if ('role' === $policy_slot['slot_type'] && 'student' === $policy_slot['role'] && $student_user_id) {
-            $slots[] = ['slot_key' => 'student', 'user_id' => $student_user_id, 'signer_id' => 0, 'charge' => '', 'phase' => 1];
+        if ('role' === $policy_slot['slot_type']) {
+            if ('' !== $holder_role && $holder_role === $policy_slot['role']) {
+                $slots[] = ['slot_key' => 'role:' . $holder_role, 'user_id' => $student_user_id, 'signer_id' => 0, 'charge' => '', 'phase' => 1];
+            }
         } elseif ('signer' === $policy_slot['slot_type'] && squuad_cert_signer_inbox_enabled()) {
-            // Firmantes institucionales: fase 2 (después del estudiante), cuando ya tienen su panel. Un hueco 'parent'
-            // de una política antigua se ignora: el representante ya no firma
+            // Firmantes institucionales: fase 2 (después de quien recibe el documento), cuando ya tienen su panel
             $signer = squuad_cert_signer_get((int) $policy_slot['signer_id']);
             if ($signer && !in_array($signer->status, ['suspended', 'retired'], true)) {
                 $slots[] = ['slot_key' => squuad_cert_signer_slot_key((int) $signer->id), 'user_id' => (int) $signer->user_id, 'signer_id' => (int) $signer->id, 'charge' => (string) $signer->charge, 'phase' => 2];
@@ -694,6 +699,45 @@ function squuad_cert_signing_policy_has(array $policy, string $slot_type): bool
     return false;
 }
 
+/** Primer rol de la política que tiene la cuenta (quien recibe el documento), o '' si no tiene ninguno. */
+function squuad_cert_signing_policy_role_for_user(array $policy, WP_User $user): string
+{
+    $user_roles = (array) $user->roles;
+    foreach (squuad_cert_signing_policy_roles($policy) as $role) {
+        if (in_array($role, $user_roles, true) && squuad_cert_signing_role_enabled($role)) {
+            return $role;
+        }
+    }
+
+    return '';
+}
+
+/** ¿Es el puesto de quien recibe el documento? 'role:<rol>' (y 'student' de solicitudes anteriores a la firma por roles). */
+function squuad_cert_is_holder_slot(string $slot_key): bool
+{
+    return 0 === strpos($slot_key, 'role:') || 'student' === $slot_key;
+}
+
+/** Puesto de quien recibe el documento en una solicitud ('role:<rol>'), o '' si no lo tiene. */
+function squuad_cert_request_holder_slot(object $request): string
+{
+    foreach (squuad_cert_request_signers($request) as $signer) {
+        if (squuad_cert_is_holder_slot($signer['slot_key'])) {
+            return $signer['slot_key'];
+        }
+    }
+
+    return '';
+}
+
+/** Nombre del rol de un puesto de quien recibe el documento (p. ej. "Student"). */
+function squuad_cert_holder_slot_label(string $slot_key): string
+{
+    $role = 0 === strpos($slot_key, 'role:') ? substr($slot_key, 5) : 'student';
+
+    return (string) (squuad_cert_site_roles()[$role] ?? $role);
+}
+
 /** Roles que la política pide que firmen (claves de rol), en orden. */
 function squuad_cert_signing_policy_roles(array $policy): array
 {
@@ -968,7 +1012,7 @@ function squuad_cert_signature_institutional_replacements(object $request): arra
 
 /**
  * Variables de firma de una solicitud, cada firmante por separado (además de {{signature_section}}, que se mantiene):
- *   {{signature_student}}                           recuadro del estudiante (vacío si no firma)
+ *   {{signature_role_<rol>}}, {{signature_student}}  recuadro de quien recibe el documento (vacío si no firma)
  *   {{signature_parent}}                            siempre vacío: el representante ya no firma (se mantiene para que
  *                                                   las plantillas antiguas no muestren el texto de la variable)
  *   {{signature_signer_ID}}, {{signer_name_ID}}, {{signer_charge_ID}}   firmante del sistema ID (su número en
@@ -990,15 +1034,17 @@ function squuad_cert_signature_signer_replacements(object $request): array
             $replacements['signer_charge_' . $id] = ['value' => esc_html($signer['charge']), 'wrap' => true];
         }
     }
-    $has_student = in_array('student', $slots, true);
-    $replacements['signature_student'] = ['value' => $has_student ? squuad_cert_signer_slot_marker('student') : '', 'wrap' => false];
-    // Firma por roles: {{signature_role_<rol>}} de cada rol activo. El rol student usa el puesto del estudiante; los
-    // demás roles quedan vacíos hasta que reciban su propio documento (paso 3c)
+    // Firma por roles: {{signature_role_<rol>}} lleva el recuadro de quien recibe el documento si ese es su rol; los
+    // demás roles quedan vacíos (cada usuario recibe su propio documento). {{signature_student}} es el del rol student
+    $holder = squuad_cert_request_holder_slot($request);
+    $marker = '' !== $holder ? squuad_cert_signer_slot_marker($holder) : '';
     foreach (squuad_cert_signing_roles() as $role) {
-        $replacements[squuad_cert_signing_role_variable($role)] = ['value' => 'student' === $role ? $replacements['signature_student']['value'] : '', 'wrap' => false];
+        $replacements[squuad_cert_signing_role_variable($role)] = ['value' => 'role:' . $role === $holder ? $marker : '', 'wrap' => false];
     }
+    $replacements['signature_student'] = ['value' => in_array($holder, ['role:student', 'student'], true) ? $marker : '', 'wrap' => false];
     $replacements['signature_parent'] = ['value' => '', 'wrap' => false];
-    $replacements['requires_student_signature'] = ['value' => $has_student, 'wrap' => false];
+    // Regla de plantilla: {{#requires_student_signature}} se cumple si quien recibe el documento lo firma
+    $replacements['requires_student_signature'] = ['value' => '' !== $holder, 'wrap' => false];
     $replacements['requires_parent_signature'] = ['value' => false, 'wrap' => false];
     $replacements['student_is_own_parent'] = ['value' => false, 'wrap' => false];
 
@@ -1058,12 +1104,12 @@ function squuad_cert_signature_request_render_final(object $request): ?string
         if ($signer['phase'] >= 2) {
             $content = str_replace($marker, $box($signer), $content);
         } elseif (false !== strpos($content, $marker)) {
-            // Colocado por separado en la plantilla ({{signature_student}})
-            $label = __('Student', 'edusystem');
+            // Colocado por separado en la plantilla ({{signature_role_<rol>}})
+            $label = squuad_cert_holder_slot_label($signer['slot_key']);
             $content = str_replace($marker, '<div style="min-width:260px;text-align:center">' . $box($signer)
                 . '<div style="border-top:1px solid #333;margin-top:4px;padding-top:4px"><strong>' . esc_html($signer['name']) . '</strong><br>' . esc_html($label) . '</div></div>', $content);
         } else {
-            $label = __('Student', 'edusystem');
+            $label = squuad_cert_holder_slot_label($signer['slot_key']);
             $users_block .= '<div style="min-width:260px;text-align:center">' . $box($signer)
                 . '<div style="border-top:1px solid #333;margin-top:4px;padding-top:4px"><strong>' . esc_html($signer['name']) . '</strong><br>' . esc_html($label) . '</div></div>';
         }
@@ -1447,7 +1493,7 @@ function squuad_cert_signature_batch_holder_candidates(WP_User $user): array
             continue;
         }
         $role = squuad_cert_signature_request_role($request, (int) $user->ID);
-        if ('student' !== $role || !squuad_cert_signature_request_slot_open($request, $role)) {
+        if (!squuad_cert_is_holder_slot($role) || !squuad_cert_signature_request_slot_open($request, $role)) {
             continue;
         }
         $row = clone $request;
@@ -1479,7 +1525,7 @@ function squuad_cert_signature_sign_as_holder_with(int $request_id, string $show
         return $fail(__('Documents cannot be signed from a switched session. Each person must sign from their own account.', 'edusystem'));
     }
     $role = squuad_cert_signature_request_role($request, $user_id);
-    if ('student' !== $role) {
+    if (!squuad_cert_is_holder_slot($role)) {
         return $fail(__('You are not allowed to sign this document.', 'edusystem'));
     }
     if (!in_array($request->status, ['open', 'partially_signed'], true) || null === $request->frozen_at_utc) {

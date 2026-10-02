@@ -20,7 +20,7 @@ $statuses = [
         <thead><tr>
             <?php if ($batchable) : ?><th><span class="screen-reader-text"><?= esc_html__('Select', 'edusystem') ?></span></th><?php endif; ?>
             <th><?= esc_html__('Document', 'edusystem') ?></th>
-            <th><?= esc_html__('Student', 'edusystem') ?></th>
+            <th><?= esc_html__('Name', 'edusystem') ?></th>
             <th><?= esc_html__('Status', 'edusystem') ?></th>
             <th></th>
         </tr></thead>
@@ -36,7 +36,7 @@ $statuses = [
                         </td>
                     <?php endif; ?>
                     <td data-title="<?= esc_attr__('Document', 'edusystem') ?>"><?= esc_html((string) $item['document']->title) ?></td>
-                    <td data-title="<?= esc_attr__('Student', 'edusystem') ?>"><?= esc_html(squuad_cert_account_name((int) $item['subject_id'])) ?></td>
+                    <td data-title="<?= esc_attr__('Name', 'edusystem') ?>"><?= esc_html(squuad_cert_account_name((int) $item['subject_id'])) ?></td>
                     <td data-title="<?= esc_attr__('Status', 'edusystem') ?>"><?= esc_html($statuses[$item['state']] ?? '') ?></td>
                     <td>
                         <?php if ('to_sign' === $item['state']) : ?>

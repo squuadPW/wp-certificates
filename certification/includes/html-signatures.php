@@ -24,24 +24,29 @@ function squuad_cert_signature_holder_name(string $slot_key, ?object $request = 
     return squuad_cert_account_name(get_current_user_id());
 }
 
-/** {{signature_section}}: el recuadro del estudiante (el único puesto que firma desde Mi Cuenta). */
+/** {{signature_section}}: el recuadro de quien recibe el documento (el único puesto que firma desde Mi Cuenta). */
 function squuad_cert_get_signature_section(?object $request = null): string
 {
-    return squuad_cert_signature_pad_box('student', $request);
+    $holder = $request ? squuad_cert_request_holder_slot($request) : '';
+
+    return '' !== $holder ? squuad_cert_signature_pad_box($holder, $request) : '';
 }
 
 /**
- * Recuadro de firma de un solo firmante, para colocarlo por separado en la plantilla con {{signature_student}} (ADR
- * 0003, variables de firma por firmante). $role: solo 'student'; cualquier otro puesto no tiene recuadro aquí (los
- * firmantes del sistema firman desde su bandeja). El nombre es el de su cuenta de WordPress.
+ * Recuadro de firma de quien recibe el documento ($slot_key 'role:<rol>'), para colocarlo en la plantilla con
+ * {{signature_role_<rol>}} o en {{signature_section}} (ADR 0003, variables de firma por firmante). Los firmantes del
+ * sistema no tienen recuadro aquí: firman desde su bandeja. El nombre es el de la cuenta de WordPress.
  */
-function squuad_cert_signature_pad_box(string $role, ?object $request = null): string
+function squuad_cert_signature_pad_box(string $slot_key, ?object $request = null): string
 {
-    if ('student' !== $role) {
+    if (!squuad_cert_is_holder_slot($slot_key)) {
         return '';
     }
-    $full_name = $short_name = squuad_cert_signature_holder_name('student', $request);
-    $label = __('Signature of applicant:', 'edusystem');
+    $full_name = $short_name = squuad_cert_signature_holder_name($slot_key, $request);
+    /* translators: %s: name of the role */
+    $label = sprintf(__('Signature (%s):', 'edusystem'), squuad_cert_holder_slot_label($slot_key));
+    // El recuadro conserva los ids «student» (signature-pad-student…) que usa create-enrollment.js para cualquier rol
+    $role = 'student';
     ob_start();
     ?>
         <div class="signatures_squares">

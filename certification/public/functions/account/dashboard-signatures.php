@@ -13,9 +13,9 @@ function squuad_cert_modal_document_automatic()
 {
     global $current_user;
 
-    // Firma o rellena solo el estudiante con su cuenta (decisión del dueño, 2026-10-01). Nada más activa ni bloquea los
-    // automáticos (ni el registro completo ni otras condiciones): ver squuad_cert_signature_user_documents()
-    if (!in_array('student', (array) $current_user->roles, true)) {
+    // Cada cuenta firma o rellena sus propios documentos, según sus roles (firma por roles, paso 3d). Nada más activa ni
+    // bloquea los automáticos: ver squuad_cert_signature_user_documents()
+    if (!is_user_logged_in()) {
         return;
     }
 

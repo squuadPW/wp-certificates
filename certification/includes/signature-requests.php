@@ -524,13 +524,13 @@ const SQUUAD_CERT_SIGNATURE_SLOT = '<div data-edusig-slot="signature_section"></
 /** Marcador fijo que sustituye a {{qrcode}} en el contenido. */
 const SQUUAD_CERT_SIGNATURE_QR_SLOT = '<div data-edusig-slot="qrcode"></div>';
 
-/** Puesto del usuario en la solicitud según los firmantes fijados en ella ('student', 'signer:<id>') o '' si no firma. */
+/** Puesto del usuario en la solicitud según los firmantes fijados en ella ('role:<rol>', 'signer:<id>') o '' si no firma. */
 function squuad_cert_signature_request_role(object $request, int $user_id): string
 {
     if (!$user_id) {
         return '';
     }
-    // ADR 0003: hueco del usuario entre los firmantes fijados en la solicitud ('student', 'signer:<id>')
+    // ADR 0003: hueco del usuario entre los firmantes fijados en la solicitud ('role:<rol>', 'signer:<id>')
     if (function_exists('squuad_cert_request_signers')) {
         foreach (squuad_cert_request_signers($request) as $signer) {
             if ($signer['user_id'] === $user_id) {
@@ -621,11 +621,8 @@ function squuad_cert_signature_user_documents(WP_User $user): array
     if (!$user->ID || !squuad_cert_signature_requests_enabled()) {
         return [];
     }
-    // Por ahora firma el rol student (el disparo por cualquier rol activo llega en el paso 3d). El documento es de la
-    // cuenta; su ficha de EduSystem, si la tiene, solo aporta datos (variables, requisito)
-    if (!in_array('student', (array) $user->roles, true)) {
-        return [];
-    }
+    // Firma por roles (paso 3d): a la cuenta le llega cada automático cuya política pide uno de sus roles. El documento
+    // es de la cuenta; su ficha de EduSystem, si la tiene, solo aporta datos (variables, requisito)
     $subject_id = (int) $user->ID;
     $student_id = squuad_cert_account_student_id($subject_id);
 
@@ -646,10 +643,10 @@ function squuad_cert_signature_user_documents(WP_User $user): array
         // en curso conserva sus firmantes aunque la configuración haya cambiado
         $in_progress = $request && in_array($request->status, SQUUAD_CERT_SIGNATURE_REQUEST_OPEN, true);
         if (!$in_progress) {
-            // Solo si pide firma o tiene campos, y solo si la cuenta firma (panel) o rellena (campos)
+            // Solo si pide firma o tiene campos, y solo a las cuentas con uno de los roles del panel: firman si la
+            // plantilla tiene variable de firma; si no, solo rellenan los campos
             $automatic = squuad_cert_automatic_status($document);
-            $signs = $automatic['signature'] && squuad_cert_signing_policy_has(squuad_cert_signing_policy($document), 'student');
-            if (!$automatic['shown'] || (!$signs && !$automatic['fields'])) {
+            if (!$automatic['shown'] || '' === squuad_cert_signing_policy_role_for_user(squuad_cert_signing_policy($document), $user)) {
                 continue;
             }
         }
@@ -790,13 +787,14 @@ function squuad_cert_signature_render_content(string $content, ?object $request 
         }
     }
 
-    // Recuadro del estudiante: donde la plantilla lo coloca ({{signature_student}}) o, si no, en {{signature_section}}.
-    // Un hueco del representante de una solicitud antigua queda vacío (el representante ya no firma).
+    // Recuadro de quien recibe el documento: donde la plantilla lo coloca ({{signature_role_<rol>}}) o, si no, en
+    // {{signature_section}}. Un hueco del representante de una solicitud antigua queda vacío.
     $content = str_replace('<div data-edusig-slot="parent"></div>', '', $content);
-    $marker = '<div data-edusig-slot="student"></div>';
-    $box = squuad_cert_signature_pad_box('student', $request);
+    $holder = $request ? squuad_cert_request_holder_slot($request) : '';
+    $marker = '' !== $holder ? squuad_cert_signer_slot_marker($holder) : '';
+    $box = '' !== $holder ? squuad_cert_signature_pad_box($holder, $request) : '';
     $section = $box;
-    if (false !== strpos($content, $marker)) {
+    if ('' !== $marker && false !== strpos($content, $marker)) {
         $content = str_replace($marker, $box, $content);
         $section = '';
     }

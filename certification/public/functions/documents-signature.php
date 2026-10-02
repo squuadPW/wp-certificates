@@ -80,9 +80,9 @@ function squuad_cert_signature_handle_request_submission(int $request_id): void
 
     $shown_sha256 = is_string($_POST['content_sha256'] ?? null) ? strtolower(sanitize_text_field(wp_unslash($_POST['content_sha256']))) : '';
     $signature_student = squuad_cert_signature_from_request('signature_student');
-    // Por aquí firma solo el estudiante; los firmantes del sistema firman desde su bandeja y solo envían por aquí el PDF
+    // Por aquí firma solo quien recibe el documento (su recuadro llega como signature_student); los firmantes del sistema firman desde su bandeja y solo envían por aquí el PDF
     // final, sin firma. Una firma de otro recuadro (p. ej. el del representante de una página antigua) se rechaza.
-    if (($signature_student && 'student' !== $role) || squuad_cert_signature_from_request('signature_parent')) {
+    if (($signature_student && !squuad_cert_is_holder_slot($role)) || squuad_cert_signature_from_request('signature_parent')) {
         wp_send_json_error(__('You can only sign your own part of the document.', 'edusystem'), 403);
     }
     $signature = $signature_student;
