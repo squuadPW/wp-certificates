@@ -83,17 +83,16 @@ function squuad_cert_request_signers(object $request): array
             "SELECT * FROM {$wpdb->prefix}squuad_cert_request_signers WHERE request_id = %d ORDER BY position ASC, id ASC",
             $request->id
         ));
-        if ($rows) {
-            return array_map(static fn($row): array => [
-                'slot_key' => (string) $row->slot_key,
-                'user_id' => (int) $row->user_id,
-                'signer_id' => (int) $row->signer_id,
-                'name' => (string) $row->name_snapshot,
-                'charge' => (string) $row->charge_snapshot,
-                'required' => (bool) $row->required,
-                'phase' => (int) $row->phase,
-            ], $rows);
-        }
+        // Sin filas = nadie firma (p. ej. un automático que solo pide campos adicionales): no se deduce al estudiante
+        return array_map(static fn($row): array => [
+            'slot_key' => (string) $row->slot_key,
+            'user_id' => (int) $row->user_id,
+            'signer_id' => (int) $row->signer_id,
+            'name' => (string) $row->name_snapshot,
+            'charge' => (string) $row->charge_snapshot,
+            'required' => (bool) $row->required,
+            'phase' => (int) $row->phase,
+        ], (array) $rows);
     }
 
     // Solicitudes de los ADR 0002 (esquema v5): el estudiante (el representante ya no firma)
@@ -128,6 +127,11 @@ function squuad_cert_request_signers_fix(object $request, array $signers, int $d
         'slots' => [['slot_type' => 'student', 'signer_id' => 0]],
         'policy_sha256' => null,
     ];
+    // Un documento automático sin variable de firma no pide firma aunque el panel tenga firmantes: solo lo rellena el
+    // estudiante (campos adicionales). ADR 0004, decisión del 2026-10-01
+    if ($document && 'automatic' === $document->type && !squuad_cert_document_has_signature_variable($document)) {
+        $policy['slots'] = [];
+    }
 
     $slots = [];
     foreach ($policy['slots'] as $policy_slot) {
@@ -1894,128 +1898,12 @@ function squuad_cert_signature_issued_decline(int $request_id, string $reason): 
 }
 
 /* ---------------------------------------------------------------------------------------------------------------
- * Paso 9: condición de los documentos automáticos y carta de documentos faltantes (MISSING DOCUMENT)
+ * Paso 9: carta de documentos faltantes (MISSING DOCUMENT). La condición «Cuándo pedirlo» se quitó (ADR 0004, decisión
+ * del 2026-10-01): un automático se muestra si pide firma o tiene campos adicionales; la lista {{missing_documents}}
+ * es un dato de EduSystem y la da su método de variable.
  * ------------------------------------------------------------------------------------------------------------ */
 
-const SQUUAD_CERT_DOCUMENT_CONDITIONS_OPTION = 'squuad_cert_document_request_conditions';
 const SQUUAD_CERT_MISSING_LETTER_ID = 'MISSING DOCUMENT';
-
-/** Condiciones disponibles para pedir un documento automático: clave => etiqueta. */
-function squuad_cert_document_conditions(): array
-{
-    return [
-        'always' => __('Always', 'edusystem'),
-        'missing_documents' => __('Only when the student has optional documents pending', 'edusystem'),
-    ];
-}
-
-/** Condición de un documento automático ('always' si no tiene). Se guarda por sitio en una opción. */
-function squuad_cert_document_request_condition(int $document_certificate_id): string
-{
-    $conditions = (array) get_option(SQUUAD_CERT_DOCUMENT_CONDITIONS_OPTION, []);
-    $condition = (string) ($conditions[$document_certificate_id] ?? 'always');
-
-    return isset(squuad_cert_document_conditions()[$condition]) ? $condition : 'always';
-}
-
-/** Cambia la condición de un documento y la registra en el log. Devuelve true si cambió. */
-function squuad_cert_document_request_condition_set(int $document_certificate_id, string $condition): bool
-{
-    if (!isset(squuad_cert_document_conditions()[$condition]) || squuad_cert_document_request_condition($document_certificate_id) === $condition) {
-        return false;
-    }
-    $conditions = (array) get_option(SQUUAD_CERT_DOCUMENT_CONDITIONS_OPTION, []);
-    if ('always' === $condition) {
-        unset($conditions[$document_certificate_id]);
-    } else {
-        $conditions[$document_certificate_id] = $condition;
-    }
-    update_option(SQUUAD_CERT_DOCUMENT_CONDITIONS_OPTION, $conditions, false);
-    if (function_exists('edusystem_set_log')) {
-        edusystem_set_log(sprintf('Condición del documento %d: %s (usuario %d)', $document_certificate_id, $condition, get_current_user_id()), 'signing_policy');
-    }
-
-    return true;
-}
-
-/**
- * Documentos no obligatorios y visibles que el estudiante aún no tiene aprobados (los que lista la carta de
- * documentos faltantes). No incluye los documentos automáticos (los que se firman en Mi Cuenta).
- */
-function squuad_cert_missing_documents_pending(object $student): array
-{
-    global $wpdb;
-
-    $automatic = $wpdb->get_col("SELECT document_identificator FROM {$wpdb->prefix}documents_certificates WHERE `type` = 'automatic'");
-    $rows = $wpdb->get_results($wpdb->prepare(
-        "SELECT * FROM {$wpdb->prefix}student_documents WHERE student_id = %d AND `status` != 5 AND is_visible = 1 AND is_required = 0 ORDER BY id ASC",
-        $student->id
-    ));
-
-    return array_values(array_filter($rows, static fn($row): bool => !in_array((string) $row->document_id, $automatic, true)));
-}
-
-/** Lista HTML de {{missing_documents}}. */
-function squuad_cert_missing_documents_list_html(object $student): string
-{
-    $items = '';
-    foreach (squuad_cert_missing_documents_pending($student) as $i => $row) {
-        $name = function_exists('get_name_document') ? (string) get_name_document($row->document_id) : '';
-        $items .= '<li>' . ($i + 1) . '. ' . esc_html($name ?: (string) $row->document_id) . '</li>';
-    }
-
-    return $items ? '<ul style="list-style:none;padding-left:0">' . $items . '</ul>' : '';
-}
-
-/**
- * ¿Se debe pedir este documento automático a este estudiante? 'always': sí. 'missing_documents' (las reglas de la
- * carta de documentos faltantes, antes fijas en el código): los demás documentos automáticos que se piden siempre
- * ya están completos, no hay pagos vencidos, todos los documentos obligatorios visibles están aprobados y le queda
- * al menos un documento no obligatorio pendiente. $documents: los documentos automáticos activos.
- */
-function squuad_cert_document_condition_met(object $document, object $student, array $documents): bool
-{
-    global $wpdb;
-
-    if ('missing_documents' !== squuad_cert_document_request_condition((int) $document->id)) {
-        return true;
-    }
-    foreach ($documents as $other) {
-        if ((int) $other->id === (int) $document->id || 'always' !== squuad_cert_document_request_condition((int) $other->id)) {
-            continue;
-        }
-        $identificator = (string) $other->document_identificator;
-        $request = squuad_cert_signature_request_latest((int) $student->id, $identificator);
-        $done = $request ? 'completed' === $request->status || 'closed_by_upload' === $request->status : false;
-        if (!$request) {
-            $row = $wpdb->get_row($wpdb->prepare(
-                "SELECT status, attachment_id FROM {$wpdb->prefix}student_documents WHERE student_id = %d AND document_id = %s ORDER BY id ASC LIMIT 1",
-                $student->id,
-                $identificator
-            ));
-            $done = $row && (int) $row->attachment_id > 0 && 3 !== (int) $row->status;
-        }
-        if (!$done) {
-            return false;
-        }
-    }
-    $overdue = $wpdb->get_var($wpdb->prepare(
-        "SELECT id FROM {$wpdb->prefix}student_payments WHERE student_id = %d AND status_id = 0 AND date_next_payment <= NOW() LIMIT 1",
-        $student->id
-    ));
-    if ($overdue) {
-        return false;
-    }
-    $required_pending = $wpdb->get_var($wpdb->prepare(
-        "SELECT id FROM {$wpdb->prefix}student_documents WHERE student_id = %d AND `status` != 5 AND is_visible = 1 AND is_required = 1 LIMIT 1",
-        $student->id
-    ));
-    if ($required_pending) {
-        return false;
-    }
-
-    return (bool) squuad_cert_missing_documents_pending($student);
-}
 
 /** ¿El sitio ya tiene la carta de documentos faltantes como documento automático? */
 function squuad_cert_missing_letter_is_automatic(): bool

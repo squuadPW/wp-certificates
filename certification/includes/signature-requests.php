@@ -456,6 +456,15 @@ function squuad_cert_signature_request_role(object $request, int $user_id): stri
     return (int) $request->student_user_id === $user_id ? 'student' : '';
 }
 
+/**
+ * ¿El usuario es quien carga el documento sin firmarlo? (documento automático con campos adicionales en el que el
+ * estudiante no tiene puesto de firma: responde, revisa y guarda; ADR 0004, decisión del 2026-10-01).
+ */
+function squuad_cert_signature_request_is_holder(object $request, int $user_id): bool
+{
+    return $user_id > 0 && (int) $request->student_user_id === $user_id && '' === squuad_cert_signature_request_role($request, $user_id);
+}
+
 /** Puestos que deben firmar la solicitud; sin firmantes fijados, el estudiante. */
 function squuad_cert_signature_request_required_roles(object $request): array
 {
@@ -480,14 +489,12 @@ function squuad_cert_signature_request_signed_roles(int $request_id): array
 }
 
 /**
- * Siguiente documento automático que el usuario tiene que firmar, recorriendo todos sus estudiantes (como estudiante:
- * él mismo; como representante: todos sus hijos, en orden) y todos los documentos automáticos activos (el mismo
- * criterio que wp-certificates: type = 'automatic' y status = 1). Sustituye al filtro
- * get_first_pending_automatic_document, que no distingue estudiantes.
+ * Siguiente documento automático que el usuario tiene que firmar o rellenar, por prioridad (0 la más urgente; empate:
+ * el más antiguo). Ver squuad_cert_signature_user_documents().
  *
  * Un documento de un estudiante está resuelto si su última ronda está completada o cerrada por subida, o si (sin
- * solicitudes) su fila de student_documents tiene un archivo y no está declinada. Si la ronda abierta ya tiene la
- * firma del usuario, se pasa al siguiente (falta la del otro firmante).
+ * solicitudes) su fila de student_documents tiene un archivo y no está declinada. Si el usuario ya hizo su parte en la
+ * ronda abierta, se pasa al siguiente (faltan los firmantes del sistema).
  *
  * Devuelve ['student', 'document', 'request' (o null), 'student_user_id', 'legacy_partial'] o null.
  */
@@ -509,10 +516,14 @@ function squuad_cert_signature_pending_for_user(WP_User $user, string $selection
 }
 
 /**
- * Todos los documentos automáticos que conciernen al usuario (ADR 0003, paso 5b): los que le toca firmar ('to_sign'),
- * los que ya firmó y esperan a otro firmante ('waiting') y los que tienen todas las firmas y esperan su PDF final
- * ('pdf', paso 6b), de todos sus estudiantes. Mismo criterio que
- * squuad_cert_signature_pending_for_user().
+ * Documentos automáticos que conciernen al usuario (ADR 0003, paso 5b), por prioridad: los que le toca firmar o
+ * rellenar ('to_sign'), los que ya hizo y esperan a otro firmante ('waiting') y los que tienen todas las firmas y
+ * esperan su PDF final ('pdf', paso 6b).
+ *
+ * Regla (ADR 0004, decisión del 2026-10-01): un documento automático activo se muestra solo si pide firma (variable de
+ * firma en la plantilla y firmantes en el panel) o tiene campos adicionales, y solo a quien tiene que firmarlo o
+ * rellenarlo: al estudiante si el panel pide su firma o si el documento tiene campos. Nada más lo activa ni lo
+ * bloquea. Una solicitud en curso sigue hasta el final aunque cambie la configuración.
  */
 function squuad_cert_signature_user_documents(WP_User $user): array
 {
@@ -538,7 +549,7 @@ function squuad_cert_signature_user_documents(WP_User $user): array
     if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table_documents)) !== $table_documents) {
         return [];
     }
-    $documents = $wpdb->get_results("SELECT * FROM {$table_documents} WHERE `type` = 'automatic' AND `status` = 1 ORDER BY id ASC");
+    $documents = $wpdb->get_results("SELECT * FROM {$table_documents} WHERE `type` = 'automatic' AND `status` = 1 ORDER BY `priority` ASC, id ASC");
 
     foreach ($students as $student) {
         $student_user = get_user_by('email', $student->email);
@@ -557,14 +568,11 @@ function squuad_cert_signature_user_documents(WP_User $user): array
             // Firmantes del documento (ADR 0003, paso 4): la política decide solo para solicitudes nuevas; una solicitud
             // en curso conserva sus firmantes aunque la configuración haya cambiado
             $in_progress = $request && in_array($request->status, SQUUAD_CERT_SIGNATURE_REQUEST_OPEN, true);
-            // Condición del documento (ADR 0003, paso 9): p. ej. la carta de documentos faltantes solo se pide cuando
-            // el estudiante tiene documentos no obligatorios pendientes. Una solicitud en curso sigue hasta el final.
-            if (!$in_progress && function_exists('squuad_cert_document_condition_met') && !squuad_cert_document_condition_met($document, $student, $documents)) {
-                continue;
-            }
-            if (!$in_progress && function_exists('squuad_cert_signing_policy')) {
-                $policy = squuad_cert_signing_policy($document);
-                if (!squuad_cert_signing_policy_has($policy, 'student')) {
+            if (!$in_progress) {
+                // Solo si pide firma o tiene campos, y solo si el estudiante firma (panel) o rellena (campos)
+                $automatic = squuad_cert_automatic_status($document);
+                $signs = $automatic['signature'] && squuad_cert_signing_policy_has(squuad_cert_signing_policy($document), 'student');
+                if (!$automatic['shown'] || (!$signs && !$automatic['fields'])) {
                     continue;
                 }
             }
@@ -574,13 +582,14 @@ function squuad_cert_signature_user_documents(WP_User $user): array
             $state = 'to_sign';
             if ($request && in_array($request->status, SQUUAD_CERT_SIGNATURE_REQUEST_OPEN, true)) {
                 $role_here = squuad_cert_signature_request_role($request, (int) $user->ID);
-                if ('' === $role_here) {
-                    continue; // no firma aquí
+                $holder = '' === $role_here && squuad_cert_signature_request_is_holder($request, (int) $user->ID);
+                if ('' === $role_here && !$holder) {
+                    continue; // no firma ni rellena aquí
                 }
                 if ('signed' === $request->status) {
                     $state = 'pdf'; // todas las firmas; falta generar el PDF final
-                } elseif (in_array($role_here, squuad_cert_signature_request_signed_roles((int) $request->id), true)) {
-                    $state = 'waiting'; // ya firmó; falta otro firmante
+                } elseif ($holder ? null !== $request->frozen_at_utc : in_array($role_here, squuad_cert_signature_request_signed_roles((int) $request->id), true)) {
+                    $state = 'waiting'; // ya hizo su parte (firmó o guardó sus respuestas); faltan otros firmantes
                 }
             } elseif (!$request) {
                 // Sin solicitudes: completado con el modelo anterior si la fila tiene archivo y no está declinada

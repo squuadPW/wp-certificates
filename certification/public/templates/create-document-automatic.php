@@ -40,7 +40,11 @@
                 <?php } ?>
             </div>
             <div class="modal-footer" style="text-align: center; display: block">
-                <?php if (!empty($request) && function_exists('squuad_cert_signature_consent_text')) { // consentimiento (ADR 0002, punto 7): fuera del PDF ?>
+                <?php // Quien solo rellena (campos adicionales, sin recuadro de firma): guarda sin firmar y sin consentimiento de firma
+                $holder_only = !empty($request) && function_exists('squuad_cert_signature_request_is_holder')
+                    && squuad_cert_signature_request_is_holder($request, get_current_user_id());
+                ?>
+                <?php if (!empty($request) && !$holder_only && function_exists('squuad_cert_signature_consent_text')) { // consentimiento (ADR 0002, punto 7): fuera del PDF ?>
                     <label class="edusystem-signature-consent" style="display:block;max-width:640px;margin:0 auto 12px;text-align:left;font-size:13px;">
                         <input type="checkbox" name="consent_version" value="<?= esc_attr(SQUUAD_CERT_SIGNATURE_CONSENT_CURRENT) ?>">
                         <?= esc_html(squuad_cert_signature_consent_text(SQUUAD_CERT_SIGNATURE_CONSENT_CURRENT)) ?>
@@ -54,4 +58,39 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
         integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <?php if ($holder_only) { // Guardar sin firma (ADR 0004, decisión del 2026-10-01): el JS de firma solo se activa con recuadro ?>
+        <script>
+            (function () {
+                const button = document.getElementById("saveSignatures");
+                if (!button) return;
+                // Si nadie más firma, el PDF final va en la misma petición; si faltan firmantes del sistema, lo harán ellos
+                const withPdf = <?= wp_json_encode(empty($required_slots)) ?>;
+                const ajaxUrl = (window.ajax_object && window.ajax_object.ajax_url) || <?= wp_json_encode(admin_url('admin-ajax.php')) ?>;
+                const field = (name) => { const input = document.querySelector(`input[name="${name}"]`); return input ? input.value : ""; };
+                const fail = (message) => { alert(message || <?= wp_json_encode(__('The document could not be saved. Please reload the page and try again.', 'edusystem')) ?>); button.disabled = false; };
+                const send = (pdf) => {
+                    const data = new FormData();
+                    data.append("action", "create_enrollment_document");
+                    data.append("_ajax_nonce", window.edusystemSignatures ? window.edusystemSignatures.nonce : "");
+                    data.append("request_id", field("request_id"));
+                    data.append("content_sha256", field("content_sha256"));
+                    if (pdf) data.append("document", pdf, (field("document_name") || "document").toLowerCase() + ".pdf");
+                    return fetch(`${ajaxUrl}?action=create_enrollment_document`, { method: "POST", body: data, credentials: "same-origin" })
+                        .then((response) => response.json().catch(() => null))
+                        .then((response) => (response && response.success ? window.location.reload() : fail(response && typeof response.data === "string" ? response.data : "")));
+                };
+                button.addEventListener("click", () => {
+                    button.disabled = true;
+                    if (!withPdf) { send(null).catch(() => fail("")); return; }
+                    html2pdf().set({
+                        margin: [0.2, 0, 0, 0],
+                        image: { type: "jpeg", quality: 0.98 },
+                        jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
+                        html2canvas: { scale: 3 },
+                        pagebreak: { mode: ["avoid-all", "css", "legacy"], after: ".pagebreak" },
+                    }).from(document.getElementById("content-pdf")).outputPdf("blob").then(send).catch(() => fail(""));
+                });
+            })();
+        </script>
+    <?php } ?>
 </div>

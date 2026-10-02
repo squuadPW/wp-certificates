@@ -81,17 +81,6 @@ function squuad_cert_document_signing_handle_save(): void
     }
 
     $result = squuad_cert_signing_policy_save($document_id, $requires, $slots);
-    // Condición para pedir el documento automático (paso 9); se guarda aparte de la política de firmantes
-    if (isset($_POST['request_condition']) && function_exists('squuad_cert_document_request_condition_set')) {
-        if (squuad_cert_document_request_condition_set($document_id, sanitize_key($_POST['request_condition']))) {
-            $saved = __('The condition of the document was saved.', 'edusystem');
-            if (!$result['ok']) {
-                $result['message'] .= ' ' . $saved; // la política no se guardó, la condición sí
-            } else {
-                $result['message'] = __('No changes.', 'edusystem') === $result['message'] ? $saved : $result['message'] . ' ' . $saved;
-            }
-        }
-    }
     if (function_exists('squuad_cert_signers_notice')) {
         squuad_cert_signers_notice($result['message'], $result['ok']);
     }
@@ -336,7 +325,7 @@ function squuad_cert_missing_letter_conversion_notice(): void
     ?>
     <div class="notice notice-info">
         <p><strong><?= esc_html__('Missing documents commitment letter', 'edusystem') ?></strong><br>
-            <?= esc_html__('This site uses the old fixed letter. Convert it into an automatic document: it will be editable here, signed with the new signature system (frozen content, consent, "Documents to sign") and asked only when the student has optional documents pending. Letters already signed keep their validity and are not asked again.', 'edusystem') ?></p>
+            <?= esc_html__('This site uses the old fixed letter. Convert it into an automatic document: it will be editable here, signed with the new signature system (frozen content, consent, "Documents to sign"). Like every automatic document, it is shown while the student has not signed it. Letters already signed keep their validity and are not asked again.', 'edusystem') ?></p>
         <form method="post" action="<?= esc_url(admin_url('admin-post.php')) ?>">
             <input type="hidden" name="action" value="squuad_cert_convert_missing_letter">
             <?php wp_nonce_field('squuad_cert_convert_missing_letter'); ?>
@@ -393,7 +382,6 @@ function squuad_cert_missing_letter_convert_handle(): void
         wp_safe_redirect(admin_url('admin.php?page=add_admin_form_documents_content'));
         exit;
     }
-    squuad_cert_document_request_condition_set($document_id, 'missing_documents');
 
     // La variable nueva aparece en la lista de variables del editor de wp-certificates
     $variables = $wpdb->prefix . 'variables_document';
@@ -410,7 +398,7 @@ function squuad_cert_missing_letter_convert_handle(): void
     if (function_exists('edusystem_set_log')) {
         edusystem_set_log(sprintf('Carta de documentos faltantes convertida en el documento automático %d por el usuario %d', $document_id, get_current_user_id()), 'signing_policy');
     }
-    squuad_cert_signers_notice(__('The letter is now an automatic document. Review its text below; it is asked only when the student has optional documents pending.', 'edusystem'), true);
+    squuad_cert_signers_notice(__('The letter is now an automatic document. Review its text below; like every automatic document, it is shown while the student has not signed it.', 'edusystem'), true);
     wp_safe_redirect(add_query_arg([
         'page' => 'add_admin_form_documents_content',
         'section_tab' => 'document_detail',

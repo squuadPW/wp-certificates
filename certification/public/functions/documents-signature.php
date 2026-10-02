@@ -68,7 +68,9 @@ function squuad_cert_signature_handle_request_submission(int $request_id): void
     $request = squuad_cert_signature_request_get($request_id);
     $user_id = get_current_user_id();
     $role = $request ? squuad_cert_signature_request_role($request, $user_id) : '';
-    if (!$request || '' === $role) {
+    // Quien carga el documento sin firmarlo (automático con campos adicionales en el que el estudiante no firma)
+    $holder = $request && '' === $role && squuad_cert_signature_request_is_holder($request, $user_id);
+    if (!$request || ('' === $role && !$holder)) {
         if (function_exists('edusystem_set_log')) {
             edusystem_set_log(sprintf('Firma rechazada: el usuario %d no firma la solicitud %d', $user_id, $request_id), 'signature_blocked');
         }
@@ -77,7 +79,7 @@ function squuad_cert_signature_handle_request_submission(int $request_id): void
     if (!in_array($request->status, SQUUAD_CERT_SIGNATURE_REQUEST_OPEN, true)) {
         wp_send_json_error(__('This document no longer accepts signatures. Please reload the page.', 'edusystem'), 409);
     }
-    if (function_exists('squuad_cert_signature_request_slot_open') && !squuad_cert_signature_request_slot_open($request, $role)) {
+    if ('' !== $role && function_exists('squuad_cert_signature_request_slot_open') && !squuad_cert_signature_request_slot_open($request, $role)) {
         wp_send_json_error(__('This document is still waiting for previous signatures.', 'edusystem'), 409);
     }
 
@@ -135,6 +137,22 @@ function squuad_cert_signature_handle_request_submission(int $request_id): void
             squuad_cert_signer_notify_open_slots((int) $request->id);
         }
         $request = squuad_cert_signature_request_get((int) $request->id);
+    }
+
+    // 1b) Quien solo rellena (campos adicionales, sin firma): al guardar se congela el contenido que vio. Si nadie más
+    // tiene que firmar, la solicitud queda lista para su PDF final, que llega en esta misma petición.
+    if ($holder && null === $request->frozen_at_utc) {
+        if (!squuad_cert_signature_request_freeze((int) $request->id, $shown_sha256, $user_id)) {
+            wp_send_json_error(__('The document was updated while you had it open. Please reload the page and review it again before saving.', 'edusystem'), 409);
+        }
+        squuad_cert_signature_request_log_event((int) $request->id, 'filled', ['role' => 'holder', 'content_sha256' => $shown_sha256]);
+        $request = squuad_cert_signature_request_get((int) $request->id);
+        if (!squuad_cert_signature_request_required_roles($request)) {
+            squuad_cert_signature_request_transition((int) $request->id, ['open'], 'signed');
+            $request = squuad_cert_signature_request_get((int) $request->id);
+        } elseif (function_exists('squuad_cert_signer_notify_open_slots')) {
+            squuad_cert_signer_notify_open_slots((int) $request->id);
+        }
     }
 
     // 2) PDF final: una sola vez, con todas las firmas y sobre el contenido congelado

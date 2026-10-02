@@ -13,15 +13,9 @@ function squuad_cert_modal_document_automatic()
 {
     global $current_user;
 
-    // Firma solo el estudiante con su cuenta (decisión del dueño, 2026-10-01). Su registro tiene que estar completo:
-    // hoy lo dicen datos de EduSystem (status_register de la cuenta que lo inscribió y get_complete_data_success());
-    // pasarán a las condiciones del proveedor (ADR 0004, paso 4b-2).
+    // Firma o rellena solo el estudiante con su cuenta (decisión del dueño, 2026-10-01). Nada más activa ni bloquea los
+    // automáticos (ni el registro completo ni otras condiciones): ver squuad_cert_signature_user_documents()
     if (!in_array('student', (array) $current_user->roles, true)) {
-        return;
-    }
-    $student_id_meta = get_user_meta($current_user->ID, 'student_id', true);
-    $student_row = $student_id_meta && function_exists('get_student') ? get_student($student_id_meta) : null;
-    if (!$student_row || empty($student_row->partner_id) || 1 != get_user_meta($student_row->partner_id, 'status_register', true)) {
         return;
     }
 
@@ -29,12 +23,8 @@ function squuad_cert_modal_document_automatic()
     if (!empty($_GET['squuad_cert_batch']) || !empty($_GET['squuad_cert_pdf'])) {
         return;
     }
-    if (function_exists('get_complete_data_success') && !get_complete_data_success()) {
-        return;
-    }
 
-    // Documento pendiente del usuario, con su solicitud (ADR 0002): se elige por titular y por solicitud. Sin
-    // solicitudes no hay nada que firmar.
+    // Documento pendiente del usuario, con su solicitud (ADR 0002), por prioridad. Sin solicitudes no hay nada que hacer.
     $pending = squuad_cert_signature_requests_enabled()
         ? squuad_cert_signature_pending_for_user(
             $current_user,

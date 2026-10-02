@@ -17,6 +17,13 @@
         </div>
         <?php setcookie('message-error', '', time(), '/'); ?>
     <?php } ?>
+    <?php // Documento automático que no se mostrará en Mi Cuenta (ni pide firma ni tiene campos adicionales)
+    $automatic_status = !empty($document) ? squuad_cert_automatic_status($document) : null;
+    if ($automatic_status && 'automatic' === $document->type && !$automatic_status['signature'] && !$automatic_status['fields']) : ?>
+        <div class="notice notice-warning">
+            <p><?= esc_html(sprintf(__('This automatic document will not be shown in My Account: %s. It must ask someone to sign it (a signature variable in the template and signers in "Document signers") or have additional fields.', 'wp-certificates'), implode('; ', $automatic_status['reasons']))); ?></p>
+        </div>
+    <?php endif; ?>
     <div style="display:flex;width:100%;">
         <a class="button button-outline-primary"
             href="<?= admin_url('admin.php?page=add_admin_form_documents_content'); ?>"><?= esc_html__('Back') ?></a>
@@ -265,6 +272,12 @@
                                         <label for="is_visible"><b><?= esc_html__('Is visible in documents page?', 'wp-certificates'); ?></b></label>
                                     </div>
 
+                                    <div style="font-weight:400; text-align: center;" class="space-offer">
+                                        <label for="priority"><b><?= esc_html__('Priority', 'wp-certificates'); ?></b></label><br>
+                                        <input type="number" name="priority" id="priority" min="0" max="<?= (int) SQUUAD_CERT_PRIORITY_MAX ?>" step="1" value="<?= (int) ($document->priority ?? 0); ?>" style="width: 90px">
+                                        <p class="description"><?= esc_html__('Order in My Account when several automatic documents are pending: 0 is the most urgent; with the same priority, the oldest first.', 'wp-certificates'); ?></p>
+                                    </div>
+
                                     <?php if (!wpc_edusystem_signatures_active()) : ?>
                                     <div style="font-weight:400; text-align: center;" class="space-offer">
                                         <input type="checkbox" name="delete_signatures" id="delete_signatures" style="width: auto !important">
@@ -354,6 +367,7 @@
         const heightSection = document.querySelector('div.space-offer:has(label[for="height_size"])');
         const isRequired = document.querySelector('div.space-offer:has(label[for="is_required"])');
         const isVisible = document.querySelector('div.space-offer:has(label[for="is_visible"])');
+        const priority = document.querySelector('div.space-offer:has(label[for="priority"])');
         if (!paperFormatSelect || !documentType) return; // alta: formulario corto sin estos campos
 
         function toggleCustomSizeFields() {
@@ -365,6 +379,7 @@
             const isAutomatic = documentType.value === 'automatic';
             isRequired.style.display = isAutomatic ? 'block' : 'none';
             isVisible.style.display = isAutomatic ? 'block' : 'none';
+            if (priority) priority.style.display = isAutomatic ? 'block' : 'none';
         }
 
         // Ejecuta la función al cargar la página para establecer el estado inicial

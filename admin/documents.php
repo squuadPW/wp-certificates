@@ -124,6 +124,8 @@ function add_admin_form_documents_content()
             $book = isset($_POST['book']) ? absint($_POST['book']) : 0;
             // Descripción de la línea del libro: texto plano con variables (includes/book.php)
             $book_line_description = isset($_POST['book_line_description']) ? sanitize_textarea_field(wp_unslash($_POST['book_line_description'])) : '';
+            // Prioridad de los documentos automáticos en Mi Cuenta: 0 es la más urgente (includes/automatic.php)
+            $priority = isset($_POST['priority']) ? min(SQUUAD_CERT_PRIORITY_MAX, absint($_POST['priority'])) : 0;
 
             // Convertir a valores binarios (0 o 1)
             $status = isset($_POST['status']) && $_POST['status'] === 'on' ? 1 : 0;
@@ -177,6 +179,7 @@ function add_admin_form_documents_content()
                 'type_file' => $type_file,
                 'book' => $book,
                 'book_line_description' => '' !== $book_line_description ? $book_line_description : null,
+                'priority' => $priority,
             );
 
             // Campos adicionales: se piden antes de generar el documento y sus respuestas no se guardan

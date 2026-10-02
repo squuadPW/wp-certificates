@@ -48,15 +48,6 @@ $next = count($positions) + 1;
             <input type="hidden" name="document_certificate_id" value="<?= (int) $document->id ?>">
             <?php wp_nonce_field('squuad_cert_save_signing_policy'); ?>
             <p><label><input type="checkbox" name="requires_signatures" value="1" <?= checked($policy['requires_signatures'], true, false) ?>> <strong><?= esc_html__('This document asks for signatures', 'edusystem') ?></strong></label></p>
-            <?php if ('automatic' === $document->type && function_exists('squuad_cert_document_conditions')) : ?>
-                <p><label for="edusystem-request-condition"><strong><?= esc_html__('When to ask for it', 'edusystem') ?></strong></label><br>
-                    <select name="request_condition" id="edusystem-request-condition">
-                        <?php foreach (squuad_cert_document_conditions() as $key => $label) : ?>
-                            <option value="<?= esc_attr($key) ?>" <?= selected(squuad_cert_document_request_condition((int) $document->id), $key, false) ?>><?= esc_html($label) ?></option>
-                        <?php endforeach; ?>
-                    </select><br>
-                    <span class="description"><?= esc_html__('"Only when the student has optional documents pending": the other automatic documents are complete, there are no overdue payments, every required document is approved and at least one optional document is still pending (the missing documents commitment letter). Requests already in progress are not affected.', 'edusystem') ?></span></p>
-            <?php endif; ?>
 
             <table class="widefat striped" style="max-width:820px">
                 <thead><tr><th></th><th><?= esc_html__('Signer', 'edusystem') ?></th><th><?= esc_html__('Variables for the template', 'edusystem') ?></th><th><?= esc_html__('Order', 'edusystem') ?></th></tr></thead>

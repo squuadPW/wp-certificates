@@ -24,7 +24,8 @@ define('WP_C_REMOTE_INFO_URL', 'https://versions.squuad.com/plugins/wp-certifica
 // 5: las variables generales salen de la lista de la base de datos (siempre están disponibles en el código).
 // 6: cada variable de la lista se vincula con el método de su misma clave (ADR 0005 de EduSystem).
 // 7: documents_certificates.book_line_description, texto de la línea del libro de registro (ADR 0004 de EduSystem).
-define('WP_C_DB_VERSION', '7');
+// 8: documents_certificates.priority, orden de los documentos automáticos en Mi Cuenta (0 = el más urgente).
+define('WP_C_DB_VERSION', '8');
 
 // get_plugin_data() vive en wp-admin/includes/plugin.php, que en el front no está cargado (antes solo funcionaba
 // porque EduSystem lo cargaba primero)
@@ -46,6 +47,7 @@ require_once WP_C_PATH . 'includes/autoload.php';
 require_once WP_C_PATH . 'includes/contract.php';
 require_once WP_C_PATH . 'includes/variables.php';
 require_once WP_C_PATH . 'includes/book.php';
+require_once WP_C_PATH . 'includes/automatic.php';
 require_once WP_C_PATH . 'public/functions.php';
 require_once WP_C_PATH . 'admin/functions.php';
 
@@ -201,6 +203,7 @@ function create_tables_certificates() {
         `unit` VARCHAR(255) NOT NULL DEFAULT 'mm',
         `is_required` BOOLEAN NOT NULL DEFAULT 0,
         `is_visible` BOOLEAN NOT NULL DEFAULT 1,
+        `priority` INT(11) NOT NULL DEFAULT 0,
         `book` TEXT NULL,
         `book_line_description` TEXT NULL,
         `fields` LONGTEXT NULL,
