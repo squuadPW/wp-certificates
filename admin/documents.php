@@ -185,8 +185,8 @@ function add_admin_form_documents_content()
             // Campos adicionales: se piden antes de generar el documento y sus respuestas no se guardan
             // (ver edusystem/includes/document-fields.php). Las filas inválidas se descartan con un aviso.
             $field_errors = [];
-            if (function_exists('edusystem_sanitize_document_fields')) {
-                [$document_fields, $field_errors] = edusystem_sanitize_document_fields(wp_unslash($_POST['fields'] ?? []));
+            if (function_exists('squuad_cert_sanitize_document_fields')) {
+                [$document_fields, $field_errors] = squuad_cert_sanitize_document_fields(wp_unslash($_POST['fields'] ?? []));
                 $document_data['fields'] = $document_fields ? wp_json_encode($document_fields) : null;
             }
 
@@ -539,7 +539,7 @@ function get_documents_certificates(string $type = null): array
 function wpc_document_field_row($index, $field = []) {
     $name = 'fields[' . $index . ']';
     $type = $field['type'] ?? 'text';
-    $has_options = function_exists('edusystem_document_field_has_options') && edusystem_document_field_has_options($type);
+    $has_options = function_exists('squuad_cert_document_field_has_options') && squuad_cert_document_field_has_options($type);
 
     ob_start();
     ?>
@@ -553,7 +553,7 @@ function wpc_document_field_row($index, $field = []) {
         </td>
         <td>
             <select name="<?= esc_attr($name) ?>[type]" class="wpc-document-field-type" aria-label="<?= esc_attr__('Type', 'wp-certificates') ?>">
-                <?php foreach (edusystem_document_field_types() as $value => $label) { ?>
+                <?php foreach (squuad_cert_document_field_types() as $value => $label) { ?>
                     <option value="<?= esc_attr($value) ?>" <?php selected($type, $value); ?>><?= esc_html($label) ?></option>
                 <?php } ?>
             </select>

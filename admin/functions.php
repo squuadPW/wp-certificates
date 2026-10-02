@@ -10,28 +10,29 @@ function wpc_edusystem_active(): bool
 }
 
 /**
- * ¿El sitio usa el sistema de firmas de EduSystem (solicitudes con evidencia, ADR 0002/0003)? Entonces las firmas de
- * estudiantes y representantes son legales y selladas: wp-certificates no las borra, y las firmas institucionales las
- * gestiona EduSystem (la pantalla "Users and signatures" queda en solo lectura). Sin EduSystem nuevo, todo sigue igual.
+ * ¿Está activo el sistema de firmas (solicitudes con evidencia, ADR 0002/0003 de EduSystem; desde el paso 5b vive en el
+ * módulo certification/ de wp-certificates)? Entonces las firmas son legales y selladas: no se borran en bloque, y las
+ * firmas institucionales se gestionan como firmantes del sistema.
  */
 function wpc_edusystem_signatures_active(): bool
 {
-    return function_exists('edusystem_signature_requests_enabled') && edusystem_signature_requests_enabled();
+    return function_exists('squuad_cert_signature_requests_enabled') && squuad_cert_signature_requests_enabled();
 }
 
 /**
- * ¿Rige la regla "nadie firma por otro" de EduSystem (ADR 0003, paso 10)? Entonces las firmas-imagen de "Users and
- * signatures" no se insertan en ningún documento y los documentos que exigen firma se emiten para firma en EduSystem.
+ * ¿Rige la regla "nadie firma por otro" (ADR 0003 de EduSystem, paso 10)? Entonces las firmas-imagen de "Users and
+ * signatures" no se insertan en ningún documento y los documentos que exigen firma se emiten para firma. Lo responde el
+ * módulo de firmas de wp-certificates (antes preguntaba a EduSystem, cuyas funciones se retiraron en el paso 5b).
  */
 function wpc_third_party_signatures_blocked(): bool
 {
-    return function_exists('edusystem_third_party_signatures_blocked') && edusystem_third_party_signatures_blocked();
+    return function_exists('squuad_cert_third_party_signatures_blocked') && squuad_cert_third_party_signatures_blocked();
 }
 
-/** ¿EduSystem gestiona los firmantes institucionales (esquema v6, ADR 0003)? */
+/** ¿El módulo de firmas gestiona los firmantes institucionales (firmantes del sistema)? */
 function wpc_edusystem_signers_active(): bool
 {
-    return function_exists('edusystem_signers_enabled') && edusystem_signers_enabled();
+    return function_exists('squuad_cert_signers_enabled') && squuad_cert_signers_enabled();
 }
 
 /** Registro de una acción sobre firmas: log propio de wp-certificates (con copia en el de EduSystem si existe). */

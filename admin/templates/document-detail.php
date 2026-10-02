@@ -288,8 +288,8 @@
                                 </div>
                             </div>
 
-                            <?php if (function_exists('edusystem_get_document_fields')) {
-                                $document_fields = $document ? edusystem_get_document_fields($document) : []; ?>
+                            <?php if (function_exists('squuad_cert_get_document_fields')) {
+                                $document_fields = $document ? squuad_cert_get_document_fields($document) : []; ?>
                                 <details id="wpc-advanced" style="margin: 18px;" <?= $document_fields ? 'open' : '' ?>>
                                     <summary style="cursor: pointer"><b><?= esc_html__('Advanced', 'wp-certificates'); ?></b></summary>
 

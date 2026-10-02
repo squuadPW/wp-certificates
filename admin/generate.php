@@ -68,7 +68,7 @@ function squuad_cert_generate_document(): void
         wp_send_json_error(__('This document requires signatures: it can no longer be generated with signature images. Configure its signers (Certification > Documents > Document signers) and issue it for signature; each responsible person signs from their own account.', 'edusystem'), 409);
     }
     // Firma-imagen heredada, leída con SQL preparado (ADR 0003 de EduSystem, paso 0)
-    $signature = function_exists('edusystem_legacy_institutional_signature') ? edusystem_legacy_institutional_signature($user_signature_id) : null;
+    $signature = function_exists('squuad_cert_legacy_institutional_signature') ? squuad_cert_legacy_institutional_signature($user_signature_id) : null;
     if ($document->signature_required && !$signature) {
         wp_send_json_error(__('Select a valid signature for this document.', 'edusystem'), 400);
     }
@@ -77,8 +77,8 @@ function squuad_cert_generate_document(): void
     // Valores de las variables: los resuelve wp-certificates (ADR 0005 de EduSystem)
     $replacements = squuad_cert_template_replacements($document->header . $document->content . $document->footer, (int) $student->id, ['document' => $document, 'certificate_id' => $document->id])['replacements'];
     // Campos adicionales del documento: aquí no hay respuestas; así no queda el texto literal {{clave}}
-    if (function_exists('edusystem_document_fields_empty_replacements')) {
-        $replacements = array_merge(edusystem_document_fields_empty_replacements($document), $replacements);
+    if (function_exists('squuad_cert_document_fields_empty_replacements')) {
+        $replacements = array_merge(squuad_cert_document_fields_empty_replacements($document), $replacements);
     }
 
     if ($document->signature_required && $signature) {

@@ -574,8 +574,8 @@ function assign_certificate_student( $student_id, $template_id, $type, $emission
         }
 
         // Campos adicionales del documento (EduSystem): aquí no hay respuestas; así no queda el texto literal {{clave}}
-        if (function_exists('edusystem_document_fields_empty_replacements')) {
-            $replacements = array_merge(edusystem_document_fields_empty_replacements($document), $replacements);
+        if (function_exists('squuad_cert_document_fields_empty_replacements')) {
+            $replacements = array_merge(squuad_cert_document_fields_empty_replacements($document), $replacements);
         }
 
         // 5. Procesar Firma Digital si se requiere
