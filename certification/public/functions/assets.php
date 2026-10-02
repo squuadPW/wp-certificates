@@ -55,7 +55,9 @@ function squuad_cert_signature_public_assets(): void
 add_action('wp_footer', 'squuad_cert_signature_modal_footer');
 function squuad_cert_signature_modal_footer(): void
 {
-    if (squuad_cert_modal_page()) {
+    // Otro plugin puede aplazarlo si en esta página muestra un modal prioritario (p. ej. EduSystem: crear la
+    // contraseña o elegir una electiva); en la siguiente visita vuelve a insistir
+    if (squuad_cert_modal_page() && apply_filters('squuad_cert_show_signature_modal', true)) {
         squuad_cert_modal_document_automatic();
     }
 }

@@ -32,6 +32,7 @@ require_once SQUUAD_CERT_MODULE_PATH . 'admin/signers.php';
 require_once SQUUAD_CERT_MODULE_PATH . 'admin/document-signing.php';
 require_once SQUUAD_CERT_MODULE_PATH . 'admin/document-preview.php';
 require_once SQUUAD_CERT_MODULE_PATH . 'admin/signer-inbox.php';
+require_once SQUUAD_CERT_MODULE_PATH . 'admin/subject-panel.php';
 
 // Público (antes public/functions.php de EduSystem)
 require_once SQUUAD_CERT_MODULE_PATH . 'public/functions/documents-signature.php';

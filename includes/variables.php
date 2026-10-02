@@ -36,6 +36,8 @@ function squuad_cert_general_replacements(array $ctx = []): array
         'today' => ['value' => date('M d, Y'), 'wrap' => false],
         'qrcode' => ['value' => '<div id="qrcode"></div>', 'wrap' => false],
         'page_break' => ['value' => '<div class="pagebreak"></div>', 'wrap' => false],
+        // Recuadros de firma: vacío al generar sin firma; al firmar se sustituye por el hueco de las firmas
+        'signature_section' => ['value' => '', 'wrap' => false],
         'folio' => ['value' => $certificate->folio ?? '', 'wrap' => true],
         'tomo' => ['value' => $certificate->tomo ?? '', 'wrap' => true],
         'tomo_folio' => ['value' => 'Tomo: ' . ($certificate->tomo ?? '') . ' Folio: ' . ($certificate->folio ?? ''), 'wrap' => true],

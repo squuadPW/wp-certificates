@@ -27,6 +27,7 @@ final class Variables
             '{{document_code}}' => __('Code (identifier) of this document', 'wp-certificates'),
             '{{today}}' => __('Today\'s date', 'wp-certificates'),
             '{{page_break}}' => __('Page break in the PDF', 'wp-certificates'),
+            '{{signature_section}}' => __('Signatures of the roles not placed separately (empty when the document does not ask for signatures)', 'wp-certificates'),
             '{{qrcode}}' => __('QR code to validate the document', 'wp-certificates'),
             '{{tomo}}' => __('Volume of the registry book', 'wp-certificates'),
             '{{folio}}' => __('Folio of the registry book', 'wp-certificates'),

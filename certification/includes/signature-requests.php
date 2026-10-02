@@ -720,6 +720,9 @@ function squuad_cert_signature_escape_replacements(array $replacements): array
         'institute_address', 'institute_phone', 'start_academic_year', 'end_academic_year', 'today'];
     $escape = static fn($value): string => str_replace(['{', '}'], ['&#123;', '&#125;'], esc_html((string) $value));
 
+    // Huecos fijos de las firmas y del QR: siempre, los aporte o no otro plugin (variables generales de wp-certificates)
+    $replacements['signature_section'] = ['value' => SQUUAD_CERT_SIGNATURE_SLOT, 'wrap' => false];
+    $replacements['qrcode'] = $replacements['qrcode'] ?? ['value' => '', 'wrap' => false];
     foreach ($replacements as $key => $config) {
         if (!is_array($config) || !array_key_exists('value', $config)) {
             continue;

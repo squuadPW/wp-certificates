@@ -104,10 +104,18 @@ function squuad_cert_document_signing_handle_save(): void
  * Paso 7: "Emitir para firma" desde la ficha del estudiante (documentos gestionados con firmantes del sistema)
  * ------------------------------------------------------------------------------------------------------------ */
 
-/** Mismo acceso que la gestión de Admisión (no el de solo lectura). */
-function squuad_cert_document_issue_can(): bool
+/**
+ * ¿Puede el usuario actual emitir (o declinar) documentos para firma de esta ficha? Lo decide el proveedor del titular
+ * (can_act 'issue'); sin proveedor, solo el administrador del sitio.
+ */
+function squuad_cert_document_issue_can(int $student_id = 0): bool
 {
-    return current_user_can('manage_options') && current_user_can('manager_admission_aes');
+    $provider = $student_id && function_exists('squuad_cert_subject_type') ? squuad_cert_subject_type(SQUUAD_CERT_SUBJECT_STUDENT) : null;
+    if ($provider && !empty($provider['can_act'])) {
+        return (bool) call_user_func($provider['can_act'], get_current_user_id(), $student_id, 'issue');
+    }
+
+    return current_user_can('manage_options');
 }
 
 add_action('admin_post_squuad_cert_issue_document', 'squuad_cert_document_issue_handle');
@@ -116,7 +124,7 @@ function squuad_cert_document_issue_handle(): void
     $student_id = absint($_POST['student_id'] ?? 0);
     $document_certificate_id = absint($_POST['document_certificate_id'] ?? 0);
     check_admin_referer('squuad_cert_issue_document_' . $student_id . '_' . $document_certificate_id);
-    if (!squuad_cert_document_issue_can()) {
+    if (!squuad_cert_document_issue_can($student_id)) {
         wp_die(esc_html__('You do not have permission to manage admissions.', 'edusystem'), 403);
     }
     $result = squuad_cert_signature_issue_document($student_id, $document_certificate_id);
@@ -222,12 +230,12 @@ function squuad_cert_document_issued_decline_handle(): void
 {
     $request_id = absint($_POST['request_id'] ?? 0);
     check_admin_referer('squuad_cert_issued_decline_' . $request_id);
-    if (!squuad_cert_document_issue_can()) {
+    $request = squuad_cert_signature_request_get($request_id);
+    if (!squuad_cert_document_issue_can($request ? (int) $request->subject_id : 0)) {
         wp_die(esc_html__('You do not have permission to manage admissions.', 'edusystem'), 403);
     }
     $reason = sanitize_textarea_field(wp_unslash($_POST['reason'] ?? ''));
     $option = sanitize_key($_POST['book_option'] ?? '');
-    $request = squuad_cert_signature_request_get($request_id);
     $entry = $request && (int) $request->book_entry_id ? squuad_cert_book_entry_get((int) $request->book_entry_id) : null;
     $entry = $entry && 'active' === $entry->status ? $entry : null;
 
@@ -254,12 +262,12 @@ function squuad_cert_document_issued_book_decision_handle(): void
 {
     $request_id = absint($_POST['request_id'] ?? 0);
     check_admin_referer('squuad_cert_issued_book_decision_' . $request_id);
-    if (!squuad_cert_document_issue_can()) {
+    $request = squuad_cert_signature_request_get($request_id);
+    if (!squuad_cert_document_issue_can($request ? (int) $request->subject_id : 0)) {
         wp_die(esc_html__('You do not have permission to manage admissions.', 'edusystem'), 403);
     }
     $option = sanitize_key($_POST['book_option'] ?? '');
     $reason = sanitize_textarea_field(wp_unslash($_POST['reason'] ?? ''));
-    $request = squuad_cert_signature_request_get($request_id);
     $entry = $request ? squuad_cert_book_entry_pending_decision((int) $request->subject_id, (int) $request->document_certificate_id) : null;
 
     if (!$entry || (int) $entry->declined_request_id !== $request_id) {

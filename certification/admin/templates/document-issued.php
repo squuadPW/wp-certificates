@@ -5,7 +5,7 @@
  */
 if (!defined('ABSPATH')) exit;
 
-$can_manage = squuad_cert_document_issue_can();
+$can_manage = squuad_cert_document_issue_can((int) $student->id);
 
 $statuses = [
     'open' => __('Waiting for signatures', 'edusystem'),

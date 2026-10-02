@@ -42,14 +42,14 @@ function squuad_cert_create_enrollment_document_callback()
     }
 
     // Solicitudes de firma (ADR 0002): el servidor deduce de la solicitud el estudiante, el puesto y el contenido; lo
-    // que envía el navegador (ids de usuario, documento) no se usa. Sin solicitud no se firma (página antigua o JS en
-    // caché): se pide recargar.
+    // que envía el navegador (ids de usuario, documento) no se usa. Sin solicitud no se firma.
     $request_id = absint($_POST['request_id'] ?? 0);
     if ($request_id && squuad_cert_signature_requests_enabled()) {
         squuad_cert_signature_handle_request_submission($request_id);
     }
-    squuad_cert_log(sprintf('Firma sin solicitud rechazada (usuario %d): la página era anterior a la actualización', get_current_user_id()), 'signature_blocked');
-    wp_send_json_error(__('The document was updated. Please reload the page.', 'edusystem'), 409);
+    // Sin solicitud no hay nada que firmar: se rechaza como cualquier firma sin permiso (página antigua o petición ajena)
+    squuad_cert_log(sprintf('Firma sin solicitud rechazada (usuario %d)', get_current_user_id()), 'signature_blocked');
+    wp_send_json_error(__('You are not allowed to sign this document.', 'edusystem'), 403);
 }
 
 /**
