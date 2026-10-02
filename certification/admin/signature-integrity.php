@@ -75,28 +75,21 @@ function squuad_cert_signature_integrity_handle_csv(): void
 {
     squuad_cert_signature_integrity_check_request('squuad_cert_signature_legacy_csv');
 
-    if (function_exists('edusystem_set_log')) {
-        edusystem_set_log('Exportado el diagnóstico de firmas antiguas (CSV)', 'signature_verification');
-    }
+    squuad_cert_log('Exportado el diagnóstico de firmas antiguas (CSV)', 'signature_verification');
 
     nocache_headers();
     header('Content-Type: text/csv; charset=utf-8');
     header('Content-Disposition: attachment; filename="firmas-antiguas-' . gmdate('Y-m-d') . '.csv"');
     $out = fopen('php://output', 'w');
     fwrite($out, "\xEF\xBB\xBF"); // BOM: Excel abre bien los acentos
-    fputcsv($out, ['signature_id', 'revoked', 'document', 'user_id', 'student_id', 'role', 'signed_at', 'automatic', 'same_request', 'minor', 'user_missing']);
+    fputcsv($out, ['signature_id', 'document', 'user_id', 'signed_at', 'automatic', 'user_missing']);
     foreach (squuad_cert_signature_legacy_rows() as $row) {
         fputcsv($out, [
             $row['id'],
-            $row['revoked'] ? 1 : 0,
             $row['document_id'],
             $row['user_id'],
-            $row['student_id'] ?? '',
-            $row['role'],
             $row['created_at'],
             $row['automatic'] ? 1 : 0,
-            $row['same_request'] ? 1 : 0,
-            $row['minor'] ? 1 : 0,
             $row['user_missing'] ? 1 : 0,
         ]);
     }
@@ -118,7 +111,6 @@ function squuad_cert_signature_integrity_page(): void
     $current_key = $stored['keys'][$current_key_id] ?? null;
     $last = get_option('squuad_cert_signature_last_verification');
     $legacy = $enabled ? squuad_cert_signature_legacy_rows() : [];
-    $cutoff = (int) get_option('squuad_cert_signature_legacy_max_id', 0);
     $notice = isset($_GET['notice']) ? sanitize_key(wp_unslash($_GET['notice'])) : '';
 
     $count = static fn(string $flag): int => count(array_filter($legacy, static fn(array $row): bool => (bool) $row[$flag]));

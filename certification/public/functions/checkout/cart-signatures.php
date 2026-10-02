@@ -30,7 +30,7 @@ function squuad_cert_load_signatures_data()
         }
         $by_role = [];
         foreach ($wpdb->get_results($wpdb->prepare(
-            "SELECT signer_role, signature FROM {$wpdb->prefix}users_signatures WHERE request_id = %d",
+            "SELECT signer_role, signature FROM {$wpdb->prefix}squuad_cert_signatures WHERE request_id = %d",
             $request_id
         )) as $row) {
             $by_role[$row->signer_role] = json_decode($row->signature);

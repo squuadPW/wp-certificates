@@ -26,7 +26,6 @@ $statuses = [
         </tr></thead>
         <tbody>
             <?php foreach ($items as $item) :
-                $student = $item['student'];
                 $request_id = $item['request'] ? (int) $item['request']->id : 0; ?>
                 <tr>
                     <?php if ($batchable) : ?>
@@ -37,11 +36,11 @@ $statuses = [
                         </td>
                     <?php endif; ?>
                     <td data-title="<?= esc_attr__('Document', 'edusystem') ?>"><?= esc_html((string) $item['document']->title) ?></td>
-                    <td data-title="<?= esc_attr__('Student', 'edusystem') ?>"><?= esc_html(trim((string) $student->name . ' ' . (string) $student->last_name)) ?></td>
+                    <td data-title="<?= esc_attr__('Student', 'edusystem') ?>"><?= esc_html(squuad_cert_account_name((int) $item['subject_id'])) ?></td>
                     <td data-title="<?= esc_attr__('Status', 'edusystem') ?>"><?= esc_html($statuses[$item['state']] ?? '') ?></td>
                     <td>
                         <?php if ('to_sign' === $item['state']) : ?>
-                            <a class="woocommerce-button button" href="<?= esc_url(add_query_arg('squuad_cert_sign', (int) $student->id . '-' . (int) $item['document']->id, $dashboard)) ?>"><?= esc_html__('Sign', 'edusystem') ?></a>
+                            <a class="woocommerce-button button" href="<?= esc_url(add_query_arg('squuad_cert_sign', (int) $item['subject_id'] . '-' . (int) $item['document']->id, $dashboard)) ?>"><?= esc_html__('Sign', 'edusystem') ?></a>
                         <?php elseif ('pdf' === $item['state']) : ?>
                             <a class="woocommerce-button button" href="<?= esc_url(add_query_arg('squuad_cert_pdf', $request_id, $dashboard)) ?>"><?= esc_html__('Generate PDF', 'edusystem') ?></a>
                         <?php endif; ?>

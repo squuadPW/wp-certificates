@@ -35,8 +35,10 @@ function squuad_cert_modal_document_automatic()
     if (!$pending) {
         return;
     }
-    $student = $pending['student'];
-    $student_id = (int) $pending['student_user_id'];
+    // El documento es de la cuenta conectada; su ficha de EduSystem (si la tiene) solo aporta las variables
+    $subject_id = (int) $pending['subject_id'];
+    $student_id = $subject_id; // la plantilla del modal lo envía como student_user_id (cuenta que firma)
+    $variables_subject = (int) $pending['student_id'];
     $document = $pending['document'];
 
     // Con solicitud: si el contenido ya está congelado (alguien firmó), se muestra tal cual, sin volver a pedir los
@@ -47,7 +49,7 @@ function squuad_cert_modal_document_automatic()
         if (null === $content) {
             return; // contenido alterado: no se muestra para firmar (el verificador lo marca)
         }
-        $html = squuad_cert_signature_render_content($content, $student, $request);
+        $html = squuad_cert_signature_render_content($content, $request);
         $document_fields = [];
         $field_values = [];
         $legacy_partial = !empty($pending['legacy_partial']) && 1 === (int) $request->round;
@@ -93,15 +95,15 @@ function squuad_cert_modal_document_automatic()
         return;
     }
     // Las variables del sistema ganan a un campo con la misma clave. Los valores los resuelve wp-certificates (ADR 0005)
-    $replacements = array_merge($field_replacements, squuad_cert_template_replacements($html, (int) $student->id, ['document' => $document])['replacements']);
+    $replacements = array_merge($field_replacements, squuad_cert_template_replacements($html, $variables_subject, ['document' => $document])['replacements']);
 
     // Borrador de la solicitud (ADR 0002): datos escapados, marcadores fijos para las firmas y el QR, imágenes
     // incrustadas. Se regenera en cada apertura hasta la primera firma, que lo congela.
     $request = $request ?: squuad_cert_signature_request_get_or_create(
-        (int) $student->id,
+        $subject_id,
         (string) $document->document_identificator,
-        ['student_user_id' => $student_id],
-        squuad_cert_signature_student_document_id((int) $student->id, (string) $document->document_identificator),
+        ['holder_user_id' => $subject_id],
+        squuad_cert_signature_external_ref($subject_id, (string) $document->document_identificator),
         squuad_cert_signature_doc_version_hash((string) $document->document_identificator),
         (int) $document->id,
         'opened'
@@ -129,7 +131,7 @@ function squuad_cert_modal_document_automatic()
     if ($legacy_partial) {
         squuad_cert_signature_request_log_event_once((int) $request->id, 'legacy_partial_superseded');
     }
-    $html = squuad_cert_signature_render_content($content, $student, $request);
+    $html = squuad_cert_signature_render_content($content, $request);
     $document_fields = [];
 
     include SQUUAD_CERT_MODULE_PATH . 'public/templates/create-document-automatic.php';

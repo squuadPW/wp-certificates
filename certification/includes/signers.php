@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) exit;
 /** Las tablas de firmantes, invitaciones, firmas propias, políticas y lotes llegan con la versión 6 del esquema. */
 function squuad_cert_signers_enabled(): bool
 {
-    return version_compare((string) get_option('edusystem_db_version'), '6', '>=');
+    return version_compare((string) get_option('wp_c_db_version'), '9', '>=');
 }
 
 /**
@@ -71,7 +71,7 @@ function squuad_cert_signer_slot_key(int $signer_id): string
 
 /**
  * Firmantes fijados en una solicitud, en orden: filas de squuad_cert_request_signers o, para solicitudes
- * anteriores al esquema v6 (sin filas), derivados al leer de student_user_id sin escribir nada.
+ * sin módulo de firmantes, ninguno.
  * Cada elemento: ['slot_key', 'user_id', 'signer_id', 'name', 'charge', 'required', 'phase'].
  */
 function squuad_cert_request_signers(object $request): array
@@ -95,12 +95,7 @@ function squuad_cert_request_signers(object $request): array
         ], (array) $rows);
     }
 
-    // Solicitudes de los ADR 0002 (esquema v5): el estudiante (el representante ya no firma)
-    if (!(int) $request->student_user_id) {
-        return [];
-    }
-
-    return [['slot_key' => 'student', 'user_id' => (int) $request->student_user_id, 'signer_id' => 0, 'name' => '', 'charge' => '', 'required' => true, 'phase' => 1]];
+    return [];
 }
 
 /**
@@ -116,7 +111,8 @@ function squuad_cert_request_signers_fix(object $request, array $signers, int $d
     if (!squuad_cert_signers_enabled()) {
         return [];
     }
-    $student_user_id = (int) ($signers['student_user_id'] ?? 0);
+    // La cuenta que firma su puesto (la dueña del documento); 0 en un documento emitido desde la ficha
+    $student_user_id = (int) ($signers['holder_user_id'] ?? 0);
 
     // Política del documento (paso 4): qué huecos y en qué orden; sin documento, el estudiante
     $document = $document_certificate_id ? $wpdb->get_row($wpdb->prepare(
@@ -382,9 +378,7 @@ function squuad_cert_signer_invite(WP_User $user, string $charge, bool $new_acco
     }
 
     $sent = squuad_cert_signer_send_invitation_email($user, $token, $new_account);
-    if (function_exists('edusystem_set_log')) {
-        edusystem_set_log(sprintf('Invitación de firmante %d enviada al usuario %d (%s)%s', $invitation_id, $user->ID, $user->user_email, $sent ? '' : ' — el correo falló'), 'signer_invitation');
-    }
+    squuad_cert_log(sprintf('Invitación de firmante %d enviada al usuario %d (%s)%s', $invitation_id, $user->ID, $user->user_email, $sent ? '' : ' — el correo falló'), 'signer_invitation');
 
     return ['ok' => true, 'message' => $sent
         ? sprintf(__('Invitation sent to %s.', 'edusystem'), $user->user_email)
@@ -577,9 +571,7 @@ function squuad_cert_user_signature_register(string $strokes_json_input, string 
         'replaced_signature_id' => $previous ? (int) $previous->id : 0,
         'charge' => (string) $signer->charge,
     ], (int) $user->ID);
-    if (function_exists('edusystem_set_log')) {
-        edusystem_set_log(sprintf('Firma propia %d registrada por el usuario %d%s', $signature_id, $user->ID, $previous ? ' (sustituye a la ' . (int) $previous->id . ')' : ''), 'signer_signature');
-    }
+    squuad_cert_log(sprintf('Firma propia %d registrada por el usuario %d%s', $signature_id, $user->ID, $previous ? ' (sustituye a la ' . (int) $previous->id . ')' : ''), 'signer_signature');
 
     return ['ok' => true, 'message' => __('Your signature was registered.', 'edusystem')];
 }
@@ -800,12 +792,10 @@ function squuad_cert_signing_policy_save(int $document_certificate_id, bool $req
         'policy_id' => $policy_id,
         'policy_sha256' => $hash,
         'requires_signatures' => $requires,
-        'slots' => array_map(static fn(array $slot): string => $slot['slot_type'] . ($slot['signer_id'] ? ':' . $slot['signer_id'] : ''), $clean),
+        'slots' => array_map(static fn(array $slot): string => $slot['slot_type'] . ('role' === $slot['slot_type'] ? ':' . $slot['role'] : ($slot['signer_id'] ? ':' . $slot['signer_id'] : '')), $clean),
     ]);
-    if (function_exists('edusystem_set_log')) {
-        edusystem_set_log(sprintf('Firmantes del documento %d cambiados (política %d): %s', $document_certificate_id, $policy_id,
-            $requires ? implode(', ', array_map(static fn(array $slot): string => $slot['slot_type'] . ($slot['signer_id'] ? ':' . $slot['signer_id'] : ''), $clean)) : 'no pide firmas'), 'signing_policy');
-    }
+    squuad_cert_log(sprintf('Firmantes del documento %d cambiados (política %d): %s', $document_certificate_id, $policy_id,
+            $requires ? implode(', ', array_map(static fn(array $slot): string => $slot['slot_type'] . ('role' === $slot['slot_type'] ? ':' . $slot['role'] : ($slot['signer_id'] ? ':' . $slot['signer_id'] : '')), $clean)) : 'no pide firmas'), 'signing_policy');
 
     return ['ok' => true, 'message' => __('Document signers saved. They apply to new signature requests; requests already in progress keep their signers.', 'edusystem')];
 }
@@ -869,11 +859,10 @@ function squuad_cert_signer_inbox(int $user_id): array
         return [];
     }
     $rows = $wpdb->get_results($wpdb->prepare(
-        "SELECT r.*, rs.slot_key, rs.charge_snapshot, d.title AS document_title, st.name AS student_name, st.last_name AS student_last_name
+        "SELECT r.*, rs.slot_key, rs.charge_snapshot, d.title AS document_title
          FROM {$wpdb->prefix}squuad_cert_request_signers rs
          JOIN {$wpdb->prefix}squuad_cert_requests r ON r.id = rs.request_id
          LEFT JOIN {$wpdb->prefix}documents_certificates d ON d.id = r.document_certificate_id
-         LEFT JOIN {$wpdb->prefix}students st ON st.id = r.student_id
          WHERE rs.user_id = %d AND rs.phase >= 2 AND r.status IN ('open', 'partially_signed') AND r.frozen_at_utc IS NOT NULL
          ORDER BY r.frozen_at_utc ASC, r.id ASC",
         $user_id
@@ -886,6 +875,9 @@ function squuad_cert_signer_inbox(int $user_id): array
         if (!squuad_cert_signature_request_slot_open($row, (string) $row->slot_key)) {
             continue;
         }
+        // Titular del documento (la cuenta o la ficha), sin leer las tablas de EduSystem
+        $row->student_name = squuad_cert_request_subject_label($row);
+        $row->student_last_name = '';
         $inbox[] = $row;
     }
 
@@ -1147,9 +1139,9 @@ function squuad_cert_signature_sign_as_signer_with(int $request_id, string $show
         'user_id' => $user_id,
         'signature' => (string) $profile->strokes, // copia: cambiar la firma registrada no altera este documento
         'document_id' => $request->document_id,
-    ], (int) $request->student_id, $slot_key, [
+    ], (int) $request->subject_id, $slot_key, [
         'request_id' => (int) $request->id,
-        'student_document_id' => (int) $request->student_document_id,
+        'external_ref' => (int) $request->external_ref,
         'round' => (int) $request->round,
         'content_sha256' => (string) $request->content_sha256,
         'request_created_fingerprint' => squuad_cert_signature_request_created_fingerprint((int) $request->id),
@@ -1158,7 +1150,7 @@ function squuad_cert_signature_sign_as_signer_with(int $request_id, string $show
         'reused_signature_id' => (int) $profile->id,
         'consent_version' => (string) $consent['consent_version'],
         'consent_sha256' => (string) $consent['consent_sha256'],
-    ]);
+    ], (string) $request->subject_type);
     if (!$signature_id) {
         return $fail(__('Your signature could not be saved. Please reload the page and try again.', 'edusystem'));
     }
@@ -1395,9 +1387,7 @@ function squuad_cert_signature_batch_confirm(int $batch_id, string $password, st
         'result' => wp_json_encode($result),
     ], ['id' => $batch_id]);
     squuad_cert_signature_request_log_event(0, 'batch_finished', ['batch_id' => $batch_id] + $result);
-    if (function_exists('edusystem_set_log')) {
-        edusystem_set_log(sprintf('Lote %d del firmante %d: %d firmados, %d omitidos', $batch_id, $user->ID, count($signed), count($skipped)), 'signer_signature');
-    }
+    squuad_cert_log(sprintf('Lote %d del firmante %d: %d firmados, %d omitidos', $batch_id, $user->ID, count($signed), count($skipped)), 'signer_signature');
 
     $message = sprintf(
         /* translators: 1: signed documents, 2: skipped documents */
@@ -1421,24 +1411,29 @@ function squuad_cert_signer_pdf_queue(int $user_id): array
         return [];
     }
 
-    return $wpdb->get_results($wpdb->prepare(
-        "SELECT r.*, d.title AS document_title, st.name AS student_name, st.last_name AS student_last_name
+    $rows = $wpdb->get_results($wpdb->prepare(
+        "SELECT r.*, d.title AS document_title
          FROM {$wpdb->prefix}squuad_cert_request_signers rs
          JOIN {$wpdb->prefix}squuad_cert_requests r ON r.id = rs.request_id
          LEFT JOIN {$wpdb->prefix}documents_certificates d ON d.id = r.document_certificate_id
-         LEFT JOIN {$wpdb->prefix}students st ON st.id = r.student_id
          WHERE rs.user_id = %d AND r.status = 'signed' AND (r.final_attachment_id IS NULL OR r.final_attachment_id = 0)
          ORDER BY r.id ASC",
         $user_id
     ));
+    foreach ($rows as $row) {
+        $row->student_name = squuad_cert_request_subject_label($row);
+        $row->student_last_name = '';
+    }
+
+    return $rows;
 }
 
 /* ---------------------------------------------------------------------------------------------------------------
- * Paso 6b: firma en lote del estudiante y del representante en Mi Cuenta (ADR 0003, punto 10)
+ * Paso 6b: firma en lote de la cuenta dueña en Mi Cuenta (ADR 0003, punto 10)
  * ------------------------------------------------------------------------------------------------------------ */
 
 /**
- * Documentos que el estudiante o el representante puede firmar en lote: pendientes de su firma y ya congelados
+ * Documentos que la cuenta puede firmar en lote: pendientes de su firma y ya congelados
  * (otra persona firmó antes, así el contenido y los campos del documento ya están fijados), en su fase. Mismo
  * formato de fila que la bandeja del firmante (id, content_sha256, round, document_title, student_name...).
  */
@@ -1457,8 +1452,8 @@ function squuad_cert_signature_batch_holder_candidates(WP_User $user): array
         }
         $row = clone $request;
         $row->document_title = (string) $item['document']->title;
-        $row->student_name = (string) $item['student']->name;
-        $row->student_last_name = (string) $item['student']->last_name;
+        $row->student_name = squuad_cert_request_subject_label($request);
+        $row->student_last_name = '';
         $rows[] = $row;
     }
 
@@ -1507,9 +1502,9 @@ function squuad_cert_signature_sign_as_holder_with(int $request_id, string $show
         'user_id' => $user_id,
         'signature' => $strokes_json,
         'document_id' => $request->document_id,
-    ], (int) $request->student_id, $role, [
+    ], (int) $request->subject_id, $role, [
         'request_id' => (int) $request->id,
-        'student_document_id' => (int) $request->student_document_id,
+        'external_ref' => (int) $request->external_ref,
         'round' => (int) $request->round,
         'content_sha256' => (string) $request->content_sha256,
         'request_created_fingerprint' => squuad_cert_signature_request_created_fingerprint((int) $request->id),
@@ -1517,7 +1512,7 @@ function squuad_cert_signature_sign_as_holder_with(int $request_id, string $show
         'signature_method' => 'drawn',
         'consent_version' => (string) $consent['consent_version'],
         'consent_sha256' => (string) $consent['consent_sha256'],
-    ]);
+    ], (string) $request->subject_type);
     if (!$signature_id) {
         return $fail(__('Your signature could not be saved. Please reload the page and try again.', 'edusystem'));
     }
@@ -1569,10 +1564,10 @@ function squuad_cert_signature_issue_signers(object $document): array
     return $signers;
 }
 
-/** Última solicitud emitida de un documento gestionado para un estudiante (o null). */
+/** Última solicitud emitida de un documento gestionado para la ficha de un estudiante (o null). */
 function squuad_cert_signature_issued_latest(int $student_id, int $document_certificate_id): ?object
 {
-    return squuad_cert_signature_request_latest($student_id, SQUUAD_CERT_ISSUED_PREFIX . $document_certificate_id);
+    return squuad_cert_signature_request_latest($student_id, SQUUAD_CERT_ISSUED_PREFIX . $document_certificate_id, SQUUAD_CERT_SUBJECT_STUDENT);
 }
 
 /**
@@ -1612,7 +1607,10 @@ function squuad_cert_signature_issue_document(int $student_id, int $document_cer
 
     $fail = static fn(string $message): array => ['ok' => false, 'message' => $message, 'request_id' => 0];
     $user_id = get_current_user_id();
-    $student = function_exists('get_student') ? get_student($student_id) : null;
+    // Datos de la ficha para el QR (programa y estudiante): los da el proveedor, no las funciones de EduSystem
+    $provider = function_exists('squuad_cert_subject_type') ? squuad_cert_subject_type(SQUUAD_CERT_SUBJECT_STUDENT) : null;
+    $subject = ($provider && !empty($provider['book_line_data'])) ? (array) call_user_func($provider['book_line_data'], $student_id, null) : [];
+    $student = $subject['student'] ?? null;
     $document = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}documents_certificates WHERE id = %d", $document_certificate_id));
     if (!$student || !$document || !$user_id) {
         return $fail(__('The student or the document does not exist.', 'edusystem'));
@@ -1646,11 +1644,12 @@ function squuad_cert_signature_issue_document(int $student_id, int $document_cer
     $request = squuad_cert_signature_request_get_or_create(
         $student_id,
         SQUUAD_CERT_ISSUED_PREFIX . $document_certificate_id,
-        ['student_user_id' => 0],
+        ['holder_user_id' => 0],
         null,
         $template_sha256,
         $document_certificate_id,
-        'issued'
+        'issued',
+        SQUUAD_CERT_SUBJECT_STUDENT
     );
     if (!$request) {
         return $fail(__('The document could not be issued. Please try again.', 'edusystem'));
@@ -1675,25 +1674,21 @@ function squuad_cert_signature_issue_document(int $student_id, int $document_cer
     $qr = ['url' => '', 'image_url' => ''];
     if (false !== strpos(implode('', $parts), '{{qrcode}}')) {
         $emission_date = gmdate('Y-m-d');
-        $program = function_exists('get_name_program_student') ? get_name_program_student($student->id) : '';
+        $program = (string) ($subject['program'] ?? '');
         $qr = (array) apply_filters('create_certificate_edusystem', 'certificate', $document->title, $program, 1, $student, $emission_date);
     }
 
     // Valores de las variables: los resuelve wp-certificates (ADR 0005). Un documento que se emite para firma no puede
     // quedar incompleto: si una variable falla, no se emite.
-    if (function_exists('squuad_cert_template_replacements')) {
-        $resolved = squuad_cert_template_replacements(implode('', $parts), (int) $student->id, ['document' => $document, 'certificate_id' => $document->id]);
-        if ($resolved['failed']) {
-            return $fail(sprintf(
-                /* translators: %s: list of variables */
-                __('The document was not issued: these variables could not be filled in: %s.', 'edusystem'),
-                implode(', ', array_keys($resolved['failed']))
-            ));
-        }
-        $replacements = $resolved['replacements'];
-    } else {
-        $replacements = get_replacements_variables($student, null, null, $document->id);
+    $resolved = squuad_cert_template_replacements(implode('', $parts), $student_id, ['document' => $document, 'certificate_id' => $document->id]);
+    if ($resolved['failed']) {
+        return $fail(sprintf(
+            /* translators: %s: list of variables */
+            __('The document was not issued: these variables could not be filled in: %s.', 'edusystem'),
+            implode(', ', array_keys($resolved['failed']))
+        ));
     }
+    $replacements = $resolved['replacements'];
     if (function_exists('squuad_cert_document_fields_empty_replacements')) {
         $replacements = array_merge(squuad_cert_document_fields_empty_replacements($document), $replacements);
     }
@@ -1712,7 +1707,7 @@ function squuad_cert_signature_issue_document(int $student_id, int $document_cer
     }
 
     foreach ($parts as $key => $part) {
-        $parts[$key] = squuad_cert_signature_strip_unused_signer_tags((string) process_template($part, $replacements));
+        $parts[$key] = squuad_cert_signature_strip_unused_signer_tags((string) squuad_cert_process_template($part, $replacements));
     }
     // Firmantes que la plantilla no coloca: un bloque al final del cuerpo
     $joined = implode('', $parts);
@@ -1754,9 +1749,7 @@ function squuad_cert_signature_issue_document(int $student_id, int $document_cer
         'line_number' => (int) $entry->line_number,
         'reused' => (bool) $reuse_book_entry_id,
     ]] : []));
-    if (function_exists('edusystem_set_log')) {
-        edusystem_set_log(sprintf('Documento %d emitido para firma al estudiante %d (solicitud %d) por el usuario %d', (int) $document->id, $student_id, (int) $request->id, $user_id), 'signing_policy');
-    }
+    squuad_cert_log(sprintf('Documento %d emitido para firma al estudiante %d (solicitud %d) por el usuario %d', (int) $document->id, $student_id, (int) $request->id, $user_id), 'signing_policy');
 
     squuad_cert_signer_notify_open_slots((int) $request->id);
 
@@ -1774,7 +1767,8 @@ function squuad_cert_signature_issued_for_student(int $student_id): array
     $rows = $wpdb->get_results($wpdb->prepare(
         "SELECT r.*, d.title AS document_title FROM {$wpdb->prefix}squuad_cert_requests r
          LEFT JOIN {$wpdb->prefix}documents_certificates d ON d.id = r.document_certificate_id
-         WHERE r.student_id = %d AND r.origin = 'issued' ORDER BY r.id DESC",
+         WHERE r.subject_type = %s AND r.subject_id = %d AND r.origin = 'issued' ORDER BY r.id DESC",
+        SQUUAD_CERT_SUBJECT_STUDENT,
         $student_id
     ));
     $latest = [];
@@ -1831,7 +1825,7 @@ function squuad_cert_signature_pdf_page_from_options(array $page, float $margin)
 
 function squuad_cert_book_entries_enabled(): bool
 {
-    return version_compare((string) get_option('edusystem_db_version'), '7', '>=');
+    return version_compare((string) get_option('wp_c_db_version'), '9', '>=');
 }
 
 function squuad_cert_book_entry_get(int $entry_id): ?object
@@ -1922,7 +1916,7 @@ function squuad_cert_signature_issued_decline(int $request_id, string $reason): 
     if (!$request || 'issued' !== $request->origin || !in_array($request->status, ['open', 'partially_signed', 'signed', 'completed'], true)) {
         return ['ok' => false, 'message' => __('This document can no longer be declined. Please reload the page.', 'edusystem')];
     }
-    $ids = $wpdb->get_col($wpdb->prepare("SELECT id FROM {$wpdb->prefix}users_signatures WHERE request_id = %d", $request_id));
+    $ids = $wpdb->get_col($wpdb->prepare("SELECT id FROM {$wpdb->prefix}squuad_cert_signatures WHERE request_id = %d", $request_id));
     squuad_cert_revoke_signatures($ids, sprintf('Documento emitido declinado: %s', $reason), get_current_user_id());
     $declined = squuad_cert_signature_request_transition($request_id, ['open', 'partially_signed', 'signed', 'completed'], 'declined', [
         'declined_at_utc' => gmdate('Y-m-d H:i:s'),

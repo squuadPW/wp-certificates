@@ -2,10 +2,11 @@
 declare(strict_types=1);
 
 /**
- * EduSystem - Evidencias de firma de estudiantes y representantes (ADR 0001).
+ * Certificación - Evidencias de firma (ADR 0001; ADR 0004, paso 3c).
  *
- * Paso 1: esquema v4 (core/schema/students.php), corte de firmas antiguas y clave automática por sitio.
- * Todavía no cambia cómo se guardan las firmas: eso llega en el paso 2 y solo con el esquema v4 aplicado.
+ * Las firmas nuevas se guardan en {prefix}squuad_cert_signatures con su evidencia y una huella encadenada (cadena
+ * propia de wp-certificates). El titular es la cuenta dueña del documento (subject_type/subject_id). Las firmas de
+ * {prefix}users_signatures (EduSystem) son todas antiguas: solo se leen, nunca se cambian.
  */
 
 if (!defined('ABSPATH')) exit;
@@ -13,10 +14,10 @@ if (!defined('ABSPATH')) exit;
 // Claves del sitio (también las usa la instalación del esquema, sin cargar el resto del módulo)
 require_once __DIR__ . '/signature-keys.php';
 
-/** Las columnas de evidencia y las tablas de anuladas y de cadena llegan con la versión 4 del esquema. */
+/** Las tablas de firmas, anuladas y cadena llegan con la versión 9 del esquema de wp-certificates. */
 function squuad_cert_signature_evidence_enabled(): bool
 {
-    return version_compare((string) get_option('edusystem_db_version'), '4', '>=');
+    return version_compare((string) get_option('wp_c_db_version'), '9', '>=');
 }
 
 /**
@@ -150,7 +151,8 @@ function squuad_cert_signature_canonical(array $row): string
         (string) (int) $row['chain_seq'],
         $text($row['key_id']),
         $text($row['site_url']),
-        (string) (int) $row['student_id'],
+        // Titular: la cuenta dueña del documento (antes la ficha del estudiante; mismo campo y mismo formato)
+        (string) (int) ($row['subject_id'] ?? 0),
         (string) (int) $row['user_id'],
         $text($row['signer_role']),
         (string) (int) $row['actor_user_id'],
@@ -182,7 +184,8 @@ function squuad_cert_signature_canonical_v2(array $row): string
 
     return implode("\n", array_merge($lines, [
         (string) (int) ($row['request_id'] ?? 0),
-        (string) (int) ($row['student_document_id'] ?? 0),
+        // Requisito de EduSystem si el documento está enlazado (antes student_document_id; mismo campo)
+        (string) (int) ($row['external_ref'] ?? 0),
         (string) (int) ($row['round'] ?? 0),
         (string) ($row['content_sha256'] ?? ''),
         (string) ($row['request_created_fingerprint'] ?? ''),
@@ -223,23 +226,23 @@ function squuad_cert_signature_lock_name(): string
 }
 
 /**
- * Guarda una firma de estudiante o representante. Con el esquema v4 añade la evidencia y la huella encadenada;
- * sin él (sitio aún sin actualizar) la guarda como antes. La firma nunca se pierde: si no hay clave o no se
+ * Guarda una firma con su evidencia y la huella encadenada. La firma nunca se pierde: si no hay clave o no se
  * obtiene el bloqueo, se guarda con evidence_status = 'sin_huella_error' y se anota en el log.
  *
- * $data: columnas de siempre (user_id, signature, document_id, grade_selected, document_fields).
- * $request_evidence (ADR 0002, esquema v5): request_id, student_document_id, round, content_sha256,
+ * $data: user_id, signature, document_id, grade_selected, document_fields. $subject_type/$subject_id: el titular de la
+ * solicitud (la cuenta dueña del documento o la ficha del estudiante en un documento emitido).
+ * $request_evidence (ADR 0002): request_id, external_ref, round, content_sha256,
  * request_created_fingerprint, template_version_sha256, consent_version, consent_sha256, signature_method y
  * reused_signature_id. Con ella la firma se sella en formato EDUSIG2; sin ella, EDUSIG1.
  * Devuelve el id de la fila o 0 si el INSERT falla.
  */
-function squuad_cert_signature_insert(array $data, int $student_id, string $signer_role, array $request_evidence = []): int
+function squuad_cert_signature_insert(array $data, int $subject_id, string $signer_role, array $request_evidence = [], string $subject_type = SQUUAD_CERT_SUBJECT_ACCOUNT): int
 {
     global $wpdb;
-    $table = $wpdb->prefix . 'users_signatures';
+    $table = $wpdb->prefix . 'squuad_cert_signatures';
 
     if (!squuad_cert_signature_evidence_enabled()) {
-        return $wpdb->insert($table, $data) ? (int) $wpdb->insert_id : 0;
+        return 0;
     }
 
     $key = squuad_cert_signature_current_key();
@@ -253,7 +256,8 @@ function squuad_cert_signature_insert(array $data, int $student_id, string $sign
     ];
     $row += [
         'site_url' => get_site_url(),
-        'student_id' => $student_id,
+        'subject_type' => $subject_type,
+        'subject_id' => $subject_id,
         'signer_role' => $signer_role,
         'actor_user_id' => get_current_user_id(),
         'switched_from' => squuad_cert_signature_session_switched_from(),
@@ -271,7 +275,7 @@ function squuad_cert_signature_insert(array $data, int $student_id, string $sign
     // Formato de la evidencia: EDUSIG2 si la firma pertenece a una solicitud (esquema v5)
     $v5 = function_exists('squuad_cert_signature_requests_enabled') && squuad_cert_signature_requests_enabled();
     if ($v5 && $request_evidence) {
-        foreach (['request_id', 'student_document_id', 'round', 'reused_signature_id'] as $column) {
+        foreach (['request_id', 'external_ref', 'round', 'reused_signature_id'] as $column) {
             $row[$column] = (int) ($request_evidence[$column] ?? 0);
         }
         foreach (['content_sha256', 'request_created_fingerprint', 'consent_version', 'consent_sha256'] as $column) {
@@ -294,12 +298,7 @@ function squuad_cert_signature_insert(array $data, int $student_id, string $sign
         $row['key_id'] = $key[0] ?? null;
         $row['ip_hmac'] = null;
         $inserted = $wpdb->insert($table, $row) ? (int) $wpdb->insert_id : 0;
-        if (function_exists('edusystem_set_log')) {
-            edusystem_set_log(
-                sprintf('Firma %d guardada sin huella (%s)', $inserted, $key ? 'sin bloqueo de la cadena' : 'sin clave'),
-                'signature_error'
-            );
-        }
+        squuad_cert_log(sprintf('Firma %d guardada sin huella (%s)', $inserted, $key ? 'sin bloqueo de la cadena' : 'sin clave'), 'signature_error');
         return $inserted;
     }
 
@@ -328,31 +327,29 @@ function squuad_cert_signature_insert(array $data, int $student_id, string $sign
         $wpdb->query($wpdb->prepare('SELECT RELEASE_LOCK(%s)', $lock));
     }
 
-    if (function_exists('edusystem_set_log')) {
-        edusystem_set_log(sprintf(
-            'Firma %d registrada: %s, %s del estudiante %d, desde la cuenta del usuario %d (eslabón %d)',
-            $inserted,
-            $row['document_id'],
-            $signer_role,
-            $student_id,
-            $row['actor_user_id'],
-            $row['chain_seq']
-        ), 'signature');
-    }
+    squuad_cert_log(sprintf(
+        'Firma %d registrada: %s, puesto %s del documento de la cuenta %d, desde la cuenta del usuario %d (eslabón %d)',
+        $inserted,
+        $row['document_id'],
+        $signer_role,
+        $subject_id,
+        $row['actor_user_id'],
+        $row['chain_seq']
+    ), 'signature');
 
     return $inserted;
 }
 
 /**
- * Anula firmas en lugar de borrarlas: copia cada fila completa (con su huella) a squuad_cert_signatures_revoked y
- * después la retira de la tabla viva, así los puntos de lectura actuales vuelven a pedir la firma y la cadena se
- * sigue pudiendo verificar. Sin el esquema v4 las borra como antes. Otros plugins deben usar esta función
- * (con function_exists) para cambiar filas de users_signatures. Devuelve cuántas filas se retiraron.
+ * Anula firmas nuevas en lugar de borrarlas: copia cada fila completa (con su huella) a
+ * squuad_cert_signatures_revoked y después la retira de squuad_cert_signatures, así se vuelve a pedir la firma y la
+ * cadena se sigue pudiendo verificar. Las firmas antiguas (users_signatures) no se tocan aquí. Devuelve cuántas filas
+ * se retiraron.
  */
-function squuad_cert_revoke_signatures(array $ids, string $reason, int $actor_user_id, ?int $student_document_id = null): int
+function squuad_cert_revoke_signatures(array $ids, string $reason, int $actor_user_id, ?int $external_ref = null): int
 {
     global $wpdb;
-    $table = $wpdb->prefix . 'users_signatures';
+    $table = $wpdb->prefix . 'squuad_cert_signatures';
     $ids = array_values(array_filter(array_map('intval', $ids)));
     if (!$ids) {
         return 0;
@@ -360,41 +357,34 @@ function squuad_cert_revoke_signatures(array $ids, string $reason, int $actor_us
     $in = implode(',', $ids);
 
     if (!squuad_cert_signature_evidence_enabled()) {
-        return (int) $wpdb->query("DELETE FROM {$table} WHERE id IN ({$in})");
+        return 0;
     }
 
+    // Todas las columnas que entran en la huella: una firma EDUSIG2 anulada tiene que seguir verificándose
     $columns = 'user_id, signature, document_id, grade_selected, document_fields, created_at, chain_seq, evidence_status,
-        key_id, site_url, student_id, signer_role, actor_user_id, switched_from, doc_version_sha256, signature_sha256,
-        document_fields_sha256, signed_at_utc, ip, ip_hmac, user_agent, ua_sha256, session_hash, ratifies_id,
-        prev_fingerprint, fingerprint';
-    // Columnas de solicitud (ADR 0002, esquema v5): se copian también, o una firma EDUSIG2 anulada quedaría "alterada"
-    if (function_exists('squuad_cert_signature_requests_enabled') && squuad_cert_signature_requests_enabled()) {
-        $columns .= ', request_id, round, content_sha256, request_created_fingerprint, consent_version, consent_sha256,
-        signature_method, reused_signature_id, evidence_format';
-    }
+        key_id, site_url, subject_type, subject_id, signer_role, actor_user_id, switched_from, doc_version_sha256,
+        signature_sha256, document_fields_sha256, signed_at_utc, ip, ip_hmac, user_agent, ua_sha256, session_hash,
+        ratifies_id, prev_fingerprint, fingerprint, request_id, round, content_sha256, request_created_fingerprint,
+        consent_version, consent_sha256, signature_method, reused_signature_id, evidence_format';
 
-    // Documento de la anulación: el indicado o, con el esquema v5, el que ya guarda la propia firma
-    $document_expression = (function_exists('squuad_cert_signature_requests_enabled') && squuad_cert_signature_requests_enabled())
-        ? "COALESCE(NULLIF(%s, ''), student_document_id)"
-        : '%s';
+    // Requisito de la anulación: el indicado o el que ya guarda la propia firma
+    $document_expression = "COALESCE(NULLIF(%s, ''), external_ref)";
 
     $removed = 0;
     foreach ($ids as $id) {
         $copied = $wpdb->query($wpdb->prepare(
             "INSERT INTO {$wpdb->prefix}squuad_cert_signatures_revoked
-                (signature_row_id, {$columns}, revoked_at_utc, revoked_by, reason, student_document_id)
+                (signature_row_id, {$columns}, revoked_at_utc, revoked_by, reason, external_ref)
              SELECT id, {$columns}, UTC_TIMESTAMP(), %d, %s, {$document_expression} FROM {$table} WHERE id = %d",
             $actor_user_id,
             $reason,
-            null === $student_document_id ? null : (string) $student_document_id,
+            null === $external_ref ? null : (string) $external_ref,
             $id
         ));
         // Solo se borra lo que quedó copiado: si la copia falla, la firma sigue en la tabla viva
         if ($copied) {
             $removed += (int) $wpdb->delete($table, ['id' => $id]);
-            if (function_exists('edusystem_set_log')) {
-                edusystem_set_log(sprintf('Firma %d anulada: %s', $id, $reason), 'signature_revoked', $actor_user_id);
-            }
+            squuad_cert_log(sprintf('Firma %d anulada por el usuario %d: %s', $id, $actor_user_id, $reason), 'signature_revoked');
         }
     }
 
@@ -411,14 +401,10 @@ function squuad_cert_signature_verify_row(object $row, ?string $previous_fingerp
 {
     global $wpdb;
 
-    $legacy_max_id = (int) get_option('squuad_cert_signature_legacy_max_id', 0);
-    $row_id = (int) ($row->signature_row_id ?? $row->id);
-
+    // Las firmas de squuad_cert_signatures siempre llevan huella: sin ella, error al guardar o fila anómala. Las
+    // antiguas (users_signatures) no pasan por aquí
     if (empty($row->fingerprint)) {
-        if ('sin_huella_error' === ($row->evidence_status ?? '')) {
-            return 'error';
-        }
-        return $row_id <= $legacy_max_id ? 'legacy' : 'missing';
+        return 'sin_huella_error' === ($row->evidence_status ?? '') ? 'error' : 'missing';
     }
 
     $key = squuad_cert_signature_key_by_id((string) $row->key_id);
@@ -472,7 +458,7 @@ function squuad_cert_signature_chain_fingerprint_at(int $seq): ?string
 {
     global $wpdb;
 
-    $sql = "SELECT fingerprint FROM {$wpdb->prefix}users_signatures WHERE chain_seq = %d
+    $sql = "SELECT fingerprint FROM {$wpdb->prefix}squuad_cert_signatures WHERE chain_seq = %d
             UNION ALL SELECT fingerprint FROM {$wpdb->prefix}squuad_cert_signatures_revoked WHERE chain_seq = %d";
     $args = [$seq, $seq];
     if (function_exists('squuad_cert_signature_requests_enabled') && squuad_cert_signature_requests_enabled()) {
@@ -539,7 +525,7 @@ function squuad_cert_signature_context_labels(object $row): array
 function squuad_cert_signature_verify_chain(int $problems_limit = 100): array
 {
     global $wpdb;
-    $live = $wpdb->prefix . 'users_signatures';
+    $live = $wpdb->prefix . 'squuad_cert_signatures';
     $revoked = $wpdb->prefix . 'squuad_cert_signatures_revoked';
 
     $result = [
@@ -565,7 +551,7 @@ function squuad_cert_signature_verify_chain(int $problems_limit = 100): array
                 'revoked' => isset($row->signature_row_id),
                 'chain_seq' => $row->chain_seq ? (int) $row->chain_seq : null,
                 'user_id' => (int) $row->user_id,
-                'student_id' => $row->student_id ? (int) $row->student_id : null,
+                'subject_id' => isset($row->subject_id) ? (int) $row->subject_id : null,
                 'document_id' => (string) $row->document_id,
                 'status' => $status,
             ];
@@ -646,7 +632,7 @@ function squuad_cert_signature_verify_chain(int $problems_limit = 100): array
                             'request_id' => (int) $row->request_id,
                             'chain_seq' => $seq,
                             'user_id' => (int) $row->actor_user_id,
-                            'student_id' => null,
+                            'subject_id' => null,
                             'document_id' => 'evento: ' . (string) $row->event_type,
                             'status' => $status,
                         ];
@@ -671,11 +657,11 @@ function squuad_cert_signature_verify_chain(int $problems_limit = 100): array
         $result['head_ok'] = false;
     }
 
-    // 3) Filas sin eslabón: antiguas, sin huella por error o anómalas
+    // 3) Filas sin eslabón: sin huella por error o anómalas
     foreach ([$live => false, $revoked => true] as $table => $is_revoked) {
         $id_column = $is_revoked ? 'signature_row_id' : 'id';
         $rows = $wpdb->get_results(
-            "SELECT id, {$id_column} AS row_id, user_id, signature, document_id, student_id, evidence_status, fingerprint,
+            "SELECT id, {$id_column} AS row_id, user_id, signature, document_id, subject_id, evidence_status, fingerprint,
                 chain_seq, switched_from, actor_user_id, site_url
              FROM {$table} WHERE chain_seq IS NULL"
         );
@@ -696,98 +682,44 @@ function squuad_cert_signature_verify_chain(int $problems_limit = 100): array
         }
     }
 
+    // Firmas antiguas (users_signatures, solo lectura): se cuentan aparte
+    $result['status']['legacy'] = count(squuad_cert_signature_legacy_rows());
+
     update_option('squuad_cert_signature_last_verification', $result, false);
-    if (function_exists('edusystem_set_log')) {
-        edusystem_set_log(sprintf(
-            'Verificación de firmas: %d verificadas, %d alteradas, %d cadena rota, cabeza %s',
-            $result['status']['verified'],
-            $result['status']['altered'],
-            $result['status']['chain_broken'],
-            $result['head_ok'] ? 'correcta' : 'no coincide'
-        ), 'signature_verification');
-    }
+    squuad_cert_log(sprintf(
+        'Verificación de firmas: %d verificadas, %d alteradas, %d cadena rota, cabeza %s',
+        $result['status']['verified'],
+        $result['status']['altered'],
+        $result['status']['chain_broken'],
+        $result['head_ok'] ? 'correcta' : 'no coincide'
+    ), 'signature_verification');
 
     return $result;
 }
 
 /**
- * Diagnóstico de las firmas antiguas (sin huella, id <= corte), solo lectura. Una fila por firma, con los
- * indicadores de riesgo: automática, par firmado en la misma petición (<= 2 s), estudiante menor al firmar y
- * usuario que ya no existe. Incluye las antiguas que ya se anularon.
+ * Firmas antiguas, solo lectura: todas las de {prefix}users_signatures (de EduSystem). Una fila por firma con los
+ * indicadores que no dependen de otro plugin: automática y usuario que ya no existe. (El rol, el par firmado a la vez y
+ * la edad del estudiante salían de la tabla de estudiantes de EduSystem y ya no se calculan aquí.)
  */
 function squuad_cert_signature_legacy_rows(): array
 {
     global $wpdb;
-    $cutoff = (int) get_option('squuad_cert_signature_legacy_max_id', 0);
-    if ($cutoff <= 0) {
+    $table = $wpdb->prefix . 'users_signatures';
+    if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table)) !== $table) {
         return [];
-    }
-
-    $rows = $wpdb->get_results($wpdb->prepare(
-        "SELECT sig.id, sig.user_id, sig.document_id, sig.created_at, sig.signature, 0 AS revoked
-         FROM {$wpdb->prefix}users_signatures sig WHERE sig.id <= %d
-         UNION ALL
-         SELECT rev.signature_row_id, rev.user_id, rev.document_id, rev.created_at, rev.signature, 1
-         FROM {$wpdb->prefix}squuad_cert_signatures_revoked rev WHERE rev.signature_row_id <= %d AND rev.chain_seq IS NULL
-         ORDER BY id",
-        $cutoff,
-        $cutoff
-    ));
-
-    // Estudiante y representante de cada usuario (un usuario representante puede tener varios estudiantes)
-    $students = $wpdb->get_results(
-        "SELECT st.id, st.partner_id, st.birth_date, u.ID AS student_user_id
-         FROM {$wpdb->prefix}students st JOIN {$wpdb->users} u ON u.user_email = st.email"
-    );
-    $as_student = [];
-    $as_parent = [];
-    foreach ($students as $student) {
-        $as_student[(int) $student->student_user_id] = $student;
-        $as_parent[(int) $student->partner_id][] = $student;
     }
     $existing_users = array_flip(array_map('intval', $wpdb->get_col("SELECT ID FROM {$wpdb->users}")));
 
-    // Índice (usuario, documento) => fecha, para encontrar el par del otro firmante
-    $signed_at = [];
-    foreach ($rows as $row) {
-        $signed_at[(int) $row->user_id . '|' . $row->document_id] = strtotime((string) $row->created_at);
-    }
-
     $result = [];
-    foreach ($rows as $row) {
-        $user_id = (int) $row->user_id;
-        $role = '';
-        $student = null;
-        $other_user = 0;
-        if (isset($as_student[$user_id])) {
-            $student = $as_student[$user_id];
-            $role = (int) $student->partner_id === $user_id ? 'self' : 'student';
-            $other_user = (int) $student->partner_id;
-        } elseif (!empty($as_parent[$user_id])) {
-            $student = $as_parent[$user_id][0];
-            $role = 'parent';
-            $other_user = (int) $student->student_user_id;
-        }
-        $time = strtotime((string) $row->created_at);
-        $other_key = $other_user . '|' . $row->document_id;
-        $same_request = 'self' !== $role && $other_user && isset($signed_at[$other_key]) && abs($signed_at[$other_key] - $time) <= 2;
-        $minor = false;
-        if ($student && $student->birth_date && $time) {
-            $minor = (new DateTime((string) $student->birth_date))->diff(new DateTime('@' . $time))->y < 18;
-        }
-
+    foreach ((array) $wpdb->get_results("SELECT id, user_id, document_id, created_at, signature FROM {$table} ORDER BY id") as $row) {
         $result[] = [
             'id' => (int) $row->id,
-            'revoked' => (bool) $row->revoked,
             'document_id' => (string) $row->document_id,
-            'user_id' => $user_id,
-            'student_id' => $student ? (int) $student->id : null,
-            'role' => $role,
+            'user_id' => (int) $row->user_id,
             'created_at' => (string) $row->created_at,
             'automatic' => '["automatic"]' === (string) $row->signature,
-            'same_request' => (bool) $same_request,
-            'minor' => $minor,
-            'user_missing' => !isset($existing_users[$user_id]),
+            'user_missing' => !isset($existing_users[(int) $row->user_id]),
         ];
     }
 

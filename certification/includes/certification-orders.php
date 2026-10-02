@@ -3,86 +3,53 @@
  * EduSystem - Certificación: órdenes que EduSystem da al módulo (ADR 0004, paso 3g). Se llaman desde los envoltorios
  * de includes/certification.php, que antes anotan la orden en la bandeja (edusystem_certification_outbox).
  *
- * - squuad_cert_signature_order_decline(): declinar un requisito anula las firmas de ese documento. Es el código que
- *   estaba en handle_rejected_document() (admin/admission/documents.php), movido sin cambios; solo devuelve qué hizo.
+ * - squuad_cert_signature_order_decline(): declinar un requisito anula las firmas de la solicitud ligada a él.
  * - squuad_cert_signature_order_close_by_upload(): subir un archivo cierra la solicitud de firma abierta del requisito.
  */
 
 if (!defined('ABSPATH')) exit;
 
 /**
- * Anula las firmas del documento declinado. Devuelve 'declined_request' (solicitud ADR 0002 declinada),
- * 'revoked_legacy' (firmas del modelo anterior) o 'not_signed' (el documento no se firma).
+ * Anula las firmas de la solicitud ligada al requisito declinado ($document_loaded->id, fila de student_documents de
+ * EduSystem = external_ref) y la cierra como declinada. Devuelve 'declined_request' o 'not_signed' (el requisito no
+ * tiene una solicitud que anular). Las firmas antiguas (users_signatures) no se tocan: son legales y quedan selladas
+ * (decisión del dueño); su anulación caso por caso va por squuad_cert_legacy_revocations (ADR 0004, sección 6).
  */
 function squuad_cert_signature_order_decline(int $student_id, object $document_loaded, int $user_id, string $description): string
 {
     global $wpdb;
 
-    $document_types = ['ENROLLMENT', 'MISSING DOCUMENT'];
-
-    // Documentos que se firman desde Mi Cuenta: al rechazarlos se borran las firmas para que se vuelvan a pedir.
-    // Además de los dos fijos, cualquier documento automático de wp-certificates.
-    if (in_array($document_loaded->document_id, $document_types) || squuad_cert_get_automatic_document_by_identificator($document_loaded->document_id)) {
-        $table_users_signatures = $wpdb->prefix . 'users_signatures';
-        $student = get_student($student_id);
-        $user_student = get_user_by('email', $student->email);
-        $reason = sprintf('Documento rechazado: %s', (string) $description);
-
-        // Con solicitudes (ADR 0002): se anulan solo las firmas de la solicitud de la última ronda de ESTE documento
-        // y se cierra como declinada. La firma del representante en el documento de un hermano es de otra solicitud.
-        $request = function_exists('squuad_cert_signature_request_latest')
-            ? squuad_cert_signature_request_latest((int) $student_id, (string) $document_loaded->document_id)
-            : null;
-        if ($request && 'declined' !== $request->status) {
-            $signature_ids = $wpdb->get_col($wpdb->prepare(
-                "SELECT id FROM {$table_users_signatures} WHERE request_id = %d",
-                $request->id
-            ));
-            squuad_cert_revoke_signatures($signature_ids, $reason, get_current_user_id(), (int) $document_loaded->id);
-            squuad_cert_signature_request_transition((int) $request->id, ['open', 'partially_signed', 'signed', 'completed'], 'declined', [
-                'declined_at_utc' => gmdate('Y-m-d H:i:s'),
-                'declined_by' => get_current_user_id(),
-                'decline_reason' => (string) $description,
-            ]);
-            return 'declined_request';
-        }
-
-        // Modelo anterior (sin solicitud): firmas del estudiante y del representante de este documento, salvo la del
-        // representante si tiene más de un estudiante (es compartida y puede ser la del hermano: no se anula)
-        $signer_ids = [$user_student ? (int) $user_student->ID : 0];
-        $parent_students = (int) $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM {$wpdb->prefix}students WHERE partner_id = %d",
-            $user_id
-        ));
-        if ($parent_students <= 1) {
-            $signer_ids[] = (int) $user_id;
-        }
-        $in = implode(',', array_map('intval', $signer_ids));
-        $signature_ids = $wpdb->get_col($wpdb->prepare(
-            "SELECT id FROM {$table_users_signatures} WHERE document_id = %s AND user_id IN ({$in})"
-            . ((function_exists('squuad_cert_signature_requests_enabled') && squuad_cert_signature_requests_enabled()) ? ' AND request_id IS NULL' : ''),
-            $document_loaded->document_id
-        ));
-        if (function_exists('squuad_cert_revoke_signatures')) {
-            squuad_cert_revoke_signatures(
-                $signature_ids,
-                $reason,
-                get_current_user_id(),
-                (int) $document_loaded->id
-            );
-        } else {
-            foreach ($signature_ids as $signature_id) {
-                $wpdb->delete($table_users_signatures, ['id' => (int) $signature_id]);
-            }
-        }
-
-        return 'revoked_legacy';
+    $external_ref = (int) ($document_loaded->id ?? 0);
+    $request = $external_ref && squuad_cert_signature_requests_enabled() ? $wpdb->get_row($wpdb->prepare(
+        "SELECT * FROM {$wpdb->prefix}squuad_cert_requests WHERE external_ref = %d ORDER BY round DESC, id DESC LIMIT 1",
+        $external_ref
+    )) : null;
+    if (!$request || 'declined' === $request->status) {
+        return 'not_signed';
     }
 
-    return 'not_signed';
+    $signature_ids = $wpdb->get_col($wpdb->prepare(
+        "SELECT id FROM {$wpdb->prefix}squuad_cert_signatures WHERE request_id = %d",
+        $request->id
+    ));
+    squuad_cert_revoke_signatures($signature_ids, sprintf('Documento rechazado: %s', $description), get_current_user_id(), $external_ref);
+    squuad_cert_signature_request_transition((int) $request->id, ['open', 'partially_signed', 'signed', 'completed'], 'declined', [
+        'declined_at_utc' => gmdate('Y-m-d H:i:s'),
+        'declined_by' => get_current_user_id(),
+        'decline_reason' => $description,
+    ]);
+    $request = squuad_cert_signature_request_get((int) $request->id) ?? $request;
+    // La declinación nació en EduSystem (origin 'edusystem'): su oyente no debe reenviar la orden
+    do_action('squuad_cert_request_declined', squuad_cert_request_event_payload($request) + [
+        'reason' => $description,
+        'actor_user_id' => get_current_user_id(),
+        'origin' => 'edusystem',
+    ]);
+
+    return 'declined_request';
 }
 
-/** ¿Hay una solicitud de firma abierta para este requisito (fila de student_documents)? */
+/** ¿Hay una solicitud de firma abierta ligada a este requisito (fila de student_documents de EduSystem)? */
 function squuad_cert_signature_order_has_open_request(int $student_document_id): bool
 {
     return function_exists('squuad_cert_signature_request_open_for_row') && (bool) squuad_cert_signature_request_open_for_row($student_document_id);

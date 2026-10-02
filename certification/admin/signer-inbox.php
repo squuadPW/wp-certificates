@@ -102,37 +102,23 @@ function squuad_cert_signer_decline_request(int $request_id, string $reason, boo
         return ['ok' => false, 'message' => __('To decline a document you must write the reason and accept that the action cannot be reverted.', 'edusystem')];
     }
 
-    $student_id = (int) $request->student_id;
-    $row_id = (int) $request->student_document_id ?: (int) squuad_cert_signature_student_document_id($student_id, (string) $request->document_id);
-    $document = $row_id && function_exists('get_document_details') ? get_document_details($row_id) : null;
-
-    if ($document && 3 !== (int) $document->status) {
-        // El mismo circuito que el rechazo de Admisión: estado, avisos, anulación de la solicitud y correos
-        $description = build_status_description(3, $reason, $document);
-        update_document_status($row_id, $student_id, 3, $description);
-        handle_status_notifications(3, get_related_users($student_id), $description);
-        handle_status_specific_actions(3, $student_id, get_document_details($row_id));
-        if (function_exists('WC') && WC()->mailer()) {
-            $emails = WC()->mailer()->get_emails();
-            if (isset($emails['WC_Rejected_Document_Email'])) {
-                $emails['WC_Rejected_Document_Email']->trigger($student_id, $row_id, $description);
-                $emails['WC_Rejected_Document_Email']->trigger($student_id, $row_id, $description, true);
-            }
-        }
-    } else {
-        // Sin fila del documento: se anulan las firmas de la solicitud y se cierra como declinada
-        $ids = $wpdb->get_col($wpdb->prepare("SELECT id FROM {$wpdb->prefix}users_signatures WHERE request_id = %d", $request_id));
-        squuad_cert_revoke_signatures($ids, sprintf('Documento rechazado: %s', $reason), $user_id);
-        squuad_cert_signature_request_transition($request_id, ['open', 'partially_signed'], 'declined', [
-            'declined_at_utc' => gmdate('Y-m-d H:i:s'),
-            'declined_by' => $user_id,
-            'decline_reason' => $reason,
-        ]);
-    }
+    // wp-certificates hace su parte: anula las firmas de la solicitud y la cierra como declinada. El requisito, sus
+    // avisos y sus correos son de quien escuche el evento (EduSystem, si el documento está enlazado a un requisito)
+    $ids = $wpdb->get_col($wpdb->prepare("SELECT id FROM {$wpdb->prefix}squuad_cert_signatures WHERE request_id = %d", $request_id));
+    squuad_cert_revoke_signatures($ids, sprintf('Documento rechazado: %s', $reason), $user_id);
+    squuad_cert_signature_request_transition($request_id, ['open', 'partially_signed'], 'declined', [
+        'declined_at_utc' => gmdate('Y-m-d H:i:s'),
+        'declined_by' => $user_id,
+        'decline_reason' => $reason,
+    ]);
     squuad_cert_signature_request_log_event($request_id, 'declined_by_signer', ['role' => $slot, 'charge' => (string) $signer->charge]);
-    if (function_exists('edusystem_set_log')) {
-        edusystem_set_log(sprintf('El firmante %d (%s) declinó la solicitud %d: %s', $user_id, $signer->charge, $request_id, $reason), 'signing_policy');
-    }
+    squuad_cert_log(sprintf('El firmante %d (%s) declinó la solicitud %d: %s', $user_id, $signer->charge, $request_id, $reason), 'signing_policy');
+    $request = squuad_cert_signature_request_get($request_id) ?? $request;
+    do_action('squuad_cert_request_declined', squuad_cert_request_event_payload($request) + [
+        'reason' => $reason,
+        'actor_user_id' => $user_id,
+        'origin' => 'signer',
+    ]);
 
     return ['ok' => true, 'message' => 'issued' === ($request->origin ?? '')
         ? __('The document was declined. The administration will decide how to issue it again.', 'edusystem')

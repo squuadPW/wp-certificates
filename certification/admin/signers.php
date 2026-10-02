@@ -138,8 +138,8 @@ function squuad_cert_signers_handle_revoke(): void
         get_current_user_id(),
         absint($_POST['invitation_id'] ?? 0)
     ));
-    if ($revoked && function_exists('edusystem_set_log')) {
-        edusystem_set_log(sprintf('Invitación de firmante %d revocada', absint($_POST['invitation_id'] ?? 0)), 'signer_invitation');
+    if ($revoked) {
+        squuad_cert_log(sprintf('Invitación de firmante %d revocada', absint($_POST['invitation_id'] ?? 0)), 'signer_invitation');
     }
     squuad_cert_signers_notice($revoked ? __('Invitation revoked.', 'edusystem') : __('The invitation was not pending.', 'edusystem'), (bool) $revoked);
     squuad_cert_signers_back();

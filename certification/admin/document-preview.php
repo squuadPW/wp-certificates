@@ -22,7 +22,7 @@ if (!defined('ABSPATH')) exit;
 add_filter('wpc_document_preview', 'squuad_cert_document_preview_markup', 10, 2);
 function squuad_cert_document_preview_markup($markup, $document)
 {
-    if (!is_object($document) || empty($document->id) || !function_exists('process_template')) {
+    if (!is_object($document) || empty($document->id)) {
         return $markup;
     }
     $preview = squuad_cert_document_preview_data($document);
@@ -173,8 +173,8 @@ function squuad_cert_document_preview_replacements(object $document, string $mod
         'created_at' => $text(gmdate('m/d/Y')),
         'email' => $text('student@example.com'),
         'today' => $text(date_i18n('M d, Y')),
-        'ethinicity_selected' => $html(function_exists('get_ethnicity_selected_html') ? get_ethnicity_selected_html(4) : 'HISPANIC'),
-        'language_selected' => $html(function_exists('get_language_selected_html') ? get_language_selected_html('en_EN') : 'ENGLISH'),
+        'ethinicity_selected' => $html('HISPANIC'), // valor de ejemplo fijo (no se llama a EduSystem)
+        'language_selected' => $html('ENGLISH'),
         'page_break' => $html('<div class="pagebreak"></div>'),
         'missing_documents' => $html('<ul style="list-style:none;padding-left:0"><li>' . esc_html__('Example document 1', 'edusystem') . '</li><li>' . esc_html__('Example document 2', 'edusystem') . '</li></ul>'),
         'show_parent_info' => $html('1'),
@@ -303,7 +303,7 @@ function squuad_cert_document_preview_data(object $document): array
 
     if ('generate' === $mode) {
         foreach ($parts as $key => $part) {
-            $parts[$key] = process_template($part, $replacements);
+            $parts[$key] = squuad_cert_process_template($part, $replacements);
         }
         $html = null;
     } else {
@@ -312,7 +312,7 @@ function squuad_cert_document_preview_data(object $document): array
         $html = '';
         foreach ($parts as $key => $part) {
             if ('' !== trim($part)) {
-                $html .= '<div class="' . $wrap . '-' . $key . '">' . process_template($part, $replacements) . '</div>';
+                $html .= '<div class="' . $wrap . '-' . $key . '">' . squuad_cert_process_template($part, $replacements) . '</div>';
             }
         }
         $html = squuad_cert_signature_strip_unused_signer_tags($html);

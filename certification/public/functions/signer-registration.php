@@ -46,9 +46,7 @@ function squuad_cert_signer_registration_handle(): void
         } else {
             wp_set_password($password, $user->ID);
             delete_user_meta($user->ID, 'squuad_cert_signer_needs_password');
-            if (function_exists('edusystem_set_log')) {
-                edusystem_set_log(sprintf('El firmante invitado %d creó su contraseña con la invitación %d', $user->ID, $invitation->id), 'signer_invitation', $user->ID);
-            }
+            squuad_cert_log(sprintf('El firmante invitado %d creó su contraseña con la invitación %d', $user->ID, $invitation->id), 'signer_invitation');
             wp_set_current_user($user->ID);
             wp_set_auth_cookie($user->ID);
             wp_safe_redirect(add_query_arg('page', 'squuad-cert-my-signature', admin_url('admin.php')));

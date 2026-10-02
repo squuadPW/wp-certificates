@@ -1,7 +1,7 @@
 <?php
 /**
  * Pantalla "Integridad de firmas" (admin/signature-integrity.php). Variables: $enabled, $uses_config,
- * $current_key_id, $current_key, $stored, $last, $legacy, $cutoff, $notice, $count, $date, $user_name.
+ * $current_key_id, $current_key, $stored, $last, $legacy, $notice, $count, $date, $user_name.
  */
 if (!defined('ABSPATH')) exit;
 
@@ -18,7 +18,7 @@ $form = static function (string $action, string $label, string $class = 'button'
 ?>
 <div class="wrap">
     <h1><?= esc_html__('Signature integrity', 'edusystem') ?></h1>
-    <p><?= esc_html__('Evidence of the signatures of students and parents: every new signature is sealed with a fingerprint chained to the previous one, so any later change or deletion in the database can be detected.', 'edusystem') ?></p>
+    <p><?= esc_html__('Evidence of the signatures: every new signature is sealed with a fingerprint chained to the previous one, so any later change or deletion in the database can be detected.', 'edusystem') ?></p>
 
     <?php if ('verified' === $notice) : ?>
         <div class="notice notice-success is-dismissible"><p><?= esc_html__('Verification completed.', 'edusystem') ?></p></div>
@@ -115,7 +115,7 @@ $form = static function (string $action, string $label, string $class = 'button'
                     <th><?= esc_html__('Signature', 'edusystem') ?></th>
                     <th><?= esc_html__('Document', 'edusystem') ?></th>
                     <th><?= esc_html__('User', 'edusystem') ?></th>
-                    <th><?= esc_html__('Student', 'edusystem') ?></th>
+                    <th><?= esc_html__('Document owner', 'edusystem') ?></th>
                     <th><?= esc_html__('Integrity', 'edusystem') ?></th>
                 </tr></thead>
                 <tbody>
@@ -124,11 +124,7 @@ $form = static function (string $action, string $label, string $class = 'button'
                             <td>#<?= (int) $problem['id'] ?><?= $problem['revoked'] ? ' (' . esc_html__('revoked', 'edusystem') . ')' : '' ?></td>
                             <td><?= esc_html($problem['document_id']) ?></td>
                             <td><?= esc_html($user_name((int) $problem['user_id'])) ?></td>
-                            <td>
-                                <?php if ($problem['student_id']) : ?>
-                                    <a href="<?= esc_url(admin_url('admin.php?page=add_admin_form_admission_content&section_tab=student_details&student_id=' . (int) $problem['student_id'])) ?>">#<?= (int) $problem['student_id'] ?></a>
-                                <?php else : ?>—<?php endif; ?>
-                            </td>
+                            <td><?= !empty($problem['subject_id']) ? esc_html($user_name((int) $problem['subject_id'])) : '—' ?></td>
                             <td><strong style="color:#b32d2e"><?= esc_html(squuad_cert_signature_integrity_label($problem['status'])) ?></strong></td>
                         </tr>
                     <?php endforeach; ?>
@@ -140,21 +136,12 @@ $form = static function (string $action, string $label, string $class = 'button'
     <p class="description"><?= esc_html__('Also available from the command line: wp squuad-cert firmas verificar', 'edusystem') ?></p>
 
     <h2><?= esc_html__('Legacy signatures (before the fingerprint)', 'edusystem') ?></h2>
-    <p style="max-width:760px">
-        <?= esc_html(sprintf(
-            /* translators: %d: last signature id before the update */
-            __('Signatures saved before this site was updated (id up to %d) have no fingerprint. Nothing is changed here: this is a read-only diagnosis so each institution can decide what to do with them.', 'edusystem'),
-            $cutoff
-        )) ?>
-    </p>
+    <p style="max-width:760px"><?= esc_html__('Signatures saved by the previous system (users_signatures) have no fingerprint and are only read here. Nothing is changed: this is a read-only diagnosis so each institution can decide what to do with them.', 'edusystem') ?></p>
     <table class="widefat striped" style="max-width:760px">
         <tbody>
             <tr><td><?= esc_html__('Legacy signatures', 'edusystem') ?></td><td style="text-align:right"><?= (int) count($legacy) ?></td></tr>
             <tr><td><?= esc_html__('Automatic (typed name)', 'edusystem') ?></td><td style="text-align:right"><?= (int) $count('automatic') ?></td></tr>
-            <tr><td><?= esc_html__('Student and parent signed in the same request (probably one person)', 'edusystem') ?></td><td style="text-align:right"><?= (int) $count('same_request') ?></td></tr>
-            <tr><td><?= esc_html__('Student was a minor when signing', 'edusystem') ?></td><td style="text-align:right"><?= (int) $count('minor') ?></td></tr>
             <tr><td><?= esc_html__('User no longer exists', 'edusystem') ?></td><td style="text-align:right"><?= (int) $count('user_missing') ?></td></tr>
-            <tr><td><?= esc_html__('Already revoked by a rejection', 'edusystem') ?></td><td style="text-align:right"><?= (int) $count('revoked') ?></td></tr>
         </tbody>
     </table>
     <p><?php $form('squuad_cert_signature_legacy_csv', __('Export CSV', 'edusystem')); ?></p>

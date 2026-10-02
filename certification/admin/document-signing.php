@@ -202,7 +202,7 @@ function squuad_cert_document_issue_resolve_book(object $request, object $entry,
         'folio' => (int) $entry->folio,
         'reason' => $reason,
     ]);
-    $reissued = squuad_cert_signature_issue_document((int) $request->student_id, (int) $request->document_certificate_id, 'keep' === $option ? (int) $entry->id : 0);
+    $reissued = squuad_cert_signature_issue_document((int) $request->subject_id, (int) $request->document_certificate_id, 'keep' === $option ? (int) $entry->id : 0);
     if (!$reissued['ok']) {
         return ['ok' => false, 'message' => sprintf(__('Declined, but the document could not be issued again: %s', 'edusystem'), $reissued['message'])];
     }
@@ -260,7 +260,7 @@ function squuad_cert_document_issued_book_decision_handle(): void
     $option = sanitize_key($_POST['book_option'] ?? '');
     $reason = sanitize_textarea_field(wp_unslash($_POST['reason'] ?? ''));
     $request = squuad_cert_signature_request_get($request_id);
-    $entry = $request ? squuad_cert_book_entry_pending_decision((int) $request->student_id, (int) $request->document_certificate_id) : null;
+    $entry = $request ? squuad_cert_book_entry_pending_decision((int) $request->subject_id, (int) $request->document_certificate_id) : null;
 
     if (!$entry || (int) $entry->declined_request_id !== $request_id) {
         $result = ['ok' => false, 'message' => __('There is no pending decision for this document. Please reload the page.', 'edusystem')];
@@ -403,9 +403,7 @@ function squuad_cert_missing_letter_convert_handle(): void
             'type' => 'all',
         ]);
     }
-    if (function_exists('edusystem_set_log')) {
-        edusystem_set_log(sprintf('Carta de documentos faltantes convertida en el documento automático %d por el usuario %d', $document_id, get_current_user_id()), 'signing_policy');
-    }
+    squuad_cert_log(sprintf('Carta de documentos faltantes convertida en el documento automático %d por el usuario %d', $document_id, get_current_user_id()), 'signing_policy');
     squuad_cert_signers_notice(__('The letter is now an automatic document. Review its text below; like every automatic document, it is shown while the student has not signed it.', 'edusystem'), true);
     wp_safe_redirect(add_query_arg([
         'page' => 'add_admin_form_documents_content',
@@ -497,8 +495,7 @@ function squuad_cert_legacy_signatures_migration_notify(): void
         $sent += (int) wp_mail($user->user_email, $subject, $body);
     }
     update_option(SQUUAD_CERT_LEGACY_SIGNATURES_NOTIFIED, ['at' => gmdate('Y-m-d H:i:s'), 'sent' => $sent, 'documents' => count($documents)], false);
-    if (function_exists('edusystem_set_log')) {
-        edusystem_set_log(sprintf(
+    squuad_cert_log(sprintf(
             'Aviso de la actualización (nadie firma por otro): %d documentos sin firmantes; correo a %d titulares de firmas-imagen (%s) y %d administradores (%s)',
             count($documents),
             count($owners),
@@ -506,7 +503,6 @@ function squuad_cert_legacy_signatures_migration_notify(): void
             count($admins),
             implode(', ', array_keys($admins))
         ), 'signing_policy');
-    }
 }
 
 /**
@@ -549,9 +545,7 @@ function squuad_cert_legacy_signatures_dismiss_handle(): void
         wp_die(esc_html__('You do not have permission to configure document signers.', 'edusystem'), 403);
     }
     update_option(SQUUAD_CERT_LEGACY_SIGNATURES_DISMISSED, gmdate('Y-m-d H:i:s'), false);
-    if (function_exists('edusystem_set_log')) {
-        edusystem_set_log(sprintf('Aviso de documentos sin firmantes ocultado por el usuario %d', get_current_user_id()), 'signing_policy');
-    }
+    squuad_cert_log(sprintf('Aviso de documentos sin firmantes ocultado por el usuario %d', get_current_user_id()), 'signing_policy');
     wp_safe_redirect(wp_get_referer() ?: admin_url());
     exit;
 }

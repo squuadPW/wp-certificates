@@ -4,38 +4,30 @@
  * squuad_cert_signature_pad_box). Movido desde includes/html-documents.php de EduSystem (ADR 0004, paso 3c).
  *
  * Firma solo el estudiante, con su cuenta de WordPress (decisión del dueño, 2026-10-01): el recuadro muestra el nombre
- * de esa cuenta, el mismo que queda en el documento firmado. No se consulta la ficha de EduSystem: la cuenta y el
- * nombre los da el proveedor del titular (holder_slots) o, si ya hay solicitud, los firmantes fijados en ella.
+ * de esa cuenta, el mismo que queda en el documento firmado. No se consulta la ficha de EduSystem: el nombre es el
+ * fijado en la solicitud o, sin solicitud, el de la cuenta conectada (la dueña del documento).
  */
 
 if (!defined('ABSPATH')) exit;
 
-/** Nombre de la cuenta que ocupa un puesto: el fijado en la solicitud o, sin solicitud, el que da el proveedor. */
-function squuad_cert_signature_holder_name(object $student, string $slot_key, ?object $request = null): string
+/** Nombre de la cuenta que ocupa un puesto: el fijado en la solicitud o, sin solicitud, el de la cuenta conectada. */
+function squuad_cert_signature_holder_name(string $slot_key, ?object $request = null): string
 {
-    if ($request && function_exists('squuad_cert_request_signers')) {
+    if ($request) {
         foreach (squuad_cert_request_signers($request) as $signer) {
             if ($slot_key === $signer['slot_key']) {
                 return (string) $signer['name'];
             }
         }
     }
-    $provider = function_exists('squuad_cert_subject_type') ? squuad_cert_subject_type('edusystem_student') : null;
-    if ($provider && !empty($provider['holder_slots'])) {
-        foreach ((array) call_user_func($provider['holder_slots'], (int) $student->id, null) as $slot) {
-            if ($slot_key === ($slot['slot_key'] ?? '')) {
-                return (string) ($slot['name'] ?? '');
-            }
-        }
-    }
 
-    return '';
+    return squuad_cert_account_name(get_current_user_id());
 }
 
 /** {{signature_section}}: el recuadro del estudiante (el único puesto que firma desde Mi Cuenta). */
-function squuad_cert_get_signature_section($student, ?object $request = null): string
+function squuad_cert_get_signature_section(?object $request = null): string
 {
-    return squuad_cert_signature_pad_box($student, 'student', $request);
+    return squuad_cert_signature_pad_box('student', $request);
 }
 
 /**
@@ -43,12 +35,12 @@ function squuad_cert_get_signature_section($student, ?object $request = null): s
  * 0003, variables de firma por firmante). $role: solo 'student'; cualquier otro puesto no tiene recuadro aquí (los
  * firmantes del sistema firman desde su bandeja). El nombre es el de su cuenta de WordPress.
  */
-function squuad_cert_signature_pad_box($student, string $role, ?object $request = null): string
+function squuad_cert_signature_pad_box(string $role, ?object $request = null): string
 {
     if ('student' !== $role) {
         return '';
     }
-    $full_name = $short_name = squuad_cert_signature_holder_name($student, 'student', $request);
+    $full_name = $short_name = squuad_cert_signature_holder_name('student', $request);
     $label = __('Signature of applicant:', 'edusystem');
     ob_start();
     ?>

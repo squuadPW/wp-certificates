@@ -4,10 +4,7 @@
  *
  * Cada documento puede definir campos (texto, área de texto, radio, casillas, lista) en su columna
  * `fields` (JSON). Antes de generar el documento se piden en un formulario y las respuestas solo
- * se usan para rellenarlo (quedan en el PDF generado). Si el documento se firma en dos tiempos
- * (representante y estudiante por separado), se guardan con la primera firma parcial en
- * users_signatures.document_fields para que el segundo firmante vea el mismo documento, y se borran
- * al subir el PDF final.
+ * se usan para rellenarlo (quedan en el PDF generado y en el contenido congelado de la solicitud).
  *
  * En el documento se usan como {{clave}} (la respuesta) y, en los campos con opciones,
  * {{clave_list}} (todas las opciones con (✓) en las elegidas).
@@ -371,45 +368,6 @@ function squuad_cert_get_automatic_document_by_identificator($identificator)
         "SELECT * FROM {$table} WHERE document_identificator = %s AND `type` = 'automatic' ORDER BY id ASC LIMIT 1",
         $identificator
     ));
-}
-
-/**
- * La columna users_signatures.document_fields llega con la versión 3 del esquema (core/schema.php).
- */
-function squuad_cert_signatures_store_document_fields()
-{
-    return version_compare((string) get_option('edusystem_db_version'), '3', '>=');
-}
-
-/**
- * Respuestas guardadas con una firma parcial del documento (de cualquiera de los usuarios dados),
- * validadas otra vez con la definición actual. Devuelve null si no hay respuestas válidas.
- */
-function squuad_cert_document_fields_stored_values($document, $fields, $user_ids)
-{
-    global $wpdb;
-
-    $user_ids = array_values(array_filter(array_map('intval', (array) $user_ids)));
-    if (!$fields || !$user_ids || !squuad_cert_signatures_store_document_fields()) {
-        return null;
-    }
-
-    $table = $wpdb->prefix . 'users_signatures';
-    $placeholders = implode(',', array_fill(0, count($user_ids), '%d'));
-    $json = $wpdb->get_var($wpdb->prepare(
-        "SELECT document_fields FROM {$table}
-        WHERE document_id = %s AND user_id IN ({$placeholders}) AND document_fields IS NOT NULL AND document_fields <> ''
-        ORDER BY id ASC LIMIT 1",
-        array_merge([$document->document_identificator], $user_ids)
-    ));
-    $input = $json ? json_decode($json, true) : null;
-    if (!is_array($input)) {
-        return null;
-    }
-
-    [$values, $errors] = squuad_cert_document_fields_values($fields, $input);
-
-    return $errors ? null : $values;
 }
 
 /**
