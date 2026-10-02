@@ -15,7 +15,8 @@ if (!defined('ABSPATH')) exit;
 /** URL del escritorio de Mi Cuenta con parámetros. */
 function squuad_cert_signature_batch_account_url(array $args = []): string
 {
-    return add_query_arg($args, wc_get_account_endpoint_url('dashboard'));
+    // Escritorio de Mi Cuenta si hay WooCommerce; si no, la portada (el modal insiste en cualquier página pública)
+    return add_query_arg($args, function_exists('wc_get_account_endpoint_url') ? wc_get_account_endpoint_url('dashboard') : home_url('/'));
 }
 
 /**

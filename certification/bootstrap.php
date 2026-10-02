@@ -2,13 +2,41 @@
 declare(strict_types=1);
 
 /**
- * EduSystem - Módulo de certificación (firmas y documentos automáticos), reunido aquí antes de entregarlo a
- * wp-certificates (ADR 0004, paso 3). Los archivos conservan su ruta relativa dentro de certification/ y se siguen
- * cargando desde el mismo punto que antes (includes/functions.php, admin/functions.php, public/functions.php,
- * core/schema.php y edusystem.php), para no cambiar el orden de los hooks.
+ * Certificación - Arranque del módulo de firmas de wp-certificates (ADR 0004, paso 4b-4).
+ *
+ * Lo carga wp-certificates.php en plugins_loaded, solo si EduSystem no carga su propio módulo (nunca dos a la vez:
+ * compartirían acciones AJAX, pantallas y el modal). Mismo orden que tenía en EduSystem: funciones compartidas,
+ * migración, admin y público.
  */
 
 if (!defined('ABSPATH')) exit;
 
-define('SQUUAD_CERT_MODULE_PATH', EDUSYSTEM_PATH . 'certification/');
-define('SQUUAD_CERT_MODULE_URL', EDUSYSTEM_URL . 'certification/');
+define('SQUUAD_CERT_MODULE_PATH', WP_C_PATH . 'certification/');
+define('SQUUAD_CERT_MODULE_URL', plugin_dir_url(SQUUAD_CERT_MODULE_PATH . 'bootstrap.php'));
+
+// Compartido (antes includes/functions.php de EduSystem)
+require_once SQUUAD_CERT_MODULE_PATH . 'includes/document-fields.php';
+require_once SQUUAD_CERT_MODULE_PATH . 'includes/signature-integrity.php';
+require_once SQUUAD_CERT_MODULE_PATH . 'includes/signature-integrity-cli.php';
+require_once SQUUAD_CERT_MODULE_PATH . 'includes/signature-requests.php';
+require_once SQUUAD_CERT_MODULE_PATH . 'includes/signers.php';
+require_once SQUUAD_CERT_MODULE_PATH . 'includes/certification-orders.php';
+require_once SQUUAD_CERT_MODULE_PATH . 'includes/html-signatures.php';
+
+// Migración única de los documentos con PHP (antes edusystem.php)
+require_once SQUUAD_CERT_MODULE_PATH . 'core/migration-documents-php.php';
+
+// Admin (antes admin/functions.php de EduSystem)
+require_once SQUUAD_CERT_MODULE_PATH . 'admin/signature-integrity.php';
+require_once SQUUAD_CERT_MODULE_PATH . 'admin/signers.php';
+require_once SQUUAD_CERT_MODULE_PATH . 'admin/document-signing.php';
+require_once SQUUAD_CERT_MODULE_PATH . 'admin/document-preview.php';
+require_once SQUUAD_CERT_MODULE_PATH . 'admin/signer-inbox.php';
+
+// Público (antes public/functions.php de EduSystem)
+require_once SQUUAD_CERT_MODULE_PATH . 'public/functions/documents-signature.php';
+require_once SQUUAD_CERT_MODULE_PATH . 'public/functions/signer-registration.php';
+require_once SQUUAD_CERT_MODULE_PATH . 'public/functions/signature-batch.php';
+require_once SQUUAD_CERT_MODULE_PATH . 'public/functions/checkout/cart-signatures.php';
+require_once SQUUAD_CERT_MODULE_PATH . 'public/functions/account/dashboard-signatures.php';
+require_once SQUUAD_CERT_MODULE_PATH . 'public/functions/assets.php';

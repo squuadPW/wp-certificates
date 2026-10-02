@@ -1,7 +1,8 @@
 /**
- * Recuadro de firma propio de EduSystem (ADR 0003): sustituye a signature_pad (librería de terceros) con la misma
- * API que usa el plugin (isEmpty, clear, toData, fromData, off, on, addEventListener('afterUpdateStroke'|'endStroke'))
- * y el mismo formato de datos: [{penColor, points: [{x, y, time, pressure}]}]. Sin dependencias.
+ * Recuadro de firma propio (ADR 0003; ADR 0004, paso 4b-4): sustituye a signature_pad (librería de terceros) con la
+ * misma API que usa el plugin (isEmpty, clear, toData, fromData, off, on, addEventListener('afterUpdateStroke'|'endStroke'))
+ * y el mismo formato de datos: [{penColor, points: [{x, y, time, pressure}]}]. Sin dependencias. Lo usan el panel de
+ * los firmantes del sistema, la firma en lote y el modal de Mi Cuenta (create-enrollment.js).
  */
 (function (global) {
   "use strict";
@@ -19,6 +20,10 @@
       this._down = this._down.bind(this);
       this._move = this._move.bind(this);
       this._up = this._up.bind(this);
+      // Cambiar el tamaño del lienzo (width/height) lo borra: se vuelve a dibujar lo que ya hay
+      if (global.MutationObserver) {
+        new MutationObserver(() => this._redraw()).observe(canvas, { attributes: true, attributeFilter: ["width", "height"] });
+      }
       this.on();
     }
 

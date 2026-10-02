@@ -21,12 +21,12 @@ function squuad_cert_signature_integrity_grant_cap(): void
     }
 }
 
-// Submenú de la sección de auditoría (Edusystem Logs), después de que se registre ese menú
+// Submenú de Certificación, después de que se registre ese menú
 add_action('admin_menu', 'squuad_cert_signature_integrity_menu', 20);
 function squuad_cert_signature_integrity_menu(): void
 {
     add_submenu_page(
-        'edusystem-logs',
+        SQUUAD_CERT_SIGNERS_PARENT,
         __('Signature integrity', 'edusystem'),
         __('Signature integrity', 'edusystem'),
         SQUUAD_CERT_SIGNATURE_INTEGRITY_CAP,

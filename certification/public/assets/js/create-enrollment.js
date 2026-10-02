@@ -96,9 +96,10 @@ document.addEventListener("DOMContentLoaded", (event) => {
         const studentElement = document.getElementById("signature-student");
         const parentElement = document.getElementById("signature-parent");
 
-        if (studentElement) signaturePadStudent = new SignaturePad(studentElement);
+        // Recuadro de firma propio (signature-pad-edusystem.js), sin librerías de terceros
+        if (studentElement) signaturePadStudent = new EdusystemSignaturePad(studentElement);
 
-        if (parentElement) signaturePadParent = new SignaturePad(parentElement);
+        if (parentElement) signaturePadParent = new EdusystemSignaturePad(parentElement);
 
         save_signatures = document.getElementById("saveSignatures");
         sign_here_parent = document.getElementById("sign-here-parent");

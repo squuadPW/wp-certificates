@@ -7,7 +7,7 @@ if (!defined('ABSPATH')) exit;
 
 $items = (array) $batch->data['items'];
 $expired = 'prepared' === $batch->status && strtotime($batch->expires_at_utc . ' UTC') < time();
-wp_enqueue_script('edusystem-signature-pad', SQUUAD_CERT_MODULE_URL . 'admin/assets/js/signature-pad-edusystem.js', [], VERSIONS_JS, true);
+wp_enqueue_script('edusystem-signature-pad', SQUUAD_CERT_MODULE_URL . 'admin/assets/js/signature-pad-edusystem.js', [], defined('WP_C_VERSION') ? WP_C_VERSION : null, true);
 ?>
 <section class="edusystem-documents-to-sign" id="edusystem-documents-to-sign" style="margin-bottom:24px">
     <p><a href="<?= esc_url($dashboard) ?>">&larr; <?= esc_html__('Back to the list', 'edusystem') ?></a></p>

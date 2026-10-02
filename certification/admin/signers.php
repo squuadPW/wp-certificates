@@ -48,8 +48,8 @@ function squuad_cert_signers_menu(): void
             10
         );
     } else {
-        // Sitio sin wp-certificates (o sin su menú): la gestión va en la sección de auditoría de EduSystem
-        add_submenu_page('edusystem-logs', __('Signers', 'edusystem'), __('Signers', 'edusystem'), SQUUAD_CERT_MANAGE_SIGNERS_CAP, SQUUAD_CERT_SIGNERS_PAGE, 'squuad_cert_signers_page', 30);
+        // Sin el menú «Users and signatures» (p. ej. suscripción caducada): la gestión va bajo Certificación
+        add_submenu_page(SQUUAD_CERT_SIGNERS_PARENT, __('Signers', 'edusystem'), __('Signers', 'edusystem'), SQUUAD_CERT_MANAGE_SIGNERS_CAP, SQUUAD_CERT_SIGNERS_PAGE, 'squuad_cert_signers_page', 30);
     }
 
     // "Mi firma" para quien es firmante o tiene una invitación pendiente
@@ -226,7 +226,7 @@ function squuad_cert_signers_assets(string $hook): void
     if (false === strpos($hook, 'squuad-cert-my-signature')) {
         return;
     }
-    $version = defined('VERSIONS_JS') ? VERSIONS_JS : EDUSYSTEM_VERSION;
+    $version = defined('WP_C_VERSION') ? WP_C_VERSION : null;
     wp_enqueue_script('edusystem-signature-pad', SQUUAD_CERT_MODULE_URL . 'admin/assets/js/signature-pad-edusystem.js', [], $version, true);
 }
 

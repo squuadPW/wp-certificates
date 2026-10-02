@@ -51,6 +51,17 @@ require_once WP_C_PATH . 'includes/variables.php';
 require_once WP_C_PATH . 'includes/book.php';
 require_once WP_C_PATH . 'includes/automatic.php';
 require_once WP_C_PATH . 'includes/signing-roles.php';
+
+// Módulo de firmas (ADR 0004 de EduSystem, paso 4b-4): solo si EduSystem no carga el suyo, que define
+// EDUSYSTEM_CERTIFICATION_PATH al arrancar (nunca dos módulos de firma a la vez). En plugins_loaded, cuando todos los
+// plugins ya están cargados, para no depender del orden de carga.
+add_action('plugins_loaded', 'squuad_cert_load_signature_module', 1);
+function squuad_cert_load_signature_module() {
+    if (defined('EDUSYSTEM_CERTIFICATION_PATH') || defined('SQUUAD_CERT_MODULE_PATH')) {
+        return;
+    }
+    require_once WP_C_PATH . 'certification/bootstrap.php';
+}
 require_once WP_C_PATH . 'public/functions.php';
 require_once WP_C_PATH . 'admin/functions.php';
 
