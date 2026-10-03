@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WP Certificates 1.0.29\n"
 "Report-Msgid-Bugs-To: https://edusof.com\n"
-"POT-Creation-Date: 2026-10-03T03:34:49+00:00\n"
+"POT-Creation-Date: 2026-10-03T04:00:24+00:00\n"
 "PO-Revision-Date: 2026-10-02 23:50+0000\n"
 "Last-Translator: EduSof\n"
 "Language-Team: Español\n"
@@ -32,6 +32,27 @@ msgstr "Edusof"
 #: wp-certificates.php
 msgid "https://edusof.com"
 msgstr "https://edusof.com"
+
+#: admin/api-keys.php:21 admin/api-keys.php:22 admin/templates/api-keys.php:12
+#: includes/permissions.php:35
+msgid "API connections"
+msgstr "Conexiones API"
+
+#: admin/api-keys.php:48 admin/api-keys.php:63 admin/api-keys.php:81
+#: admin/permissions.php:32 admin/permissions.php:48 admin/signing-roles.php:48
+#: admin/signing-roles.php:61 admin/variables.php:99 admin/variables.php:157
+#: admin/variables.php:198 admin/variables.php:240 admin/variables.php:288
+#: admin/variables.php:305 admin/variables.php:321
+msgid "Sorry, you are not allowed to access this page."
+msgstr "Lo sentimos, no tiene permiso para acceder a esta página."
+
+#: admin/api-keys.php:86
+msgid "The key was revoked: it no longer works."
+msgstr "La clave se revocó: ya no funciona."
+
+#: admin/api-keys.php:87
+msgid "The key does not exist or was already revoked."
+msgstr "La clave no existe o ya estaba revocada."
 
 #: admin/cards.php:48
 msgid "Card adjusted successfully."
@@ -131,7 +152,7 @@ msgid "Description"
 msgstr "Descripción"
 
 #: admin/certificates.php:333 admin/documents.php:332
-#: admin/templates/document-detail.php:80
+#: admin/templates/api-keys.php:68 admin/templates/document-detail.php:80
 #: admin/templates/template-certificates-detail.php:37
 #: certification/admin/templates/signers.php:22
 msgid "Active"
@@ -183,8 +204,8 @@ msgstr "Inactivo"
 msgid "Are you sure?"
 msgstr "¿Está seguro?"
 
-#: admin/documents.php:357 admin/templates/card-detail.php:41
-#: admin/templates/document-detail.php:41
+#: admin/documents.php:357 admin/templates/api-keys.php:47
+#: admin/templates/card-detail.php:41 admin/templates/document-detail.php:41
 #: admin/templates/document-detail.php:84
 #: certification/public/templates/documents-to-sign.php:23
 #: certification/public/templates/documents-to-sign.php:39
@@ -192,7 +213,8 @@ msgstr "¿Está seguro?"
 msgid "Name"
 msgstr "Nombre"
 
-#: admin/documents.php:358 certification/admin/templates/document-issued.php:30
+#: admin/documents.php:358 admin/templates/api-keys.php:52
+#: certification/admin/templates/document-issued.php:30
 #: certification/admin/templates/signers.php:93
 #: certification/public/templates/documents-to-sign.php:24
 #: certification/public/templates/documents-to-sign.php:40
@@ -207,9 +229,10 @@ msgstr "Creado en"
 msgid "Label"
 msgstr "Etiqueta"
 
-#: admin/documents.php:488 admin/templates/document-detail.php:299
-#: admin/templates/signing-roles.php:24 admin/templates/variables.php:191
-#: admin/templates/variables.php:225 admin/templates/variables.php:260
+#: admin/documents.php:488 admin/templates/api-keys.php:48
+#: admin/templates/document-detail.php:299 admin/templates/signing-roles.php:24
+#: admin/templates/variables.php:191 admin/templates/variables.php:225
+#: admin/templates/variables.php:260
 msgid "Key"
 msgstr "Clave"
 
@@ -230,41 +253,41 @@ msgstr "Requerido"
 msgid "Remove"
 msgstr "Quitar"
 
-#: admin/functions.php:67 admin/functions.php:169
+#: admin/functions.php:68 admin/functions.php:170
 msgid "Select option"
 msgstr "Seleccionar opción"
 
-#: admin/functions.php:108 admin/functions.php:109
+#: admin/functions.php:109 admin/functions.php:110
 msgid "Certification"
 msgstr "Certificación"
 
-#: admin/functions.php:116 admin/templates/list-certificates.php:4
+#: admin/functions.php:117 admin/templates/list-certificates.php:4
 msgid "Student certificates"
 msgstr "Certificados de estudiantes"
 
-#: admin/functions.php:117 admin/templates/list-documents.php:4
+#: admin/functions.php:118 admin/templates/list-documents.php:4
 #: admin/templates/variables.php:48 includes/permissions.php:24
 msgid "Documents"
 msgstr "Documentos"
 
-#: admin/functions.php:120 admin/templates/certificate-assignment.php:5
+#: admin/functions.php:121 admin/templates/certificate-assignment.php:5
 #: includes/permissions.php:25
 msgid "Certificate assignment"
 msgstr "Asignación de certificados"
 
-#: admin/functions.php:124 includes/permissions.php:27
+#: admin/functions.php:125 includes/permissions.php:27
 msgid "ID card"
 msgstr "Carnet"
 
-#: admin/functions.php:125 includes/permissions.php:28
+#: admin/functions.php:126 includes/permissions.php:28
 msgid "Configuration"
 msgstr "Configuración"
 
-#: admin/functions.php:167
+#: admin/functions.php:168
 msgid "Document template"
 msgstr "Plantilla de documento"
 
-#: admin/functions.php:182
+#: admin/functions.php:183
 msgid "Downloadable document"
 msgstr "Documento descargable"
 
@@ -291,16 +314,10 @@ msgid "This document requires signatures: it can no longer be generated with sig
 msgstr "Este documento exige firmas: ya no se puede generar con firmas-imagen. Configure sus firmantes (Certificación > Documentos > Firmantes del documento) y emítalo para firma; cada responsable firma desde su propia cuenta."
 
 #: admin/permissions.php:21 admin/permissions.php:22
-#: admin/templates/permissions.php:10 includes/permissions.php:35
+#: admin/templates/api-keys.php:35 admin/templates/api-keys.php:49
+#: admin/templates/permissions.php:10 includes/permissions.php:36
 msgid "Permissions"
 msgstr "Permisos"
-
-#: admin/permissions.php:32 admin/permissions.php:48 admin/signing-roles.php:48
-#: admin/signing-roles.php:61 admin/variables.php:99 admin/variables.php:157
-#: admin/variables.php:198 admin/variables.php:240 admin/variables.php:288
-#: admin/variables.php:305 admin/variables.php:321
-msgid "Sorry, you are not allowed to access this page."
-msgstr "Lo sentimos, no tiene permiso para acceder a esta página."
 
 #: admin/permissions.php:53
 msgid "That role does not exist."
@@ -323,6 +340,88 @@ msgstr "Roles que firman"
 #: admin/signing-roles.php:70
 msgid "Signing roles saved. Signature requests already in progress keep their signers."
 msgstr "Roles que firman guardados. Las solicitudes de firma ya en curso conservan sus firmantes."
+
+#: admin/templates/api-keys.php:19
+msgid "Copy this key now: it will not be shown again."
+msgstr "Copie esta clave ahora: no se volverá a mostrar."
+
+#: admin/templates/api-keys.php:21
+msgid "Copied"
+msgstr "Copiada"
+
+#: admin/templates/api-keys.php:21
+msgid "Copy"
+msgstr "Copiar"
+
+#: admin/templates/api-keys.php:22
+msgid "Give it only to the team of the connected system, through a safe channel. It must be kept on their server, never in a web page or in a URL."
+msgstr "Entréguela solo al equipo del sistema conectado, por un canal seguro. Debe guardarse en su servidor, nunca en una página web ni en una URL."
+
+#: admin/templates/api-keys.php:26
+msgid "Keys for other systems (for example, the main site of the institution) to check this platform from their server. Today a key can only verify a document by its code; it never searches by person. Every creation, revocation and use is saved in the log."
+msgstr "Claves para que otros sistemas (por ejemplo, el sitio principal de la institución) consulten esta plataforma desde su servidor. Hoy una clave solo puede verificar un documento por su código; nunca busca por persona. Cada alta, revocación y uso queda en el log."
+
+#: admin/templates/api-keys.php:27
+msgid "Address:"
+msgstr "Dirección:"
+
+#: admin/templates/api-keys.php:27
+msgid "code"
+msgstr "código"
+
+#: admin/templates/api-keys.php:27
+msgid "Header:"
+msgstr "Cabecera:"
+
+#: admin/templates/api-keys.php:27
+msgid "key"
+msgstr "clave"
+
+#: admin/templates/api-keys.php:29
+msgid "New connection"
+msgstr "Nueva conexión"
+
+#: admin/templates/api-keys.php:33
+msgid "Name of the connected system"
+msgstr "Nombre del sistema conectado"
+
+#: admin/templates/api-keys.php:34
+msgid "E.g. Main site"
+msgstr "P. ej. Sitio principal"
+
+#: admin/templates/api-keys.php:40
+msgid "Generate key"
+msgstr "Generar clave"
+
+#: admin/templates/api-keys.php:43
+msgid "Keys"
+msgstr "Claves"
+
+#: admin/templates/api-keys.php:50 admin/templates/variables.php:230
+#: certification/admin/templates/signature-integrity.php:48
+msgid "Created"
+msgstr "Creado"
+
+#: admin/templates/api-keys.php:51
+msgid "Last use"
+msgstr "Último uso"
+
+#: admin/templates/api-keys.php:58
+msgid "There are no keys yet."
+msgstr "Aún no hay claves."
+
+#: admin/templates/api-keys.php:68
+#, php-format
+msgid "Revoked %s"
+msgstr "Revocada el %s"
+
+#: admin/templates/api-keys.php:71
+msgid "Revoke this key? The connected system will stop working with it at once."
+msgstr "¿Revocar esta clave? El sistema conectado dejará de funcionar con ella al instante."
+
+#: admin/templates/api-keys.php:75
+msgid "Revoke"
+msgstr "Revocar"
 
 #: admin/templates/card-detail.php:3
 msgid "Card Details"
@@ -850,11 +949,6 @@ msgstr "ID"
 #: admin/templates/variables.php:226 admin/templates/variables.php:267
 msgid "How it is written"
 msgstr "Cómo se escribe"
-
-#: admin/templates/variables.php:230
-#: certification/admin/templates/signature-integrity.php:48
-msgid "Created"
-msgstr "Creado"
 
 #: admin/templates/variables.php:232
 msgid "Documents that use it"
@@ -2623,6 +2717,22 @@ msgstr "Firmar"
 msgid "Only documents that someone else already signed can be signed together. You will review the list, draw your signature once and confirm with your password."
 msgstr "Solo se pueden firmar juntos los documentos que otra persona ya firmó. Revisará la lista, dibujará su firma una vez y confirmará con su contraseña."
 
+#: includes/api-keys.php:24
+msgid "Verify documents"
+msgstr "Verificar documentos"
+
+#: includes/api-keys.php:24
+msgid "Check a document by its code and get the data needed to validate it."
+msgstr "Consultar un documento por su código y obtener los datos necesarios para validarlo."
+
+#: includes/api-keys.php:46
+msgid "The name of the connection is required."
+msgstr "El nombre de la conexión es obligatorio."
+
+#: includes/api-keys.php:49
+msgid "Choose at least one permission."
+msgstr "Elija al menos un permiso."
+
 #: includes/automatic.php:70
 msgid "its template has no signature variable"
 msgstr "su plantilla no tiene variable de firma"
@@ -2723,8 +2833,20 @@ msgid "Choose which roles can sign documents."
 msgstr "Elegir qué roles pueden firmar documentos."
 
 #: includes/permissions.php:35
+msgid "Create and revoke the keys that other systems use to check this platform."
+msgstr "Crear y revocar las claves con las que otros sistemas consultan esta plataforma."
+
+#: includes/permissions.php:36
 msgid "Give these permissions to the roles (this screen)."
 msgstr "Dar estos permisos a los roles (esta pantalla)."
+
+#: includes/rest-v1.php:35
+msgid "Missing or invalid API key."
+msgstr "Falta la clave de API o no es válida."
+
+#: includes/rest-v1.php:58
+msgid "Document not found."
+msgstr "Documento no encontrado."
 
 #: public/endpoint.php:105
 msgid "Too many attempts. Please try again later."

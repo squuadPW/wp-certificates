@@ -29,7 +29,8 @@ define('WP_C_REMOTE_INFO_URL', 'https://versions.squuad.com/plugins/wp-certifica
 // 9: tablas de las firmas propias (squuad_cert_*: solicitudes por cuenta, firmas, anuladas, contenido, eventos,
 //    cadena, firmantes, políticas, lotes y libro) y clave del sitio (ADR 0004 de EduSystem, paso 3b).
 // 10: permisos propios de certificación (squuad_cert_*); concesión inicial una sola vez (includes/permissions.php).
-define('WP_C_DB_VERSION', '10');
+// 11: permiso squuad_cert_manage_api_keys (Conexiones API) para el administrator.
+define('WP_C_DB_VERSION', '11');
 
 // get_plugin_data() vive en wp-admin/includes/plugin.php, que en el front no está cargado (antes solo funcionaba
 // porque EduSystem lo cargaba primero)
@@ -54,6 +55,8 @@ require_once WP_C_PATH . 'includes/book.php';
 require_once WP_C_PATH . 'includes/automatic.php';
 require_once WP_C_PATH . 'includes/signing-roles.php';
 require_once WP_C_PATH . 'includes/permissions.php';
+require_once WP_C_PATH . 'includes/api-keys.php';
+require_once WP_C_PATH . 'includes/rest-v1.php';
 
 // Módulo de firmas (ADR 0004 de EduSystem, paso 4b-4): solo si EduSystem no carga el suyo, que define
 // EDUSYSTEM_CERTIFICATION_PATH al arrancar (nunca dos módulos de firma a la vez). En plugins_loaded, cuando todos los

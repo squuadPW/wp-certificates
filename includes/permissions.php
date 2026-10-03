@@ -32,6 +32,7 @@ function squuad_cert_capabilities(): array
         'squuad_cert_manage_signature_integrity' => [__('Signature integrity', 'wp-certificates'), __('Verify the signature chain and rotate the key.', 'wp-certificates')],
         'squuad_cert_manage_variables' => [__('Variables', 'wp-certificates'), __('Edit the variable list and choose the method of each variable.', 'wp-certificates')],
         'squuad_cert_manage_signing_roles' => [__('Signing roles', 'wp-certificates'), __('Choose which roles can sign documents.', 'wp-certificates')],
+        'squuad_cert_manage_api_keys' => [__('API connections', 'wp-certificates'), __('Create and revoke the keys that other systems use to check this platform.', 'wp-certificates')],
         'squuad_cert_manage_permissions' => [__('Permissions', 'wp-certificates'), __('Give these permissions to the roles (this screen).', 'wp-certificates')],
     ];
 
