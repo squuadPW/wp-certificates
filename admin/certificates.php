@@ -32,8 +32,8 @@ function add_admin_form_certificates_templates_content(){
         if ($_GET['section_tab'] == 'template_certificate_detail') {
             global $wpdb;
             $table_certificates_templates = $wpdb->prefix . 'certificates_templates';
-            $template_id = $_GET['template_id'];
-            $template = $wpdb->get_row("SELECT * FROM {$table_certificates_templates} WHERE id = {$template_id}");
+            $template_id = absint($_GET['template_id'] ?? 0);
+            $template = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$table_certificates_templates} WHERE id = %d", $template_id));
             include(plugin_dir_path(__FILE__) . 'templates/template-certificates-detail.php');
         }
     } else {
@@ -466,7 +466,7 @@ function default_templates($return_fields = false) {
 function get_certificate_details($template_id) {
     global $wpdb;
     $table_certificates_templates = $wpdb->prefix . 'certificates_templates';
-    $template = $wpdb->get_row("SELECT * FROM {$table_certificates_templates} WHERE id={$template_id}");
+    $template = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$table_certificates_templates} WHERE id = %d", absint($template_id)));
     return $template;
 }
 

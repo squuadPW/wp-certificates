@@ -106,7 +106,6 @@ function add_admin_form_documents_content()
 
             $table_student_documents = $wpdb->prefix . 'student_documents';
             $table_students = $wpdb->prefix . 'students';
-            $table_users_signatures = $wpdb->prefix . 'users_signatures';
 
             // --- 1. Saneamiento y Conversión de Entradas ---
             $document_id = isset($_POST['document_id']) ? absint($_POST['document_id']) : 0;
@@ -131,14 +130,6 @@ function add_admin_form_documents_content()
             $status = isset($_POST['status']) && $_POST['status'] === 'on' ? 1 : 0;
             $isRequired = (isset($_POST['is_required']) && $_POST['is_required'] === 'on') && $type == 'automatic' ? 1 : 0;
             $isVisible = (isset($_POST['is_visible']) && $_POST['is_visible'] === 'on') && $type == 'automatic' ? 1 : 0;
-            $deleteSignatures = isset($_POST['delete_signatures']) && $_POST['delete_signatures'] === 'on' ? 1 : 0;
-            // Con el sistema de firmas de EduSystem las firmas son legales y selladas: no se borran en bloque (el
-            // contenido de cada solicitud se congela al firmar, así que cambiar la plantilla no afecta a lo firmado).
-            // Para anular un documento concreto se declina desde Admisión, con motivo.
-            if ($deleteSignatures && wpc_edusystem_signatures_active()) {
-                wpc_log_signature_action(sprintf('Borrado masivo de firmas ignorado en el documento %d (usuario %d): EduSystem gestiona las firmas', $document_id, get_current_user_id()));
-                $deleteSignatures = 0;
-            }
             $signature_required = isset($_POST['signature_required']) && $_POST['signature_required'] === 'on' ? 1 : 0;
             $graduated_required = isset($_POST['graduated_required']) && $_POST['graduated_required'] === 'on' ? 1 : 0;
             $margin_required = isset($_POST['margin_required']) && $_POST['margin_required'] === 'on' ? 1 : 0;
@@ -217,65 +208,13 @@ function add_admin_form_documents_content()
 
             if (!empty($students)) {
 
-                // b) Obtención OPTIMIZADA de User IDs por email
-                $student_emails = array_column($students, 'email');
-                $wp_user_ids = [];
-
-                if (!empty($student_emails)) {
-
-                    // 1. Crear los placeholders de formato (%s) para la cláusula IN
-                    $email_placeholders = implode(', ', array_fill(0, count($student_emails), '%s'));
-
-                    // 2. Construir la consulta de forma segura
-                    $sql_select_user_ids = "SELECT ID FROM {$wpdb->users} 
-                                    WHERE user_email IN ({$email_placeholders})";
-
-                    // 3. Ejecutar la consulta inyectando los emails como un array
-                    $user_query_results = $wpdb->get_results(
-                        $wpdb->prepare($sql_select_user_ids, $student_emails),
-                        ARRAY_A
-                    );
-
-                    // 4. Mapear los resultados
-                    $wp_user_ids = array_column($user_query_results, 'ID');
-                }
                 // c) Mapeo de IDs
                 $student_ids_to_process = array_column($students, 'id');
-                $partner_ids_to_process = array_filter(array_column($students, 'partner_id')); // Filtra 0s o vacíos
 
                 $format_in = implode(', ', array_fill(0, count($student_ids_to_process), '%d'));
-                $format_in_parent = implode(', ', array_fill(0, count($partner_ids_to_process), '%d'));
-                $format_in_student_users = implode(', ', array_fill(0, count($wp_user_ids), '%d'));
 
-                if ($deleteSignatures) {
-                    // 1. Bulk Delete student documents
-                    $wpdb->query($wpdb->prepare(
-                        "DELETE FROM {$table_student_documents}
-                WHERE document_id = %s
-                AND student_id IN ({$format_in})",
-                        array_merge([$document_identifier_for_related_tables], $student_ids_to_process)
-                    ));
-
-                    // 2. Bulk Delete parent/partner signatures
-                    if (!empty($partner_ids_to_process)) {
-                        $wpdb->query($wpdb->prepare(
-                            "DELETE FROM {$table_users_signatures}
-                    WHERE document_id = %s
-                    AND user_id IN ({$format_in_parent})",
-                            array_merge([$document_identifier_for_related_tables], $partner_ids_to_process)
-                        ));
-                    }
-
-                    // 3. Bulk Delete student signatures
-                    if (!empty($wp_user_ids)) {
-                        $wpdb->query($wpdb->prepare(
-                            "DELETE FROM {$table_users_signatures}
-                    WHERE document_id = %s
-                    AND user_id IN ({$format_in_student_users})",
-                            array_merge([$document_identifier_for_related_tables], $wp_user_ids)
-                        ));
-                    }
-                }
+                // Ya no hay borrado en bloque de firmas ni de requisitos al guardar (ADR 0004, G2): las firmas son legales
+                // y cada documento se anula uno a uno, con motivo, desde Admisión
 
                 // --- Lógica AUTOMATIC (INSERT) ---
                 if ($type === 'automatic') {

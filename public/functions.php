@@ -12,7 +12,13 @@ function wp_certificates_scripts() {
     // Script JS
     if (str_contains(home_url($wp->request), 'card')) {
         wp_enqueue_script( 'my-card-script', plugins_url('wp-certificates') . '/public/assets/js/my-card.js', ['jquery'], $version, true );
-        wp_localize_script('my-card-script', 'squuadCertCard', ['shareError' => __('Error sharing. Do you want to download the image?', 'wp-certificates')]);
+        wp_localize_script('my-card-script', 'squuadCertCard', [
+            'nonce' => wp_create_nonce('squuad_cert_card'),
+            'shareError' => __('Error sharing. Do you want to download the image?', 'wp-certificates'),
+            'loading' => __('Loading...', 'wp-certificates'),
+            'save' => __('Save', 'wp-certificates'),
+            'requestCard' => __('Request ID Card', 'wp-certificates'),
+        ]);
     }
 
     wp_enqueue_script('qrcode-js', plugins_url('wp-certificates') . '/public/assets/js/qrcode.min.js');
@@ -242,7 +248,6 @@ function my_card_endpoint()
 }
 
 add_action('wp_ajax_set_nacionality', 'set_nacionality_callback');
-add_action('wp_ajax_nopriv_set_nacionality', 'set_nacionality_callback');
 function set_nacionality_callback()
 {
     global $wpdb, $current_user;
@@ -250,8 +255,10 @@ function set_nacionality_callback()
     if (!wpc_edusystem_active()) {
         wp_send_json_error(['success' => false]);
     }
+    // Solo la cuenta conectada, con el nonce de su página del carnet (ADR 0004 de EduSystem, G7)
+    check_ajax_referer('squuad_cert_card', '_ajax_nonce');
     $roles = $current_user->roles;
-    $nacionality = $_POST['nacionality'];
+    $nacionality = sanitize_text_field(wp_unslash($_POST['nacionality'] ?? ''));
 
     if (in_array('student', $roles)) {
         $table_students = $wpdb->prefix . 'students';
@@ -276,7 +283,6 @@ function set_nacionality_callback()
 }
 
 add_action('wp_ajax_request_card', 'request_card_callback');
-add_action('wp_ajax_nopriv_request_card', 'request_card_callback');
 function request_card_callback()
 {
     global $current_user;
@@ -284,6 +290,7 @@ function request_card_callback()
     if (!wpc_edusystem_active()) {
         wp_send_json_error(['success' => false]);
     }
+    check_ajax_referer('squuad_cert_card', '_ajax_nonce');
     $roles = $current_user->roles;
 
     if (in_array('student', $roles)) {
@@ -401,9 +408,8 @@ function create_certificate_edusystem_callback($type, $name, $program = '', $tem
     $inserted_id = $wpdb->insert_id;
 
     // 3. Generar y actualizar con el token único
-    $string = $inserted_id;
-    $hash = wp_hash($string);
-    $simple_uuid = substr($hash, 0, 6);
+    // Código del QR: 128 bits al azar (ADR 0004 de EduSystem, G3); antes, 6 caracteres de un hash del id
+    $simple_uuid = squuad_cert_new_certificate_code();
 
     $wpdb->update(
         $table_certificates,
@@ -640,9 +646,8 @@ function assign_certificate_student( $student_id, $template_id, $type, $emission
         $inserted_id = $wpdb->insert_id;
 
         // 9. Generar y actualizar con el token único
-        $string = $inserted_id;
-        $hash = wp_hash($string);
-        $simple_uuid = substr($hash, 0, 6);
+        // Código del QR: 128 bits al azar (ADR 0004 de EduSystem, G3); antes, 6 caracteres de un hash del id
+        $simple_uuid = squuad_cert_new_certificate_code();
 
         $wpdb->update(
             $table_certificates,

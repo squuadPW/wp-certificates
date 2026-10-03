@@ -1,3 +1,8 @@
+// Textos traducidos y nonce que da PHP (public/functions.php, squuadCertCard)
+function cardText(key) {
+  return (window.squuadCertCard && squuadCertCard[key]) || "";
+}
+
 let modal_close = document.querySelectorAll(".modal-close");
 if (modal_close) {
   modal_close.forEach((close) => {
@@ -39,7 +44,7 @@ let send_request = document.getElementById("send-request");
 if (send_request) {
   send_request.addEventListener("click", function () {
     document.getElementById("send-request").disabled = true;
-    document.getElementById("send-request").innerText = "Loading...";
+    document.getElementById("send-request").innerText = cardText("loading");
     let nacionality = document.querySelector(
       'select[name="nacionality"]'
     ).value;
@@ -48,9 +53,9 @@ if (send_request) {
     XHR.open("POST", `${ajax_object.ajax_url}?action=set_nacionality`, true);
     XHR.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     XHR.responseType = "text";
-    let params = `action=set_nacionality`;
+    let params = `action=set_nacionality&_ajax_nonce=${encodeURIComponent(cardText("nonce"))}`;
     if (nacionality) {
-      params += `&nacionality=${nacionality}`;
+      params += `&nacionality=${encodeURIComponent(nacionality)}`;
     }
 
     XHR.send(params);
@@ -59,7 +64,7 @@ if (send_request) {
         location.reload();
       } else {
         document.getElementById("send-request").disabled = false;
-        document.getElementById("send-request").innerText = "Save";
+        document.getElementById("send-request").innerText = cardText("save");
       }
     };
   });
@@ -69,13 +74,13 @@ let send_request_card = document.getElementById("send-request-card");
 if (send_request_card) {
   send_request_card.addEventListener("click", function () {
     document.getElementById("send-request-card").disabled = true;
-    document.getElementById("send-request-card").innerText = "Loading...";
+    document.getElementById("send-request-card").innerText = cardText("loading");
 
     const XHR = new XMLHttpRequest();
     XHR.open("POST", `${ajax_object.ajax_url}?action=request_card`, true);
     XHR.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     XHR.responseType = "text";
-    let params = `action=request_card`;
+    let params = `action=request_card&_ajax_nonce=${encodeURIComponent(cardText("nonce"))}`;
 
     XHR.send(params);
     XHR.onload = function () {
@@ -83,8 +88,7 @@ if (send_request_card) {
         location.reload();
       } else {
         document.getElementById("send-request-card").disabled = false;
-        document.getElementById("send-request-card").innerText =
-          "Request ID Card";
+        document.getElementById("send-request-card").innerText = cardText("requestCard");
       }
     };
   });

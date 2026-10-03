@@ -207,7 +207,7 @@ function get_card_detail($card_id)
 {
     global $wpdb;
     $table_cards_templates = $wpdb->prefix . 'cards_templates';
-    $card = $wpdb->get_row("SELECT * FROM {$table_cards_templates} WHERE id = {$card_id}");
+    $card = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$table_cards_templates} WHERE id = %d", absint($card_id)));
     return $card;
 }
 

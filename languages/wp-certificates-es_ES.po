@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WP Certificates 1.0.29\n"
 "Report-Msgid-Bugs-To: https://edusof.com\n"
-"POT-Creation-Date: 2026-10-03T01:41:03+00:00\n"
+"POT-Creation-Date: 2026-10-03T03:34:49+00:00\n"
 "PO-Revision-Date: 2026-10-02 23:50+0000\n"
 "Last-Translator: EduSof\n"
 "Language-Team: Español\n"
@@ -41,7 +41,7 @@ msgstr "Carnet ajustado correctamente."
 msgid "Certification deleted successfully."
 msgstr "Certificado eliminado correctamente."
 
-#: admin/cards.php:89 admin/documents.php:395
+#: admin/cards.php:89 admin/documents.php:334
 msgid "View Details"
 msgstr "Ver detalles"
 
@@ -57,8 +57,8 @@ msgstr "Certificado"
 msgid "User"
 msgstr "Usuario"
 
-#: admin/cards.php:112 admin/documents.php:421
-#: admin/templates/document-detail.php:309 admin/templates/variables.php:83
+#: admin/cards.php:112 admin/documents.php:360
+#: admin/templates/document-detail.php:303 admin/templates/variables.php:83
 msgid "Actions"
 msgstr "Acciones"
 
@@ -130,14 +130,14 @@ msgstr "Nombre de la plantilla"
 msgid "Description"
 msgstr "Descripción"
 
-#: admin/certificates.php:333 admin/documents.php:393
+#: admin/certificates.php:333 admin/documents.php:332
 #: admin/templates/document-detail.php:80
 #: admin/templates/template-certificates-detail.php:37
 #: certification/admin/templates/signers.php:22
 msgid "Active"
 msgstr "Activo"
 
-#: admin/documents.php:54 admin/documents.php:339
+#: admin/documents.php:54 admin/documents.php:278
 msgid "You are not allowed to do this."
 msgstr "No tiene permiso para hacer esto."
 
@@ -150,7 +150,7 @@ msgstr "El nombre y el código son obligatorios."
 msgid "There is already a document with the code %s."
 msgstr "Ya existe un documento con el código %s."
 
-#: admin/documents.php:100 admin/documents.php:204
+#: admin/documents.php:100 admin/documents.php:195
 msgid "Error saving document."
 msgstr "Error al guardar el documento."
 
@@ -158,32 +158,32 @@ msgstr "Error al guardar el documento."
 msgid "Document created as inactive. Complete it and activate it when it is ready."
 msgstr "Documento creado como inactivo. Complételo y actívelo cuando esté listo."
 
-#: admin/documents.php:319
+#: admin/documents.php:258
 msgid "Document adjusted successfully."
 msgstr "Documento ajustado correctamente."
 
-#: admin/documents.php:320
+#: admin/documents.php:259
 msgid "Some additional fields were not saved:"
 msgstr "Algunos campos adicionales no se guardaron:"
 
-#: admin/documents.php:323
+#: admin/documents.php:262
 #, php-format
 msgid "The registry book line cannot use %s: they are assigned when the line is reserved. Remove them, or the document will not be issued."
 msgstr "La línea del libro de registro no puede usar %s: se asignan al reservar la línea. Quítelas o el documento no se emitirá."
 
-#: admin/documents.php:347
+#: admin/documents.php:286
 msgid "Document deleted successfully."
 msgstr "Documento eliminado correctamente."
 
-#: admin/documents.php:393
+#: admin/documents.php:332
 msgid "Inactive"
 msgstr "Inactivo"
 
-#: admin/documents.php:396
+#: admin/documents.php:335
 msgid "Are you sure?"
 msgstr "¿Está seguro?"
 
-#: admin/documents.php:418 admin/templates/card-detail.php:41
+#: admin/documents.php:357 admin/templates/card-detail.php:41
 #: admin/templates/document-detail.php:41
 #: admin/templates/document-detail.php:84
 #: certification/public/templates/documents-to-sign.php:23
@@ -192,41 +192,41 @@ msgstr "¿Está seguro?"
 msgid "Name"
 msgstr "Nombre"
 
-#: admin/documents.php:419 certification/admin/templates/document-issued.php:30
+#: admin/documents.php:358 certification/admin/templates/document-issued.php:30
 #: certification/admin/templates/signers.php:93
 #: certification/public/templates/documents-to-sign.php:24
 #: certification/public/templates/documents-to-sign.php:40
 msgid "Status"
 msgstr "Estado"
 
-#: admin/documents.php:420
+#: admin/documents.php:359
 msgid "Created at"
 msgstr "Creado en"
 
-#: admin/documents.php:547 admin/templates/document-detail.php:304
+#: admin/documents.php:486 admin/templates/document-detail.php:298
 msgid "Label"
 msgstr "Etiqueta"
 
-#: admin/documents.php:549 admin/templates/document-detail.php:305
+#: admin/documents.php:488 admin/templates/document-detail.php:299
 #: admin/templates/signing-roles.php:24 admin/templates/variables.php:191
 #: admin/templates/variables.php:225 admin/templates/variables.php:260
 msgid "Key"
 msgstr "Clave"
 
-#: admin/documents.php:555 admin/templates/document-detail.php:237
-#: admin/templates/document-detail.php:306
+#: admin/documents.php:494 admin/templates/document-detail.php:237
+#: admin/templates/document-detail.php:300
 msgid "Type"
 msgstr "Tipo"
 
-#: admin/documents.php:561 admin/templates/document-detail.php:307
+#: admin/documents.php:500 admin/templates/document-detail.php:301
 msgid "Options (one per line)"
 msgstr "Opciones (una por línea)"
 
-#: admin/documents.php:562 admin/templates/document-detail.php:308
+#: admin/documents.php:501 admin/templates/document-detail.php:302
 msgid "Required"
 msgstr "Requerido"
 
-#: admin/documents.php:563
+#: admin/documents.php:502
 msgid "Remove"
 msgstr "Quitar"
 
@@ -349,14 +349,14 @@ msgstr "Cara principal"
 msgid "Rear side"
 msgstr "Cara posterior"
 
-#: admin/templates/card-detail.php:61 admin/templates/document-detail.php:351
+#: admin/templates/card-detail.php:61 admin/templates/document-detail.php:345
 #: admin/templates/template-certificates-detail.php:64
 #: certification/admin/templates/document-preview.php:19
 #: public/templates/certificates.php:37
 msgid "Preview"
 msgstr "Vista previa"
 
-#: admin/templates/card-detail.php:80 admin/templates/document-detail.php:326
+#: admin/templates/card-detail.php:80 admin/templates/document-detail.php:320
 msgid "Saves changes"
 msgstr "Guardar cambios"
 
@@ -579,27 +579,23 @@ msgstr "Prioridad"
 msgid "Order in My Account when several automatic documents are pending: 0 is the most urgent; with the same priority, the oldest first."
 msgstr "Orden en Mi cuenta cuando hay varios documentos automáticos pendientes: 0 es el más urgente; con la misma prioridad, primero el más antiguo."
 
-#: admin/templates/document-detail.php:284
-msgid "When saving, all existing signatures will be deleted."
-msgstr "Al guardar, se borrarán todas las firmas existentes."
-
-#: admin/templates/document-detail.php:294
+#: admin/templates/document-detail.php:288
 msgid "Advanced"
 msgstr "Avanzado"
 
-#: admin/templates/document-detail.php:296
+#: admin/templates/document-detail.php:290
 msgid "Additional fields"
 msgstr "Campos adicionales"
 
-#: admin/templates/document-detail.php:298
+#: admin/templates/document-detail.php:292
 msgid "They are requested before generating the document and the answers are only used to fill it in (they are only stored while the document is partially signed). Use {{key}} in the document to print the answer and, in fields with options, {{key_list}} to print all the options with (✓) on the selected ones. If the key is left empty, it is created from the label."
 msgstr "Se piden antes de generar el documento y las respuestas solo se usan para rellenarlo (solo se guardan mientras el documento está firmado en parte). Use {{key}} en el documento para imprimir la respuesta y, en los campos con opciones, {{key_list}} para imprimir todas las opciones con (✓) en las elegidas. Si la clave se deja vacía, se crea a partir de la etiqueta."
 
-#: admin/templates/document-detail.php:318
+#: admin/templates/document-detail.php:312
 msgid "+ Add field"
 msgstr "+ Agregar campo"
 
-#: admin/templates/document-detail.php:331
+#: admin/templates/document-detail.php:325
 msgid "Add document"
 msgstr "Agregar documento"
 
@@ -665,8 +661,9 @@ msgstr "Qué permite"
 
 #: admin/templates/permissions.php:44 admin/templates/signing-roles.php:42
 #: admin/templates/template-certificates-detail.php:55
+#: certification/public/functions/assets.php:54
 #: certification/public/templates/create-document-automatic.php:55
-#: public/templates/select-nacionality.php:20
+#: public/functions.php:19 public/templates/select-nacionality.php:20
 msgid "Save"
 msgstr "Guardar"
 
@@ -2668,7 +2665,7 @@ msgstr "El libro de registro no está disponible en este sitio."
 msgid "The registry book could not void the line."
 msgstr "El libro de registro no pudo anular la línea."
 
-#: includes/permissions.php:23 public/functions.php:40
+#: includes/permissions.php:23 public/functions.php:46
 #: public/templates/certificates.php:8
 msgid "Certificates"
 msgstr "Certificados"
@@ -2729,31 +2726,43 @@ msgstr "Elegir qué roles pueden firmar documentos."
 msgid "Give these permissions to the roles (this screen)."
 msgstr "Dar estos permisos a los roles (esta pantalla)."
 
-#: public/endpoint.php:23 public/endpoint.php:48
-msgid "Certificate not found"
-msgstr "Certificado no encontrado"
+#: public/endpoint.php:105
+msgid "Too many attempts. Please try again later."
+msgstr "Demasiados intentos. Inténtelo de nuevo más tarde."
 
-#: public/endpoint.php:40
-msgid "Certificate found"
-msgstr "Certificado encontrado"
-
-#: public/endpoint.php:54
+#: public/endpoint.php:114
 msgid "The certificate_id parameter is missing."
 msgstr "Falta el parámetro certificate_id."
 
-#: public/functions.php:15
+#: public/endpoint.php:117 public/endpoint.php:126
+msgid "Certificate not found"
+msgstr "Certificado no encontrado"
+
+#: public/endpoint.php:131
+msgid "Certificate found"
+msgstr "Certificado encontrado"
+
+#: public/functions.php:17
 msgid "Error sharing. Do you want to download the image?"
 msgstr "Error al compartir. ¿Quiere descargar la imagen?"
 
-#: public/functions.php:34
+#: public/functions.php:18
+msgid "Loading..."
+msgstr "Cargando..."
+
+#: public/functions.php:20 public/templates/my-card.php:10
+msgid "Request ID Card"
+msgstr "Solicitar carnet"
+
+#: public/functions.php:40
 msgid "ID Card"
 msgstr "Carnet"
 
-#: public/functions.php:569
+#: public/functions.php:575
 msgid "Tome: "
 msgstr "Tomo: "
 
-#: public/functions.php:571
+#: public/functions.php:577
 msgid "Folio: "
 msgstr "Folio: "
 
@@ -2788,10 +2797,6 @@ msgstr "No tiene certificados"
 #: public/templates/my-card.php:5
 msgid "My ID"
 msgstr "Mi carnet"
-
-#: public/templates/my-card.php:10
-msgid "Request ID Card"
-msgstr "Solicitar carnet"
 
 #: public/templates/my-card.php:27
 msgid "You do not yet have a photo to use on the ID card, please check its status in the documents screen"
