@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WP Certificates 1.0.29\n"
 "Report-Msgid-Bugs-To: https://edusof.com\n"
-"POT-Creation-Date: 2026-10-02T23:47:50+00:00\n"
+"POT-Creation-Date: 2026-10-03T01:41:03+00:00\n"
 "PO-Revision-Date: 2026-10-02 23:50+0000\n"
 "Last-Translator: EduSof\n"
 "Language-Team: Español\n"
@@ -43,7 +43,7 @@ msgstr "Certificado eliminado correctamente."
 
 #: admin/cards.php:89 admin/documents.php:395
 msgid "View Details"
-msgstr "Ver Detalles"
+msgstr "Ver detalles"
 
 #: admin/cards.php:110
 msgid "Certificate"
@@ -130,11 +130,12 @@ msgstr "Nombre de la plantilla"
 msgid "Description"
 msgstr "Descripción"
 
-#: admin/certificates.php:333 admin/templates/document-detail.php:80
+#: admin/certificates.php:333 admin/documents.php:393
+#: admin/templates/document-detail.php:80
 #: admin/templates/template-certificates-detail.php:37
 #: certification/admin/templates/signers.php:22
 msgid "Active"
-msgstr "Activar"
+msgstr "Activo"
 
 #: admin/documents.php:54 admin/documents.php:339
 msgid "You are not allowed to do this."
@@ -173,6 +174,14 @@ msgstr "La línea del libro de registro no puede usar %s: se asignan al reservar
 #: admin/documents.php:347
 msgid "Document deleted successfully."
 msgstr "Documento eliminado correctamente."
+
+#: admin/documents.php:393
+msgid "Inactive"
+msgstr "Inactivo"
+
+#: admin/documents.php:396
+msgid "Are you sure?"
+msgstr "¿Está seguro?"
 
 #: admin/documents.php:418 admin/templates/card-detail.php:41
 #: admin/templates/document-detail.php:41
@@ -219,7 +228,7 @@ msgstr "Requerido"
 
 #: admin/documents.php:563
 msgid "Remove"
-msgstr "Remover"
+msgstr "Quitar"
 
 #: admin/functions.php:67 admin/functions.php:169
 msgid "Select option"
@@ -229,13 +238,9 @@ msgstr "Seleccionar opción"
 msgid "Certification"
 msgstr "Certificación"
 
-#: admin/functions.php:116
+#: admin/functions.php:116 admin/templates/list-certificates.php:4
 msgid "Student certificates"
 msgstr "Certificados de estudiantes"
-
-#: admin/functions.php:116
-msgid "Student certificate"
-msgstr "Certificado de estudiante"
 
 #: admin/functions.php:117 admin/templates/list-documents.php:4
 #: admin/templates/variables.php:48 includes/permissions.php:24
@@ -291,9 +296,9 @@ msgid "Permissions"
 msgstr "Permisos"
 
 #: admin/permissions.php:32 admin/permissions.php:48 admin/signing-roles.php:48
-#: admin/signing-roles.php:61 admin/variables.php:99 admin/variables.php:127
-#: admin/variables.php:168 admin/variables.php:210 admin/variables.php:258
-#: admin/variables.php:275 admin/variables.php:291
+#: admin/signing-roles.php:61 admin/variables.php:99 admin/variables.php:157
+#: admin/variables.php:198 admin/variables.php:240 admin/variables.php:288
+#: admin/variables.php:305 admin/variables.php:321
 msgid "Sorry, you are not allowed to access this page."
 msgstr "Lo sentimos, no tiene permiso para acceder a esta página."
 
@@ -369,7 +374,7 @@ msgstr "Seleccionar estudiantes"
 
 #: admin/templates/certificate-assignment.php:60
 msgid "Save Changes"
-msgstr "Guardar Cambios"
+msgstr "Guardar cambios"
 
 #: admin/templates/configuration-options.php:19
 msgid "Settings"
@@ -502,6 +507,22 @@ msgstr "Horizontal"
 msgid "Paper Format"
 msgstr "Formato de papel"
 
+#: admin/templates/document-detail.php:229
+msgid "Letter"
+msgstr "Carta"
+
+#: admin/templates/document-detail.php:230
+msgid "Legal"
+msgstr "Oficio"
+
+#: admin/templates/document-detail.php:231
+msgid "Tabloid"
+msgstr "Tabloide"
+
+#: admin/templates/document-detail.php:232
+msgid "Custom"
+msgstr "Personalizado"
+
 #: admin/templates/document-detail.php:239
 msgid "Managed"
 msgstr "Gestionado"
@@ -513,6 +534,26 @@ msgstr "Automático"
 #: admin/templates/document-detail.php:245
 msgid "Unit"
 msgstr "Unidad"
+
+#: admin/templates/document-detail.php:247
+msgid "mm (millimeters)"
+msgstr "mm (milímetros)"
+
+#: admin/templates/document-detail.php:248
+msgid "pt (points)"
+msgstr "pt (puntos)"
+
+#: admin/templates/document-detail.php:249
+msgid "cm (centimeters)"
+msgstr "cm (centímetros)"
+
+#: admin/templates/document-detail.php:250
+msgid "in (inches)"
+msgstr "in (pulgadas)"
+
+#: admin/templates/document-detail.php:251
+msgid "px (pixels)"
+msgstr "px (píxeles)"
 
 #: admin/templates/document-detail.php:256
 msgid "Width size"
@@ -583,11 +624,6 @@ msgstr "Cerrar"
 msgid "Download"
 msgstr "Descargar"
 
-#: admin/templates/list-certificates.php:4 includes/permissions.php:23
-#: public/functions.php:40 public/templates/certificates.php:8
-msgid "Certificates"
-msgstr "Certificados"
-
 #: admin/templates/list-certificates.php:20
 #: admin/templates/list-template-certificates.php:20
 #: certification/admin/templates/signers.php:41
@@ -597,11 +633,11 @@ msgstr "Buscar"
 #: admin/templates/list-certificates.php:21
 #: admin/templates/list-template-certificates.php:21
 msgid "Search for Student"
-msgstr "Buscar Estudiante"
+msgstr "Buscar estudiante"
 
 #: admin/templates/list-documents.php:8
 msgid "Add Document"
-msgstr "Agregar Documento"
+msgstr "Agregar documento"
 
 #: admin/templates/list-template-certificates.php:4
 msgid "Templates of certification"
@@ -843,60 +879,60 @@ msgstr "Sin método, el valor se calcula como antes (EduSystem)."
 msgid "Save variable"
 msgstr "Guardar variable"
 
-#: admin/variables.php:135
+#: admin/variables.php:165
 msgid "The variable does not exist."
 msgstr "La variable no existe."
 
-#: admin/variables.php:143
+#: admin/variables.php:173
 msgid "Description, how it is written and where it is offered are required."
 msgstr "La descripción, cómo se escribe y dónde se ofrece son obligatorios."
 
-#: admin/variables.php:149 admin/variables.php:231
+#: admin/variables.php:179 admin/variables.php:261
 msgid "Choose a method from the list."
 msgstr "Elija un método de la lista."
 
-#: admin/variables.php:159
+#: admin/variables.php:189
 msgid "Variable saved."
 msgstr "Variable guardada."
 
 #. translators: %s: variable, e.g. {{program}}
-#: admin/variables.php:184
+#: admin/variables.php:214
 #, php-format
 msgid "Variable %s deleted from the list."
 msgstr "Variable %s eliminada de la lista."
 
-#: admin/variables.php:223
+#: admin/variables.php:253
 msgid "The key must start with a letter and contain only lowercase letters, numbers and underscores."
 msgstr "La clave debe empezar por una letra y contener solo letras minúsculas, números y guiones bajos."
 
-#: admin/variables.php:225
+#: admin/variables.php:255
 msgid "There is already a variable with that key."
 msgstr "Ya existe una variable con esa clave."
 
-#: admin/variables.php:227
+#: admin/variables.php:257
 msgid "That key is a general variable of WP Certificates."
 msgstr "Esa clave es una variable general de WP Certificates."
 
-#: admin/variables.php:229
+#: admin/variables.php:259
 msgid "Description and where it is offered are required."
 msgstr "La descripción y dónde se ofrece son obligatorios."
 
-#: admin/variables.php:249
+#: admin/variables.php:279
 msgid "Variable created."
 msgstr "Variable creada."
 
 #. translators: %d: number of variables
-#: admin/variables.php:264
+#: admin/variables.php:294
 #, php-format
 msgid "%d variables linked to the method with the same key."
 msgstr "%d variables vinculadas al método de la misma clave."
 
-#: admin/variables.php:282
+#: admin/variables.php:312
 msgid "Plugins saved."
 msgstr "Plugins guardados."
 
 #. translators: %s: method identifier
-#: admin/variables.php:298
+#: admin/variables.php:328
 #, php-format
 msgid "Method %s enabled again."
 msgstr "Método %s habilitado de nuevo."
@@ -1519,7 +1555,7 @@ msgstr "Los firmantes registrados se guardan en la configuración y se exigirán
 msgid "Save document signers"
 msgstr "Guardar firmantes del documento"
 
-#: certification/admin/templates/document-signing.php:130
+#: certification/admin/templates/document-signing.php:132
 msgid "✓ In the template"
 msgstr "✓ En la plantilla"
 
@@ -2631,6 +2667,11 @@ msgstr "El libro de registro no está disponible en este sitio."
 #: includes/book.php:162
 msgid "The registry book could not void the line."
 msgstr "El libro de registro no pudo anular la línea."
+
+#: includes/permissions.php:23 public/functions.php:40
+#: public/templates/certificates.php:8
+msgid "Certificates"
+msgstr "Certificados"
 
 #: includes/permissions.php:23
 msgid "Student certificates."

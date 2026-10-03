@@ -226,10 +226,10 @@
                                         <select name="paper_format" required>
                                             <option value="a4" <?= ($document->paper_format == 'a4' || !$document) ? 'selected' : ''; ?>>A4</option>
                                             <option value="a3" <?= ($document->paper_format == 'a3') ? 'selected' : ''; ?>>A3</option>
-                                            <option value="letter" <?= ($document->paper_format == 'letter') ? 'selected' : ''; ?>>Letter</option>
-                                            <option value="legal" <?= ($document->paper_format == 'legal') ? 'selected' : ''; ?>>Legal</option>
-                                            <option value="tabloid" <?= ($document->paper_format == 'tabloid') ? 'selected' : ''; ?>>Tabloid</option>
-                                            <option value="custom" <?= ($document->paper_format == 'custom') ? 'selected' : ''; ?>>Custom</option>
+                                            <option value="letter" <?= ($document->paper_format == 'letter') ? 'selected' : ''; ?>><?= esc_html__('Letter', 'wp-certificates'); ?></option>
+                                            <option value="legal" <?= ($document->paper_format == 'legal') ? 'selected' : ''; ?>><?= esc_html__('Legal', 'wp-certificates'); ?></option>
+                                            <option value="tabloid" <?= ($document->paper_format == 'tabloid') ? 'selected' : ''; ?>><?= esc_html__('Tabloid', 'wp-certificates'); ?></option>
+                                            <option value="custom" <?= ($document->paper_format == 'custom') ? 'selected' : ''; ?>><?= esc_html__('Custom', 'wp-certificates'); ?></option>
                                         </select>
                                     </div>
 
@@ -244,11 +244,11 @@
                                     <div style="font-weight:400; text-align: center" class="space-offer">
                                         <label for="unit"><b><?= esc_html__('Unit', 'wp-certificates'); ?></b></label><br>
                                         <select name="unit" required>
-                                            <option value="mm" <?= ($document->unit == 'mm' || !$document) ? 'selected' : ''; ?>>mm (millimeters)</option>
-                                            <option value="pt" <?= ($document->unit == 'pt') ? 'selected' : ''; ?>>pt (points)</option>
-                                            <option value="cm" <?= ($document->unit == 'cm') ? 'selected' : ''; ?>>cm (centimeters)</option>
-                                            <option value="in" <?= ($document->unit == 'in') ? 'selected' : ''; ?>>in (inches)</option>
-                                            <option value="px" <?= ($document->unit == 'px') ? 'selected' : ''; ?>>px (pixels)</option>
+                                            <option value="mm" <?= ($document->unit == 'mm' || !$document) ? 'selected' : ''; ?>><?= esc_html__('mm (millimeters)', 'wp-certificates'); ?></option>
+                                            <option value="pt" <?= ($document->unit == 'pt') ? 'selected' : ''; ?>><?= esc_html__('pt (points)', 'wp-certificates'); ?></option>
+                                            <option value="cm" <?= ($document->unit == 'cm') ? 'selected' : ''; ?>><?= esc_html__('cm (centimeters)', 'wp-certificates'); ?></option>
+                                            <option value="in" <?= ($document->unit == 'in') ? 'selected' : ''; ?>><?= esc_html__('in (inches)', 'wp-certificates'); ?></option>
+                                            <option value="px" <?= ($document->unit == 'px') ? 'selected' : ''; ?>><?= esc_html__('px (pixels)', 'wp-certificates'); ?></option>
                                         </select>
                                     </div>
 

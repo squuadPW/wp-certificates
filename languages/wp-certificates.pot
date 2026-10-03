@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-02T23:47:50+00:00\n"
+"POT-Creation-Date: 2026-10-03T01:41:03+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: wp-certificates\n"
@@ -141,6 +141,7 @@ msgid "Description"
 msgstr ""
 
 #: admin/certificates.php:333
+#: admin/documents.php:393
 #: admin/templates/document-detail.php:80
 #: admin/templates/template-certificates-detail.php:37
 #: certification/admin/templates/signers.php:22
@@ -185,6 +186,14 @@ msgstr ""
 
 #: admin/documents.php:347
 msgid "Document deleted successfully."
+msgstr ""
+
+#: admin/documents.php:393
+msgid "Inactive"
+msgstr ""
+
+#: admin/documents.php:396
+msgid "Are you sure?"
 msgstr ""
 
 #: admin/documents.php:418
@@ -254,11 +263,8 @@ msgid "Certification"
 msgstr ""
 
 #: admin/functions.php:116
+#: admin/templates/list-certificates.php:4
 msgid "Student certificates"
-msgstr ""
-
-#: admin/functions.php:116
-msgid "Student certificate"
 msgstr ""
 
 #: admin/functions.php:117
@@ -328,12 +334,12 @@ msgstr ""
 #: admin/signing-roles.php:48
 #: admin/signing-roles.php:61
 #: admin/variables.php:99
-#: admin/variables.php:127
-#: admin/variables.php:168
-#: admin/variables.php:210
-#: admin/variables.php:258
-#: admin/variables.php:275
-#: admin/variables.php:291
+#: admin/variables.php:157
+#: admin/variables.php:198
+#: admin/variables.php:240
+#: admin/variables.php:288
+#: admin/variables.php:305
+#: admin/variables.php:321
 msgid "Sorry, you are not allowed to access this page."
 msgstr ""
 
@@ -552,6 +558,22 @@ msgstr ""
 msgid "Paper Format"
 msgstr ""
 
+#: admin/templates/document-detail.php:229
+msgid "Letter"
+msgstr ""
+
+#: admin/templates/document-detail.php:230
+msgid "Legal"
+msgstr ""
+
+#: admin/templates/document-detail.php:231
+msgid "Tabloid"
+msgstr ""
+
+#: admin/templates/document-detail.php:232
+msgid "Custom"
+msgstr ""
+
 #: admin/templates/document-detail.php:239
 msgid "Managed"
 msgstr ""
@@ -562,6 +584,26 @@ msgstr ""
 
 #: admin/templates/document-detail.php:245
 msgid "Unit"
+msgstr ""
+
+#: admin/templates/document-detail.php:247
+msgid "mm (millimeters)"
+msgstr ""
+
+#: admin/templates/document-detail.php:248
+msgid "pt (points)"
+msgstr ""
+
+#: admin/templates/document-detail.php:249
+msgid "cm (centimeters)"
+msgstr ""
+
+#: admin/templates/document-detail.php:250
+msgid "in (inches)"
+msgstr ""
+
+#: admin/templates/document-detail.php:251
+msgid "px (pixels)"
 msgstr ""
 
 #: admin/templates/document-detail.php:256
@@ -631,13 +673,6 @@ msgstr ""
 
 #: admin/templates/generate-modal.php:42
 msgid "Download"
-msgstr ""
-
-#: admin/templates/list-certificates.php:4
-#: includes/permissions.php:23
-#: public/functions.php:40
-#: public/templates/certificates.php:8
-msgid "Certificates"
 msgstr ""
 
 #: admin/templates/list-certificates.php:20
@@ -905,61 +940,61 @@ msgstr ""
 msgid "Save variable"
 msgstr ""
 
-#: admin/variables.php:135
+#: admin/variables.php:165
 msgid "The variable does not exist."
 msgstr ""
 
-#: admin/variables.php:143
+#: admin/variables.php:173
 msgid "Description, how it is written and where it is offered are required."
 msgstr ""
 
-#: admin/variables.php:149
-#: admin/variables.php:231
+#: admin/variables.php:179
+#: admin/variables.php:261
 msgid "Choose a method from the list."
 msgstr ""
 
-#: admin/variables.php:159
+#: admin/variables.php:189
 msgid "Variable saved."
 msgstr ""
 
 #. translators: %s: variable, e.g. {{program}}
-#: admin/variables.php:184
+#: admin/variables.php:214
 #, php-format
 msgid "Variable %s deleted from the list."
 msgstr ""
 
-#: admin/variables.php:223
+#: admin/variables.php:253
 msgid "The key must start with a letter and contain only lowercase letters, numbers and underscores."
 msgstr ""
 
-#: admin/variables.php:225
+#: admin/variables.php:255
 msgid "There is already a variable with that key."
 msgstr ""
 
-#: admin/variables.php:227
+#: admin/variables.php:257
 msgid "That key is a general variable of WP Certificates."
 msgstr ""
 
-#: admin/variables.php:229
+#: admin/variables.php:259
 msgid "Description and where it is offered are required."
 msgstr ""
 
-#: admin/variables.php:249
+#: admin/variables.php:279
 msgid "Variable created."
 msgstr ""
 
 #. translators: %d: number of variables
-#: admin/variables.php:264
+#: admin/variables.php:294
 #, php-format
 msgid "%d variables linked to the method with the same key."
 msgstr ""
 
-#: admin/variables.php:282
+#: admin/variables.php:312
 msgid "Plugins saved."
 msgstr ""
 
 #. translators: %s: method identifier
-#: admin/variables.php:298
+#: admin/variables.php:328
 #, php-format
 msgid "Method %s enabled again."
 msgstr ""
@@ -1587,7 +1622,7 @@ msgstr ""
 msgid "Save document signers"
 msgstr ""
 
-#: certification/admin/templates/document-signing.php:130
+#: certification/admin/templates/document-signing.php:132
 msgid "✓ In the template"
 msgstr ""
 
@@ -2698,6 +2733,12 @@ msgstr ""
 
 #: includes/book.php:162
 msgid "The registry book could not void the line."
+msgstr ""
+
+#: includes/permissions.php:23
+#: public/functions.php:40
+#: public/templates/certificates.php:8
+msgid "Certificates"
 msgstr ""
 
 #: includes/permissions.php:23

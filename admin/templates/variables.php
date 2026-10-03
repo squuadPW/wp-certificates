@@ -91,7 +91,7 @@ $type_labels = [
                     <tr>
                         <td><?= (int) $row->id ?></td>
                         <td><code><?= esc_html($row->visual) ?></code></td>
-                        <td><?= esc_html($row->text) ?></td>
+                        <td><?= esc_html(squuad_cert_variable_display_text($row, $methods)) ?></td>
                         <td><?= esc_html($type_labels[$row->type] ?? $row->type) ?></td>
                         <td>
                             <?php if (empty($row->method)) : ?>

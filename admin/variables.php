@@ -120,6 +120,36 @@ function squuad_cert_variables_page(): void
     include WP_C_PATH . 'admin/templates/variables.php';
 }
 
+/**
+ * Descripción de una variable en la lista. Las de la base de datos se guardaron en inglés al crearse; si sigue siendo la
+ * descripción original de su método, se muestra la del método en el idioma del usuario. Si alguien la cambió, se
+ * respeta. No cambia nada en la base de datos.
+ *
+ * @param array $methods Métodos registrados (VariableMethods::all()), en el idioma actual.
+ */
+function squuad_cert_variable_display_text(object $row, array $methods): string
+{
+    static $english = null;
+
+    $text = (string) $row->text;
+    $method = (string) ($row->method ?? '');
+    if ('' === $method || !isset($methods[$method]) || '' === (string) $methods[$method]['label']) {
+        return $text;
+    }
+    if (null === $english) {
+        // Las descripciones de los métodos en inglés (el idioma en que se guardaron), una sola vez por petición
+        $english = [];
+        if (switch_to_locale('en_US')) {
+            foreach (\Squuad\Certificados\VariableMethods::all() as $id => $definition) {
+                $english[$id] = (string) $definition['label'];
+            }
+            restore_previous_locale();
+        }
+    }
+
+    return isset($english[$method]) && 0 === strcasecmp(trim($english[$method]), trim($text)) ? (string) $methods[$method]['label'] : $text;
+}
+
 add_action('admin_post_squuad_cert_variable_save', 'squuad_cert_variable_save_handle');
 function squuad_cert_variable_save_handle(): void
 {

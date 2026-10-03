@@ -1,7 +1,7 @@
 <div class="tabs-content">
 	<div class="wrap">
 		<div style="text-align:start;">
-			<h1 class="wp-heading-line"><?= esc_html__('Certificates', 'wp-certificates'); ?></h1>
+			<h1 class="wp-heading-line"><?= esc_html__('Student certificates', 'wp-certificates'); ?></h1>
 		</div>
 		<?php if (isset($_COOKIE['message']) && !empty($_COOKIE['message'])) { ?>
 			<div class="notice notice-success is-dismissible">

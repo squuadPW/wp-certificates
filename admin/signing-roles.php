@@ -47,7 +47,7 @@ function squuad_cert_signing_roles_page(): void
     if (!current_user_can('squuad_cert_manage_signing_roles')) {
         wp_die(esc_html__('Sorry, you are not allowed to access this page.', 'wp-certificates'), 403);
     }
-    $roles = squuad_cert_site_roles();
+    $roles = squuad_cert_signing_role_candidates();
     $enabled = squuad_cert_signing_roles();
     $users = count_users()['avail_roles'] ?? [];
     $notice = squuad_cert_signing_roles_notice();

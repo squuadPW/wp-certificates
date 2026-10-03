@@ -51,6 +51,7 @@ function squuad_cert_signature_public_assets(): void
             'generate' => __('Generate %s', 'wp-certificates'),
             'missingDocument' => __('missing document', 'wp-certificates'),
             'enrollment' => __('enrollment', 'wp-certificates'),
+            'save' => __('Save', 'wp-certificates'),
         ],
     ]);
     wp_enqueue_script('create-enrollment');

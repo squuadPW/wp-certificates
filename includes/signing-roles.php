@@ -26,6 +26,20 @@ function squuad_cert_site_roles(): array
 }
 
 /**
+ * Roles que se pueden marcar como «roles que firman»: los del sitio menos los de los firmantes del sistema
+ * (squuad_cert_signer y el antiguo edusystem_signer del módulo que tenía EduSystem): un firmante del sistema firma los
+ * documentos de otros, no recibe los suyos. Filtro squuad_cert_signing_role_excluded para excluir otros.
+ *
+ * @return array<string, string> clave => nombre
+ */
+function squuad_cert_signing_role_candidates(): array
+{
+    $excluded = (array) apply_filters('squuad_cert_signing_role_excluded', ['squuad_cert_signer', 'edusystem_signer']);
+
+    return array_diff_key(squuad_cert_site_roles(), array_flip(array_map('strval', $excluded)));
+}
+
+/**
  * Roles marcados como firmantes que siguen existiendo en el sitio (un rol borrado deja de contar). Sin configurar, el
  * rol student si existe: es el que firmaba hasta ahora.
  *
@@ -36,7 +50,7 @@ function squuad_cert_signing_roles(): array
     $saved = get_option(SQUUAD_CERT_SIGNING_ROLES_OPTION, null);
     $roles = is_array($saved) ? $saved : ['student'];
 
-    return array_values(array_intersect(array_map('strval', $roles), array_keys(squuad_cert_site_roles())));
+    return array_values(array_intersect(array_map('strval', $roles), array_keys(squuad_cert_signing_role_candidates())));
 }
 
 /** ¿Este rol está marcado como firmante? */
@@ -57,7 +71,7 @@ function squuad_cert_signing_role_variable(string $role): string
  */
 function squuad_cert_signing_roles_save(array $roles): array
 {
-    $site = squuad_cert_site_roles();
+    $site = squuad_cert_signing_role_candidates();
     $new = array_values(array_intersect(array_unique(array_map('strval', $roles)), array_keys($site)));
     $old = squuad_cert_signing_roles();
     $added = array_values(array_diff($new, $old));

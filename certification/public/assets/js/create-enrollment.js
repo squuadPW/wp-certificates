@@ -553,7 +553,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
 
     function refreshSaveLabel() {
         if (!save_signatures) return;
-        save_signatures.innerHTML = mySignatureReady() && (!twoSigners || otherSigned) ? `Generate ${returnButtonTitle()}` : "Save";
+        save_signatures.textContent = mySignatureReady() && (!twoSigners || otherSigned) ? signaturesText("generate").replace("%s", returnButtonTitle()) : signaturesText("save");
     }
 
     function returnButtonTitle() {
@@ -570,9 +570,9 @@ document.addEventListener("DOMContentLoaded", (event) => {
         if (document_name) {
             return document_name.toLowerCase();
         } else if (document_id == "ENROLLMENT") {
-            return "enrollment";
+            return signaturesText("enrollment");
         } else {
-            return "missing document";
+            return signaturesText("missingDocument");
         }
     }
 });

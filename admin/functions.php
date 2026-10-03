@@ -113,7 +113,7 @@ function add_certificates_page_admin()
             'dashicons-awards',
             4
         );
-        add_submenu_page('add_admin_form_certificates_content', esc_html__('Student certificates', 'wp-certificates'), esc_html__('Student certificate', 'wp-certificates'), 'manager_certificates', 'add_admin_form_certificates_list_content', 'add_admin_form_certificates_list_content', 10);
+        add_submenu_page('add_admin_form_certificates_content', esc_html__('Student certificates', 'wp-certificates'), esc_html__('Student certificates', 'wp-certificates'), 'manager_certificates', 'add_admin_form_certificates_list_content', 'add_admin_form_certificates_list_content', 10);
         add_submenu_page('add_admin_form_certificates_content', esc_html__('Documents', 'wp-certificates'), esc_html__('Documents', 'wp-certificates'), 'manager_documents_certificates', 'add_admin_form_documents_content', 'add_admin_form_documents_content', 10);
         // Asignar certificados a estudiantes: solo con EduSystem
         if (wpc_edusystem_active()) {

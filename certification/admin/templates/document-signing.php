@@ -110,6 +110,8 @@ $next = count($positions) + 1;
     </div>
 </div>
 <style>
+/* La página de documentos estira todos sus campos (.admin-add-offer input { width: 100% }); los checks y radios no */
+#edusystem-document-signers input[type=checkbox], #edusystem-document-signers input[type=radio] { width: auto; }
     #edusystem-document-signers .edusig-var { background: #f0f6fc; border: 1px solid #c5d9ed; border-radius: 3px; padding: 1px 6px; cursor: pointer; display: inline-block; margin: 2px 0; }
     #edusystem-document-signers .edusig-var.is-used { opacity: .45; }
     #edusystem-document-signers .edusig-var.copied { background: #d7f0dd; }

@@ -390,10 +390,10 @@ class TT_Documents_Certificates_List_Table extends WP_List_Table
 
         switch ($column_name) {
             case 'status':
-                return $item[$column_name] == 1 ? '<span style="color: green">Active</span>' : '<span style="color: red">Inactive</span>';
+                return $item[$column_name] == 1 ? '<span style="color: green">' . esc_html__('Active', 'wp-certificates') . '</span>' : '<span style="color: red">' . esc_html__('Inactive', 'wp-certificates') . '</span>';
             case 'view_details':
                 $html = "<a href='" . admin_url('/admin.php?page=add_admin_form_documents_content&section_tab=document_detail&document_id=' . $item['id']) . "' class='button button-primary'>" . esc_html__('View Details', 'wp-certificates') . "</a>";
-                $html .= '<a style="margin-left: 10px" href="' . esc_url(wp_nonce_url(admin_url('admin.php?page=add_admin_form_documents_content&action=delete_document&document_id=' . $item['id']), 'wpc_delete_document_' . $item['id'])) . '" class="button button-danger" onclick="return confirm(\'Are you sure?\');"><span class="dashicons dashicons-trash"></span></a>';
+                $html .= '<a style="margin-left: 10px" href="' . esc_url(wp_nonce_url(admin_url('admin.php?page=add_admin_form_documents_content&action=delete_document&document_id=' . $item['id']), 'wpc_delete_document_' . $item['id'])) . '" class="button button-danger" onclick="return confirm(\'' . esc_js(__('Are you sure?', 'wp-certificates')) . '\');"><span class="dashicons dashicons-trash"></span></a>';
                 return $html;
             default:
                 return strtoupper($item[$column_name]);
