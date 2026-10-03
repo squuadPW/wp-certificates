@@ -3,7 +3,7 @@
 Plugin Name: WP Certificates
 Description: The WordPress plugin for certificates, certificates and personalized documents of the institution.
 Author: EduSof
-Version: 1.0.29
+Version: 2.0.0
 Requires EduSystem: 6.0.0
 Author URI: https://edusof.com
 License: GPL2
