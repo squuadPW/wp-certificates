@@ -1,5 +1,5 @@
 /*
- * Edusof UI 1.0.0: sistema de diseño de EduSystem y WP Certificates (ADR 0006).
+ * Edusof UI 1.0.1: sistema de diseño de EduSystem y WP Certificates (ADR 0006).
  * Contrato: Antigravity/docs/edusof-ui-contrato.md. CSS propio, sin dependencias ni recursos externos.
  *
  * 1. Variables por tema y modo (.edusof-ui en <body>, o .eds-scope en un contenedor).
@@ -483,7 +483,7 @@ body.edusof-ui.eds-screen #wpbody-content :where(p.description, .description, .h
 	display: flex;
 	flex-direction: column;
 	gap: 20px;
-	max-width: 1160px;
+	max-width: none; /* todo el ancho, como el resto de pantallas del admin (1.0.1) */
 	padding: 20px 12px 48px 4px;
 	box-sizing: border-box;
 	color: var(--eds-ink);
@@ -1412,3 +1412,11 @@ body.edusof-ui.login .language-switcher .button {
 	background: var(--eds-surface);
 	color: var(--eds-ink);
 }
+
+/* ---- 1.0.1: margen derecho también para tablas y formularios que las plantillas ponen fuera de .wrap (p. ej. Materias):
+   el margen pasa de .wrap al contenedor, así queda igual en las pantallas que sí usan .wrap */
+body.edusof-ui.eds-screen #wpbody-content { padding-right: 20px; box-sizing: border-box; position: relative; }
+body.edusof-ui.eds-screen #wpbody-content .wrap { margin-right: 0; }
+/* «Opciones de pantalla» flotaba a la derecha y el contenedor .eds-page (flex) se encogía a su lado en toda la página:
+   se saca del flujo, en la misma esquina */
+body.edusof-ui.eds-screen #screen-meta-links { position: absolute; top: 0; right: 20px; float: none; margin: 0; z-index: 5; }

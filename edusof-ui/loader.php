@@ -17,7 +17,7 @@ defined('ABSPATH') || exit;
 
 (static function (): void {
     // Versión de ESTA copia de la biblioteca. Súbela al cambiar cualquier archivo de edusof-ui/.
-    $version = '1.0.0';
+    $version = '1.0.1';
 
     $plugin_dir = dirname(__DIR__);
     $main_file  = $plugin_dir . '/' . basename($plugin_dir) . '.php';
