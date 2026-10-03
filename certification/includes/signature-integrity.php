@@ -104,17 +104,36 @@ function squuad_cert_signature_mark_switched_session($session, $user_id)
     return $session;
 }
 
-/** Usuario que hizo el Switch hacia la sesión actual, o 0 si la sesión es del propio usuario. */
+/**
+ * Usuario que hizo el Switch hacia la sesión actual, o 0 si la sesión es del propio usuario.
+ *
+ * Primero, la marca propia del token de sesión. Si no la hay (p. ej. el Switch se hizo mientras wp-certificates
+ * estaba desactivado: riesgo G4, ADR 0004 sección 5), se pregunta a los plugins de Switch conocidos:
+ * - «User Switching»: current_user_switched() da el usuario de origen.
+ * - WPFront User Role Editor: deja su cookie de pila de cambios; no se puede leer quién fue, así que se devuelve -1
+ *   («conmutada, origen desconocido»). Esa cookie la borra el propio plugin al volver a la cuenta, al entrar y al salir.
+ * Filtro squuad_cert_session_switched_from para otros plugins. Quien llama trata cualquier valor distinto de 0 como
+ * sesión conmutada: no se firma.
+ */
 function squuad_cert_signature_session_switched_from(): int
 {
     $user_id = get_current_user_id();
-    $token = wp_get_session_token();
-    if (!$user_id || '' === $token) {
+    if (!$user_id) {
         return 0;
     }
-    $session = WP_Session_Tokens::get_instance($user_id)->get($token);
+    $token = wp_get_session_token();
+    $session = '' !== $token ? WP_Session_Tokens::get_instance($user_id)->get($token) : null;
+    $from = (int) ($session['squuad_cert_switched_from'] ?? 0);
 
-    return (int) ($session['squuad_cert_switched_from'] ?? 0);
+    if (!$from && function_exists('current_user_switched')) {
+        $original = current_user_switched();
+        $from = $original instanceof WP_User ? (int) $original->ID : 0;
+    }
+    if (!$from && defined('COOKIEHASH') && !empty($_COOKIE['wpfront_ure_user_switching_stack_' . COOKIEHASH])) {
+        $from = -1;
+    }
+
+    return (int) apply_filters('squuad_cert_session_switched_from', $from, $user_id);
 }
 
 /** sha256 de la versión del documento que se firma (plantilla de documents_certificates o versión fija). */
@@ -373,6 +392,11 @@ function squuad_cert_revoke_signatures(array $ids, string $reason, int $actor_us
 
     $removed = 0;
     foreach ($ids as $id) {
+        // Datos de la firma para su evento de anulación (se leen antes de retirarla)
+        $signature = $wpdb->get_row($wpdb->prepare(
+            "SELECT id, request_id, user_id, signer_role, fingerprint, chain_seq FROM {$table} WHERE id = %d",
+            $id
+        ));
         $copied = $wpdb->query($wpdb->prepare(
             "INSERT INTO {$wpdb->prefix}squuad_cert_signatures_revoked
                 (signature_row_id, {$columns}, revoked_at_utc, revoked_by, reason, external_ref)
@@ -386,6 +410,20 @@ function squuad_cert_revoke_signatures(array $ids, string $reason, int $actor_us
         if ($copied) {
             $removed += (int) $wpdb->delete($table, ['id' => $id]);
             squuad_cert_log(sprintf('Firma %d anulada por el usuario %d: %s', $id, $actor_user_id, $reason), 'signature_revoked');
+            // Un evento sellado por cada firma anulada (ADR 0004, sección 7, decisión 3): la anulación de cada firma
+            // queda en la cadena de evidencia, no solo el «declinado» de la solicitud
+            if ($signature && (int) $signature->request_id) {
+                squuad_cert_signature_request_log_event((int) $signature->request_id, 'signature_revoked', [
+                    'signature_id' => (int) $signature->id,
+                    'signature_chain_seq' => null === $signature->chain_seq ? null : (int) $signature->chain_seq,
+                    'signature_fingerprint' => (string) $signature->fingerprint,
+                    'signer_user_id' => (int) $signature->user_id,
+                    'signer_role' => (string) $signature->signer_role,
+                    'reason' => $reason,
+                    'external_ref' => $external_ref,
+                    'revoked_at_utc' => gmdate('Y-m-d H:i:s'),
+                ], $actor_user_id);
+            }
         }
     }
 
