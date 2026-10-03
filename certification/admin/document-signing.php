@@ -333,8 +333,16 @@ function squuad_cert_missing_letter_conversion_available(): bool
         return false;
     }
 
-    return (bool) ($wpdb->get_var($wpdb->prepare("SELECT id FROM {$wpdb->prefix}users_signatures WHERE document_id = %s LIMIT 1", SQUUAD_CERT_MISSING_LETTER_ID))
-        || $wpdb->get_var($wpdb->prepare("SELECT id FROM {$wpdb->prefix}student_documents WHERE document_id = %s LIMIT 1", SQUUAD_CERT_MISSING_LETTER_ID)));
+    // users_signatures y student_documents son tablas de EduSystem: sin él (o en un sitio que no las tenga) no hay carta
+    foreach (['users_signatures', 'student_documents'] as $legacy) {
+        $legacy_table = $wpdb->prefix . $legacy;
+        if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $legacy_table)) === $legacy_table
+            && $wpdb->get_var($wpdb->prepare("SELECT id FROM {$legacy_table} WHERE document_id = %s LIMIT 1", SQUUAD_CERT_MISSING_LETTER_ID))) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 /**

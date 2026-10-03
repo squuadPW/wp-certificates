@@ -41,6 +41,27 @@ function wpc_log_signature_action(string $message): void
     squuad_cert_log($message, 'legacy_signature_used');
 }
 
+/**
+ * Las pantallas del plugin guardan y redirigen (setcookie + wp_redirect) desde la propia función de la página, cuando
+ * WordPress ya imprimió la cabecera del admin. Junto a EduSystem funcionaba porque otro código abría un búfer de salida;
+ * solo (sin EduSystem) la redirección fallaba con "headers already sent" y la página quedaba a medias (p. ej. al crear
+ * un documento). Se abre un búfer en las pantallas del plugin antes de que empiece la salida.
+ */
+add_action('admin_init', 'wpc_admin_screens_buffer');
+function wpc_admin_screens_buffer(): void
+{
+    $page = isset($_GET['page']) && is_string($_GET['page']) ? sanitize_key(wp_unslash($_GET['page'])) : '';
+    if ('' === $page || wp_doing_ajax()) {
+        return;
+    }
+    foreach (['add_admin_form_certificates', 'add_admin_form_documents_content', 'add_admin_form_users_signatures_certificate', 'add_admin_form_cards_content', 'add_admin_form_configuration_options_certificates', 'admin_certificate_', 'squuad-cert-'] as $prefix) {
+        if (str_starts_with($page, $prefix)) {
+            ob_start();
+            return;
+        }
+    }
+}
+
 require plugin_dir_path(__FILE__) . 'certificates.php';
 require plugin_dir_path(__FILE__) . 'cards.php';
 require plugin_dir_path(__FILE__) . 'configuration-options.php';
@@ -129,6 +150,16 @@ function add_certificates_page_admin()
 }
 
 add_action('admin_menu', 'add_certificates_page_admin');
+
+/**
+ * Página principal del menú «Certificación»: no tiene pantalla propia (se quita del submenú y el menú enlaza con la
+ * primera subpágina). Abierta a mano daba un error 500 porque la función no existía: lleva a «Student certificates».
+ */
+function add_admin_form_certificates_content()
+{
+    wp_safe_redirect(admin_url('admin.php?page=add_admin_form_certificates_list_content'));
+    exit;
+}
 
 function add_certificates_to_administrator()
 {

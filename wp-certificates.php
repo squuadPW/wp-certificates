@@ -36,7 +36,8 @@ define('WP_C_DB_VERSION', '11');
 // porque EduSystem lo cargaba primero)
 if ( !function_exists('get_plugin_data') )
     require_once ABSPATH . 'wp-admin/includes/plugin.php';
-$plugin_data = get_plugin_data(__FILE__);
+// Sin traducir (tercer argumento): traducir aqui cargaba el dominio antes de init (aviso de WordPress 6.7+)
+$plugin_data = get_plugin_data(__FILE__, false, false);
 define('WP_C_VERSION', $plugin_data['Version']);
 
 // Contrato con otros plugins (ADR 0004 de EduSystem): versión del contrato (entero; sube solo con cambios
