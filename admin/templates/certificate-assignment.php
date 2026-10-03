@@ -1,10 +1,16 @@
+<?php $wpc_eds = wpc_eds_documents_enabled(); // diseño Edusof: título de pantalla y formulario corto a la izquierda ?>
 <div class="wrap">
 
+    <?php if ($wpc_eds): ?>
+        <h1 class="wp-heading-inline"><?= esc_html__('Certificate assignment', 'wp-certificates'); ?></h1>
+        <hr class="wp-header-end">
+    <?php else: ?>
     <div style="text-align:start;">
         <h3 style="margin-top:20px;margin-bottom:0px;text-align:center; border-bottom: 1px solid #8080805c;">
             <?= esc_html__('Certificate assignment', 'wp-certificates'); ?>
         </h3>
     </div>
+    <?php endif; ?>
 
     <?php if (isset($_COOKIE['message']) && !empty($_COOKIE['message'])): ?>
         <div class="notice notice-success is-dismissible">
@@ -20,7 +26,7 @@
         <?php setcookie('message-error', '', time(), '/'); ?>
     <?php endif; ?>
 
-    <div id="dashboard-widgets" class="metabox-holder admin-add-offer" style="width: 210mm !important">
+    <div id="dashboard-widgets" class="metabox-holder admin-add-offer<?= $wpc_eds ? ' eds-narrow' : '' ?>"<?= $wpc_eds ? '' : ' style="width: 210mm !important"' ?>>
         <div id="postbox-container-1" style="width:100% !important;">
             <div id="normal-sortables">
                 <div id="metabox" class="postbox" style="width:100%;min-width:0px;">

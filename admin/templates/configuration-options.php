@@ -1,4 +1,7 @@
-<div style="margin: 20px auto">
+<?php $wpc_eds = wpc_eds_documents_enabled(); // diseño Edusof: marco único (sin centrar ni 90 %) ?>
+<div class="wrap"<?= $wpc_eds ? '' : ' style="margin: 20px auto"' ?>>
+  <h1 class="wp-heading-inline"><?= esc_html__('Configuration', 'wp-certificates'); ?></h1>
+  <hr class="wp-header-end">
 
   <?php if (isset($_COOKIE['message']) && !empty($_COOKIE['message'])): ?>
     <div class="notice notice-success is-dismissible">
@@ -14,7 +17,7 @@
     <?php setcookie('message-error', '', time(), '/'); ?>
   <?php endif; ?>
 
-  <div class="card" style="max-width: 90% !important;">
+  <div class="card"<?= $wpc_eds ? '' : ' style="max-width: 90% !important;"' ?>>
     <div class="card-header">
       <h3><?= esc_html__('Settings', 'wp-certificates'); ?></h3>
     </div>

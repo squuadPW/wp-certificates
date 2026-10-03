@@ -1,5 +1,5 @@
 /*
- * Edusof UI 1.0.1: sistema de diseño de EduSystem y WP Certificates (ADR 0006).
+ * Edusof UI 1.0.2: sistema de diseño de EduSystem y WP Certificates (ADR 0006).
  * Contrato: Antigravity/docs/edusof-ui-contrato.md. CSS propio, sin dependencias ni recursos externos.
  *
  * 1. Variables por tema y modo (.edusof-ui en <body>, o .eds-scope en un contenedor).
@@ -7,6 +7,7 @@
  * 3. Componentes y restilado del admin de WordPress SOLO bajo body.edusof-ui.eds-screen (o dentro de .eds-scope).
  * 4. Pantalla Ajustes › Apariencia.
  * 5. Pantalla de acceso (wp-login.php).
+ * 6. Marco único: mismos bordes izquierdo y derecho en todas las pantallas de los plugins (1.0.2).
  */
 
 /* ======================================================================= 1. Variables */
@@ -484,7 +485,7 @@ body.edusof-ui.eds-screen #wpbody-content :where(p.description, .description, .h
 	flex-direction: column;
 	gap: 20px;
 	max-width: none; /* todo el ancho, como el resto de pantallas del admin (1.0.1) */
-	padding: 20px 12px 48px 4px;
+	padding: 20px 0 48px; /* sin relleno lateral: mismos bordes que .wrap (1.0.2, marco único) */
 	box-sizing: border-box;
 	color: var(--eds-ink);
 	font-family: var(--eds-font);
@@ -1413,10 +1414,61 @@ body.edusof-ui.login .language-switcher .button {
 	color: var(--eds-ink);
 }
 
-/* ---- 1.0.1: margen derecho también para tablas y formularios que las plantillas ponen fuera de .wrap (p. ej. Materias):
-   el margen pasa de .wrap al contenedor, así queda igual en las pantallas que sí usan .wrap */
+/* ======================================================================= 6. Marco único (1.0.2)
+   Todo el contenido de las pantallas de los plugins ocupa el área útil con el mismo margen a izquierda y derecha:
+   20 px en escritorio (el de #wpcontent a la izquierda y este relleno a la derecha), 10 px en móvil, como WordPress.
+   Título, avisos, pestañas, filtros, tablas, tarjetas y formularios empiezan y terminan en las mismas dos líneas. */
 body.edusof-ui.eds-screen #wpbody-content { padding-right: 20px; box-sizing: border-box; position: relative; }
-body.edusof-ui.eds-screen #wpbody-content .wrap { margin-right: 0; }
-/* «Opciones de pantalla» flotaba a la derecha y el contenedor .eds-page (flex) se encogía a su lado en toda la página:
-   se saca del flujo, en la misma esquina */
+body.edusof-ui.eds-screen #wpbody-content .wrap { margin-left: 0; margin-right: 0; }
+body.edusof-ui.eds-screen #wpbody-content .wrap .wrap { margin: 0; }
+@media screen and (max-width: 782px) {
+	body.edusof-ui.eds-screen #wpbody-content { padding-right: 10px; }
+}
+/* «Opciones de pantalla» fuera del flujo, en su esquina (si flotaba, el contenedor .eds-page se encogía a su lado) */
 body.edusof-ui.eds-screen #screen-meta-links { position: absolute; top: 0; right: 20px; float: none; margin: 0; z-index: 5; }
+@media screen and (max-width: 782px) {
+	body.edusof-ui.eds-screen #screen-meta-links { right: 10px; }
+}
+/* Avisos que quedan sueltos en #wpbody-content (pantallas sin .wrap) y pestañas antes de .wrap: mismo borde que el
+   resto y por debajo del botón «Opciones de pantalla» */
+body.edusof-ui.eds-screen #wpbody-content > :is(.notice, div.updated, div.error) { margin: 10px 0 15px; }
+body.edusof-ui.eds-screen #screen-meta-links + :is(.notice, div.updated, div.error, .nav-tab-wrapper, .eds-tabs) { margin-top: 44px; }
+
+/* Cajas de WordPress: el borde no desborda (width:100% + borde = 2 px fuera) y lo ancho hace scroll dentro, no en la
+   página; .card de WordPress (máx. 520 px) ocupa el marco */
+body.edusof-ui.eds-screen #wpbody-content .postbox { box-sizing: border-box; }
+body.edusof-ui.eds-screen #wpbody-content .postbox > .inside { overflow-x: auto; }
+body.edusof-ui.eds-screen #wpbody-content .card { max-width: none; margin-left: 0; margin-right: 0; }
+
+/* Tablas .widefat que no son WP_List_Table (las de WP Certificates, Comisiones por método de pago): ancho, colores
+   y rayado de WordPress con las variables del tema (antes en eds-legacy.css de EduSystem, que WP Certificates no carga) */
+body.edusof-ui.eds-screen #wpbody-content table.widefat { width: 100%; }
+body.edusof-ui.eds-screen #wpbody-content table.widefat :is(thead, tfoot) :is(th, td) {
+	background: var(--eds-surface);
+	color: var(--eds-muted);
+	border-color: var(--eds-line);
+}
+body.edusof-ui.eds-screen #wpbody-content table.widefat tbody :is(th, td) { color: var(--eds-ink-2); border-color: var(--eds-line-2); }
+body.edusof-ui.eds-screen #wpbody-content :is(.striped > tbody > :nth-child(odd), .alternate) { background-color: var(--eds-surface); }
+body.edusof-ui.eds-screen #wpbody-content .striped > tbody > :nth-child(even) { background-color: var(--eds-surface-2); }
+/* Tablas, formularios y desplegables con style="max-width:…px" en línea (pantallas de firma de WP Certificates): al
+   marco con el diseño activo; con el diseño apagado conservan su ancho de siempre. Los <p> mantienen su medida de lectura */
+body.edusof-ui.eds-screen #wpbody-content .wrap table.widefat[style*="max-width"],
+body.edusof-ui.eds-screen #wpbody-content .wrap > :is(form, details)[style*="max-width"] { max-width: none !important; }
+/* Tablas clave–valor (2 columnas) a todo el marco: la etiqueta con ancho fijo para que el valor quede cerca */
+body.edusof-ui.eds-screen #wpbody-content table.widefat:not(:has(tr > :nth-child(3))) tr > :first-child { width: 320px; }
+
+/* Título de pantalla único (26 px / 700, como .eds-title) también en las pantallas sin .eds-page */
+body.edusof-ui.eds-screen #wpbody-content .wrap:not(.eds-page) > h1:not(.eds-title),
+body.edusof-ui.eds-screen #wpbody-content .wrap:not(.eds-page) > div > h1:first-child:not(.eds-title),
+body.edusof-ui.eds-screen #wpbody-content .wrap:not(.eds-page) h1:is(.wp-heading-line, .wp-heading-inline),
+body.edusof-ui.eds-screen #wpbody-content .wrap:not(.eds-page) > h2:first-child {
+	font-size: 26px;
+	font-weight: 700;
+	line-height: 1.25;
+	margin: 20px 0 16px;
+	padding: 0;
+}
+
+/* Formularios cortos (1–2 campos, p. ej. un primer paso): pueden ser estrechos, siempre a la izquierda, nunca centrados */
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-narrow { width: auto; max-width: 640px; margin-left: 0; margin-right: auto; }
