@@ -138,6 +138,7 @@ function squuad_cert_document_preview_replacements(object $document, string $mod
 
     $replacements = [
         'student_name' => $text('PÉREZ GÓMEZ, JUAN CARLOS'),
+        'full_name' => $text('PÉREZ GÓMEZ, JUAN CARLOS'),
         'name' => $text('Juan Carlos'),
         'last_name' => $text('Pérez Gómez'),
         'id_student' => $text('V-12345678'),
@@ -171,7 +172,7 @@ function squuad_cert_document_preview_replacements(object $document, string $mod
         'institution_title_obtained_form_filled' => $text('High School Diploma'),
         'institution_graduation_year_form_filled' => $text('2024'),
         'created_at' => $text(gmdate('m/d/Y')),
-        'email' => $text('student@example.com'),
+        'email' => $text('juan.perez@example.com'),
         'today' => $text(date_i18n('M d, Y')),
         'ethinicity_selected' => $html('HISPANIC'), // valor de ejemplo fijo (no se llama a EduSystem)
         'language_selected' => $html('ENGLISH'),
@@ -213,6 +214,13 @@ function squuad_cert_document_preview_replacements(object $document, string $mod
         'admission_requirements_table' => $html('<ul style="list-style-type: none; padding-left: 0; margin-top: 0"><li style="margin-bottom: 5px">✓ ' . esc_html__('Example requirement 1', 'wp-certificates') . '</li><li style="margin-bottom: 5px">✓ ' . esc_html__('Example requirement 2', 'wp-certificates') . '</li></ul>'),
     ];
 
+    // Sin EduSystem sus variables no tienen valor: solo las generales y las de la persona ({{full_name}}…); los campos
+    // adicionales y las firmas se añaden después
+    if (function_exists('wpc_edusystem_active') && !wpc_edusystem_active()) {
+        $keep = array_merge(\Squuad\Certificados\Variables::general_keys(), array_keys(squuad_cert_person_variables()));
+        $replacements = array_intersect_key($replacements, array_flip($keep));
+    }
+
     // Campos adicionales del documento: la primera opción marcada o un texto de ejemplo
     if (function_exists('squuad_cert_get_document_fields') && function_exists('squuad_cert_document_fields_replacements')) {
         $fields = squuad_cert_get_document_fields($document);
@@ -224,6 +232,13 @@ function squuad_cert_document_preview_replacements(object $document, string $mod
                 : sprintf(__('%s (example)', 'wp-certificates'), $field['label']);
         }
         $replacements = array_merge(squuad_cert_document_fields_replacements($fields, $values), $replacements);
+        // Un campo ya existente llamado como una variable nueva del sistema ({{full_name}}) gana, como al rellenarlo
+        $field_values = squuad_cert_document_fields_replacements($fields, $values);
+        foreach (squuad_cert_document_fields_shadowed_keys($document) as $shadowed) {
+            if (isset($field_values[$shadowed])) {
+                $replacements[$shadowed] = $field_values[$shadowed];
+            }
+        }
     }
 
     $replacements['signature_section'] = $html(SQUUAD_CERT_SIGNATURE_SLOT);

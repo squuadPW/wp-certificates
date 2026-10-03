@@ -15,6 +15,8 @@ $edusof_ui_settings = Edusof_UI::settings();
 $edusof_ui_enabled  = 1 === $edusof_ui_settings['enabled'];
 $edusof_ui_view     = $edusof_ui_enabled ? Edusof_UI::mode() : 'light'; // modo de las miniaturas
 $edusof_ui_scope    = $edusof_ui_enabled ? '' : 'eds-scope eds-theme-' . $edusof_ui_settings['theme'] . ' eds-mode-light';
+// Sin EduSystem la pantalla está bajo Certificación (WP Certificates) y los textos no lo nombran
+$edusof_ui_edusystem = defined('EDUSYSTEM_VERSION');
 ?>
 <div class="wrap eds-wrap">
     <div class="<?php echo esc_attr($edusof_ui_scope); ?>"><div class="eds-page eds-appearance">
@@ -23,9 +25,9 @@ $edusof_ui_scope    = $edusof_ui_enabled ? '' : 'eds-scope eds-theme-' . $edusof
             <?php wp_nonce_field('edusof_ui_save_appearance'); ?>
 
             <div class="eds-page-header">
-                <div class="eds-breadcrumb"><?php echo esc_html($edusof_ui_t('Settings')); ?> / <?php echo esc_html($edusof_ui_t('Appearance')); ?></div>
+                <div class="eds-breadcrumb"><?php echo esc_html($edusof_ui_t($edusof_ui_edusystem ? 'Settings' : 'Certification')); ?> / <?php echo esc_html($edusof_ui_t('Appearance')); ?></div>
                 <h1 class="eds-title"><?php echo esc_html($edusof_ui_t('Appearance')); ?></h1>
-                <p class="eds-subtitle"><?php echo esc_html($edusof_ui_t('The appearance is the same in EduSystem and WP Certificates.')); ?></p>
+                <p class="eds-subtitle"><?php echo esc_html($edusof_ui_edusystem ? $edusof_ui_t('The appearance is the same in EduSystem and WP Certificates.') : $edusof_ui_t('The appearance applies to all the screens of WP Certificates.')); ?></p>
                 <div class="eds-actions">
                     <button type="submit" class="eds-btn eds-btn--primary"><?php echo esc_html($edusof_ui_t('Save')); ?></button>
                 </div>
@@ -39,7 +41,7 @@ $edusof_ui_scope    = $edusof_ui_enabled ? '' : 'eds-scope eds-theme-' . $edusof
             <section class="eds-card eds-appearance__switch">
                 <div class="eds-appearance__switch-text">
                     <h2 id="eds-ui-enabled-label"><?php echo esc_html($edusof_ui_t('Edusof design')); ?></h2>
-                    <p id="eds-ui-enabled-help"><?php echo esc_html($edusof_ui_t('Turns on the new look of the EduSystem and WP Certificates panel. When it is off, everything looks as before.')); ?></p>
+                    <p id="eds-ui-enabled-help"><?php echo esc_html($edusof_ui_edusystem ? $edusof_ui_t('Turns on the new look of the EduSystem and WP Certificates panel. When it is off, everything looks as before.') : $edusof_ui_t('Turns on the new look of the WP Certificates panel. When it is off, everything looks as before.')); ?></p>
                 </div>
                 <label class="eds-switch">
                     <input type="checkbox" role="switch" name="edusof_ui_enabled" value="1" aria-labelledby="eds-ui-enabled-label" aria-describedby="eds-ui-enabled-help" <?php checked($edusof_ui_enabled); ?> />

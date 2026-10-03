@@ -55,7 +55,7 @@ $save_url = admin_url('admin.php?page=add_admin_form_documents_content&action=sa
     $total_students = wpc_edusystem_active() ? (int) $GLOBALS['wpdb']->get_var("SELECT COUNT(*) FROM {$GLOBALS['wpdb']->prefix}students") : 0;
     $document_fields = function_exists('squuad_cert_get_document_fields') ? squuad_cert_get_document_fields($document) : [];
 
-    // Panel «Datos»: variables agrupadas (las generales del código y las de la tabla variables_document)
+    // Panel «Datos»: variables agrupadas (las generales del código, las de la tabla variables_document y las del titular)
     $groups = [
         'person' => [__('Person', 'wp-certificates'), []],
         'parent' => [__('Parent or guardian', 'wp-certificates'), []],
@@ -94,8 +94,19 @@ $save_url = admin_url('admin.php?page=add_admin_form_documents_content&action=sa
         // Las familias (_N, _ID) no se insertan tal cual: se muestran como referencia
         $groups[$group][1][] = ['var' => (string) $variable, 'label' => (string) $description, 'insert' => false === strpos((string) $variable, ',')];
     }
+    // Solo se ofrecen las variables a las que da valor un plugin activo (o el titular, p. ej. la cuenta de WordPress);
+    // las demás siguen en Certificación > Variables, marcadas
+    $available_methods = \Squuad\Certificados\VariableMethods::available();
+    // Descripciones de los métodos en el idioma del usuario: la de la tabla se guardó en inglés (squuad_cert_variable_display_text())
+    $all_methods = \Squuad\Certificados\VariableMethods::all();
+    $holder_catalog = squuad_cert_holder_catalog();
+    $catalog_keys = [];
     foreach ((array) $variables as $variable) {
         $key = (string) $variable->identificator;
+        $catalog_keys[$key] = true;
+        if (!squuad_cert_catalog_variable_offered(squuad_cert_catalog_variable_status($variable, $available_methods, $holder_catalog))) {
+            continue;
+        }
         if (preg_match('/^parent_|show_parent_info/', $key)) {
             $group = 'parent';
         } elseif (preg_match('/^institute_/', $key)) {
@@ -111,7 +122,13 @@ $save_url = admin_url('admin.php?page=add_admin_form_documents_content&action=sa
         } else {
             $group = 'person';
         }
-        $groups[$group][1][] = ['var' => (string) $variable->visual, 'label' => (string) $variable->text, 'insert' => true];
+        $groups[$group][1][] = ['var' => (string) $variable->visual, 'label' => squuad_cert_variable_display_text($variable, $all_methods), 'insert' => true];
+    }
+    // Variables de la persona ({{full_name}}…) que no están en la lista y tienen quien les dé valor (EduSystem o la cuenta)
+    foreach (squuad_cert_person_variables_offered($available_methods) as $key => $person) {
+        if (!isset($catalog_keys[$key])) {
+            $groups['person'][1][] = ['var' => '{{' . $key . '}}', 'label' => $person['label'], 'insert' => true];
+        }
     }
     foreach ($document_fields as $field) {
         if (empty($field['key'])) {
@@ -156,6 +173,14 @@ $save_url = admin_url('admin.php?page=add_admin_form_documents_content&action=sa
         <div class="eds-notice eds-notice--bad" role="alert"><p><?= esc_html(wp_unslash($_COOKIE['message-error'])) ?></p></div>
         <?php setcookie('message-error', '', time(), '/'); ?>
     <?php } ?>
+    <?php // Campo adicional ya existente llamado como una variable nueva del sistema ({{full_name}}): gana el campo
+    foreach (function_exists('squuad_cert_document_fields_shadowed_keys') ? squuad_cert_document_fields_shadowed_keys($document) : [] as $shadowed_key) : ?>
+        <div class="eds-notice eds-notice--warn"><p><?= esc_html(sprintf(
+            /* translators: %s: key of the field, e.g. full_name */
+            __('This document has a field named %s that matches a system variable; the answer of the field is used.', 'wp-certificates'),
+            $shadowed_key
+        )) ?></p></div>
+    <?php endforeach; ?>
     <?php // Documento automático que no se mostrará en Mi Cuenta (ni pide firma ni tiene campos adicionales)
     $automatic_status = squuad_cert_automatic_status($document);
     if ($automatic && $automatic_status && !$automatic_status['signature'] && !$automatic_status['fields']) : ?>
@@ -191,7 +216,7 @@ $save_url = admin_url('admin.php?page=add_admin_form_documents_content&action=sa
                 <div class="wpc-eds-field">
                     <label for="document_identificator"><?= esc_html__('Code', 'wp-certificates') ?> <span aria-hidden="true">*</span></label>
                     <input type="text" name="document_identificator" id="document_identificator" value="<?= esc_attr((string) $document->document_identificator) ?>" required aria-describedby="document_identificator-help">
-                    <p class="wpc-eds-help" id="document_identificator-help"><?= esc_html__('It links the document with the requirements of each student and with the signatures: change it only if you know what it affects.', 'wp-certificates') ?></p>
+                    <p class="wpc-eds-help" id="document_identificator-help"><?= wpc_edusystem_active() ? esc_html__('It links the document with the requirements of each student and with the signatures: change it only if you know what it affects.', 'wp-certificates') : esc_html__('It links the document with its signatures and issued copies: change it only if you know what it affects.', 'wp-certificates') ?></p>
                 </div>
             </div>
 
@@ -303,7 +328,7 @@ $save_url = admin_url('admin.php?page=add_admin_form_documents_content&action=sa
             <div class="wpc-eds-check">
                 <input type="checkbox" name="status" id="status" <?php checked(1 === (int) $document->status); ?> aria-describedby="status-help">
                 <label for="status"><?= esc_html__('Active', 'wp-certificates') ?></label>
-                <p class="wpc-eds-help" id="status-help"><?= esc_html__('An inactive document is not requested or generated.', 'wp-certificates') ?></p>
+                <p class="wpc-eds-help" id="status-help"><?= esc_html__('An inactive document is not requested or issued.', 'wp-certificates') ?></p>
             </div>
 
             <fieldset class="wpc-eds-choice">
@@ -311,12 +336,12 @@ $save_url = admin_url('admin.php?page=add_admin_form_documents_content&action=sa
                 <label class="wpc-eds-choice__option">
                     <input type="radio" name="type" value="managed" <?php checked(!$automatic); ?>>
                     <span><strong><?= esc_html__('Issued by the school office', 'wp-certificates') ?></strong>
-                        <span class="wpc-eds-help"><?= esc_html__('The office generates it, or issues it for signature, from the student file. (Managed)', 'wp-certificates') ?></span></span>
+                        <span class="wpc-eds-help"><?= wpc_edusystem_active() ? esc_html__('The school office generates it, or issues it for signature, from the student file.', 'wp-certificates') : esc_html__('The school office issues it to each person from "Issue documents".', 'wp-certificates') ?></span></span>
                 </label>
                 <label class="wpc-eds-choice__option">
                     <input type="radio" name="type" value="automatic" <?php checked($automatic); ?>>
                     <span><strong><?= esc_html__('Signed or completed by the person in their account', 'wp-certificates') ?></strong>
-                        <span class="wpc-eds-help"><?= esc_html__('It appears in My Account of each student until they sign or complete it. When saved, it is added as a requirement to the students who do not have it yet. (Automatic)', 'wp-certificates') ?></span></span>
+                        <span class="wpc-eds-help"><?= wpc_edusystem_active() ? esc_html__('It appears in My Account of each student until they sign or complete it. When saved, it is added as a requirement to the students who do not have it yet.', 'wp-certificates') : esc_html__('It appears in My Account of each person who must sign or complete it, until they do.', 'wp-certificates') ?></span></span>
                 </label>
             </fieldset>
 
@@ -336,10 +361,14 @@ $save_url = admin_url('admin.php?page=add_admin_form_documents_content&action=sa
                 </div>
             </div>
 
+            <?php if (wpc_edusystem_active()) { // Graduado: dato de EduSystem ?>
             <div class="wpc-eds-check">
                 <input type="checkbox" name="graduated_required" id="graduated_required" <?php checked(1 === (int) $document->graduated_required); ?>>
                 <label for="graduated_required"><?= esc_html__('This document requires that the student be a graduate', 'wp-certificates') ?></label>
             </div>
+            <?php } elseif (1 === (int) $document->graduated_required) { // sin EduSystem no se muestra, pero se conserva ?>
+                <input type="hidden" name="graduated_required" value="on">
+            <?php } ?>
 
             <div class="wpc-eds-signing" id="wpc-eds-signing">
                 <h3><?= esc_html__('Signatures', 'wp-certificates') ?></h3>
@@ -365,6 +394,7 @@ $save_url = admin_url('admin.php?page=add_admin_form_documents_content&action=sa
                 <?php } ?>
             </div>
 
+            <?php if (wpc_edusystem_active()) { // Requisito y tipo de archivo: conceptos de los requisitos de EduSystem ?>
             <div class="wpc-eds-grid">
                 <div class="wpc-eds-field">
                     <label for="id_requisito"><?= esc_html__('ID Requirement for the admin (ID requisito)', 'wp-certificates') ?></label>
@@ -375,12 +405,16 @@ $save_url = admin_url('admin.php?page=add_admin_form_documents_content&action=sa
                     <input type="text" name="type_file" id="type_file" value="<?= esc_attr((string) ($document->type_file ?? '')) ?>">
                 </div>
             </div>
+            <?php } else { // sin EduSystem no se muestran, pero se conservan al guardar ?>
+                <input type="hidden" name="id_requisito" value="<?= esc_attr((string) ($document->id_requisito ?? '')) ?>">
+                <input type="hidden" name="type_file" value="<?= esc_attr((string) ($document->type_file ?? '')) ?>">
+            <?php } ?>
         </section>
 
         <section class="eds-card" id="wpc-sec-book" aria-labelledby="wpc-sec-book-title">
             <h2 class="wpc-eds-section-title" id="wpc-sec-book-title"><?= esc_html__('Registry book', 'wp-certificates') ?></h2>
             <div class="wpc-eds-field">
-                <label for="book"><?= esc_html__('Certificate book', 'wp-certificates') ?></label>
+                <label for="book"><?= esc_html__('Registry book', 'wp-certificates') ?></label>
                 <select name="book" id="book">
                     <option value="0"><?= esc_html__('Select a book', 'wp-certificates') ?></option>
                     <?php foreach ((array) $books as $book) {

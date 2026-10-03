@@ -34,7 +34,7 @@
                             <div>
                                 <h3
                                     style="margin-top:20px;margin-bottom:0px;text-align:center; border-bottom: 1px solid #8080805c;">
-                                    <b><?= esc_html__('Card details', 'wp-certificates'); ?></b>
+                                    <b><?= esc_html__('Card design', 'wp-certificates'); ?></b>
                                 </h3>
                                 <div style="display: flex; justify-content: space-evenly; margin: 18px;">
                                     <div style="font-weight:400; text-align: center">

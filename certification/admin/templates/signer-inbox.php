@@ -53,7 +53,7 @@ $frame = static function (string $html): string {
                     <input type="hidden" name="request_id" value="<?= (int) $request->id ?>">
                     <?php wp_nonce_field('squuad_cert_signer_decline_' . (int) $request->id); ?>
                     <div class="notice notice-error inline" style="margin:0 0 8px"><p><strong><?= esc_html__('This action cannot be reverted.', 'wp-certificates') ?></strong>
-                        <?= esc_html__('When you decline this document, the signature of the student linked to it (if any) will be revoked, and the document can no longer be approved or set back to pending. The user will have to send or sign a new document.', 'wp-certificates') ?></p></div>
+                        <?= esc_html__('When you decline this document, the signature of the person linked to it (if any) will be revoked, and the document can no longer be approved or set back to pending. The user will have to send or sign a new document.', 'wp-certificates') ?></p></div>
                     <p><label for="edusystem-decline-reason"><?= esc_html__('Reason why it is declined', 'wp-certificates') ?></label><br>
                         <textarea id="edusystem-decline-reason" name="reason" required rows="3" style="width:100%"></textarea></p>
                     <p><label><input type="checkbox" name="confirm_irreversible" value="1" required> <?= esc_html__('I understand that declining is final and cannot be reverted.', 'wp-certificates') ?></label></p>
@@ -128,7 +128,7 @@ $frame = static function (string $html): string {
                 <thead><tr>
                     <th>#</th>
                     <th><?= esc_html__('Document', 'wp-certificates') ?></th>
-                    <th><?= esc_html__('Student', 'wp-certificates') ?></th>
+                    <th><?= esc_html__('Holder', 'wp-certificates') ?></th>
                     <th><?= esc_html__('Round', 'wp-certificates') ?></th>
                     <th><?= esc_html__('Content fingerprint', 'wp-certificates') ?></th>
                     <th></th>
@@ -173,7 +173,7 @@ $frame = static function (string $html): string {
             <h2><?= esc_html__('Batch result', 'wp-certificates') ?></h2>
             <?php $titles = array_column((array) $batch->data['items'], null, 'request_id'); ?>
             <table class="widefat striped" style="max-width:1100px">
-                <thead><tr><th><?= esc_html__('Document', 'wp-certificates') ?></th><th><?= esc_html__('Student', 'wp-certificates') ?></th><th><?= esc_html__('Result', 'wp-certificates') ?></th></tr></thead>
+                <thead><tr><th><?= esc_html__('Document', 'wp-certificates') ?></th><th><?= esc_html__('Holder', 'wp-certificates') ?></th><th><?= esc_html__('Result', 'wp-certificates') ?></th></tr></thead>
                 <tbody>
                     <?php foreach ((array) $batch->result_data['signed'] as $id) : ?>
                         <tr><td><?= esc_html((string) ($titles[$id]['title'] ?? $id)) ?></td><td><?= esc_html((string) ($titles[$id]['student'] ?? '')) ?></td>
@@ -199,7 +199,7 @@ $frame = static function (string $html): string {
                 <thead><tr>
                     <td class="check-column" style="padding:8px 0 0 3px"><input type="checkbox" id="edusystem-batch-all" aria-label="<?= esc_attr__('Select all', 'wp-certificates') ?>"></td>
                     <th><?= esc_html__('Document', 'wp-certificates') ?></th>
-                    <th><?= esc_html__('Student', 'wp-certificates') ?></th>
+                    <th><?= esc_html__('Holder', 'wp-certificates') ?></th>
                     <th><?= esc_html__('Round', 'wp-certificates') ?></th>
                     <th><?= esc_html__('Waiting since', 'wp-certificates') ?></th>
                     <th></th>
@@ -236,7 +236,7 @@ $frame = static function (string $html): string {
         <?php if ($pdf_queue) : ?>
             <h2 style="margin-top:24px"><?= esc_html__('Signed documents waiting for the final PDF', 'wp-certificates') ?></h2>
             <table class="widefat striped" style="max-width:1100px">
-                <thead><tr><th><?= esc_html__('Document', 'wp-certificates') ?></th><th><?= esc_html__('Student', 'wp-certificates') ?></th><th></th></tr></thead>
+                <thead><tr><th><?= esc_html__('Document', 'wp-certificates') ?></th><th><?= esc_html__('Holder', 'wp-certificates') ?></th><th></th></tr></thead>
                 <tbody>
                     <?php foreach ($pdf_queue as $done) : ?>
                         <tr>

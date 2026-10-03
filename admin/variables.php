@@ -114,10 +114,41 @@ function squuad_cert_variables_page(): void
     $enabled_plugins = \Squuad\Certificados\OwnPlugins::enabled();
     $quarantine = \Squuad\Certificados\Quarantine::all();
     $variables = '' === $view ? $wpdb->get_results('SELECT * FROM ' . squuad_cert_variables_table() . ' ORDER BY id ASC') : [];
+    // Quién da valor a cada variable: las que no tienen un plugin activo detrás no se ofrecen en el editor
+    $holder_catalog = squuad_cert_holder_catalog();
+    $statuses = [];
+    foreach ((array) $variables as $row) {
+        $statuses[(int) $row->id] = squuad_cert_catalog_variable_status($row, $available, $holder_catalog);
+    }
+    if ($variable) {
+        $statuses[(int) $variable->id] = squuad_cert_catalog_variable_status($variable, $available, $holder_catalog);
+    }
+    // Variables de la persona ({{full_name}}…) que no están en la lista: se listan aparte, con quién les da valor
+    $catalog_keys = array_flip(array_map(static fn($row): string => (string) $row->identificator, (array) $variables));
+    $person_variables = array_diff_key(squuad_cert_person_variables_offered($available), $catalog_keys);
     $documents = $variable ? squuad_cert_variable_documents((string) $variable->identificator) : [];
     $notice = squuad_cert_variables_notice();
 
     include WP_C_PATH . 'admin/templates/variables.php';
+}
+
+/** Aviso de una variable que no se ofrece en el editor (o que da el titular), o '' si se ofrece normalmente. */
+function squuad_cert_variable_status_badge(string $status): string
+{
+    $labels = [
+        'holder' => [__('WordPress account of the person', 'wp-certificates'), '#2271b1'],
+        'requires_edusystem' => [__('Requires EduSystem', 'wp-certificates'), '#996800'],
+        'plugin_inactive' => [__('Plugin not active', 'wp-certificates'), '#996800'],
+        'unavailable' => [__('Method not available', 'wp-certificates'), '#b32d2e'],
+        'quarantine' => [__('Not offered in the editor', 'wp-certificates'), '#b32d2e'],
+        'no_method' => [__('Not offered in the editor: no plugin gives it a value', 'wp-certificates'), '#996800'],
+    ];
+    if (!isset($labels[$status])) {
+        return '';
+    }
+    [$label, $color] = $labels[$status];
+
+    return '<span class="squuad-cert-variable-status" style="display:inline-block;margin-top:4px;padding:1px 8px;border:1px solid ' . esc_attr($color) . ';border-radius:10px;color:' . esc_attr($color) . ';font-size:12px">' . esc_html($label) . '</span>';
 }
 
 /**

@@ -21,7 +21,8 @@ const SQUUAD_CERT_SIGNATURE_CONTENT_MAX_BYTES = 1048576; // 1 MB
 
 /** Tipos de titular: la cuenta de WordPress que recibe el documento (Mi Cuenta) o la ficha de un estudiante de
  * EduSystem (documento emitido para firma desde su ficha, que solo firman los firmantes del sistema). */
-const SQUUAD_CERT_SUBJECT_ACCOUNT = 'wp_user';
+// Definida también por el proveedor wp_user (includes/provider-wp-user.php), que se carga antes: una sola constante
+defined('SQUUAD_CERT_SUBJECT_ACCOUNT') || define('SQUUAD_CERT_SUBJECT_ACCOUNT', 'wp_user');
 const SQUUAD_CERT_SUBJECT_STUDENT = 'edusystem_student';
 
 /** Las tablas de firma de wp-certificates llegan con la versión 9 de su esquema (core/schema/signatures.php). */

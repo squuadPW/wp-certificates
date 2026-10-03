@@ -111,9 +111,23 @@ if (wpc_eds_documents_enabled()) {
                                     <div style="font-weight:400;" class="space-offer">
                                         <b><?= esc_html__('Variables', 'wp-certificates'); ?></b><br>
                                         <ul style="display: grid;grid-template-columns: 1fr 1fr;">
-                                            <?php foreach ($variables as $key => $variable) { ?>
-                                                <li><strong><?= esc_html($variable->text) ?></strong>: <?= esc_html($variable->visual) ?></li>
-                                            <?php } ?>
+                                            <?php // Solo las variables a las que da valor un plugin activo o el titular (como el panel «Datos»)
+                                            $wpc_available = \Squuad\Certificados\VariableMethods::available();
+                                            $wpc_methods = \Squuad\Certificados\VariableMethods::all();
+                                            $wpc_holder = squuad_cert_holder_catalog();
+                                            $wpc_keys = [];
+                                            foreach ($variables as $key => $variable) {
+                                                $wpc_keys[(string) $variable->identificator] = true;
+                                                if (!squuad_cert_catalog_variable_offered(squuad_cert_catalog_variable_status($variable, $wpc_available, $wpc_holder))) {
+                                                    continue;
+                                                } ?>
+                                                <li><strong><?= esc_html(squuad_cert_variable_display_text($variable, $wpc_methods)) ?></strong>: <?= esc_html($variable->visual) ?></li>
+                                            <?php }
+                                            foreach (squuad_cert_person_variables_offered($wpc_available) as $wpc_key => $wpc_person) {
+                                                if (!isset($wpc_keys[$wpc_key])) { ?>
+                                                    <li><strong><?= esc_html($wpc_person['label']) ?></strong>: <?= esc_html('{{' . $wpc_key . '}}') ?></li>
+                                                <?php }
+                                            } ?>
                                         </ul>
                                     </div>
 
@@ -167,6 +181,7 @@ if (wpc_eds_documents_enabled()) {
                                             for="signature_required"><b><?= esc_html__('This document will require signatures', 'wp-certificates'); ?></b></label>
                                     </div>
 
+                                    <?php if (wpc_edusystem_active()) { // Graduado: dato de EduSystem ?>
                                     <div style="font-weight:400; text-align: center;" class="space-offer">
                                         <input type="checkbox" name="graduated_required" id="graduated_required"
                                             <?= ($document->graduated_required == 1) ? 'checked' : ''; ?>
@@ -174,6 +189,9 @@ if (wpc_eds_documents_enabled()) {
                                         <label
                                             for="graduated_required"><b><?= esc_html__('This document requires that the student be a graduate', 'wp-certificates'); ?></b></label>
                                     </div>
+                                    <?php } elseif (1 === (int) ($document->graduated_required ?? 0)) { // sin EduSystem no se muestra, pero se conserva ?>
+                                        <input type="hidden" name="graduated_required" value="on">
+                                    <?php } ?>
 
                                     <div style="font-weight:400; text-align: center;" class="space-offer">
                                         <input type="checkbox" name="margin_required" id="margin_required"
@@ -183,6 +201,7 @@ if (wpc_eds_documents_enabled()) {
                                             for="margin_required"><b><?= esc_html__('This document has margins (on all sides)', 'wp-certificates'); ?></b></label>
                                     </div>
 
+                                    <?php if (wpc_edusystem_active()) { // Requisito y tipo de archivo: conceptos de los requisitos de EduSystem ?>
                                     <div style="font-weight:400; text-align: center" class="space-offer">
                                         <label for="id_requisito"><b><?= esc_html__('ID Requirement for the admin (ID requisito)', 'wp-certificates'); ?></b></label><br>
                                         <input type="text" name="id_requisito" id="id_requisito" value="<?= esc_attr($document->id_requisito ?? ''); ?>">
@@ -192,9 +211,13 @@ if (wpc_eds_documents_enabled()) {
                                         <label for="type_file"><b><?= esc_html__('Type file', 'wp-certificates'); ?></b></label><br>
                                         <input type="text" name="type_file" id="type_file" value="<?= esc_attr($document->type_file ?? ''); ?>">
                                     </div>
+                                    <?php } else { // sin EduSystem no se muestran, pero se conservan al guardar ?>
+                                        <input type="hidden" name="id_requisito" value="<?= esc_attr($document->id_requisito ?? ''); ?>">
+                                        <input type="hidden" name="type_file" value="<?= esc_attr($document->type_file ?? ''); ?>">
+                                    <?php } ?>
 
                                     <div style="font-weight:400; text-align: center" class="space-offer">
-                                        <label for="book"><b><?= esc_html__('Certificate book', 'wp-certificates'); ?></b></label><br>
+                                        <label for="book"><b><?= esc_html__('Registry book', 'wp-certificates'); ?></b></label><br>
                                         <select name="book" id="book">
                                             <option value="0"><?= esc_html__('Select a book', 'wp-certificates'); ?></option>
                                             <?php foreach ((array) $books as $book):

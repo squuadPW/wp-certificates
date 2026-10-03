@@ -25,8 +25,10 @@ $status_labels = [
 ];
 ?>
 <div class="wrap">
-    <h1><?= esc_html__('Users and signatures', 'wp-certificates') ?></h1>
-    <p style="max-width:820px"><?= esc_html__('Signers of the system (directors, coordinators...). Each one registers their own signature from their account after an invitation: nobody can upload the signature of another person. Students and parents sign their own documents and do not need an invitation.', 'wp-certificates') ?></p>
+    <h1><?= esc_html__('Signers', 'wp-certificates') ?></h1>
+    <p style="max-width:820px"><?= wpc_edusystem_active()
+        ? esc_html__('Signers of the system (directors, coordinators...). Each one registers their own signature from their account after an invitation: nobody can upload the signature of another person. Students and parents sign their own documents and do not need an invitation.', 'wp-certificates')
+        : esc_html__('Signers of the system (directors, coordinators...). Each one registers their own signature from their account after an invitation: nobody can upload the signature of another person. The people who receive a document sign it from their own account and do not need an invitation.', 'wp-certificates') ?></p>
 
     <?php if ($notice) : ?>
         <div class="notice <?= $notice['ok'] ? 'notice-success' : 'notice-error' ?> is-dismissible"><p><?= esc_html($notice['message']) ?></p></div>
@@ -64,7 +66,9 @@ $status_labels = [
                     </tbody>
                 </table>
             <?php else : ?>
-                <p><?= esc_html__('No user with that name or email (students and parents are not listed). You can invite the person to register:', 'wp-certificates') ?></p>
+                <p><?= wpc_edusystem_active()
+                    ? esc_html__('No user with that name or email (students and parents are not listed). You can invite the person to register:', 'wp-certificates')
+                    : esc_html__('No user with that name or email. You can invite the person to register:', 'wp-certificates') ?></p>
             <?php endif; ?>
         <?php endif; ?>
 

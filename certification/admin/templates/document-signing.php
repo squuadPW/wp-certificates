@@ -39,14 +39,16 @@ $requires_checked = $eds
         <p class="description" style="max-width:820px"><?= esc_html__('Who signs this document and in which order. First the roles: every user with a marked role receives their own document and signs it from their own account. Then the registered signers of the system sign every one of those documents. The document is valid when all the signatures are done. Changes apply to new signature requests; requests already in progress keep their signers.', 'wp-certificates') ?></p>
 
         <?php if ('automatic' !== $document->type) : ?>
-            <p class="description" style="max-width:820px"><strong><?= esc_html__('Issued document:', 'wp-certificates') ?></strong> <?= esc_html__('only the system signers sign it (the roles do not). With at least one signer, "Generate" in the student file becomes "Issue for signature".', 'wp-certificates') ?></p>
+            <p class="description" style="max-width:820px"><?php if (wpc_edusystem_active()) { ?><strong><?= esc_html__('Issued document:', 'wp-certificates') ?></strong> <?= esc_html__('only the system signers sign it (the roles do not). With at least one signer, "Generate" in the student file becomes "Issue for signature".', 'wp-certificates') ?><?php } else { ?><?= esc_html__('If the school office issues it: only the system signers sign it (the roles do not).', 'wp-certificates') ?><?php } ?></p>
         <?php endif; ?>
         <?php if ($notice) : ?>
             <div class="notice <?= $notice['ok'] ? 'notice-success' : 'notice-error' ?> inline"><p><?= esc_html($notice['message']) ?></p></div>
         <?php endif; ?>
         <?php if (!$policy['policy_id']) : ?>
             <p><em><?= esc_html('automatic' === $document->type
-                ? __('Not configured yet: by default the users with the student role sign this document, if that role is active in "Signing roles".', 'wp-certificates')
+                ? (wpc_edusystem_active()
+                    ? __('Not configured yet: by default the users with the student role sign this document, if that role is active in "Signing roles".', 'wp-certificates')
+                    : __('Not configured yet: choose below which roles and signers sign this document.', 'wp-certificates'))
                 : __('Not configured yet: by default this document does not ask for user signatures.', 'wp-certificates')) ?></em></p>
         <?php endif; ?>
 
@@ -103,17 +105,19 @@ $requires_checked = $eds
                 <p style="margin-top:0"><strong><?= esc_html__('How to place the signatures in the template', 'wp-certificates') ?></strong></p>
                 <p><?= $chip('signature_section') // phpcs:ignore ?> <?= esc_html__('The signatures of the roles that are not placed separately (as before).', 'wp-certificates') ?></p>
                 <p><?= esc_html__('Each signer separately: use the variables of their row. Signers not placed in the template go in {{signature_section}} (roles) or in a signatures block at the end (system signers).', 'wp-certificates') ?></p>
+                <?php if (wpc_edusystem_active()) { // Reglas de los puestos de EduSystem (estudiante y representante) ?>
                 <p style="margin-bottom:4px"><strong><?= esc_html__('Template rules', 'wp-certificates') ?></strong> — <?= esc_html__('the text between the marks is shown only if the rule is met; with ^ , only if it is not:', 'wp-certificates') ?></p>
                 <ul style="list-style:disc;margin:0 0 0 20px">
                     <li><code>{{#requires_student_signature}}</code> … <code>{{/requires_student_signature}}</code> — <?= esc_html__('the student signs this document', 'wp-certificates') ?></li>
                 </ul>
                 <p class="description"><?= esc_html__('The parent no longer signs: in old templates {{signature_parent}} is empty and {{#requires_parent_signature}} and {{#student_is_own_parent}} are never met.', 'wp-certificates') ?></p>
+                <?php } ?>
                 <?php // Variable fija del sistema (definida en el código, no en la tabla variables_document): siempre disponible ?>
                 <p style="margin-bottom:4px"><strong><?= esc_html__('PDF layout', 'wp-certificates') ?></strong></p>
                 <p style="margin:0"><?= $chip('page_break') // phpcs:ignore ?> <?= esc_html__('Page break: what follows starts on a new page. In automatic documents, lines, paragraphs and table rows are never cut between pages; use it to decide where a section starts.', 'wp-certificates') ?></p>
             </div>
             <?php if (!$signers) : ?>
-                <p class="description"><?= esc_html__('There are no registered signers yet. Invite them from Certification > Users and signatures.', 'wp-certificates') ?></p>
+                <p class="description"><?= esc_html__('There are no registered signers yet. Invite them from Certification > Signers.', 'wp-certificates') ?></p>
             <?php elseif (!$inbox) : ?>
                 <p class="description"><?= esc_html__('Registered signers are saved in the configuration and will be required once their "Documents to sign" panel is active.', 'wp-certificates') ?></p>
             <?php endif; ?>

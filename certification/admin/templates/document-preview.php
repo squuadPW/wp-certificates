@@ -9,7 +9,9 @@ if (!defined('ABSPATH')) exit;
 $modes = [
     'automatic' => __('As the final PDF of the signature request (A4, portrait).', 'wp-certificates'),
     'issued' => __('As the document issued for signature, with the format of the document.', 'wp-certificates'),
-    'generate' => __('As "Generate" in the student file, with the format of the document.', 'wp-certificates'),
+    'generate' => wpc_edusystem_active()
+        ? __('As "Generate" in the student file, with the format of the document.', 'wp-certificates')
+        : __('This is how the issued document will look, with its page format.', 'wp-certificates'),
 ];
 // Pie del PDF de las solicitudes de firma, con valores de ejemplo (el real lleva el número, la ronda y la huella)
 $fingerprint = sprintf(__('Signature request #%1$d, round %2$d · Content fingerprint (SHA-256): %3$s', 'wp-certificates'), 123, 1, hash('sha256', 'example'));
@@ -53,7 +55,9 @@ $fingerprint = sprintf(__('Signature request #%1$d, round %2$d · Content finger
         const texts = {
             generating: <?= wp_json_encode(__('Generating the PDF…', 'wp-certificates')) ?>,
             done: <?= wp_json_encode(__('PDF ready.', 'wp-certificates')) ?>,
-            fail: <?= wp_json_encode(__('The preview could not be generated.', 'wp-certificates')) ?>
+            fail: <?= wp_json_encode(__('The preview could not be generated.', 'wp-certificates')) ?>,
+            /* translators: %s: technical reason of the error (from the PDF library) */
+            failReason: <?= wp_json_encode(__('The preview could not be generated (%s).', 'wp-certificates')) ?>
         };
         const frame = document.getElementById("edusystem-preview-frame");
         const holder = document.getElementById("edusystem-preview-holder");
@@ -103,7 +107,10 @@ $fingerprint = sprintf(__('Signature request #%1$d, round %2$d · Content finger
             content.style.minWidth = g.width;
             content.style.minHeight = g.height;
             holder.append(header, content, footer);
-            drawQr(content, "#qrcode", function () { return "https://example.com/verify/EXAMPLE"; });
+            // El QR de ejemplo, también si la plantilla lo pone en el encabezado o en el pie
+            [header, content, footer].forEach(function (part) {
+                drawQr(part, "#qrcode", function () { return "https://example.com/verify/EXAMPLE"; });
+            });
 
             let margin = [0, 0];
             if (1 === g.margin_required) {
@@ -121,8 +128,15 @@ $fingerprint = sprintf(__('Signature request #%1$d, round %2$d · Content finger
 
             if ("portrait" === g.orientation && (data.header || data.footer)) {
                 const width = pdf.internal.pageSize.width;
-                const headerCanvas = data.header ? await html2canvas(header, { scale: 2 }) : null;
-                const footerCanvas = data.footer ? await html2canvas(footer, { scale: 2 }) : null;
+                // Un encabezado o pie sin alto (p. ej. solo un hueco vacío) no se estampa: con 0 px jsPDF recibe una
+                // medida no válida y fallaba toda la vista previa
+                const capture = async function (part, has) {
+                    if (!has || part.offsetWidth < 1 || part.offsetHeight < 1) return null;
+                    const canvas = await html2canvas(part, { scale: 2 });
+                    return canvas.width > 0 && canvas.height > 0 ? canvas : null;
+                };
+                const headerCanvas = await capture(header, data.header);
+                const footerCanvas = await capture(footer, data.footer);
                 for (let i = 1; i <= pdf.internal.getNumberOfPages(); i++) {
                     pdf.setPage(i);
                     if (headerCanvas) {
@@ -149,7 +163,9 @@ $fingerprint = sprintf(__('Signature request #%1$d, round %2$d · Content finger
                 status.textContent = texts.done;
             } catch (error) {
                 console.error("Vista previa del documento:", error);
-                status.textContent = texts.fail;
+                // Motivo técnico (mensaje de la biblioteca del PDF, sin datos del documento), recortado
+                const reason = error && error.message ? String(error.message).slice(0, 160) : "";
+                status.textContent = reason ? texts.failReason.replace("%s", reason) : texts.fail;
             }
             holder.innerHTML = "";
             refresh.disabled = false;

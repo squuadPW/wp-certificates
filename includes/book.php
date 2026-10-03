@@ -23,9 +23,16 @@ const SQUUAD_CERT_BOOK_LINE_MAX = 1000;
 /** Variables que no se pueden usar en la descripción: son el resultado de reservar la línea. */
 const SQUUAD_CERT_BOOK_LINE_FORBIDDEN = ['tomo', 'folio', 'tomo_folio', 'qrcode'];
 
-/** Texto por defecto si el documento no tiene descripción (equivalente al que se enviaba antes). */
+/**
+ * Texto por defecto si el documento no tiene descripción: con EduSystem, el de siempre (equivalente al que se enviaba
+ * antes); sin él, con las variables neutras de la persona (sin {{student_name}} ni {{program}}, que son de EduSystem).
+ */
 function squuad_cert_book_line_default(): string
 {
+    if (function_exists('wpc_edusystem_active') && !wpc_edusystem_active()) {
+        return 'Documento emitido: {{full_name}} ({{email}}) | Documento: {{document_name}} | Fecha: {{today}}';
+    }
+
     return 'Certificado emitido: {{student_name}} ({{email}}) | Documento: {{document_name}} | Programa: {{program}} | Fecha: {{today}}';
 }
 
@@ -54,7 +61,8 @@ function squuad_cert_book_line_forbidden_used(string $description): array
 
 /**
  * Texto de la línea para un titular: la descripción del documento (o el texto por defecto) con sus variables,
- * como texto plano. failed: variables sin valor (método que falla, eliminada o prohibida).
+ * como texto plano. failed: variables sin valor (método que falla, eliminada o prohibida). ctx methods_subject_id
+ * (opcional): titular que reciben los métodos de variables, si no es $subject_id.
  *
  * @return array{text: string, failed: array<string, string>}
  */
@@ -69,7 +77,12 @@ function squuad_cert_book_line_text(object $document, int $subject_id, array $ct
     }
     $template = (string) preg_replace('/\{\{[#^\/]?(?:' . implode('|', SQUUAD_CERT_BOOK_LINE_FORBIDDEN) . ')\}\}/', '', $template);
 
-    $resolved = squuad_cert_template_replacements($template, $subject_id, ['document' => $document] + $ctx);
+    // Titular de los métodos: el mismo que el de la plantilla (ctx methods_subject_id), si quien llama lo da; p. ej. al
+    // emitir a una cuenta (wp_user) su id no es una ficha de estudiante
+    $methods_subject = array_key_exists('methods_subject_id', $ctx) ? (int) $ctx['methods_subject_id'] : $subject_id;
+    // keep_shadowed: en la línea del libro no hay respuestas de campos, así que {{full_name}} usa el valor del sistema
+    // aunque el documento tenga un campo con esa clave (si no, la emisión se cortaba por variable sin valor)
+    $resolved = squuad_cert_template_replacements($template, $methods_subject, ['document' => $document, 'keep_shadowed' => true] + $ctx);
     $failed += $resolved['failed'];
     $text = (string) squuad_cert_process_template($template, $resolved['replacements']);
 

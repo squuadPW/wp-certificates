@@ -26,9 +26,15 @@ final class VariableRunner
     {
         $replacements = [];
         $failed = [];
+        // Variables que puede dar el titular (ctx holder_keys, ver squuad_cert_template_replacements()): si su método
+        // no está disponible (plugin no activo), no es un fallo; el valor lo pone el titular después
+        $holder_keys = array_map('strval', (array) ($ctx['holder_keys'] ?? []));
 
         foreach (self::assigned_methods($template) as $key => $method_id) {
             $method = VariableMethods::get_available($method_id);
+            if (!$method && in_array((string) $key, $holder_keys, true) && !Quarantine::has($method_id)) {
+                continue;
+            }
             if (!$method) {
                 $failed[$key] = Quarantine::has($method_id) ? 'quarantine' : 'unavailable';
                 $replacements[$key] = ['value' => '', 'wrap' => false];

@@ -72,7 +72,7 @@ function squuad_cert_document_fields_reserved_keys()
             'user_sign', 'position_user_charge', 'signature', 'show_parent_info', 'document_name', 'document_code',
             'academic_year', 'address', 'admission_requirements_table', 'admission_signature_fgu', 'birth_date',
             'career_mention', 'city', 'country', 'created_at', 'educational_background_information', 'email',
-            'end_academic_year', 'end_term_student_entered', 'ethinicity_selected', 'fax', 'folio', 'gender',
+            'end_academic_year', 'end_term_student_entered', 'ethinicity_selected', 'fax', 'folio', 'full_name', 'gender',
             'id_student', 'initial_academic_cut', 'institute_address', 'institute_name', 'institute_phone',
             'institution_city_country_form_filled', 'institution_graduation_year_form_filled',
             'institution_name_form_filled', 'institution_title_obtained_form_filled', 'language_selected',
@@ -97,6 +97,41 @@ function squuad_cert_document_fields_reserved_keys()
 }
 
 /**
+ * Variables del sistema que llegaron después de que algún documento pudiera tener ya un campo con esa clave
+ * ({{full_name}}, 2026-10-03). En esos documentos el campo sigue ganando y se conserva al guardar; solo los campos
+ * nuevos no pueden llamarse así.
+ */
+const SQUUAD_CERT_FIELD_KEYS_FIELD_WINS = ['full_name'];
+
+/**
+ * Claves de campo que se conservan al guardar aunque sean variables del sistema (las que el documento ya tenía, de
+ * SQUUAD_CERT_FIELD_KEYS_FIELD_WINS). Quien guarda las fija antes de llamar a squuad_cert_sanitize_document_fields()
+ * ($set); sin argumento, las devuelve.
+ */
+function squuad_cert_document_fields_kept_keys(?array $set = null): array
+{
+    static $kept = [];
+    if (null !== $set) {
+        $kept = array_values(array_intersect(array_map('strval', $set), SQUUAD_CERT_FIELD_KEYS_FIELD_WINS));
+    }
+
+    return $kept;
+}
+
+/**
+ * Variables del sistema que en este documento da su campo adicional (un campo ya existente llamado como una de
+ * SQUUAD_CERT_FIELD_KEYS_FIELD_WINS): quien rellena la plantilla deja que gane el campo, como antes.
+ */
+function squuad_cert_document_fields_shadowed_keys($document): array
+{
+    if (!$document) {
+        return [];
+    }
+
+    return array_values(array_intersect(array_column(squuad_cert_get_document_fields($document), 'key'), SQUUAD_CERT_FIELD_KEYS_FIELD_WINS));
+}
+
+/**
  * Limpia y valida la definición de campos que llega del formulario del admin.
  * Devuelve [campos válidos, errores]. Las filas inválidas se descartan con su error.
  *
@@ -106,7 +141,8 @@ function squuad_cert_sanitize_document_fields($rows)
 {
     $fields = [];
     $errors = [];
-    $reserved = squuad_cert_document_fields_reserved_keys();
+    // Los campos que el documento ya tenía con una clave que después pasó a ser variable del sistema se conservan
+    $reserved = array_values(array_diff(squuad_cert_document_fields_reserved_keys(), squuad_cert_document_fields_kept_keys()));
 
     foreach ((array) $rows as $row) {
         if (!is_array($row)) {

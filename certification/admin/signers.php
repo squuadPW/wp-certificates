@@ -25,15 +25,16 @@ function squuad_cert_signers_menu(): void
         return;
     }
 
-    // "Users and signatures": la gestión de firmantes, en la URL de la pantalla antigua de firmas-imagen (retirada, ADR
-    // 0004). Con el menú Certificación visible va en su sitio; si no (p. ej. suscripción caducada), como "Signers"
+    // "Signers" (antes "Users and signatures"): la gestión de firmantes, en la URL de la pantalla antigua de firmas-imagen
+    // (retirada, ADR 0004). Con el menú Certificación visible va en su sitio; si no (p. ej. suscripción caducada), suelto.
+    // Es un solo submenú con la misma URL en los dos casos: nunca se registran los dos
     if (!empty($submenu[SQUUAD_CERT_SIGNERS_PARENT])) {
         // En el sitio de siempre: antes de "ID card"
         $position = array_search('add_admin_form_cards_content', array_column($submenu[SQUUAD_CERT_SIGNERS_PARENT], 2), true);
         add_submenu_page(
             SQUUAD_CERT_SIGNERS_PARENT,
-            __('Users and signatures', 'wp-certificates'),
-            __('Users and signatures', 'wp-certificates'),
+            __('Signers', 'wp-certificates'),
+            __('Signers', 'wp-certificates'),
             'manager_users_signatures_certificate',
             SQUUAD_CERT_SIGNERS_PAGE,
             'squuad_cert_signers_page',

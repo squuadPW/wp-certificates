@@ -19,7 +19,7 @@ wp_enqueue_script('edusystem-signature-pad', SQUUAD_CERT_MODULE_URL . 'admin/ass
             <thead><tr>
                 <th>#</th>
                 <th><?= esc_html__('Document', 'wp-certificates') ?></th>
-                <th><?= esc_html__('Student', 'wp-certificates') ?></th>
+                <th><?= esc_html__('Holder', 'wp-certificates') ?></th>
                 <th><?= esc_html__('Content fingerprint', 'wp-certificates') ?></th>
             </tr></thead>
             <tbody>
@@ -27,7 +27,7 @@ wp_enqueue_script('edusystem-signature-pad', SQUUAD_CERT_MODULE_URL . 'admin/ass
                     <tr>
                         <td><?= (int) $i + 1 ?></td>
                         <td data-title="<?= esc_attr__('Document', 'wp-certificates') ?>"><?= esc_html((string) $item['title']) ?></td>
-                        <td data-title="<?= esc_attr__('Student', 'wp-certificates') ?>"><?= esc_html((string) $item['student']) ?></td>
+                        <td data-title="<?= esc_attr__('Holder', 'wp-certificates') ?>"><?= esc_html((string) $item['student']) ?></td>
                         <td data-title="<?= esc_attr__('Content fingerprint', 'wp-certificates') ?>"><code><?= esc_html(substr((string) $item['content_sha256'], 0, 12)) ?>…</code></td>
                     </tr>
                 <?php endforeach; ?>
@@ -84,7 +84,7 @@ wp_enqueue_script('edusystem-signature-pad', SQUUAD_CERT_MODULE_URL . 'admin/ass
         <h3><?= esc_html__('Batch result', 'wp-certificates') ?></h3>
         <?php $titles = array_column($items, null, 'request_id'); ?>
         <table class="woocommerce-orders-table shop_table shop_table_responsive my_account_orders">
-            <thead><tr><th><?= esc_html__('Document', 'wp-certificates') ?></th><th><?= esc_html__('Student', 'wp-certificates') ?></th><th><?= esc_html__('Result', 'wp-certificates') ?></th></tr></thead>
+            <thead><tr><th><?= esc_html__('Document', 'wp-certificates') ?></th><th><?= esc_html__('Holder', 'wp-certificates') ?></th><th><?= esc_html__('Result', 'wp-certificates') ?></th></tr></thead>
             <tbody>
                 <?php foreach ((array) $batch->result_data['signed'] as $id) : ?>
                     <tr><td><?= esc_html((string) ($titles[$id]['title'] ?? $id)) ?></td><td><?= esc_html((string) ($titles[$id]['student'] ?? '')) ?></td>

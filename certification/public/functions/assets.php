@@ -40,7 +40,7 @@ function squuad_cert_signature_public_assets(): void
         'nonce' => wp_create_nonce('edusystem_signatures'),
         'currentUserId' => get_current_user_id(),
         'i18n' => [
-            'pendingStudent' => __('Pending: the student must sign from their own account', 'wp-certificates'),
+            'pendingStudent' => __('Pending: the person must sign from their own account', 'wp-certificates'),
             'pendingParent' => __('Pending: the parent or guardian must sign from their own account', 'wp-certificates'),
             'signYourPart' => __('To continue, please sign in your area or generate your signature automatically.', 'wp-certificates'),
             'waitingOther' => __('Your signature is saved. The document will be completed when the other person signs from their own account.', 'wp-certificates'),

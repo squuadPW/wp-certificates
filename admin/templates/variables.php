@@ -2,7 +2,8 @@
 /**
  * Certificación > Variables (admin/variables.php). Variables: $view ('' lista, 'view', 'edit', 'new'), $variables,
  * $variable, $documents, $notice, $methods (todos los registrados), $available (los que se pueden elegir),
- * $own_plugins, $enabled_plugins, $quarantine.
+ * $own_plugins, $enabled_plugins, $quarantine, $statuses (id => quién le da valor, squuad_cert_catalog_variable_status())
+ * y $person_variables (variables de la persona que no están en la lista, con quién les da valor).
  */
 defined('ABSPATH') || exit;
 
@@ -70,7 +71,7 @@ $type_labels = [
 
     <?php if ('' === $view) : ?>
         <p class="description" style="max-width: 900px">
-            <?= esc_html__('Variables saved in the database: this is the list shown when writing a document template. Editing or deleting a variable only changes this list; it does not change how the variable is filled in when a document is generated.', 'wp-certificates') ?>
+            <?= esc_html__('Variables saved in the database: this is the list shown when writing a document template. Editing or deleting a variable only changes this list; it does not change how the variable is filled in when a document is issued.', 'wp-certificates') ?>
         </p>
         <table class="wp-list-table widefat fixed striped">
             <thead>
@@ -95,12 +96,14 @@ $type_labels = [
                         <td><?= esc_html($type_labels[$row->type] ?? $row->type) ?></td>
                         <td>
                             <?php if (empty($row->method)) : ?>
-                                <span class="description"><?= esc_html__('No method (calculated by EduSystem as before)', 'wp-certificates') ?></span>
+                                <span class="description"><?= wpc_edusystem_active() ? esc_html__('No method (calculated by EduSystem as before)', 'wp-certificates') : esc_html__('No method', 'wp-certificates') ?></span>
                             <?php elseif (isset($available[$row->method])) : ?>
                                 <code><?= esc_html($row->method) ?></code>
                             <?php else : ?>
                                 <span style="color:#b32d2e"><?= esc_html(isset($quarantine[$row->method]) ? __('In quarantine', 'wp-certificates') : __('Unavailable', 'wp-certificates')) ?>: <code><?= esc_html($row->method) ?></code></span>
                             <?php endif; ?>
+                            <?php $badge = squuad_cert_variable_status_badge($statuses[(int) $row->id] ?? ''); ?>
+                            <?php if ('' !== $badge) : ?><br><?= $badge // escapado en squuad_cert_variable_status_badge() ?><?php endif; ?>
                         </td>
                         <td>
                             <a class="button button-small" href="<?= esc_url(squuad_cert_variables_url(['view' => 'view', 'id' => (int) $row->id])) ?>"><?= esc_html__('View', 'wp-certificates') ?></a>
@@ -121,6 +124,31 @@ $type_labels = [
                 <?php endforeach; ?>
             </tbody>
         </table>
+
+        <?php if ($person_variables) : ?>
+            <h2 style="margin-top: 30px"><?= esc_html__('Variables of the person', 'wp-certificates') ?></h2>
+            <p class="description" style="max-width: 900px">
+                <?= esc_html__('Details of the person who receives the document. They are offered in the editor when a plugin or the WordPress account of the person gives them a value; the source is shown in "Source of the value".', 'wp-certificates') ?>
+            </p>
+            <table class="wp-list-table widefat fixed striped" style="max-width: 900px">
+                <thead>
+                    <tr>
+                        <th><?= esc_html__('Variable', 'wp-certificates') ?></th>
+                        <th><?= esc_html__('Description', 'wp-certificates') ?></th>
+                        <th><?= esc_html__('Source of the value', 'wp-certificates') ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($person_variables as $key => $person) : ?>
+                        <tr>
+                            <td><code><?= esc_html('{{' . $key . '}}') ?></code></td>
+                            <td><?= esc_html($person['label']) ?></td>
+                            <td><?= 'holder' === $person['source'] ? esc_html__('WordPress account of the person', 'wp-certificates') : esc_html($method_label($person['source'])) ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php endif; ?>
 
         <form method="post" action="<?= esc_url(admin_url('admin-post.php')) ?>" style="margin-top: 12px">
             <input type="hidden" name="action" value="squuad_cert_variables_link">
@@ -226,7 +254,9 @@ $type_labels = [
             <tr><th><?= esc_html__('How it is written', 'wp-certificates') ?></th><td><code><?= esc_html($variable->visual) ?></code></td></tr>
             <tr><th><?= esc_html__('Description', 'wp-certificates') ?></th><td><?= esc_html($variable->text) ?></td></tr>
             <tr><th><?= esc_html__('Offered in', 'wp-certificates') ?></th><td><?= esc_html($type_labels[$variable->type] ?? $variable->type) ?></td></tr>
-            <tr><th><?= esc_html__('Method', 'wp-certificates') ?></th><td><?= empty($variable->method) ? esc_html__('No method (calculated by EduSystem as before)', 'wp-certificates') : esc_html($method_label((string) $variable->method)) ?></td></tr>
+            <tr><th><?= esc_html__('Method', 'wp-certificates') ?></th><td><?= empty($variable->method) ? (wpc_edusystem_active() ? esc_html__('No method (calculated by EduSystem as before)', 'wp-certificates') : esc_html__('No method', 'wp-certificates')) : esc_html($method_label((string) $variable->method)) ?>
+                <?php $badge = squuad_cert_variable_status_badge($statuses[(int) $variable->id] ?? ''); ?>
+                <?php if ('' !== $badge) : ?><br><?= $badge // escapado en squuad_cert_variable_status_badge() ?><?php endif; ?></td></tr>
             <tr><th><?= esc_html__('Created', 'wp-certificates') ?></th><td><?= esc_html((string) $variable->created_at) ?></td></tr>
             <tr>
                 <th><?= esc_html__('Documents that use it', 'wp-certificates') ?></th>
@@ -285,7 +315,7 @@ $type_labels = [
                     <th><label for="squuad-cert-method"><?= esc_html__('Method that gives the value', 'wp-certificates') ?></label></th>
                     <td>
                         <?php $method_select((string) ($variable->method ?? ''), true); ?>
-                        <p class="description"><?= esc_html__('Without a method, the value is calculated as before (EduSystem).', 'wp-certificates') ?></p>
+                        <p class="description"><?= wpc_edusystem_active() ? esc_html__('Without a method, the value is calculated as before (EduSystem).', 'wp-certificates') : esc_html__('Without a method, the variable has no value.', 'wp-certificates') ?></p>
                     </td>
                 </tr>
             </table>

@@ -545,11 +545,7 @@ msgid ""
 "check this platform from their server. Today a key can only verify a "
 "document by its code; it never searches by person. Every creation, "
 "revocation and use is saved in the log."
-msgstr ""
-"Claves para que otros sistemas (por ejemplo, el sitio principal de la "
-"institución) consulten esta plataforma desde su servidor. Hoy una clave solo "
-"puede verificar un documento por su código; nunca busca por persona. Cada "
-"alta, revocación y uso queda en el log."
+msgstr "Claves para que otros sistemas (por ejemplo, el sitio principal de la institución) consulten esta plataforma desde su servidor. Hoy una clave solo puede verificar un documento por su código; nunca busca por persona. Cada alta, revocación y uso queda en el registro de actividad."
 
 #: admin/templates/api-keys.php:27
 msgid "Address:"
@@ -730,9 +726,7 @@ msgstr ""
 msgid ""
 "Unique. It is saved in capital letters with hyphens (e.g. OFFICIAL-"
 "TRANSCRIPT) and cannot be repeated."
-msgstr ""
-"Único. Se guarda en mayúsculas con guiones (p. ej. OFFICIAL-TRANSCRIPT) y no "
-"se puede repetir."
+msgstr "Único. Se guarda en mayúsculas con guiones (p. ej. CONSTANCIA-PARTICIPACION) y no se puede repetir."
 
 #: admin/templates/document-detail.php:57
 #: admin/templates/eds-document-detail.php:44
@@ -804,7 +798,7 @@ msgstr "Tipo de archivo"
 #: admin/templates/document-detail.php:197
 #: admin/templates/eds-document-detail.php:383
 msgid "Certificate book"
-msgstr "Libro de certificados"
+msgstr "Libro de registro"
 
 #: admin/templates/document-detail.php:199
 #: admin/templates/eds-document-detail.php:385
@@ -1310,9 +1304,7 @@ msgstr "Plantillas de certificación"
 msgid ""
 "Choose a role and mark the certification permissions it has. Every change is "
 "saved in the log. The administrator always keeps this screen."
-msgstr ""
-"Elija un rol y marque los permisos de certificación que tiene. Cada cambio "
-"queda en el log. El administrador siempre conserva esta pantalla."
+msgstr "Elija un rol y marque los permisos de certificación que tiene. Cada cambio queda en el registro de actividad. El administrador siempre conserva esta pantalla."
 
 #: admin/templates/permissions.php:18 admin/templates/signing-roles.php:23
 msgid "Role"
@@ -1414,10 +1406,7 @@ msgid ""
 "The value of a variable is given by a method written in the code of an own "
 "plugin (EduSof or Squuad) and chosen from a list. No code is ever written or "
 "stored here. Changes are recorded in the log."
-msgstr ""
-"El valor de una variable lo da un método escrito en el código de un plugin "
-"propio (EduSof o Squuad) y elegido de una lista. Aquí nunca se escribe ni se "
-"guarda código. Los cambios quedan en el log."
+msgstr "El valor de una variable lo da un método escrito en el código de un plugin propio (EduSof o Squuad) y elegido de una lista. Aquí nunca se escribe ni se guarda código. Los cambios quedan en el registro de actividad."
 
 #: admin/templates/variables.php:73
 msgid ""
@@ -1568,9 +1557,7 @@ msgstr "Ninguna plantilla de documento la usa."
 msgid ""
 "The key is what the code fills in when a document is generated: it cannot be "
 "changed here."
-msgstr ""
-"La clave es lo que el código rellena al generar un documento: aquí no se "
-"puede cambiar."
+msgstr "La clave es lo que el código rellena al emitir un documento: aquí no se puede cambiar."
 
 #: admin/templates/variables.php:288
 msgid "Without a method, the value is calculated as before (EduSystem)."
@@ -2267,6 +2254,11 @@ msgstr "Este es el único interruptor de firmas del documento. Se guarda con «G
 msgid "Signer"
 msgstr "Firmante"
 
+#: includes/signing-roles.php:28
+msgctxt "User role"
+msgid "Signer"
+msgstr "Firmante"
+
 #: certification/admin/templates/document-signing.php:66
 msgid "Variables for the template"
 msgstr "Variables para la plantilla"
@@ -2375,9 +2367,7 @@ msgstr ""
 msgid ""
 "There are no registered signers yet. Invite them from Certification > Users "
 "and signatures."
-msgstr ""
-"Todavía no hay firmantes registrados. Invítelos desde Certification > Users "
-"and signatures."
+msgstr "Todavía no hay firmantes registrados. Invítelos desde Certificación > Firmantes."
 
 #: certification/admin/templates/document-signing.php:118
 msgid ""
@@ -2440,7 +2430,7 @@ msgstr "Borrar"
 
 #: certification/admin/templates/my-signature.php:41
 msgid "Confirm your password"
-msgstr "Confirma tu contraseña"
+msgstr "Confirme su contraseña"
 
 #: certification/admin/templates/my-signature.php:43
 msgid "Replace my signature"
@@ -2625,10 +2615,7 @@ msgid ""
 "Signatures saved by the previous system (users_signatures) have no "
 "fingerprint and are only read here. Nothing is changed: this is a read-only "
 "diagnosis so each institution can decide what to do with them."
-msgstr ""
-"Las firmas guardadas por el sistema anterior (users_signatures) no tienen "
-"huella y aquí solo se leen. No se cambia nada: es un diagnóstico de solo "
-"lectura para que cada institución decida qué hacer con ellas."
+msgstr "Las firmas del sistema anterior no tienen huella y aquí solo se leen. No se cambia nada: es un diagnóstico de solo lectura para que cada institución decida qué hacer con ellas."
 
 #: certification/admin/templates/signature-integrity.php:142
 msgid "Legacy signatures"
@@ -3767,10 +3754,6 @@ msgstr "Certificados de los estudiantes."
 msgid "Create and edit the documents (templates, book, priority)."
 msgstr "Crear y editar los documentos (plantillas, libro, prioridad)."
 
-#: includes/permissions.php:25
-msgid "Assign certificates to students."
-msgstr "Asignar certificados a los estudiantes."
-
 #: includes/permissions.php:26
 msgid "See the system signers."
 msgstr "Ver los firmantes del sistema."
@@ -4150,3 +4133,250 @@ msgstr "Modo"
 #: edusof-ui (biblioteca compartida Edusof UI)
 msgid "There is no free color picker: that way no change leaves text that cannot be read. If an institution needs its exact color, it is added as a new theme after checking the contrast."
 msgstr "No hay selector de colores libre: así ningún cambio deja textos que no se leen. Si una institución necesita su color exacto, se añade como tema nuevo después de comprobar el contraste."
+
+#: includes/provider-wp-user.php (titular wp_user)
+msgid "Full name of the person (last names, first names)"
+msgstr "Nombre completo de la persona (apellidos, nombres)"
+
+msgid "First names of the person"
+msgstr "Nombres de la persona"
+
+msgid "Last names of the person"
+msgstr "Apellidos de la persona"
+
+msgid "Email of the person"
+msgstr "Correo de la persona"
+
+msgid "The document does not exist."
+msgstr "El documento no existe."
+
+msgid "This document requires signatures: it cannot be issued here."
+msgstr "Este documento exige firmas: no se puede emitir aquí."
+
+msgid "Some variables of the document have no value: it was not issued."
+msgstr "Algunas variables del documento no tienen valor: no se emitió."
+
+msgid "The certificate could not be saved."
+msgstr "No se pudo guardar el certificado."
+
+#: admin/assignment-users.php, admin/templates/certificate-assignment-users.php
+msgid "Choose a document and at least one user."
+msgstr "Elija un documento y al menos una persona."
+
+#. translators: %s: list of names
+msgid "Document issued to: %s"
+msgstr "Documento emitido a: %s"
+
+msgid "Search users"
+msgstr "Buscar personas"
+
+msgid "Name, username or email"
+msgstr "Nombre, usuario o correo"
+
+msgid "There are no active documents without signatures."
+msgstr "No hay documentos activos sin firmas."
+
+msgid "No users found."
+msgstr "No se encontraron usuarios."
+
+#. translators: 1: users shown, 2: users found
+msgid "Showing %1$d of %2$d users. Search to narrow the list."
+msgstr "Se muestran %1$d de %2$d personas. Busque para acotar la lista."
+
+
+
+msgid "Requires EduSystem"
+msgstr "Requiere EduSystem"
+
+msgid "Plugin not active"
+msgstr "Plugin no activo"
+
+msgid "Not offered in the editor"
+msgstr "No se ofrece en el editor"
+
+msgid "Not offered in the editor: no plugin gives it a value"
+msgstr "No se ofrece en el editor: ningún plugin le da valor"
+
+msgid "With EduSystem, documents are issued to its students."
+msgstr "Con EduSystem, los documentos se emiten a sus estudiantes."
+
+msgid "The user has no email: the document cannot be identified or validated."
+msgstr "El usuario no tiene correo: el documento no se puede identificar ni validar."
+
+msgid "This account cannot receive documents from here."
+msgstr "Esta cuenta no puede recibir documentos desde aquí."
+
+#. translators: %s: list of names
+msgid "Already issued before (not issued again): %s"
+msgstr "Ya emitido antes (no se vuelve a emitir): %s"
+
+#. translators: %d: minimum number of characters
+msgid "Search the person by name or email (at least %d characters)."
+msgstr "Busque a la persona por nombre o correo (al menos %d caracteres)."
+
+msgid "Method not available"
+msgstr "Método no disponible"
+
+#: textos neutros (sin «student» en lo propio de WP Certificates)
+msgid "Issued documents"
+msgstr "Documentos emitidos"
+
+msgid "This action requires EduSystem."
+msgstr "Esta acción requiere EduSystem."
+
+msgid "The person or the document does not exist."
+msgstr "La persona o el documento no existe."
+
+msgid "It links the document with its signatures and issued copies: change it only if you know what it affects."
+msgstr "Enlaza el documento con sus firmas y sus copias emitidas: cámbielo solo si sabe a qué afecta."
+
+
+
+msgid "Search for a person"
+msgstr "Buscar una persona"
+
+msgid "Variables of the person"
+msgstr "Variables de la persona"
+
+
+
+msgid "WordPress account of the person"
+msgstr "Cuenta de WordPress de la persona"
+
+msgid "The document was declined."
+msgstr "El documento se declinó."
+
+
+
+msgid "Not configured yet: choose below which roles and signers sign this document."
+msgstr "Aún sin configurar: elija abajo qué roles y firmantes firman este documento."
+
+msgid "When you decline this document, the signature of the person linked to it (if any) will be revoked, and the document can no longer be approved or set back to pending. The user will have to send or sign a new document."
+msgstr "Al declinar este documento se anulará la firma de la persona vinculada (si la hay) y el documento ya no se podrá aprobar ni volver a pendiente. El usuario tendrá que enviar o firmar un documento nuevo."
+
+msgid "Signers of the system (directors, coordinators...). Each one registers their own signature from their account after an invitation: nobody can upload the signature of another person. The people who receive a document sign it from their own account and do not need an invitation."
+msgstr "Firmantes del sistema (directores, coordinadores...). Cada uno registra su propia firma desde su cuenta tras una invitación: nadie puede subir la firma de otra persona. Las personas que reciben un documento lo firman desde su propia cuenta y no necesitan invitación."
+
+msgid "No user with that name or email. You can invite the person to register:"
+msgstr "No hay ningún usuario con ese nombre o correo. Puede invitar a la persona a registrarse:"
+
+msgid "Pending: the person must sign from their own account"
+msgstr "Pendiente: la persona debe firmar desde su propia cuenta"
+
+
+
+
+msgid "Issue documents for signature and decline them."
+msgstr "Emitir documentos para firma y declinarlos."
+
+#: ronda final: menús, usted, secretaría, titular
+msgid "There are no registered signers yet. Invite them from Certification > Signers."
+msgstr "Todavía no hay firmantes registrados. Invítelos desde Certificación > Firmantes."
+
+msgid "Holder"
+msgstr "Titular"
+
+msgid "Issue documents"
+msgstr "Emitir documentos"
+
+msgid "See the list of issued documents."
+msgstr "Ver la lista de documentos emitidos."
+
+msgid "Issue documents to people."
+msgstr "Emitir documentos a personas."
+
+msgid "Design the ID card."
+msgstr "Diseñar el carnet."
+
+msgid "Change the validation address and the QR image, and turn the ID card on or off."
+msgstr "Cambiar la dirección de validación, la imagen del QR y activar o desactivar el carnet."
+
+msgid "No expiry"
+msgstr "Sin vencimiento"
+
+msgid "This document has a field named %s that matches a system variable; the answer of the field is used."
+msgstr "Este documento tiene un campo llamado %s que coincide con una variable del sistema; se usa la respuesta del campo."
+
+msgid "An inactive document is not requested or issued."
+msgstr "Un documento inactivo no se pide ni se emite."
+
+msgid "The school office generates it, or issues it for signature, from the student file."
+msgstr "La secretaría lo genera, o lo emite para firma, desde la ficha del estudiante."
+
+msgid "The school office issues it to each person from \"Issue documents\"."
+msgstr "La secretaría lo emite a cada persona desde «Emitir documentos»."
+
+msgid "It appears in My Account of each student until they sign or complete it. When saved, it is added as a requirement to the students who do not have it yet."
+msgstr "Aparece en Mi cuenta de cada estudiante hasta que lo firme o lo complete. Al guardar, se añade como requisito a los estudiantes que aún no lo tienen."
+
+msgid "It appears in My Account of each person who must sign or complete it, until they do."
+msgstr "Aparece en Mi cuenta de cada persona que debe firmarlo o completarlo, hasta que lo haga."
+
+msgid "Variables saved in the database: this is the list shown when writing a document template. Editing or deleting a variable only changes this list; it does not change how the variable is filled in when a document is issued."
+msgstr "Variables guardadas en la base de datos: es la lista que se muestra al escribir una plantilla de documento. Editar o eliminar una variable solo cambia esta lista; no cambia cómo se rellena la variable al emitir un documento."
+
+msgid "No method"
+msgstr "Sin método"
+
+msgid "Details of the person who receives the document. They are offered in the editor when a plugin or the WordPress account of the person gives them a value; the source is shown in \"Source of the value\"."
+msgstr "Datos de la persona que recibe el documento. Se ofrecen en el editor cuando un plugin o la cuenta de WordPress de la persona les da valor; el origen se indica en «Origen del valor»."
+
+msgid "Source of the value"
+msgstr "Origen del valor"
+
+msgid "Without a method, the variable has no value."
+msgstr "Sin método, la variable no tiene valor."
+
+msgid "Card design"
+msgstr "Diseño del carnet"
+
+msgid "Issue a document to people with an account on this site. Their details (first names, last names and email) are taken from their WordPress account. The issued documents appear in \"Issued documents\" with their validation code. Documents that ask for signatures are not issued here."
+msgstr "Emita un documento a personas con cuenta en este sitio. Sus datos (nombre, apellidos y correo) se toman de su cuenta de WordPress. Los documentos emitidos aparecen en «Documentos emitidos» con su código de validación. Los documentos que piden firmas no se emiten aquí."
+
+msgid "Select a document"
+msgstr "Seleccione un documento"
+
+msgid "Issue to the selected people"
+msgstr "Emitir a las personas marcadas"
+
+msgid "Teacher"
+msgstr "Docente"
+
+msgid "This user has a role that signs its own documents (see \"Signing roles\"): they cannot be a system signer."
+msgstr "Este usuario tiene un rol que firma sus propios documentos (vea «Roles que firman»): no puede ser firmante del sistema."
+
+msgid "This document was already issued to this person and is waiting for signatures."
+msgstr "Este documento ya se emitió a esta persona y está esperando firmas."
+
+msgid "What to do: 1) in Certification > Signers, invite the responsible persons to register their own signature; 2) in Certification > Documents, open each document and choose its signers in \"Document signers\"; 3) from the student file, use \"Issue for signature\". Documents already signed keep their validity."
+msgstr "Qué hacer: 1) en Certificación > Firmantes, invite a los responsables a registrar su propia firma; 2) en Certificación > Documentos, abra cada documento y elija sus firmantes en «Firmantes del documento»; 3) desde la ficha del estudiante, use «Emitir para firma». Los documentos ya firmados conservan su validez."
+
+msgid "What to do: 1) in Certification > Signers, invite the responsible persons to register their own signature; 2) in Certification > Documents, open each document and choose its signers in \"Document signers\". Documents already signed keep their validity."
+msgstr "Qué hacer: 1) en Certificación > Firmantes, invite a los responsables a registrar su propia firma; 2) en Certificación > Documentos, abra cada documento y elija sus firmantes en «Firmantes del documento». Los documentos ya firmados conservan su validez."
+
+msgid "This is how the issued document will look, with its page format."
+msgstr "Así se verá el documento emitido, con su formato de página."
+
+msgid "The preview could not be generated (%s)."
+msgstr "No se pudo generar la vista previa (%s)."
+
+msgid "If the school office issues it: only the system signers sign it (the roles do not)."
+msgstr "Si lo emite la secretaría: solo lo firman los firmantes del sistema (los roles no)."
+
+msgid "Signature of the system signer (old templates)"
+msgstr "Firma del firmante del sistema (plantillas antiguas)"
+
+msgid "Name of the system signer (old templates)"
+msgstr "Nombre del firmante del sistema (plantillas antiguas)"
+
+msgid "Position of the system signer (old templates)"
+msgstr "Cargo del firmante del sistema (plantillas antiguas)"
+
+msgid "Signature, name and position of system signer number N (old templates)"
+msgstr "Firma, nombre y cargo del firmante del sistema número N (plantillas antiguas)"
+
+msgid "The appearance applies to all the screens of WP Certificates."
+msgstr "La apariencia se aplica a todas las pantallas de WP Certificates."
+
+msgid "Turns on the new look of the WP Certificates panel. When it is off, everything looks as before."
+msgstr "Activa la nueva apariencia del panel de WP Certificates. Apagado, todo se ve como antes."

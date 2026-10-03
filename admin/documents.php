@@ -56,10 +56,11 @@ function wpc_eds_documents_assets(): void
             /* translators: 1: number of issued certificates, 2: number of signature requests */
             'deleteBlockedBody' => __('It has %1$s issued certificates and %2$s signature requests. If it were deleted, they would be left without their template. Deactivate it instead so that it is no longer used.', 'wp-certificates'),
             'automaticTitle' => __('Save as a document signed by the person?', 'wp-certificates'),
+            // Requisitos de los estudiantes: solo con EduSystem (sin él nunca hay requisitos que añadir ni se muestra)
             /* translators: %s: number of students */
-            'automaticBody' => __('When you save, this document is added as a requirement to %s students who do not have it yet. They will see it in My Account.', 'wp-certificates'),
+            'automaticBody' => wpc_edusystem_active() ? __('When you save, this document is added as a requirement to %s students who do not have it yet. They will see it in My Account.', 'wp-certificates') : '',
             /* translators: %s: number of students */
-            'automaticBodyUpTo' => __('When you save, this document is added as a requirement to up to %s students who do not have it yet (the code changed). They will see it in My Account.', 'wp-certificates'),
+            'automaticBodyUpTo' => wpc_edusystem_active() ? __('When you save, this document is added as a requirement to up to %s students who do not have it yet (the code changed). They will see it in My Account.', 'wp-certificates') : '',
             'automaticConfirm' => __('Save and add the requirement', 'wp-certificates'),
             'unsavedTitle' => __('There are unsaved changes', 'wp-certificates'),
             'unsavedSigners' => __('You changed the signers and did not save them. If you save the document now, those changes are lost.', 'wp-certificates'),
@@ -426,6 +427,11 @@ function add_admin_form_documents_content()
             // (ver edusystem/includes/document-fields.php). Las filas inválidas se descartan con un aviso.
             $field_errors = [];
             if (function_exists('squuad_cert_sanitize_document_fields')) {
+                // Un campo que ya existía con una clave que después pasó a ser variable del sistema ({{full_name}}) se conserva
+                if (function_exists('squuad_cert_document_fields_kept_keys')) {
+                    $stored_document = $document_id > 0 ? get_document_detail($document_id) : null;
+                    squuad_cert_document_fields_kept_keys($stored_document ? array_column(squuad_cert_get_document_fields($stored_document), 'key') : []);
+                }
                 [$document_fields, $field_errors] = squuad_cert_sanitize_document_fields(wp_unslash($_POST['fields'] ?? []));
                 $document_data['fields'] = $document_fields ? wp_json_encode($document_fields) : null;
             }

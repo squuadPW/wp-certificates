@@ -334,7 +334,7 @@ function squuad_cert_signer_invite(WP_User $user, string $charge, bool $new_acco
         return ['ok' => false, 'message' => __('The signers module is not available yet.', 'wp-certificates')];
     }
     if (!squuad_cert_signer_user_is_eligible($user)) {
-        return ['ok' => false, 'message' => __('Students and parents cannot be invited as signers.', 'wp-certificates')];
+        return ['ok' => false, 'message' => (wpc_edusystem_active() ? __('Students and parents cannot be invited as signers.', 'wp-certificates') : __('This user has a role that signs its own documents (see "Signing roles"): they cannot be a system signer.', 'wp-certificates'))];
     }
     $charge = mb_substr(trim($charge), 0, 191);
     $now = gmdate('Y-m-d H:i:s');
@@ -1670,7 +1670,7 @@ function squuad_cert_signature_issue_document(int $student_id, int $document_cer
     $student = $subject['student'] ?? null;
     $document = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}documents_certificates WHERE id = %d", $document_certificate_id));
     if (!$student || !$document || !$user_id) {
-        return $fail(__('The student or the document does not exist.', 'wp-certificates'));
+        return $fail(__('The person or the document does not exist.', 'wp-certificates'));
     }
     if (function_exists('squuad_cert_signature_session_switched_from') && squuad_cert_signature_session_switched_from()) {
         return $fail(__('Documents cannot be issued from a switched session.', 'wp-certificates'));
@@ -1680,7 +1680,7 @@ function squuad_cert_signature_issue_document(int $student_id, int $document_cer
     }
     $latest = squuad_cert_signature_issued_latest($student_id, $document_certificate_id);
     if ($latest && in_array($latest->status, SQUUAD_CERT_SIGNATURE_REQUEST_OPEN, true) && null !== $latest->frozen_at_utc) {
-        return $fail(__('This document was already issued for this student and is waiting for signatures.', 'wp-certificates'));
+        return $fail(__('This document was already issued to this person and is waiting for signatures.', 'wp-certificates'));
     }
 
     // Tomo y folio (paso 8b): la línea reservada que se reutiliza, o ninguna decisión pendiente sobre la anterior

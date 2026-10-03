@@ -122,7 +122,7 @@ function squuad_cert_signer_decline_request(int $request_id, string $reason, boo
 
     return ['ok' => true, 'message' => 'issued' === ($request->origin ?? '')
         ? __('The document was declined. The administration will decide how to issue it again.', 'wp-certificates')
-        : __('The document was declined. The student was notified.', 'wp-certificates')];
+        : (wpc_edusystem_active() ? __('The document was declined. The student was notified.', 'wp-certificates') : __('The document was declined.', 'wp-certificates'))];
 }
 
 add_action('admin_post_squuad_cert_signer_decline', 'squuad_cert_signer_inbox_handle_decline');

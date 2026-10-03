@@ -95,9 +95,10 @@ function squuad_cert_last_completed_grade_field()
  */
 function squuad_cert_migrate_documents_php()
 {
-    // 'done-2' = versión actual terminada; el 'done' de la versión 1 hace que se vuelva a ejecutar
+    // 'done-2' = versión actual terminada; 'done-2-pending' = terminada sin EduSystem, con sus variables pendientes
+    // (squuad_cert_migrate_documents_php_variables()); el 'done' de la versión 1 hace que se vuelva a ejecutar
     $state = get_option('squuad_cert_documents_php_migrated');
-    if ('done-2' === $state) {
+    if (in_array($state, ['done-2', SQUUAD_CERT_DOCUMENTS_PHP_VARIABLES_PENDING], true)) {
         return;
     }
     // Candado con la hora de inicio: evita que dos peticiones migren a la vez y, si una ejecución
@@ -161,39 +162,11 @@ function squuad_cert_migrate_documents_php()
         }
     }
 
-    // Dar a conocer las variables nuevas en la lista «Variables» del formulario de documentos
-    $table_variables = $wpdb->prefix . 'variables_document';
-    if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table_variables)) === $table_variables) {
-        $variables = [
-            'parent_full_name' => 'Parent/guardian full name',
-            'parent_email' => 'Parent/guardian email',
-            'parent_cell' => 'Parent/guardian cell phone',
-            'parent_identification' => 'Parent/guardian identification',
-            'institute_name' => 'School name',
-            'institute_address' => 'School address',
-            'institute_phone' => 'School phone',
-            'payment_full_year_check' => 'Full year payment mark (✓)',
-            'payment_balance_check' => 'Balance payment mark (✓)',
-        ];
-        foreach ($variables as $identificator => $text) {
-            $exists = $wpdb->get_var($wpdb->prepare("SELECT id FROM {$table_variables} WHERE identificator = %s", $identificator));
-            if (!$exists) {
-                $wpdb->insert($table_variables, [
-                    'text' => $text,
-                    'visual' => '{{' . $identificator . '}}',
-                    'identificator' => $identificator,
-                    'type' => 'all',
-                ]);
-            }
-        }
-        if (!$wpdb->get_var($wpdb->prepare("SELECT id FROM {$table_variables} WHERE identificator = %s", 'show_parent_info'))) {
-            $wpdb->insert($table_variables, [
-                'text' => 'Only if the student is not their own guardian',
-                'visual' => '{{#show_parent_info}} ... {{/show_parent_info}}',
-                'identificator' => 'show_parent_info',
-                'type' => 'all',
-            ]);
-        }
+    // Dar a conocer las variables nuevas en la lista «Variables» del formulario de documentos: son de EduSystem, así que
+    // solo con EduSystem activo; sin él quedan pendientes y se añaden cuando se active (squuad_cert_migrate_documents_php_variables())
+    $variables_pending = !squuad_cert_documents_php_variables_ready();
+    if (!$variables_pending) {
+        squuad_cert_documents_php_insert_variables();
     }
 
     if ($pending) {
@@ -203,10 +176,85 @@ function squuad_cert_migrate_documents_php()
     }
     // Sin la columna `fields` queda pendiente la conversión del bloque de grados: se reintenta pasados 5 minutos
     if ($has_fields_column) {
-        update_option('squuad_cert_documents_php_migrated', 'done-2');
+        update_option('squuad_cert_documents_php_migrated', $variables_pending ? SQUUAD_CERT_DOCUMENTS_PHP_VARIABLES_PENDING : 'done-2');
     }
 }
 add_action('init', 'squuad_cert_migrate_documents_php');
+
+/**
+ * Estado de squuad_cert_documents_php_migrated cuando la migración terminó sin EduSystem: sus variables se añaden a la
+ * lista cuando EduSystem esté activo. Se guarda en la misma opción (autocargada): no cuesta una consulta por petición.
+ * Con 'done-2' (también el de la versión anterior, que las añadía siempre) no se vuelve a tocar.
+ */
+const SQUUAD_CERT_DOCUMENTS_PHP_VARIABLES_PENDING = 'done-2-pending';
+
+/** Variables de EduSystem que se dan a conocer al convertir el PHP: clave => [descripción, cómo se escribe]. */
+function squuad_cert_documents_php_variables(): array
+{
+    return [
+        'parent_full_name' => ['Parent/guardian full name', '{{parent_full_name}}'],
+        'parent_email' => ['Parent/guardian email', '{{parent_email}}'],
+        'parent_cell' => ['Parent/guardian cell phone', '{{parent_cell}}'],
+        'parent_identification' => ['Parent/guardian identification', '{{parent_identification}}'],
+        'institute_name' => ['School name', '{{institute_name}}'],
+        'institute_address' => ['School address', '{{institute_address}}'],
+        'institute_phone' => ['School phone', '{{institute_phone}}'],
+        'payment_full_year_check' => ['Full year payment mark (✓)', '{{payment_full_year_check}}'],
+        'payment_balance_check' => ['Balance payment mark (✓)', '{{payment_balance_check}}'],
+        'show_parent_info' => ['Only if the student is not their own guardian', '{{#show_parent_info}} ... {{/show_parent_info}}'],
+    ];
+}
+
+/** ¿Se pueden añadir ya? Solo con EduSystem activo (sus métodos se registran en plugins_loaded, antes de init). */
+function squuad_cert_documents_php_variables_ready(): bool
+{
+    return function_exists('wpc_edusystem_active') && wpc_edusystem_active();
+}
+
+/**
+ * Añade a la lista las variables de EduSystem que falten, con su método edusystem.<clave> si está disponible (como
+ * las demás, ADR 0005). Las que ya están no se tocan. Sin la tabla no hace nada.
+ */
+function squuad_cert_documents_php_insert_variables(): void
+{
+    global $wpdb;
+    $table_variables = $wpdb->prefix . 'variables_document';
+    if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table_variables)) !== $table_variables) {
+        return;
+    }
+    $available = function_exists('squuad_cert_variable_methods') ? squuad_cert_variable_methods() : [];
+    $added = [];
+    foreach (squuad_cert_documents_php_variables() as $identificator => [$text, $visual]) {
+        if ($wpdb->get_var($wpdb->prepare("SELECT id FROM {$table_variables} WHERE identificator = %s", $identificator))) {
+            continue;
+        }
+        $method = 'edusystem.' . $identificator;
+        $wpdb->insert($table_variables, [
+            'text' => $text,
+            'visual' => $visual,
+            'identificator' => $identificator,
+            'type' => 'all',
+            'method' => isset($available[$method]) ? $method : null,
+        ]);
+        $added[] = $identificator;
+    }
+    if ($added) {
+        squuad_cert_log(sprintf('Variables de EduSystem añadidas a la lista (conversión de documentos PHP): %s', implode(', ', $added)), 'variable_created');
+    }
+}
+
+/** Migración hecha sin EduSystem: al activarse EduSystem, se añaden sus variables (una vez). */
+function squuad_cert_migrate_documents_php_variables(): void
+{
+    // Primero lo barato (sin EduSystem no hay nada que hacer); la opción está autocargada
+    if (!squuad_cert_documents_php_variables_ready() || SQUUAD_CERT_DOCUMENTS_PHP_VARIABLES_PENDING !== get_option('squuad_cert_documents_php_migrated')) {
+        return;
+    }
+    // Sin la tabla tampoco se repite: no hay lista a la que añadirlas
+    squuad_cert_documents_php_insert_variables();
+    update_option('squuad_cert_documents_php_migrated', 'done-2');
+}
+add_action('init', 'squuad_cert_migrate_documents_php_variables', 11);
 
 /**
  * Aviso para quien gestiona documentos si alguno conserva PHP que no se pudo convertir

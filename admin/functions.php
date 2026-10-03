@@ -63,6 +63,7 @@ function wpc_admin_screens_buffer(): void
 }
 
 require plugin_dir_path(__FILE__) . 'certificates.php';
+require plugin_dir_path(__FILE__) . 'assignment-users.php';
 require plugin_dir_path(__FILE__) . 'cards.php';
 require plugin_dir_path(__FILE__) . 'configuration-options.php';
 require plugin_dir_path(__FILE__) . 'users-signatures.php';
@@ -135,12 +136,10 @@ function add_certificates_page_admin()
             'dashicons-awards',
             4
         );
-        add_submenu_page('add_admin_form_certificates_content', esc_html__('Student certificates', 'wp-certificates'), esc_html__('Student certificates', 'wp-certificates'), 'manager_certificates', 'add_admin_form_certificates_list_content', 'add_admin_form_certificates_list_content', 10);
+        add_submenu_page('add_admin_form_certificates_content', esc_html__('Issued documents', 'wp-certificates'), esc_html__('Issued documents', 'wp-certificates'), 'manager_certificates', 'add_admin_form_certificates_list_content', 'add_admin_form_certificates_list_content', 10);
         add_submenu_page('add_admin_form_certificates_content', esc_html__('Documents', 'wp-certificates'), esc_html__('Documents', 'wp-certificates'), 'manager_documents_certificates', 'add_admin_form_documents_content', 'add_admin_form_documents_content', 10);
-        // Asignar certificados a estudiantes: solo con EduSystem
-        if (wpc_edusystem_active()) {
-            add_submenu_page('add_admin_form_certificates_content', esc_html__('Certificate assignment', 'wp-certificates'), esc_html__('Certificate assignment', 'wp-certificates'), 'manager_certificate_assignment', 'admin_certificate_assignment_content', 'admin_certificate_assignment_content', 10);
-        }
+        // Asignar certificados: con EduSystem, a sus estudiantes; sin él, a usuarios de WordPress (titular wp_user)
+        add_submenu_page('add_admin_form_certificates_content', esc_html__('Issue documents', 'wp-certificates'), esc_html__('Issue documents', 'wp-certificates'), 'manager_certificate_assignment', 'admin_certificate_assignment_content', 'admin_certificate_assignment_content', 10);
         // add_submenu_page('add_admin_form_certificates_content', esc_html__('Certificates', 'wp-certificates'), esc_html__('Certificates', 'wp-certificates'), 'manager_certificates_templates', 'add_admin_form_certificates_templates_content', 'add_admin_form_certificates_templates_content', 10);
         // «Users and signatures» lo registra el módulo de firmas (certification/admin/signers.php), en esta misma URL
         add_submenu_page('add_admin_form_certificates_content', esc_html__('ID card', 'wp-certificates'), esc_html__('ID card', 'wp-certificates'), 'manager_id_card', 'add_admin_form_cards_content', 'add_admin_form_cards_content', 10);

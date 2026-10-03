@@ -2,12 +2,12 @@
 <div class="wrap">
 
     <?php if ($wpc_eds): ?>
-        <h1 class="wp-heading-inline"><?= esc_html__('Certificate assignment', 'wp-certificates'); ?></h1>
+        <h1 class="wp-heading-inline"><?= esc_html__('Issue documents', 'wp-certificates'); ?></h1>
         <hr class="wp-header-end">
     <?php else: ?>
     <div style="text-align:start;">
         <h3 style="margin-top:20px;margin-bottom:0px;text-align:center; border-bottom: 1px solid #8080805c;">
-            <?= esc_html__('Certificate assignment', 'wp-certificates'); ?>
+            <?= esc_html__('Issue documents', 'wp-certificates'); ?>
         </h3>
     </div>
     <?php endif; ?>
@@ -39,7 +39,7 @@
                                     <b><?= __('Select Certificate','wp-certificates') ?></b>
                                     <br>
                                     <select name="certificate_id" required >
-                                        <option value=""><?= __('Select a certificate', 'wp-certificates'); ?></option>
+                                        <option value=""><?= __('Select a document', 'wp-certificates'); ?></option>
                                         <?php foreach ( $documents_certificates as $document_certificates ): ?>
                                             <option value="<?= $document_certificates->id ?>"> <?= $document_certificates->title ?> </option>
                                         <?php endforeach; ?>

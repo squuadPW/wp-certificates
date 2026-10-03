@@ -20,15 +20,18 @@ const SQUUAD_CERT_PERMISSIONS_INSTALLED = 'squuad_cert_permissions_installed';
 function squuad_cert_capabilities(): array
 {
     $caps = [
-        'manager_certificates' => [__('Certificates', 'wp-certificates'), __('Student certificates.', 'wp-certificates')],
+        'manager_certificates' => [__('Issued documents', 'wp-certificates'), __('See the list of issued documents.', 'wp-certificates')],
         'manager_documents_certificates' => [__('Documents', 'wp-certificates'), __('Create and edit the documents (templates, book, priority).', 'wp-certificates')],
-        'manager_certificate_assignment' => [__('Certificate assignment', 'wp-certificates'), __('Assign certificates to students.', 'wp-certificates')],
-        'manager_users_signatures_certificate' => [__('Users and signatures', 'wp-certificates'), __('See the system signers.', 'wp-certificates')],
-        'manager_id_card' => [__('ID card', 'wp-certificates'), __('Student ID cards.', 'wp-certificates')],
-        'manager_configuration_certificates' => [__('Configuration', 'wp-certificates'), __('Certification configuration.', 'wp-certificates')],
+        'manager_certificate_assignment' => [__('Issue documents', 'wp-certificates'), __('Issue documents to people.', 'wp-certificates')],
+        'manager_users_signatures_certificate' => [__('Signers', 'wp-certificates'), __('See the system signers.', 'wp-certificates')],
+        'manager_id_card' => [__('ID card', 'wp-certificates'), __('Design the ID card.', 'wp-certificates')],
+        'manager_configuration_certificates' => [__('Configuration', 'wp-certificates'), __('Change the validation address and the QR image, and turn the ID card on or off.', 'wp-certificates')],
         'squuad_cert_manage_signers' => [__('Manage signers', 'wp-certificates'), __('Invite, suspend and remove system signers.', 'wp-certificates')],
         'squuad_cert_manage_signing_policies' => [__('Document signers', 'wp-certificates'), __('Choose who signs each document and in which order.', 'wp-certificates')],
-        'squuad_cert_issue_documents' => [__('Issue for signature', 'wp-certificates'), __('Issue documents for signature from a student file, and decline them.', 'wp-certificates')],
+        // La ficha del estudiante es de EduSystem: sin él, el texto no la nombra
+        'squuad_cert_issue_documents' => [__('Issue for signature', 'wp-certificates'), function_exists('wpc_edusystem_active') && wpc_edusystem_active()
+            ? __('Issue documents for signature from a student file, and decline them.', 'wp-certificates')
+            : __('Issue documents for signature and decline them.', 'wp-certificates')],
         'squuad_cert_manage_signature_integrity' => [__('Signature integrity', 'wp-certificates'), __('Verify the signature chain and rotate the key.', 'wp-certificates')],
         'squuad_cert_manage_variables' => [__('Variables', 'wp-certificates'), __('Edit the variable list and choose the method of each variable.', 'wp-certificates')],
         'squuad_cert_manage_signing_roles' => [__('Signing roles', 'wp-certificates'), __('Choose which roles can sign documents.', 'wp-certificates')],

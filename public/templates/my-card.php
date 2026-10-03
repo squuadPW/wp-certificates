@@ -51,10 +51,17 @@
                         <?= esc_html__('Name', 'wp-certificates') ?>:</div>
                 </div>
                 <div style="font-size: 14px; color: #0534a5; margin: 0 20px; text-shadow: 0 0 2px white;">
-                    <?= $user->name ?>     <?= $user->last_name ?>
+                    <?= esc_html((string) $user->name) ?>     <?= esc_html((string) $user->last_name) ?>
                 </div>
                 <div style="font-size: 8px; color: #0534a5; margin: 0 0 5px; text-shadow: 0 0 1px white;">
-                    <?= esc_html__('High School', 'wp-certificates') ?>    <?= in_array('teacher', $roles) ? 'Teacher' : 'Student' ?>
+                    <?php if (wpc_edusystem_active()) { // Carnet de EduSystem (estudiantes y docentes) ?>
+                        <?= esc_html__('High School', 'wp-certificates') ?>    <?= in_array('teacher', (array) $roles, true) ? esc_html__('Teacher', 'wp-certificates') : esc_html__('Student', 'wp-certificates') ?>
+                    <?php } else { // Sin EduSystem: nombre del sitio y nombre traducido del rol de la cuenta
+                        $card_role = (string) (((array) $roles)[0] ?? '');
+                        $card_role_name = (string) (wp_roles()->role_names[$card_role] ?? '');
+                        ?>
+                        <?= esc_html(get_bloginfo('name')) ?>    <?= esc_html('' !== $card_role_name ? translate_user_role($card_role_name) : '') ?>
+                    <?php } ?>
                 </div>
                 <div style="display: flex; justify-content: center; align-items: center; flex-direction: column;">
                     <div id="qrcode" style="width: 60px; image-rendering: crisp-edges;"></div>

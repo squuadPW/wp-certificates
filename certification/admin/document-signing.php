@@ -322,7 +322,8 @@ function squuad_cert_missing_letter_conversion_available(): bool
 {
     global $wpdb;
 
-    if (!function_exists('squuad_cert_signers_enabled') || !squuad_cert_signers_enabled()) {
+    // La carta es de EduSystem (documentos faltantes del estudiante): sin EduSystem activo no se ofrece
+    if (!function_exists('squuad_cert_signers_enabled') || !squuad_cert_signers_enabled() || !wpc_edusystem_active()) {
         return false;
     }
     $table = $wpdb->prefix . 'documents_certificates';
@@ -536,7 +537,9 @@ function squuad_cert_legacy_signatures_migration_notify(): void
     foreach ($admins as $user) {
         $body = sprintf(__('Hello %s,', 'wp-certificates'), $user->display_name) . "\n\n" . $intro . "\n\n"
             . __('These documents require a signature and are disabled until you configure who signs them:', 'wp-certificates') . "\n" . $list . "\n\n"
-            . __('What to do: 1) in Users and signatures, invite the responsible persons to register their own signature; 2) in Certification > Documents, open each document and choose its signers in "Document signers"; 3) from the student file, use "Issue for signature". Documents already signed keep their validity.', 'wp-certificates') . "\n"
+            . (wpc_edusystem_active()
+                ? __('What to do: 1) in Certification > Signers, invite the responsible persons to register their own signature; 2) in Certification > Documents, open each document and choose its signers in "Document signers"; 3) from the student file, use "Issue for signature". Documents already signed keep their validity.', 'wp-certificates')
+                : __('What to do: 1) in Certification > Signers, invite the responsible persons to register their own signature; 2) in Certification > Documents, open each document and choose its signers in "Document signers". Documents already signed keep their validity.', 'wp-certificates')) . "\n"
             . admin_url('admin.php?page=add_admin_form_documents_content') . "\n";
         $sent += (int) wp_mail($user->user_email, $subject, $body);
     }

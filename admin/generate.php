@@ -47,7 +47,7 @@ function squuad_cert_generate_document(): void
     // El titular lo aporta el proveedor de EduSystem: sin él no hay estudiantes
     $provider = squuad_cert_subject_type(SQUUAD_CERT_GENERATE_SUBJECT);
     if (!$provider || empty($provider['can_act']) || empty($provider['book_line_data'])) {
-        wp_send_json_error(__('Students are not available (EduSystem is not active).', 'wp-certificates'), 503);
+        wp_send_json_error(__('This action requires EduSystem.', 'wp-certificates'), 503);
     }
     // Mismo permiso que antes: administrador con permiso de Admisión (edición o lectura)
     if (!call_user_func($provider['can_act'], get_current_user_id(), $student_id, 'generate')) {
@@ -57,7 +57,7 @@ function squuad_cert_generate_document(): void
     $student = $subject['student'] ?? null;
     $document = get_document_detail($document_certificate_id);
     if (!$student || !$document) {
-        wp_send_json_error(__('The student or the document does not exist.', 'wp-certificates'), 404);
+        wp_send_json_error(__('The person or the document does not exist.', 'wp-certificates'), 404);
     }
     $emission_date = (new DateTime('now', new DateTimeZone('UTC')))->format('Y-m-d');
 

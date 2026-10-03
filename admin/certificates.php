@@ -72,6 +72,12 @@ function add_admin_form_certificates_templates_content(){
 
 function admin_certificate_assignment_content () {
 
+    // Sin EduSystem no hay estudiantes: se emite a usuarios de WordPress (admin/assignment-users.php)
+    if ( !wpc_edusystem_active() ) {
+        squuad_cert_assignment_users_page();
+        return;
+    }
+
     if( isset($_GET['action']) && $_GET['action'] == 'generate_certificates' ) {
         
         $student_ids = isset($_POST['student_ids']) ? array_map('intval', $_POST['student_ids']) : [];
@@ -161,24 +167,24 @@ class TT_certificates_all_List_Table extends WP_List_Table {
         global $current_user;
 
         switch ($column_name) {
+            // Fechas con el formato y el idioma del sitio (Ajustes > Generales)
             case 'expiration_date':
                 if ($item[$column_name]) {
-                    $expiration_date = DateTime::createFromFormat('Y-m-d', $item[$column_name]);
-                    return '<span>' . $expiration_date->format('M, Y') . '</span>';
+                    return '<span>' . esc_html(mysql2date(get_option('date_format'), $item[$column_name])) . '</span>';
                 } else {
-                    return '<span class="text-uppercase">N/A</span>';
+                    return '<span>' . esc_html__('No expiry', 'wp-certificates') . '</span>';
                 }
             case 'emission_date':
                 if ($item[$column_name]) {
-                    $emission_date = DateTime::createFromFormat('Y-m-d', $item[$column_name]);
-                    return '<span>' . $emission_date->format('M, Y') . '</span>';
+                    return '<span>' . esc_html(mysql2date(get_option('date_format'), $item[$column_name])) . '</span>';
                 } else {
-                    return '<span class="text-uppercase">N/A</span>';
+                    return '<span>—</span>';
                 }
             // case 'view_details':
             //     return "<a href='" . admin_url('/admin.php?page=add_admin_form_academic_projection_content&section_tab=academic_projection_details&projection_id=' . $item['academic_projection_id']) . "' class='button button-primary'>" . esc_html__('View Details', 'wp-certificates') . "</a>";
             default:
-                return '<span class="text-uppercase">' . $item[$column_name] . '</span>';
+                // Escapado: el nombre puede venir del perfil de una cuenta de WordPress (titular wp_user), que edita su dueño
+                return '<span class="text-uppercase">' . esc_html((string) $item[$column_name]) . '</span>';
         }
     }
 
@@ -199,7 +205,7 @@ class TT_certificates_all_List_Table extends WP_List_Table {
         $columns = array(
             'name_document' => esc_html__('Document', 'wp-certificates'),
             'simple_uuid' => esc_html__('Code', 'wp-certificates'),
-            'user' => esc_html__('User', 'wp-certificates'),
+            'user' => esc_html__('Holder', 'wp-certificates'),
             // 'email' => esc_html__('Email', 'wp-certificates'),
             'emission_date' => esc_html__('Emission date', 'wp-certificates'),
             'expiration_date' => esc_html__('Expiration date', 'wp-certificates'),

@@ -19,7 +19,14 @@ function squuad_cert_site_roles(): array
 {
     $roles = [];
     foreach (wp_roles()->roles as $key => $role) {
-        $roles[(string) $key] = translate_user_role((string) ($role['name'] ?? $key));
+        // Roles propios (p. ej. «Signer» del módulo de firmas): su nombre se traduce con el dominio de wp-certificates
+        $name = (string) ($role['name'] ?? $key);
+        $label = translate_user_role($name);
+        $roles[(string) $key] = $label === $name ? translate_user_role($name, 'wp-certificates') : $label;
+        // translate_user_role() traduce con el contexto «User role»: marcador para que la cadena llegue al .pot
+        if (false) {
+            _x('Signer', 'User role', 'wp-certificates');
+        }
     }
 
     return $roles;
