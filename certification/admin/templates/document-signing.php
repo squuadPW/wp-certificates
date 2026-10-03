@@ -26,8 +26,14 @@ $row = static function (string $key, string $label, string $detail, bool $checke
     <?php
 };
 $next = count($positions) + 1;
+// Diseño Edusof: este es el único interruptor de firmas del documento. En los gestionados también refleja el «requerirá
+// firmas» de siempre (signature_required), que se actualiza al guardar aquí (admin/document-signing.php)
+$eds = function_exists('wpc_eds_documents_enabled') && wpc_eds_documents_enabled();
+$requires_checked = $eds
+    ? ($policy['requires_signatures'] || ('automatic' !== $document->type && !empty($document->signature_required)))
+    : $policy['requires_signatures'];
 ?>
-<div id="edusystem-document-signers" class="postbox" style="margin-top:20px;display:none">
+<div id="edusystem-document-signers" class="<?= $eds ? 'eds-card wpc-eds-signers' : 'postbox' ?>" style="margin-top:20px;display:none">
     <div class="inside">
         <h2 style="padding-left:0"><?= esc_html__('Document signers', 'wp-certificates') ?></h2>
         <p class="description" style="max-width:820px"><?= esc_html__('Who signs this document and in which order. First the roles: every user with a marked role receives their own document and signs it from their own account. Then the registered signers of the system sign every one of those documents. The document is valid when all the signatures are done. Changes apply to new signature requests; requests already in progress keep their signers.', 'wp-certificates') ?></p>
@@ -48,7 +54,13 @@ $next = count($positions) + 1;
             <input type="hidden" name="action" value="squuad_cert_save_signing_policy">
             <input type="hidden" name="document_certificate_id" value="<?= (int) $document->id ?>">
             <?php wp_nonce_field('squuad_cert_save_signing_policy'); ?>
-            <p><label><input type="checkbox" name="requires_signatures" value="1" <?= checked($policy['requires_signatures'], true, false) ?>> <strong><?= esc_html__('This document asks for signatures', 'wp-certificates') ?></strong></label></p>
+            <?php if ($eds) : ?>
+                <input type="hidden" name="wpc_eds_sync_signature" value="1">
+            <?php endif; ?>
+            <p><label><input type="checkbox" name="requires_signatures" value="1" id="edusig-requires-signatures" <?= checked($requires_checked, true, false) ?>> <strong><?= esc_html__('This document asks for signatures', 'wp-certificates') ?></strong></label></p>
+            <?php if ($eds) : ?>
+                <p class="description" style="max-width:820px"><?= esc_html__('This is the only signature switch of the document. Save it with «Save document signers»: the document button does not save it.', 'wp-certificates') ?></p>
+            <?php endif; ?>
 
             <table class="widefat striped" style="max-width:820px">
                 <thead><tr><th></th><th><?= esc_html__('Signer', 'wp-certificates') ?></th><th><?= esc_html__('Variables for the template', 'wp-certificates') ?></th><th><?= esc_html__('Order', 'wp-certificates') ?></th></tr></thead>
@@ -121,7 +133,11 @@ $next = count($positions) + 1;
     document.addEventListener("DOMContentLoaded", function () {
         const panel = document.getElementById("edusystem-document-signers");
         const anchor = document.getElementById("metabox") || document.querySelector(".wrap");
-        if (panel && anchor) {
+        const slot = document.getElementById("wpc-eds-signers-slot"); // diseño Edusof: hueco propio en el editor
+        if (panel && slot) {
+            slot.appendChild(panel);
+            panel.style.display = "";
+        } else if (panel && anchor) {
             anchor.parentNode.insertBefore(panel, anchor.nextSibling);
             panel.style.display = "";
         }

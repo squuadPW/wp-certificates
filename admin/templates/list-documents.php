@@ -1,3 +1,8 @@
+<?php // Diseño Edusof activo: lista nueva (eds-list-documents.php); si no, la de siempre
+if (wpc_eds_documents_enabled()) {
+	include __DIR__ . '/eds-list-documents.php';
+	return;
+} ?>
 <div class="tabs-content">
 	<div class="wrap">
 		<div style="text-align:start;">

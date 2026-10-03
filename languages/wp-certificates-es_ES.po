@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: WP Certificates 1.0.29\n"
-"Report-Msgid-Bugs-To: https://edusof.com\n"
-"POT-Creation-Date: 2026-10-03T04:00:24+00:00\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wp-certificates\n"
+"POT-Creation-Date: 2026-10-03T14:28:26+00:00\n"
 "PO-Revision-Date: 2026-10-02 23:50+0000\n"
 "Last-Translator: EduSof\n"
 "Language-Team: Español\n"
@@ -20,8 +20,12 @@ msgstr "WP Certificates"
 
 #. Description of the plugin
 #: wp-certificates.php
-msgid "The WordPress plugin for certificates, certificates and personalized documents of the institution."
-msgstr "El plugin de WordPress para los certificados y documentos personalizados de la institución."
+msgid ""
+"The WordPress plugin for certificates, certificates and personalized "
+"documents of the institution."
+msgstr ""
+"El plugin de WordPress para los certificados y documentos personalizados de "
+"la institución."
 
 #. Author of the plugin
 #: wp-certificates.php
@@ -62,7 +66,7 @@ msgstr "Carnet ajustado correctamente."
 msgid "Certification deleted successfully."
 msgstr "Certificado eliminado correctamente."
 
-#: admin/cards.php:89 admin/documents.php:334
+#: admin/cards.php:89 admin/documents.php:600
 msgid "View Details"
 msgstr "Ver detalles"
 
@@ -78,8 +82,10 @@ msgstr "Certificado"
 msgid "User"
 msgstr "Usuario"
 
-#: admin/cards.php:112 admin/documents.php:360
-#: admin/templates/document-detail.php:303 admin/templates/variables.php:83
+#: admin/cards.php:112 admin/documents.php:626
+#: admin/templates/document-detail.php:307
+#: admin/templates/eds-document-detail.php:418
+#: admin/templates/eds-list-documents.php:130 admin/templates/variables.php:83
 msgid "Actions"
 msgstr "Acciones"
 
@@ -96,22 +102,30 @@ msgid "Template deleted successfully."
 msgstr "Plantilla eliminada correctamente."
 
 #: admin/certificates.php:87
-msgid "This document requires signatures: it cannot be issued here. Configure its signers and issue it for signature from the student file; each responsible person signs from their own account."
-msgstr "Este documento exige firmas: no se puede emitir aquí. Configure sus firmantes y emítalo para firma desde la ficha del estudiante; cada responsable firma desde su propia cuenta."
+msgid ""
+"This document requires signatures: it cannot be issued here. Configure its "
+"signers and issue it for signature from the student file; each responsible "
+"person signs from their own account."
+msgstr ""
+"Este documento exige firmas: no se puede emitir aquí. Configure sus "
+"firmantes y emítalo para firma desde la ficha del estudiante; cada "
+"responsable firma desde su propia cuenta."
 
 #: admin/certificates.php:94
 msgid "An error occurred while trying to issue the certificate"
 msgstr "Ocurrió un error al intentar emitir el certificado"
 
 #: admin/certificates.php:124
-msgid "There have been problems issuing certificates to the following students:"
-msgstr "Hubo problemas al emitir los certificados de los siguientes estudiantes:"
+msgid ""
+"There have been problems issuing certificates to the following students:"
+msgstr ""
+"Hubo problemas al emitir los certificados de los siguientes estudiantes:"
 
 #: admin/certificates.php:128
 msgid "The certificates have been successfully issued"
 msgstr "Los certificados se emitieron correctamente"
 
-#: admin/certificates.php:200 admin/templates/document-detail.php:5
+#: admin/certificates.php:200 admin/templates/document-detail.php:10
 #: certification/admin/subject-panel.php:76
 #: certification/admin/subject-panel.php:92
 #: certification/admin/templates/document-issued.php:26
@@ -129,7 +143,10 @@ msgstr "Los certificados se emitieron correctamente"
 msgid "Document"
 msgstr "Documento"
 
-#: admin/certificates.php:201 admin/templates/document-detail.php:46
+#: admin/certificates.php:201 admin/templates/document-detail.php:51
+#: admin/templates/eds-document-detail.php:39
+#: admin/templates/eds-document-detail.php:140
+#: admin/templates/eds-document-detail.php:192
 msgid "Code"
 msgstr "Código"
 
@@ -151,69 +168,205 @@ msgstr "Nombre de la plantilla"
 msgid "Description"
 msgstr "Descripción"
 
-#: admin/certificates.php:333 admin/documents.php:332
-#: admin/templates/api-keys.php:68 admin/templates/document-detail.php:80
+#: admin/certificates.php:333 admin/documents.php:598
+#: admin/templates/api-keys.php:68 admin/templates/document-detail.php:85
+#: admin/templates/eds-document-detail.php:134
+#: admin/templates/eds-document-detail.php:305
+#: admin/templates/eds-list-documents.php:161
 #: admin/templates/template-certificates-detail.php:37
 #: certification/admin/templates/signers.php:22
 msgid "Active"
 msgstr "Activo"
 
-#: admin/documents.php:54 admin/documents.php:278
+#: admin/documents.php:48 certification/includes/html-signatures.php:78
+msgid "Cancel"
+msgstr "Cancelar"
+
+#: admin/documents.php:49 admin/templates/generate-modal.php:41
+msgid "Close"
+msgstr "Cerrar"
+
+#: admin/documents.php:50 admin/templates/eds-list-documents.php:172
+#: admin/templates/variables.php:117
+msgid "Delete"
+msgstr "Eliminar"
+
+#. translators: %s: name of the document
+#: admin/documents.php:52
+#, php-format
+msgid "Delete «%s»"
+msgstr "Eliminar «%s»"
+
+#: admin/documents.php:53
+msgid "The document will be deleted permanently. This cannot be undone."
+msgstr "El documento se eliminará de forma definitiva. No se puede deshacer."
+
+#. translators: %s: name of the document
+#: admin/documents.php:55
+#, php-format
+msgid "«%s» cannot be deleted"
+msgstr "«%s» no se puede eliminar"
+
+#. translators: 1: number of issued certificates, 2: number of signature requests
+#: admin/documents.php:57
+#, php-format
+msgid "It has %1$s issued certificates and %2$s signature requests. If it were deleted, they would be left without their template. Deactivate it instead so that it is no longer used."
+msgstr "Tiene %1$s certificados emitidos y %2$s solicitudes de firma. Si se eliminara, quedarían sin su plantilla. Desactívelo para que no se siga usando."
+
+#: admin/documents.php:58
+#
+msgid "Save as a document signed by the person?"
+msgstr "¿Guardar como documento que firma la persona?"
+
+#. translators: %s: number of students
+#: admin/documents.php:60
+#, php-format
+msgid "When you save, this document is added as a requirement to %s students who do not have it yet. They will see it in My Account."
+msgstr "Al guardar, este documento se añade como requisito a %s estudiantes que aún no lo tienen. Lo verán en Mi cuenta."
+
+#. translators: %s: number of students
+#: admin/documents.php:62
+#, php-format
+msgid "When you save, this document is added as a requirement to up to %s students who do not have it yet (the code changed). They will see it in My Account."
+msgstr "Al guardar, este documento se añade como requisito a hasta %s estudiantes que aún no lo tienen (cambió el código). Lo verán en Mi cuenta."
+
+#: admin/documents.php:63
+msgid "Save and add the requirement"
+msgstr "Guardar y añadir el requisito"
+
+#: admin/documents.php:64
+#
+msgid "There are unsaved changes"
+msgstr "Hay cambios sin guardar"
+
+#: admin/documents.php:65
+msgid "You changed the signers and did not save them. If you save the document now, those changes are lost."
+msgstr "Cambió los firmantes y no los guardó. Si guarda el documento ahora, esos cambios se pierden."
+
+#: admin/documents.php:66
+msgid "You changed the document and did not save it. If you save the signers now, those changes are lost."
+msgstr "Cambió el documento y no lo guardó. Si guarda los firmantes ahora, esos cambios se pierden."
+
+#: admin/documents.php:67
+#
+msgid "Save anyway"
+msgstr "Guardar de todos modos"
+
+#. translators: %s: variable, e.g. {{student_name}}
+#: admin/documents.php:69
+#, php-format
+msgid "%s inserted"
+msgstr "%s insertado"
+
+#. translators: %s: number of results
+#: admin/documents.php:71
+#, php-format
+msgid "%s results"
+msgstr "%s resultados"
+
+#: admin/documents.php:136 admin/templates/eds-document-detail.php:353
+#: admin/templates/eds-list-documents.php:154
+#
+msgid "Asks for signatures"
+msgstr "Pide firmas"
+
+#: admin/documents.php:136 admin/documents.php:143
+#: admin/templates/eds-document-detail.php:142
+#: admin/templates/eds-document-detail.php:355
+#
+msgid "Does not ask for signatures"
+msgstr "No pide firmas"
+
+#: admin/documents.php:146
+msgid "Asks for signatures, but has no signers"
+msgstr "Pide firmas, pero no tiene firmantes"
+
+#. translators: %d: number of system signers
+#: admin/documents.php:160
+#, php-format
+msgid "%d signer"
+msgid_plural "%d signers"
+msgstr[0] "%d firmante"
+msgstr[1] "%d firmantes"
+
+#: admin/documents.php:287 admin/documents.php:527
 msgid "You are not allowed to do this."
 msgstr "No tiene permiso para hacer esto."
 
-#: admin/documents.php:73
+#: admin/documents.php:306
 msgid "The name and the code are required."
 msgstr "El nombre y el código son obligatorios."
 
-#: admin/documents.php:78
+#: admin/documents.php:311
 #, php-format
 msgid "There is already a document with the code %s."
 msgstr "Ya existe un documento con el código %s."
 
-#: admin/documents.php:100 admin/documents.php:195
+#: admin/documents.php:333 admin/documents.php:444
 msgid "Error saving document."
 msgstr "Error al guardar el documento."
 
-#: admin/documents.php:102
-msgid "Document created as inactive. Complete it and activate it when it is ready."
-msgstr "Documento creado como inactivo. Complételo y actívelo cuando esté listo."
+#: admin/documents.php:335
+msgid ""
+"Document created as inactive. Complete it and activate it when it is ready."
+msgstr ""
+"Documento creado como inactivo. Complételo y actívelo cuando esté listo."
 
-#: admin/documents.php:258
+#: admin/documents.php:393
+msgid "The document was not saved: confirm that it is added as a requirement to the students who do not have it yet."
+msgstr "El documento no se guardó: confirme que se añade como requisito a los estudiantes que aún no lo tienen."
+
+#: admin/documents.php:507
 msgid "Document adjusted successfully."
 msgstr "Documento ajustado correctamente."
 
-#: admin/documents.php:259
+#: admin/documents.php:508
 msgid "Some additional fields were not saved:"
 msgstr "Algunos campos adicionales no se guardaron:"
 
-#: admin/documents.php:262
+#: admin/documents.php:511
 #, php-format
-msgid "The registry book line cannot use %s: they are assigned when the line is reserved. Remove them, or the document will not be issued."
-msgstr "La línea del libro de registro no puede usar %s: se asignan al reservar la línea. Quítelas o el documento no se emitirá."
+msgid ""
+"The registry book line cannot use %s: they are assigned when the line is "
+"reserved. Remove them, or the document will not be issued."
+msgstr ""
+"La línea del libro de registro no puede usar %s: se asignan al reservar la "
+"línea. Quítelas o el documento no se emitirá."
 
-#: admin/documents.php:286
+#. translators: 1: name of the document, 2: number of issued certificates, 3: number of signature requests
+#: admin/documents.php:539
+#, php-format
+msgid "«%1$s» was not deleted: it has %2$d issued certificates and %3$d signature requests, which would be left without their template. Deactivate it instead."
+msgstr "«%1$s» no se eliminó: tiene %2$d certificados emitidos y %3$d solicitudes de firma, que quedarían sin su plantilla. Desactívelo en su lugar."
+
+#: admin/documents.php:549
 msgid "Document deleted successfully."
 msgstr "Documento eliminado correctamente."
 
-#: admin/documents.php:332
+#: admin/documents.php:598 admin/templates/eds-document-detail.php:136
+#: admin/templates/eds-list-documents.php:20
+#: admin/templates/eds-list-documents.php:163
 msgid "Inactive"
 msgstr "Inactivo"
 
-#: admin/documents.php:335
+#: admin/documents.php:601
 msgid "Are you sure?"
 msgstr "¿Está seguro?"
 
-#: admin/documents.php:357 admin/templates/api-keys.php:47
-#: admin/templates/card-detail.php:41 admin/templates/document-detail.php:41
-#: admin/templates/document-detail.php:84
+#: admin/documents.php:623 admin/templates/api-keys.php:47
+#: admin/templates/card-detail.php:41 admin/templates/document-detail.php:46
+#: admin/templates/document-detail.php:89
+#: admin/templates/eds-document-detail.php:35
+#: admin/templates/eds-document-detail.php:188
+#: admin/templates/eds-list-documents.php:126
 #: certification/public/templates/documents-to-sign.php:23
 #: certification/public/templates/documents-to-sign.php:39
 #: public/templates/my-card.php:51
 msgid "Name"
 msgstr "Nombre"
 
-#: admin/documents.php:358 admin/templates/api-keys.php:52
+#: admin/documents.php:624 admin/templates/api-keys.php:52
+#: admin/templates/eds-list-documents.php:129
 #: certification/admin/templates/document-issued.php:30
 #: certification/admin/templates/signers.php:93
 #: certification/public/templates/documents-to-sign.php:24
@@ -221,35 +374,40 @@ msgstr "Nombre"
 msgid "Status"
 msgstr "Estado"
 
-#: admin/documents.php:359
+#: admin/documents.php:625
 msgid "Created at"
 msgstr "Creado en"
 
-#: admin/documents.php:486 admin/templates/document-detail.php:298
+#: admin/documents.php:752 admin/templates/document-detail.php:302
+#: admin/templates/eds-document-detail.php:413
 msgid "Label"
 msgstr "Etiqueta"
 
-#: admin/documents.php:488 admin/templates/api-keys.php:48
-#: admin/templates/document-detail.php:299 admin/templates/signing-roles.php:24
-#: admin/templates/variables.php:191 admin/templates/variables.php:225
-#: admin/templates/variables.php:260
+#: admin/documents.php:754 admin/templates/api-keys.php:48
+#: admin/templates/document-detail.php:303
+#: admin/templates/eds-document-detail.php:414
+#: admin/templates/signing-roles.php:24 admin/templates/variables.php:191
+#: admin/templates/variables.php:225 admin/templates/variables.php:260
 msgid "Key"
 msgstr "Clave"
 
-#: admin/documents.php:494 admin/templates/document-detail.php:237
-#: admin/templates/document-detail.php:300
+#: admin/documents.php:760 admin/templates/document-detail.php:241
+#: admin/templates/document-detail.php:304
+#: admin/templates/eds-document-detail.php:415
 msgid "Type"
 msgstr "Tipo"
 
-#: admin/documents.php:500 admin/templates/document-detail.php:301
+#: admin/documents.php:766 admin/templates/document-detail.php:305
+#: admin/templates/eds-document-detail.php:416
 msgid "Options (one per line)"
 msgstr "Opciones (una por línea)"
 
-#: admin/documents.php:501 admin/templates/document-detail.php:302
+#: admin/documents.php:767 admin/templates/document-detail.php:306
+#: admin/templates/eds-document-detail.php:417
 msgid "Required"
 msgstr "Requerido"
 
-#: admin/documents.php:502
+#: admin/documents.php:768
 msgid "Remove"
 msgstr "Quitar"
 
@@ -258,6 +416,9 @@ msgid "Select option"
 msgstr "Seleccionar opción"
 
 #: admin/functions.php:109 admin/functions.php:110
+#: admin/templates/eds-document-detail.php:18
+#: admin/templates/eds-document-detail.php:130
+#: admin/templates/eds-list-documents.php:40
 msgid "Certification"
 msgstr "Certificación"
 
@@ -265,8 +426,13 @@ msgstr "Certificación"
 msgid "Student certificates"
 msgstr "Certificados de estudiantes"
 
-#: admin/functions.php:118 admin/templates/list-documents.php:4
-#: admin/templates/variables.php:48 includes/permissions.php:24
+#: admin/functions.php:118 admin/templates/eds-document-detail.php:18
+#: admin/templates/eds-document-detail.php:130
+#: admin/templates/eds-list-documents.php:40
+#: admin/templates/eds-list-documents.php:42
+#: admin/templates/eds-list-documents.php:123
+#: admin/templates/list-documents.php:9 admin/templates/variables.php:48
+#: includes/permissions.php:24
 msgid "Documents"
 msgstr "Documentos"
 
@@ -299,9 +465,9 @@ msgstr "No se pudo generar el documento."
 msgid "Students are not available (EduSystem is not active)."
 msgstr "Los estudiantes no están disponibles (EduSystem no está activo)."
 
-#: admin/generate.php:54 certification/admin/document-signing.php:132
-#: certification/admin/document-signing.php:239
-#: certification/admin/document-signing.php:271
+#: admin/generate.php:54 certification/admin/document-signing.php:154
+#: certification/admin/document-signing.php:261
+#: certification/admin/document-signing.php:293
 msgid "You do not have permission to manage admissions."
 msgstr "No tiene permiso para gestionar las admisiones."
 
@@ -310,8 +476,16 @@ msgid "The student or the document does not exist."
 msgstr "El estudiante o el documento no existe."
 
 #: admin/generate.php:68
-msgid "This document requires signatures: it can no longer be generated with signature images. Configure its signers (Certification > Documents > Document signers) and issue it for signature; each responsible person signs from their own account."
-msgstr "Este documento exige firmas: ya no se puede generar con firmas-imagen. Configure sus firmantes (Certificación > Documentos > Firmantes del documento) y emítalo para firma; cada responsable firma desde su propia cuenta."
+msgid ""
+"This document requires signatures: it can no longer be generated with "
+"signature images. Configure its signers (Certification > Documents > "
+"Document signers) and issue it for signature; each responsible person signs "
+"from their own account."
+msgstr ""
+"Este documento exige firmas: ya no se puede generar con firmas-imagen. "
+"Configure sus firmantes (Certificación > Documentos > Firmantes del "
+"documento) y emítalo para firma; cada responsable firma desde su propia "
+"cuenta."
 
 #: admin/permissions.php:21 admin/permissions.php:22
 #: admin/templates/api-keys.php:35 admin/templates/api-keys.php:49
@@ -338,8 +512,12 @@ msgid "Signing roles"
 msgstr "Roles que firman"
 
 #: admin/signing-roles.php:70
-msgid "Signing roles saved. Signature requests already in progress keep their signers."
-msgstr "Roles que firman guardados. Las solicitudes de firma ya en curso conservan sus firmantes."
+msgid ""
+"Signing roles saved. Signature requests already in progress keep their "
+"signers."
+msgstr ""
+"Roles que firman guardados. Las solicitudes de firma ya en curso conservan "
+"sus firmantes."
 
 #: admin/templates/api-keys.php:19
 msgid "Copy this key now: it will not be shown again."
@@ -354,12 +532,24 @@ msgid "Copy"
 msgstr "Copiar"
 
 #: admin/templates/api-keys.php:22
-msgid "Give it only to the team of the connected system, through a safe channel. It must be kept on their server, never in a web page or in a URL."
-msgstr "Entréguela solo al equipo del sistema conectado, por un canal seguro. Debe guardarse en su servidor, nunca en una página web ni en una URL."
+msgid ""
+"Give it only to the team of the connected system, through a safe channel. It "
+"must be kept on their server, never in a web page or in a URL."
+msgstr ""
+"Entréguela solo al equipo del sistema conectado, por un canal seguro. Debe "
+"guardarse en su servidor, nunca en una página web ni en una URL."
 
 #: admin/templates/api-keys.php:26
-msgid "Keys for other systems (for example, the main site of the institution) to check this platform from their server. Today a key can only verify a document by its code; it never searches by person. Every creation, revocation and use is saved in the log."
-msgstr "Claves para que otros sistemas (por ejemplo, el sitio principal de la institución) consulten esta plataforma desde su servidor. Hoy una clave solo puede verificar un documento por su código; nunca busca por persona. Cada alta, revocación y uso queda en el log."
+msgid ""
+"Keys for other systems (for example, the main site of the institution) to "
+"check this platform from their server. Today a key can only verify a "
+"document by its code; it never searches by person. Every creation, "
+"revocation and use is saved in the log."
+msgstr ""
+"Claves para que otros sistemas (por ejemplo, el sitio principal de la "
+"institución) consulten esta plataforma desde su servidor. Hoy una clave solo "
+"puede verificar un documento por su código; nunca busca por persona. Cada "
+"alta, revocación y uso queda en el log."
 
 #: admin/templates/api-keys.php:27
 msgid "Address:"
@@ -416,8 +606,11 @@ msgid "Revoked %s"
 msgstr "Revocada el %s"
 
 #: admin/templates/api-keys.php:71
-msgid "Revoke this key? The connected system will stop working with it at once."
-msgstr "¿Revocar esta clave? El sistema conectado dejará de funcionar con ella al instante."
+msgid ""
+"Revoke this key? The connected system will stop working with it at once."
+msgstr ""
+"¿Revocar esta clave? El sistema conectado dejará de funcionar con ella al "
+"instante."
 
 #: admin/templates/api-keys.php:75
 msgid "Revoke"
@@ -431,7 +624,9 @@ msgstr "Detalles del carnet"
 msgid "Add Card"
 msgstr "Agregar carnet"
 
-#: admin/templates/card-detail.php:22 admin/templates/document-detail.php:29
+#: admin/templates/card-detail.php:22 admin/templates/document-detail.php:34
+#: admin/templates/eds-document-detail.php:23
+#: admin/templates/eds-document-detail.php:145
 #: admin/templates/template-certificates-detail.php:19
 msgid "Back"
 msgstr "Atrás"
@@ -448,14 +643,17 @@ msgstr "Cara principal"
 msgid "Rear side"
 msgstr "Cara posterior"
 
-#: admin/templates/card-detail.php:61 admin/templates/document-detail.php:345
+#: admin/templates/card-detail.php:61 admin/templates/document-detail.php:349
+#: admin/templates/eds-document-detail.php:172
+#: admin/templates/eds-document-detail.php:448
+#: admin/templates/eds-document-detail.php:452
 #: admin/templates/template-certificates-detail.php:64
 #: certification/admin/templates/document-preview.php:19
 #: public/templates/certificates.php:37
 msgid "Preview"
 msgstr "Vista previa"
 
-#: admin/templates/card-detail.php:80 admin/templates/document-detail.php:320
+#: admin/templates/card-detail.php:80 admin/templates/document-detail.php:324
 msgid "Saves changes"
 msgstr "Guardar cambios"
 
@@ -495,208 +693,588 @@ msgstr "Desactivar carnet"
 msgid "Save settings"
 msgstr "Guardar ajustes"
 
-#: admin/templates/document-detail.php:3
+#: admin/templates/document-detail.php:8
 msgid "Document details"
 msgstr "Detalles del documento"
 
-#: admin/templates/document-detail.php:24
+#: admin/templates/document-detail.php:29
+#: admin/templates/eds-document-detail.php:162
 #, php-format
-msgid "This automatic document will not be shown in My Account: %s. It must ask someone to sign it (a signature variable in the template and signers in \"Document signers\") or have additional fields."
-msgstr "Este documento automático no se mostrará en Mi cuenta: %s. Debe pedir a alguien que lo firme (una variable de firma en la plantilla y firmantes en «Firmantes del documento») o tener campos adicionales."
+msgid ""
+"This automatic document will not be shown in My Account: %s. It must ask "
+"someone to sign it (a signature variable in the template and signers in "
+"\"Document signers\") or have additional fields."
+msgstr ""
+"Este documento automático no se mostrará en Mi cuenta: %s. Debe pedir a "
+"alguien que lo firme (una variable de firma en la plantilla y firmantes en "
+"«Firmantes del documento») o tener campos adicionales."
 
-#: admin/templates/document-detail.php:38
+#: admin/templates/document-detail.php:43
+#: admin/templates/eds-document-detail.php:18
+#: admin/templates/eds-document-detail.php:20
 msgid "New document"
 msgstr "Nuevo documento"
 
-#: admin/templates/document-detail.php:39
-msgid "The document is created as inactive. Then you will be taken to its page to complete the content, the format and the rest of the settings, and to activate it."
-msgstr "El documento se crea como inactivo. Después irá a su página para completar el contenido, el formato y el resto de ajustes, y para activarlo."
+#: admin/templates/document-detail.php:44
+#: admin/templates/eds-document-detail.php:21
+msgid ""
+"The document is created as inactive. Then you will be taken to its page to "
+"complete the content, the format and the rest of the settings, and to "
+"activate it."
+msgstr ""
+"El documento se crea como inactivo. Después irá a su página para completar "
+"el contenido, el formato y el resto de ajustes, y para activarlo."
 
-#: admin/templates/document-detail.php:49
-msgid "Unique. It is saved in capital letters with hyphens (e.g. OFFICIAL-TRANSCRIPT) and cannot be repeated."
-msgstr "Único. Se guarda en mayúsculas con guiones (p. ej. OFFICIAL-TRANSCRIPT) y no se puede repetir."
+#: admin/templates/document-detail.php:54
+#: admin/templates/eds-document-detail.php:41
+msgid ""
+"Unique. It is saved in capital letters with hyphens (e.g. OFFICIAL-"
+"TRANSCRIPT) and cannot be repeated."
+msgstr ""
+"Único. Se guarda en mayúsculas con guiones (p. ej. OFFICIAL-TRANSCRIPT) y no "
+"se puede repetir."
 
-#: admin/templates/document-detail.php:52
+#: admin/templates/document-detail.php:57
+#: admin/templates/eds-document-detail.php:44
 msgid "Create document"
 msgstr "Crear documento"
 
-#: admin/templates/document-detail.php:72
+#: admin/templates/document-detail.php:77
 msgid "Document Information"
 msgstr "Información del documento"
 
-#: admin/templates/document-detail.php:90
+#: admin/templates/document-detail.php:95
 msgid "Identifier (can be the name of the document)"
 msgstr "Identificador (puede ser el nombre del documento)"
 
-#: admin/templates/document-detail.php:97
+#: admin/templates/document-detail.php:102
 msgid "General variables"
 msgstr "Variables generales"
 
-#: admin/templates/document-detail.php:98
+#: admin/templates/document-detail.php:103
 msgid "Defined by WP Certificates: they work on any site."
 msgstr "Definidas por WP Certificates: funcionan en cualquier sitio."
 
-#: admin/templates/document-detail.php:108 admin/templates/variables.php:53
+#: admin/templates/document-detail.php:112 admin/templates/variables.php:53
 #: admin/variables.php:29 admin/variables.php:30 includes/permissions.php:33
 msgid "Variables"
 msgstr "Variables"
 
-#: admin/templates/document-detail.php:117
+#: admin/templates/document-detail.php:121
+#: admin/templates/eds-document-detail.php:123
 msgid "Header"
 msgstr "Encabezado"
 
-#: admin/templates/document-detail.php:131
+#: admin/templates/document-detail.php:135
+#: admin/templates/eds-document-detail.php:124
+#: admin/templates/eds-document-detail.php:166
+#: admin/templates/eds-document-detail.php:185
 msgid "Content"
 msgstr "Contenido"
 
-#: admin/templates/document-detail.php:145
+#: admin/templates/document-detail.php:149
+#: admin/templates/eds-document-detail.php:125
 msgid "Footer"
 msgstr "Pie de página"
 
-#: admin/templates/document-detail.php:163
+#: admin/templates/document-detail.php:167
 msgid "This document will require signatures"
 msgstr "Este documento requerirá firmas"
 
-#: admin/templates/document-detail.php:171
+#: admin/templates/document-detail.php:175
+#: admin/templates/eds-document-detail.php:341
 msgid "This document requires that the student be a graduate"
 msgstr "Este documento requiere que el estudiante sea graduado"
 
-#: admin/templates/document-detail.php:179
+#: admin/templates/document-detail.php:183
+#: admin/templates/eds-document-detail.php:297
 msgid "This document has margins (on all sides)"
 msgstr "Este documento tiene márgenes (en todos los lados)"
 
-#: admin/templates/document-detail.php:183
+#: admin/templates/document-detail.php:187
+#: admin/templates/eds-document-detail.php:370
 msgid "ID Requirement for the admin (ID requisito)"
 msgstr "ID del requisito para el admin (ID requisito)"
 
-#: admin/templates/document-detail.php:188
+#: admin/templates/document-detail.php:192
+#: admin/templates/eds-document-detail.php:374
 msgid "Type file"
 msgstr "Tipo de archivo"
 
-#: admin/templates/document-detail.php:193
+#: admin/templates/document-detail.php:197
+#: admin/templates/eds-document-detail.php:383
 msgid "Certificate book"
 msgstr "Libro de certificados"
 
-#: admin/templates/document-detail.php:195
+#: admin/templates/document-detail.php:199
+#: admin/templates/eds-document-detail.php:385
 msgid "Select a book"
 msgstr "Seleccione un libro"
 
-#: admin/templates/document-detail.php:211
+#: admin/templates/document-detail.php:215
+#: admin/templates/eds-document-detail.php:397
 msgid "Registry book line description"
 msgstr "Descripción de la línea del libro de registro"
 
-#: admin/templates/document-detail.php:213
-#, php-format
-msgid "Text of the line registered in the book when the document is issued. It accepts the same variables as the document, except {{tomo}}, {{folio}}, {{tomo_folio}} and {{qrcode}}, and is sent as plain text (maximum %d characters). If a variable has no value, the document is not issued. Empty: the text shown as an example is used."
-msgstr "Texto de la línea que se registra en el libro al emitir el documento. Acepta las mismas variables que el documento, salvo {{tomo}}, {{folio}}, {{tomo_folio}} y {{qrcode}}, y se envía como texto plano (máximo %d caracteres). Si una variable no tiene valor, el documento no se emite. Vacío: se usa el texto que se muestra como ejemplo."
-
 #: admin/templates/document-detail.php:217
+#: admin/templates/eds-document-detail.php:399
+#, php-format
+msgid ""
+"Text of the line registered in the book when the document is issued. It "
+"accepts the same variables as the document, except {{tomo}}, {{folio}}, "
+"{{tomo_folio}} and {{qrcode}}, and is sent as plain text (maximum %d "
+"characters). If a variable has no value, the document is not issued. Empty: "
+"the text shown as an example is used."
+msgstr ""
+"Texto de la línea que se registra en el libro al emitir el documento. Acepta "
+"las mismas variables que el documento, salvo {{tomo}}, {{folio}}, "
+"{{tomo_folio}} y {{qrcode}}, y se envía como texto plano (máximo %d "
+"caracteres). Si una variable no tiene valor, el documento no se emite. "
+"Vacío: se usa el texto que se muestra como ejemplo."
+
+#: admin/templates/document-detail.php:221
+#: admin/templates/eds-document-detail.php:270
 msgid "Orientation"
 msgstr "Orientación"
 
-#: admin/templates/document-detail.php:219
+#: admin/templates/document-detail.php:223
+#: admin/templates/eds-document-detail.php:272
 msgid "Portrait"
 msgstr "Vertical"
 
-#: admin/templates/document-detail.php:220
+#: admin/templates/document-detail.php:224
+#: admin/templates/eds-document-detail.php:273
 msgid "Landscape"
 msgstr "Horizontal"
 
-#: admin/templates/document-detail.php:225
+#: admin/templates/document-detail.php:229
+#: admin/templates/eds-document-detail.php:259
 msgid "Paper Format"
 msgstr "Formato de papel"
 
-#: admin/templates/document-detail.php:229
+#: admin/templates/document-detail.php:233
+#: admin/templates/eds-document-detail.php:263
 msgid "Letter"
 msgstr "Carta"
 
-#: admin/templates/document-detail.php:230
+#: admin/templates/document-detail.php:234
+#: admin/templates/eds-document-detail.php:264
 msgid "Legal"
 msgstr "Oficio"
 
-#: admin/templates/document-detail.php:231
+#: admin/templates/document-detail.php:235
+#: admin/templates/eds-document-detail.php:265
 msgid "Tabloid"
 msgstr "Tabloide"
 
-#: admin/templates/document-detail.php:232
+#: admin/templates/document-detail.php:236
+#: admin/templates/eds-document-detail.php:266
 msgid "Custom"
 msgstr "Personalizado"
 
-#: admin/templates/document-detail.php:239
+#: admin/templates/document-detail.php:243
 msgid "Managed"
 msgstr "Gestionado"
 
-#: admin/templates/document-detail.php:240
+#: admin/templates/document-detail.php:244
 msgid "Automatic"
 msgstr "Automático"
 
-#: admin/templates/document-detail.php:245
+#: admin/templates/document-detail.php:249
+#: admin/templates/eds-document-detail.php:277
 msgid "Unit"
 msgstr "Unidad"
 
-#: admin/templates/document-detail.php:247
+#: admin/templates/document-detail.php:251
+#: admin/templates/eds-document-detail.php:279
 msgid "mm (millimeters)"
 msgstr "mm (milímetros)"
 
-#: admin/templates/document-detail.php:248
+#: admin/templates/document-detail.php:252
+#: admin/templates/eds-document-detail.php:280
 msgid "pt (points)"
 msgstr "pt (puntos)"
 
-#: admin/templates/document-detail.php:249
+#: admin/templates/document-detail.php:253
+#: admin/templates/eds-document-detail.php:281
 msgid "cm (centimeters)"
 msgstr "cm (centímetros)"
 
-#: admin/templates/document-detail.php:250
+#: admin/templates/document-detail.php:254
+#: admin/templates/eds-document-detail.php:282
 msgid "in (inches)"
 msgstr "in (pulgadas)"
 
-#: admin/templates/document-detail.php:251
+#: admin/templates/document-detail.php:255
+#: admin/templates/eds-document-detail.php:283
 msgid "px (pixels)"
 msgstr "px (píxeles)"
 
-#: admin/templates/document-detail.php:256
+#: admin/templates/document-detail.php:260
+#: admin/templates/eds-document-detail.php:287
 msgid "Width size"
 msgstr "Ancho"
 
-#: admin/templates/document-detail.php:261
+#: admin/templates/document-detail.php:265
+#: admin/templates/eds-document-detail.php:291
 msgid "Height size"
 msgstr "Alto"
 
-#: admin/templates/document-detail.php:267
+#: admin/templates/document-detail.php:271
+#: admin/templates/eds-document-detail.php:326
 msgid "Is required"
 msgstr "Es obligatorio"
 
-#: admin/templates/document-detail.php:272
+#: admin/templates/document-detail.php:276
+#: admin/templates/eds-document-detail.php:330
 msgid "Is visible in documents page?"
 msgstr "¿Se ve en la página de documentos?"
 
-#: admin/templates/document-detail.php:276
+#: admin/templates/document-detail.php:280
+#: admin/templates/eds-document-detail.php:333
 msgid "Priority"
 msgstr "Prioridad"
 
-#: admin/templates/document-detail.php:278
-msgid "Order in My Account when several automatic documents are pending: 0 is the most urgent; with the same priority, the oldest first."
-msgstr "Orden en Mi cuenta cuando hay varios documentos automáticos pendientes: 0 es el más urgente; con la misma prioridad, primero el más antiguo."
+#: admin/templates/document-detail.php:282
+#: admin/templates/eds-document-detail.php:335
+msgid ""
+"Order in My Account when several automatic documents are pending: 0 is the "
+"most urgent; with the same priority, the oldest first."
+msgstr ""
+"Orden en Mi cuenta cuando hay varios documentos automáticos pendientes: 0 es "
+"el más urgente; con la misma prioridad, primero el más antiguo."
 
-#: admin/templates/document-detail.php:288
+#: admin/templates/document-detail.php:292
+#: admin/templates/eds-document-detail.php:170
+#: admin/templates/eds-document-detail.php:404
 msgid "Advanced"
 msgstr "Avanzado"
 
-#: admin/templates/document-detail.php:290
+#: admin/templates/document-detail.php:294
+#: admin/templates/eds-document-detail.php:407
 msgid "Additional fields"
 msgstr "Campos adicionales"
 
-#: admin/templates/document-detail.php:292
-msgid "They are requested before generating the document and the answers are only used to fill it in (they are only stored while the document is partially signed). Use {{key}} in the document to print the answer and, in fields with options, {{key_list}} to print all the options with (✓) on the selected ones. If the key is left empty, it is created from the label."
-msgstr "Se piden antes de generar el documento y las respuestas solo se usan para rellenarlo (solo se guardan mientras el documento está firmado en parte). Use {{key}} en el documento para imprimir la respuesta y, en los campos con opciones, {{key_list}} para imprimir todas las opciones con (✓) en las elegidas. Si la clave se deja vacía, se crea a partir de la etiqueta."
+#: admin/templates/document-detail.php:296
+#: admin/templates/eds-document-detail.php:408
+msgid ""
+"They are requested before generating the document and the answers are only "
+"used to fill it in (they are only stored while the document is partially "
+"signed). Use {{key}} in the document to print the answer and, in fields with "
+"options, {{key_list}} to print all the options with (✓) on the selected "
+"ones. If the key is left empty, it is created from the label."
+msgstr ""
+"Se piden antes de generar el documento y las respuestas solo se usan para "
+"rellenarlo (solo se guardan mientras el documento está firmado en parte). "
+"Use {{key}} en el documento para imprimir la respuesta y, en los campos con "
+"opciones, {{key_list}} para imprimir todas las opciones con (✓) en las "
+"elegidas. Si la clave se deja vacía, se crea a partir de la etiqueta."
 
-#: admin/templates/document-detail.php:312
+#: admin/templates/document-detail.php:316
+#: admin/templates/eds-document-detail.php:428
 msgid "+ Add field"
 msgstr "+ Agregar campo"
 
-#: admin/templates/document-detail.php:325
+#: admin/templates/document-detail.php:329
 msgid "Add document"
 msgstr "Agregar documento"
+
+#: admin/templates/eds-document-detail.php:17
+#: admin/templates/eds-document-detail.php:129
+#: admin/templates/eds-list-documents.php:39
+msgid "Breadcrumb"
+msgstr "Ruta de navegación"
+
+#: admin/templates/eds-document-detail.php:60
+msgid "Person"
+msgstr "Persona"
+
+#: admin/templates/eds-document-detail.php:61
+msgid "Parent or guardian"
+msgstr "Representante"
+
+#: admin/templates/eds-document-detail.php:62
+msgid "Program and term"
+msgstr "Programa y periodo"
+
+#: admin/templates/eds-document-detail.php:63
+msgid "Previous studies"
+msgstr "Estudios anteriores"
+
+#: admin/templates/eds-document-detail.php:64
+msgid "Payments"
+msgstr "Pagos"
+
+#: admin/templates/eds-document-detail.php:65
+#
+msgid "Tables"
+msgstr "Tablas"
+
+#: admin/templates/eds-document-detail.php:66
+#
+msgid "School"
+msgstr "Colegio"
+
+#: admin/templates/eds-document-detail.php:67
+#
+msgid "This document"
+msgstr "Este documento"
+
+#: admin/templates/eds-document-detail.php:68
+#: admin/templates/eds-document-detail.php:171
+#: admin/templates/eds-document-detail.php:345
+#: admin/templates/eds-list-documents.php:128
+#: certification/admin/templates/document-issued.php:28
+#: certification/admin/templates/signature-integrity.php:80
+msgid "Signatures"
+msgstr "Firmas"
+
+#: admin/templates/eds-document-detail.php:69
+#
+msgid "Validation and registry book"
+msgstr "Validación y libro de registro"
+
+#: admin/templates/eds-document-detail.php:70
+#
+msgid "Layout"
+msgstr "Diseño"
+
+#: admin/templates/eds-document-detail.php:71
+#
+msgid "Additional fields of this document"
+msgstr "Campos adicionales de este documento"
+
+#: admin/templates/eds-document-detail.php:141
+#: admin/templates/eds-list-documents.php:18
+#: admin/templates/eds-list-documents.php:149
+msgid "Signed by the person in their account"
+msgstr "Lo firma la persona en su cuenta"
+
+#: admin/templates/eds-document-detail.php:141
+#: admin/templates/eds-document-detail.php:313
+#: admin/templates/eds-list-documents.php:19
+#: admin/templates/eds-list-documents.php:149
+msgid "Issued by the school office"
+msgstr "Lo emite la secretaría"
+
+#: admin/templates/eds-document-detail.php:146
+#: admin/templates/eds-document-detail.php:437
+#
+msgid "Save changes"
+msgstr "Guardar cambios"
+
+#: admin/templates/eds-document-detail.php:165
+#
+msgid "Sections of the document"
+msgstr "Secciones del documento"
+
+#: admin/templates/eds-document-detail.php:167
+#: admin/templates/eds-document-detail.php:256
+msgid "Page and printing"
+msgstr "Página e impresión"
+
+#: admin/templates/eds-document-detail.php:168
+#: admin/templates/eds-document-detail.php:302
+msgid "Delivery"
+msgstr "Entrega"
+
+#: admin/templates/eds-document-detail.php:169
+#: admin/templates/eds-document-detail.php:381
+#
+msgid "Registry book"
+msgstr "Libro de registro"
+
+#: admin/templates/eds-document-detail.php:194
+msgid "It links the document with the requirements of each student and with the signatures: change it only if you know what it affects."
+msgstr "Enlaza el documento con los requisitos de cada estudiante y con las firmas: cámbielo solo si sabe a qué afecta."
+
+#: admin/templates/eds-document-detail.php:200
+#
+msgid "Parts of the document"
+msgstr "Partes del documento"
+
+#: admin/templates/eds-document-detail.php:213
+msgid "Code editor: the HTML is saved exactly as written, without automatic changes."
+msgstr "Editor de código: el HTML se guarda tal cual se escribe, sin cambios automáticos."
+
+#: admin/templates/eds-document-detail.php:217
+msgid "Data"
+msgstr "Datos"
+
+#: admin/templates/eds-document-detail.php:218
+#
+msgid "Search data"
+msgstr "Buscar dato"
+
+#: admin/templates/eds-document-detail.php:221
+msgid "Click to insert it where the cursor is."
+msgstr "Haga clic para insertarlo donde está el cursor."
+
+#: admin/templates/eds-document-detail.php:248
+msgid "No data matches the search."
+msgstr "Ningún dato coincide con la búsqueda."
+
+#: admin/templates/eds-document-detail.php:306
+#
+msgid "An inactive document is not requested or generated."
+msgstr "Un documento inactivo no se pide ni se genera."
+
+#: admin/templates/eds-document-detail.php:310
+#: admin/templates/eds-list-documents.php:127
+#
+msgid "How it is delivered"
+msgstr "Cómo se entrega"
+
+#: admin/templates/eds-document-detail.php:314
+msgid "The office generates it, or issues it for signature, from the student file. (Managed)"
+msgstr "La secretaría lo genera, o lo emite para firma, desde la ficha del estudiante. (Gestionado)"
+
+#: admin/templates/eds-document-detail.php:318
+msgid "Signed or completed by the person in their account"
+msgstr "Lo firma o completa la persona en su cuenta"
+
+#: admin/templates/eds-document-detail.php:319
+msgid "It appears in My Account of each student until they sign or complete it. When saved, it is added as a requirement to the students who do not have it yet. (Automatic)"
+msgstr "Aparece en Mi cuenta de cada estudiante hasta que lo firme o lo complete. Al guardar, se añade como requisito a los estudiantes que aún no lo tienen. (Automático)"
+
+#: admin/templates/eds-document-detail.php:358
+msgid "Whether the document asks for signatures and who signs it are chosen in «Document signers», below, with its own save button."
+msgstr "Si el documento pide firmas y quién lo firma se eligen en «Firmantes del documento», más abajo, con su propio botón de guardar."
+
+#: admin/templates/eds-document-detail.php:359
+msgid "Choose who signs"
+msgstr "Elegir quién firma"
+
+#: admin/templates/eds-document-detail.php:363
+#: certification/admin/templates/document-signing.php:60
+msgid "This document asks for signatures"
+msgstr "Este documento pide firmas"
+
+#: admin/templates/eds-document-detail.php:432
+#
+msgid "There are no advanced settings on this site."
+msgstr "No hay ajustes avanzados en este sitio."
+
+#: admin/templates/eds-document-detail.php:453
+msgid "It shows the saved version: save to see your changes."
+msgstr "Muestra la versión guardada: guarde para ver sus cambios."
+
+#: admin/templates/eds-list-documents.php:17
+msgid "All"
+msgstr "Todos"
+
+#: admin/templates/eds-list-documents.php:43
+#
+msgid "The templates used to create proofs, certificates and documents to sign."
+msgstr "Las plantillas con las que se crean constancias, certificados y documentos para firmar."
+
+#: admin/templates/eds-list-documents.php:45
+#
+msgid "Create"
+msgstr "Crear"
+
+#. translators: %d: number of documents
+#: admin/templates/eds-list-documents.php:66
+#, php-format
+msgid "%d document asks for signatures but has no signers yet: it cannot be issued."
+msgid_plural "%d documents ask for signatures but have no signers yet: they cannot be issued."
+msgstr[0] "%d documento pide firmas pero aún no tiene firmantes: no se puede emitir."
+msgstr[1] "%d documentos piden firmas pero aún no tienen firmantes: no se pueden emitir."
+
+#: admin/templates/eds-list-documents.php:69
+#
+msgid "For security, nobody can sign on behalf of someone else: choose the signers of each document; they will sign from their own account."
+msgstr "Por seguridad, nadie puede firmar en nombre de otra persona: elija los firmantes de cada documento; firmarán desde su propia cuenta."
+
+#: admin/templates/eds-list-documents.php:71
+msgid "See which ones"
+msgstr "Ver cuáles"
+
+#: admin/templates/eds-list-documents.php:80
+#: certification/admin/document-signing.php:576
+msgid "Hide this notice"
+msgstr "Ocultar este aviso"
+
+#: admin/templates/eds-list-documents.php:88
+#: certification/admin/document-signing.php:373
+msgid "Missing documents commitment letter"
+msgstr "Carta de compromiso de documentos faltantes"
+
+#: admin/templates/eds-list-documents.php:89
+#: certification/admin/document-signing.php:374
+msgid ""
+"This site uses the old fixed letter. Convert it into an automatic document: "
+"it will be editable here, signed with the new signature system (frozen "
+"content, consent, \"Documents to sign\"). Like every automatic document, it "
+"is shown while the student has not signed it. Letters already signed keep "
+"their validity and are not asked again."
+msgstr ""
+"Este sitio usa la carta fija antigua. Conviértala en un documento "
+"automático: se podrá editar aquí y se firmará con el nuevo sistema de firmas "
+"(contenido congelado, consentimiento, «Documentos por firmar»). Como todo "
+"documento automático, se muestra mientras el estudiante no lo haya firmado. "
+"Las cartas ya firmadas conservan su validez y no se vuelven a pedir."
+
+#: admin/templates/eds-list-documents.php:93
+#: certification/admin/document-signing.php:378
+msgid "Convert the letter into an automatic document"
+msgstr "Convertir la carta en documento automático"
+
+#: admin/templates/eds-list-documents.php:98
+#
+msgid "Filter documents"
+msgstr "Filtrar documentos"
+
+#: admin/templates/eds-list-documents.php:107
+#
+msgid "Search by name or code"
+msgstr "Buscar por nombre o código"
+
+#: admin/templates/eds-list-documents.php:110
+#: admin/templates/list-certificates.php:20
+#: admin/templates/list-template-certificates.php:20
+#: certification/admin/templates/signers.php:41
+msgid "Search"
+msgstr "Buscar"
+
+#: admin/templates/eds-list-documents.php:112
+msgid "Clear search"
+msgstr "Quitar la búsqueda"
+
+#: admin/templates/eds-list-documents.php:118
+#
+msgid "No document matches the search."
+msgstr "Ningún documento coincide con la búsqueda."
+
+#: admin/templates/eds-list-documents.php:118
+#
+msgid "There are no documents here yet."
+msgstr "Todavía no hay documentos aquí."
+
+#: admin/templates/eds-list-documents.php:167 admin/templates/variables.php:107
+#: admin/templates/variables.php:250
+msgid "Edit"
+msgstr "Editar"
+
+#: admin/templates/eds-list-documents.php:180
+#
+msgid "Pagination"
+msgstr "Paginación"
+
+#. translators: 1: first row, 2: last row, 3: total rows
+#: admin/templates/eds-list-documents.php:183
+#, php-format
+msgid "Showing %1$d–%2$d of %3$d"
+msgstr "Mostrando %1$d–%2$d de %3$d"
+
+#: admin/templates/eds-list-documents.php:190
+#
+msgid "Previous"
+msgstr "Anterior"
+
+#: admin/templates/eds-list-documents.php:191
+msgid "Next"
+msgstr "Siguiente"
 
 #: admin/templates/generate-modal.php:13
 msgid "Generate Document"
@@ -711,26 +1289,16 @@ msgstr "Generar"
 msgid "Exit"
 msgstr "Salir"
 
-#: admin/templates/generate-modal.php:41
-msgid "Close"
-msgstr "Cerrar"
-
 #: admin/templates/generate-modal.php:42
 msgid "Download"
 msgstr "Descargar"
-
-#: admin/templates/list-certificates.php:20
-#: admin/templates/list-template-certificates.php:20
-#: certification/admin/templates/signers.php:41
-msgid "Search"
-msgstr "Buscar"
 
 #: admin/templates/list-certificates.php:21
 #: admin/templates/list-template-certificates.php:21
 msgid "Search for Student"
 msgstr "Buscar estudiante"
 
-#: admin/templates/list-documents.php:8
+#: admin/templates/list-documents.php:13
 msgid "Add Document"
 msgstr "Agregar documento"
 
@@ -739,8 +1307,12 @@ msgid "Templates of certification"
 msgstr "Plantillas de certificación"
 
 #: admin/templates/permissions.php:14
-msgid "Choose a role and mark the certification permissions it has. Every change is saved in the log. The administrator always keeps this screen."
-msgstr "Elija un rol y marque los permisos de certificación que tiene. Cada cambio queda en el log. El administrador siempre conserva esta pantalla."
+msgid ""
+"Choose a role and mark the certification permissions it has. Every change is "
+"saved in the log. The administrator always keeps this screen."
+msgstr ""
+"Elija un rol y marque los permisos de certificación que tiene. Cada cambio "
+"queda en el log. El administrador siempre conserva esta pantalla."
 
 #: admin/templates/permissions.php:18 admin/templates/signing-roles.php:23
 msgid "Role"
@@ -767,8 +1339,18 @@ msgid "Save"
 msgstr "Guardar"
 
 #: admin/templates/signing-roles.php:14
-msgid "Mark the roles that can sign documents. Each marked role appears in \"Document signers\" of every document, with its own variable for the template. When a document asks a role to sign, every user with that role receives their own document and signs it from their own account; the system signers of the document sign after them."
-msgstr "Marque los roles que pueden firmar documentos. Cada rol marcado aparece en «Firmantes del documento» de cada documento, con su propia variable para la plantilla. Cuando un documento pide la firma de un rol, cada usuario con ese rol recibe su propio documento y lo firma desde su propia cuenta; los firmantes del sistema del documento firman después."
+msgid ""
+"Mark the roles that can sign documents. Each marked role appears in "
+"\"Document signers\" of every document, with its own variable for the "
+"template. When a document asks a role to sign, every user with that role "
+"receives their own document and signs it from their own account; the system "
+"signers of the document sign after them."
+msgstr ""
+"Marque los roles que pueden firmar documentos. Cada rol marcado aparece en "
+"«Firmantes del documento» de cada documento, con su propia variable para la "
+"plantilla. Cuando un documento pide la firma de un rol, cada usuario con ese "
+"rol recibe su propio documento y lo firma desde su propia cuenta; los "
+"firmantes del sistema del documento firman después."
 
 #: admin/templates/signing-roles.php:25
 msgid "Users"
@@ -779,8 +1361,12 @@ msgid "Variable for the template"
 msgstr "Variable para la plantilla"
 
 #: admin/templates/signing-roles.php:41
-msgid "Unmarking a role does not change the signature requests already in progress: they keep their signers."
-msgstr "Desmarcar un rol no cambia las solicitudes de firma ya en curso: conservan sus firmantes."
+msgid ""
+"Unmarking a role does not change the signature requests already in progress: "
+"they keep their signers."
+msgstr ""
+"Desmarcar un rol no cambia las solicitudes de firma ya en curso: conservan "
+"sus firmantes."
 
 #: admin/templates/template-certificates-detail.php:25
 msgid "Template content"
@@ -824,12 +1410,25 @@ msgid "Administrators only."
 msgstr "Solo administradores."
 
 #: admin/templates/variables.php:68
-msgid "The value of a variable is given by a method written in the code of an own plugin (EduSof or Squuad) and chosen from a list. No code is ever written or stored here. Changes are recorded in the log."
-msgstr "El valor de una variable lo da un método escrito en el código de un plugin propio (EduSof o Squuad) y elegido de una lista. Aquí nunca se escribe ni se guarda código. Los cambios quedan en el log."
+msgid ""
+"The value of a variable is given by a method written in the code of an own "
+"plugin (EduSof or Squuad) and chosen from a list. No code is ever written or "
+"stored here. Changes are recorded in the log."
+msgstr ""
+"El valor de una variable lo da un método escrito en el código de un plugin "
+"propio (EduSof o Squuad) y elegido de una lista. Aquí nunca se escribe ni se "
+"guarda código. Los cambios quedan en el log."
 
 #: admin/templates/variables.php:73
-msgid "Variables saved in the database: this is the list shown when writing a document template. Editing or deleting a variable only changes this list; it does not change how the variable is filled in when a document is generated."
-msgstr "Variables guardadas en la base de datos: es la lista que se muestra al escribir una plantilla de documento. Editar o eliminar una variable solo cambia esta lista; no cambia cómo se rellena la variable al generar un documento."
+msgid ""
+"Variables saved in the database: this is the list shown when writing a "
+"document template. Editing or deleting a variable only changes this list; it "
+"does not change how the variable is filled in when a document is generated."
+msgstr ""
+"Variables guardadas en la base de datos: es la lista que se muestra al "
+"escribir una plantilla de documento. Editar o eliminar una variable solo "
+"cambia esta lista; no cambia cómo se rellena la variable al generar un "
+"documento."
 
 #: admin/templates/variables.php:79
 msgid "Variable"
@@ -864,19 +1463,11 @@ msgstr "No disponible"
 msgid "View"
 msgstr "Ver"
 
-#: admin/templates/variables.php:107 admin/templates/variables.php:250
-msgid "Edit"
-msgstr "Editar"
-
 #. translators: %s: variable
 #: admin/templates/variables.php:111
 #, php-format
 msgid "Delete %s from the list? Documents that already use it are not changed."
 msgstr "¿Eliminar %s de la lista? Los documentos que ya la usan no cambian."
-
-#: admin/templates/variables.php:117
-msgid "Delete"
-msgstr "Eliminar"
 
 #: admin/templates/variables.php:128
 msgid "Link variables without a method to the method with the same key"
@@ -887,8 +1478,14 @@ msgid "Own plugins that can provide methods"
 msgstr "Plugins propios que pueden aportar métodos"
 
 #: admin/templates/variables.php:133
-msgid "Only plugins whose details mention EduSof or Squuad appear here. Check the author and website before enabling one: only enabled plugins can provide methods."
-msgstr "Aquí solo aparecen los plugins cuyos datos mencionan a EduSof o Squuad. Compruebe el autor y el sitio web antes de habilitar uno: solo los plugins habilitados pueden aportar métodos."
+msgid ""
+"Only plugins whose details mention EduSof or Squuad appear here. Check the "
+"author and website before enabling one: only enabled plugins can provide "
+"methods."
+msgstr ""
+"Aquí solo aparecen los plugins cuyos datos mencionan a EduSof o Squuad. "
+"Compruebe el autor y el sitio web antes de habilitar uno: solo los plugins "
+"habilitados pueden aportar métodos."
 
 #: admin/templates/variables.php:141
 msgid "Enabled"
@@ -919,16 +1516,25 @@ msgid "Methods in quarantine"
 msgstr "Métodos en cuarentena"
 
 #: admin/templates/variables.php:164
-msgid "These methods stopped a request (memory, time or exit) and are not executed again until they are enabled. Fix the plugin before enabling them."
-msgstr "Estos métodos detuvieron una petición (memoria, tiempo o salida) y no se vuelven a ejecutar hasta que se habiliten. Corrija el plugin antes de habilitarlos."
+msgid ""
+"These methods stopped a request (memory, time or exit) and are not executed "
+"again until they are enabled. Fix the plugin before enabling them."
+msgstr ""
+"Estos métodos detuvieron una petición (memoria, tiempo o salida) y no se "
+"vuelven a ejecutar hasta que se habiliten. Corrija el plugin antes de "
+"habilitarlos."
 
 #: admin/templates/variables.php:176
 msgid "Enable again"
 msgstr "Habilitar de nuevo"
 
 #: admin/templates/variables.php:194
-msgid "Lowercase letters, numbers and underscores. In the template it is written {{key}}."
-msgstr "Letras minúsculas, números y guiones bajos. En la plantilla se escribe {{key}}."
+msgid ""
+"Lowercase letters, numbers and underscores. In the template it is written "
+"{{key}}."
+msgstr ""
+"Letras minúsculas, números y guiones bajos. En la plantilla se escribe "
+"{{key}}."
 
 #: admin/templates/variables.php:212 admin/templates/variables.php:285
 msgid "Method that gives the value"
@@ -959,8 +1565,12 @@ msgid "No document template uses it."
 msgstr "Ninguna plantilla de documento la usa."
 
 #: admin/templates/variables.php:263
-msgid "The key is what the code fills in when a document is generated: it cannot be changed here."
-msgstr "La clave es lo que el código rellena al generar un documento: aquí no se puede cambiar."
+msgid ""
+"The key is what the code fills in when a document is generated: it cannot be "
+"changed here."
+msgstr ""
+"La clave es lo que el código rellena al generar un documento: aquí no se "
+"puede cambiar."
 
 #: admin/templates/variables.php:288
 msgid "Without a method, the value is calculated as before (EduSystem)."
@@ -993,8 +1603,12 @@ msgid "Variable %s deleted from the list."
 msgstr "Variable %s eliminada de la lista."
 
 #: admin/variables.php:253
-msgid "The key must start with a letter and contain only lowercase letters, numbers and underscores."
-msgstr "La clave debe empezar por una letra y contener solo letras minúsculas, números y guiones bajos."
+msgid ""
+"The key must start with a letter and contain only lowercase letters, numbers "
+"and underscores."
+msgstr ""
+"La clave debe empezar por una letra y contener solo letras minúsculas, "
+"números y guiones bajos."
 
 #: admin/variables.php:255
 msgid "There is already a variable with that key."
@@ -1075,123 +1689,162 @@ msgid "Signer (example)"
 msgstr "Firmante (ejemplo)"
 
 #: certification/admin/document-signing.php:72
-#: certification/admin/document-signing.php:365
-#: certification/admin/document-signing.php:557
+#: certification/admin/document-signing.php:391
+#: certification/admin/document-signing.php:587
 msgid "You do not have permission to configure document signers."
 msgstr "No tiene permiso para configurar los firmantes de los documentos."
 
-#: certification/admin/document-signing.php:179 includes/book.php:141
-msgid "The registry book did not assign a volume and folio (connection or book error). The document was not issued; try again."
-msgstr "El libro de registro no asignó tomo y folio (error de conexión o del libro). El documento no se emitió; inténtelo de nuevo."
+#: certification/admin/document-signing.php:201 includes/book.php:141
+msgid ""
+"The registry book did not assign a volume and folio (connection or book "
+"error). The document was not issued; try again."
+msgstr ""
+"El libro de registro no asignó tomo y folio (error de conexión o del libro). "
+"El documento no se emitió; inténtelo de nuevo."
 
-#: certification/admin/document-signing.php:190
+#: certification/admin/document-signing.php:212
 #, php-format
 msgid "The registry book could not void the volume and folio: %s"
 msgstr "El libro de registro no pudo anular el tomo y folio: %s"
 
-#: certification/admin/document-signing.php:219
+#: certification/admin/document-signing.php:241
 #, php-format
 msgid "Declined, but the document could not be issued again: %s"
 msgstr "Declinado, pero el documento no se pudo volver a emitir: %s"
 
 #. translators: 1: volume, 2: folio
-#: certification/admin/document-signing.php:225
-#, php-format
-msgid "Declined and issued again with volume %1$d, folio %2$d. The signers will find it in \"Documents to sign\"."
-msgstr "Declinado y emitido de nuevo con tomo %1$d, folio %2$d. Los firmantes lo encontrarán en \"Documentos por firmar\"."
-
 #: certification/admin/document-signing.php:247
+#, php-format
+msgid ""
+"Declined and issued again with volume %1$d, folio %2$d. The signers will "
+"find it in \"Documents to sign\"."
+msgstr ""
+"Declinado y emitido de nuevo con tomo %1$d, folio %2$d. Los firmantes lo "
+"encontrarán en \"Documentos por firmar\"."
+
+#: certification/admin/document-signing.php:269
 #: certification/includes/signers.php:1974
 #: certification/includes/signers.php:1984
 msgid "This document can no longer be declined. Please reload the page."
 msgstr "Este documento ya no se puede declinar. Recargue la página."
 
-#: certification/admin/document-signing.php:249
+#: certification/admin/document-signing.php:271
 #: certification/admin/signer-inbox.php:102
-msgid "To decline a document you must write the reason and accept that the action cannot be reverted."
-msgstr "Para declinar un documento debe escribir el motivo y aceptar que la acción no se puede revertir."
+msgid ""
+"To decline a document you must write the reason and accept that the action "
+"cannot be reverted."
+msgstr ""
+"Para declinar un documento debe escribir el motivo y aceptar que la acción "
+"no se puede revertir."
 
-#: certification/admin/document-signing.php:251
-#: certification/admin/document-signing.php:280
+#: certification/admin/document-signing.php:273
+#: certification/admin/document-signing.php:302
 msgid "Choose whether to keep or void the volume and folio."
 msgstr "Elija si mantener o anular el tomo y folio."
 
-#: certification/admin/document-signing.php:278
+#: certification/admin/document-signing.php:300
 msgid "There is no pending decision for this document. Please reload the page."
-msgstr "No hay ninguna decisión pendiente para este documento. Recargue la página."
+msgstr ""
+"No hay ninguna decisión pendiente para este documento. Recargue la página."
 
-#: certification/admin/document-signing.php:282
+#: certification/admin/document-signing.php:304
 msgid "Write why the volume and folio are voided."
 msgstr "Escriba por qué se anulan el tomo y folio."
 
-#: certification/admin/document-signing.php:347
-msgid "Missing documents commitment letter"
-msgstr "Carta de compromiso de documentos faltantes"
-
-#: certification/admin/document-signing.php:348
-msgid "This site uses the old fixed letter. Convert it into an automatic document: it will be editable here, signed with the new signature system (frozen content, consent, \"Documents to sign\"). Like every automatic document, it is shown while the student has not signed it. Letters already signed keep their validity and are not asked again."
-msgstr "Este sitio usa la carta fija antigua. Conviértala en un documento automático: se podrá editar aquí y se firmará con el nuevo sistema de firmas (contenido congelado, consentimiento, «Documentos por firmar»). Como todo documento automático, se muestra mientras el estudiante no lo haya firmado. Las cartas ya firmadas conservan su validez y no se vuelven a pedir."
-
-#: certification/admin/document-signing.php:352
-msgid "Convert the letter into an automatic document"
-msgstr "Convertir la carta en documento automático"
-
-#: certification/admin/document-signing.php:368
+#: certification/admin/document-signing.php:394
 msgid "The letter was already converted or is not used on this site."
 msgstr "La carta ya se convirtió o no se usa en este sitio."
 
-#: certification/admin/document-signing.php:401
+#: certification/admin/document-signing.php:427
 msgid "The letter could not be converted. Please try again."
 msgstr "No se pudo convertir la carta. Inténtelo de nuevo."
 
-#: certification/admin/document-signing.php:419
-msgid "The letter is now an automatic document. Review its text below; like every automatic document, it is shown while the student has not signed it."
-msgstr "La carta ya es un documento automático. Revise su texto abajo; como todo documento automático, se muestra mientras el estudiante no lo haya firmado."
+#: certification/admin/document-signing.php:445
+msgid ""
+"The letter is now an automatic document. Review its text below; like every "
+"automatic document, it is shown while the student has not signed it."
+msgstr ""
+"La carta ya es un documento automático. Revise su texto abajo; como todo "
+"documento automático, se muestra mientras el estudiante no lo haya firmado."
 
-#: certification/admin/document-signing.php:493
+#: certification/admin/document-signing.php:519
 #, php-format
 msgid "[%s] Security change: documents that require a signature"
 msgstr "[%s] Cambio de seguridad: documentos que exigen firma"
 
-#: certification/admin/document-signing.php:494
-msgid "For security, documents can no longer be signed with signature images uploaded to \"Users and signatures\". Only the responsible person can sign, from their own account: nobody can sign on behalf of someone else."
-msgstr "Por seguridad, los documentos ya no se pueden firmar con las firmas-imagen subidas a \"Usuarios y firmas\". Solo el responsable puede firmar, desde su propia cuenta: nadie puede firmar en nombre de otra persona."
+#: certification/admin/document-signing.php:520
+msgid ""
+"For security, documents can no longer be signed with signature images "
+"uploaded to \"Users and signatures\". Only the responsible person can sign, "
+"from their own account: nobody can sign on behalf of someone else."
+msgstr ""
+"Por seguridad, los documentos ya no se pueden firmar con las firmas-imagen "
+"subidas a \"Usuarios y firmas\". Solo el responsable puede firmar, desde su "
+"propia cuenta: nadie puede firmar en nombre de otra persona."
 
-#: certification/admin/document-signing.php:497
-#: certification/admin/document-signing.php:503
+#: certification/admin/document-signing.php:523
+#: certification/admin/document-signing.php:529
 #: certification/includes/signers.php:414
 #: certification/includes/signers.php:2062
 #, php-format
 msgid "Hello %s,"
 msgstr "Hola, %s:"
 
-#: certification/admin/document-signing.php:498
-msgid "These documents require a signature and are disabled until the administration configures who signs them:"
-msgstr "Estos documentos exigen firma y quedan deshabilitados hasta que la administración configure quién los firma:"
+#: certification/admin/document-signing.php:524
+msgid ""
+"These documents require a signature and are disabled until the "
+"administration configures who signs them:"
+msgstr ""
+"Estos documentos exigen firma y quedan deshabilitados hasta que la "
+"administración configure quién los firma:"
 
-#: certification/admin/document-signing.php:499
-msgid "If you are responsible for signing them, the administration will invite you to register your own signature. Documents already signed keep their validity."
-msgstr "Si usted es responsable de firmarlos, la administración le invitará a registrar su propia firma. Los documentos ya firmados conservan su validez."
+#: certification/admin/document-signing.php:525
+msgid ""
+"If you are responsible for signing them, the administration will invite you "
+"to register your own signature. Documents already signed keep their validity."
+msgstr ""
+"Si usted es responsable de firmarlos, la administración le invitará a "
+"registrar su propia firma. Los documentos ya firmados conservan su validez."
 
-#: certification/admin/document-signing.php:504
-msgid "These documents require a signature and are disabled until you configure who signs them:"
-msgstr "Estos documentos exigen firma y quedan deshabilitados hasta que configure quién los firma:"
+#: certification/admin/document-signing.php:530
+msgid ""
+"These documents require a signature and are disabled until you configure who "
+"signs them:"
+msgstr ""
+"Estos documentos exigen firma y quedan deshabilitados hasta que configure "
+"quién los firma:"
 
-#: certification/admin/document-signing.php:505
-msgid "What to do: 1) in Users and signatures, invite the responsible persons to register their own signature; 2) in Certification > Documents, open each document and choose its signers in \"Document signers\"; 3) from the student file, use \"Issue for signature\". Documents already signed keep their validity."
-msgstr "Qué hacer: 1) en Usuarios y firmas, invite a los responsables a registrar su propia firma; 2) en Certificación > Documentos, abra cada documento y elija sus firmantes en \"Firmantes del documento\"; 3) desde la ficha del estudiante, use \"Emitir para firma\". Los documentos ya firmados conservan su validez."
+#: certification/admin/document-signing.php:531
+msgid ""
+"What to do: 1) in Users and signatures, invite the responsible persons to "
+"register their own signature; 2) in Certification > Documents, open each "
+"document and choose its signers in \"Document signers\"; 3) from the student "
+"file, use \"Issue for signature\". Documents already signed keep their "
+"validity."
+msgstr ""
+"Qué hacer: 1) en Usuarios y firmas, invite a los responsables a registrar su "
+"propia firma; 2) en Certificación > Documentos, abra cada documento y elija "
+"sus firmantes en \"Firmantes del documento\"; 3) desde la ficha del "
+"estudiante, use \"Emitir para firma\". Los documentos ya firmados conservan "
+"su validez."
 
-#: certification/admin/document-signing.php:536
-msgid "Documents that require a signature are disabled until you configure who signs them"
-msgstr "Los documentos que exigen firma están deshabilitados hasta que configure quién los firma"
+#: certification/admin/document-signing.php:566
+msgid ""
+"Documents that require a signature are disabled until you configure who "
+"signs them"
+msgstr ""
+"Los documentos que exigen firma están deshabilitados hasta que configure "
+"quién los firma"
 
-#: certification/admin/document-signing.php:537
-msgid "For security, nobody can sign on behalf of someone else: signature images are no longer used. Choose the signers of each document; they will sign from their own account."
-msgstr "Por seguridad, nadie puede firmar en nombre de otra persona: ya no se usan firmas-imagen. Elija los firmantes de cada documento; firmarán desde su propia cuenta."
-
-#: certification/admin/document-signing.php:546
-msgid "Hide this notice"
-msgstr "Ocultar este aviso"
+#: certification/admin/document-signing.php:567
+msgid ""
+"For security, nobody can sign on behalf of someone else: signature images "
+"are no longer used. Choose the signers of each document; they will sign from "
+"their own account."
+msgstr ""
+"Por seguridad, nadie puede firmar en nombre de otra persona: ya no se usan "
+"firmas-imagen. Elija los firmantes de cada documento; firmarán desde su "
+"propia cuenta."
 
 #: certification/admin/signature-integrity.php:30
 #: certification/admin/signature-integrity.php:31
@@ -1246,8 +1899,12 @@ msgstr "No tiene permiso para firmar este documento."
 #: certification/includes/signers.php:1389
 #: certification/includes/signers.php:1536
 #: certification/public/functions/documents-signature.php:41
-msgid "Documents cannot be signed from a switched session. Each person must sign from their own account."
-msgstr "Los documentos no se pueden firmar desde una sesión conmutada. Cada persona debe firmar desde su propia cuenta."
+msgid ""
+"Documents cannot be signed from a switched session. Each person must sign "
+"from their own account."
+msgstr ""
+"Los documentos no se pueden firmar desde una sesión conmutada. Cada persona "
+"debe firmar desde su propia cuenta."
 
 #: certification/admin/signer-inbox.php:99
 #: certification/includes/signers.php:1176
@@ -1257,8 +1914,12 @@ msgid "This document no longer accepts signatures. Please reload the page."
 msgstr "Este documento ya no admite firmas. Por favor, recargue la página."
 
 #: certification/admin/signer-inbox.php:124
-msgid "The document was declined. The administration will decide how to issue it again."
-msgstr "El documento fue declinado. La administración decidirá cómo volver a emitirlo."
+msgid ""
+"The document was declined. The administration will decide how to issue it "
+"again."
+msgstr ""
+"El documento fue declinado. La administración decidirá cómo volver a "
+"emitirlo."
 
 #: certification/admin/signer-inbox.php:125
 msgid "The document was declined. The student was notified."
@@ -1344,8 +2005,12 @@ msgid "There are no signed files"
 msgstr "No hay archivos firmados"
 
 #: certification/admin/subject-panel.php:122
-msgid "The document will be generated now with the current data and frozen; the signers will sign it from their panel. Continue?"
-msgstr "El documento se generará ahora con los datos actuales y quedará congelado; los firmantes lo firmarán desde su panel. ¿Continuar?"
+msgid ""
+"The document will be generated now with the current data and frozen; the "
+"signers will sign it from their panel. Continue?"
+msgstr ""
+"El documento se generará ahora con los datos actuales y quedará congelado; "
+"los firmantes lo firmarán desde su panel. ¿Continuar?"
 
 #: certification/admin/subject-panel.php:127 includes/permissions.php:31
 msgid "Issue for signature"
@@ -1383,11 +2048,6 @@ msgstr "Documentos emitidos para firma"
 #: certification/admin/templates/document-issued.php:27
 msgid "Issued"
 msgstr "Emitido"
-
-#: certification/admin/templates/document-issued.php:28
-#: certification/admin/templates/signature-integrity.php:80
-msgid "Signatures"
-msgstr "Firmas"
 
 #: certification/admin/templates/document-issued.php:29
 msgid "Volume / Folio"
@@ -1434,12 +2094,20 @@ msgid "Reason why it is declined"
 msgstr "Motivo por el cual se rechaza"
 
 #: certification/admin/templates/document-issued.php:62
-msgid "Revoke the signatures and keep the same volume and folio (the document is issued again with them)"
-msgstr "Anular las firmas y seguir con el mismo tomo y folio (el documento se emite de nuevo con ellos)"
+msgid ""
+"Revoke the signatures and keep the same volume and folio (the document is "
+"issued again with them)"
+msgstr ""
+"Anular las firmas y seguir con el mismo tomo y folio (el documento se emite "
+"de nuevo con ellos)"
 
 #: certification/admin/templates/document-issued.php:63
-msgid "Revoke the signatures and void the volume and folio in the book (the document is issued again with a new one)"
-msgstr "Anular las firmas y anular el tomo y folio en el libro (el documento se emite de nuevo con uno nuevo)"
+msgid ""
+"Revoke the signatures and void the volume and folio in the book (the "
+"document is issued again with a new one)"
+msgstr ""
+"Anular las firmas y anular el tomo y folio en el libro (el documento se "
+"emite de nuevo con uno nuevo)"
 
 #: certification/admin/templates/document-issued.php:65
 #: certification/admin/templates/signer-inbox.php:59
@@ -1476,7 +2144,8 @@ msgstr "Como el documento emitido para firma, con el formato del documento."
 
 #: certification/admin/templates/document-preview.php:12
 msgid "As \"Generate\" in the student file, with the format of the document."
-msgstr "Como «Generar» en la ficha del estudiante, con el formato del documento."
+msgstr ""
+"Como «Generar» en la ficha del estudiante, con el formato del documento."
 
 #: certification/admin/templates/document-preview.php:15
 #: certification/admin/templates/signer-inbox.php:32
@@ -1484,20 +2153,31 @@ msgstr "Como «Generar» en la ficha del estudiante, con el formato del document
 #: certification/public/templates/create-document-automatic.php:40
 #: certification/public/templates/signature-final-pdf.php:22
 #, php-format
-msgid "Signature request #%1$d, round %2$d · Content fingerprint (SHA-256): %3$s"
-msgstr "Solicitud de firma n.º %1$d, ronda %2$d · Huella del contenido (SHA-256): %3$s"
+msgid ""
+"Signature request #%1$d, round %2$d · Content fingerprint (SHA-256): %3$s"
+msgstr ""
+"Solicitud de firma n.º %1$d, ronda %2$d · Huella del contenido (SHA-256): "
+"%3$s"
 
 #: certification/admin/templates/document-preview.php:22
 msgid "Update preview"
 msgstr "Actualizar vista previa"
 
 #: certification/admin/templates/document-preview.php:27
-msgid "All the variables show example data, never real data. It shows the saved version: save your changes to see them."
-msgstr "Todas las variables muestran datos de ejemplo, nunca datos reales. Muestra la versión guardada: guarde sus cambios para verlos."
+msgid ""
+"All the variables show example data, never real data. It shows the saved "
+"version: save your changes to see them."
+msgstr ""
+"Todas las variables muestran datos de ejemplo, nunca datos reales. Muestra "
+"la versión guardada: guarde sus cambios para verlos."
 
 #: certification/admin/templates/document-preview.php:30
-msgid "This document asks for signature images: it can no longer be generated this way. Configure its signers so that each person signs from their own account."
-msgstr "Este documento pide firmas-imagen: ya no se puede generar así. Configure sus firmantes para que cada persona firme desde su propia cuenta."
+msgid ""
+"This document asks for signature images: it can no longer be generated this "
+"way. Configure its signers so that each person signs from their own account."
+msgstr ""
+"Este documento pide firmas-imagen: ya no se puede generar así. Configure sus "
+"firmantes para que cada persona firme desde su propia cuenta."
 
 #: certification/admin/templates/document-preview.php:34
 msgid "These variables do not exist and will appear as text in the document:"
@@ -1524,129 +2204,194 @@ msgid "Click to copy"
 msgstr "Clic para copiar"
 
 #: certification/admin/templates/document-signing.php:24
-#: certification/admin/templates/document-signing.php:54
+#: certification/admin/templates/document-signing.php:66
 msgid "Order"
 msgstr "Orden"
 
-#: certification/admin/templates/document-signing.php:32
+#: certification/admin/templates/document-signing.php:38
 #: includes/permissions.php:30
 msgid "Document signers"
 msgstr "Firmantes del documento"
 
-#: certification/admin/templates/document-signing.php:33
-msgid "Who signs this document and in which order. First the roles: every user with a marked role receives their own document and signs it from their own account. Then the registered signers of the system sign every one of those documents. The document is valid when all the signatures are done. Changes apply to new signature requests; requests already in progress keep their signers."
-msgstr "Quién firma este documento y en qué orden. Primero los roles: cada usuario con un rol marcado recibe su propio documento y lo firma desde su propia cuenta. Después los firmantes registrados del sistema firman cada uno de esos documentos. El documento es válido cuando están todas las firmas. Los cambios se aplican a las nuevas solicitudes de firma; las que ya están en curso conservan sus firmantes."
+#: certification/admin/templates/document-signing.php:39
+msgid ""
+"Who signs this document and in which order. First the roles: every user with "
+"a marked role receives their own document and signs it from their own "
+"account. Then the registered signers of the system sign every one of those "
+"documents. The document is valid when all the signatures are done. Changes "
+"apply to new signature requests; requests already in progress keep their "
+"signers."
+msgstr ""
+"Quién firma este documento y en qué orden. Primero los roles: cada usuario "
+"con un rol marcado recibe su propio documento y lo firma desde su propia "
+"cuenta. Después los firmantes registrados del sistema firman cada uno de "
+"esos documentos. El documento es válido cuando están todas las firmas. Los "
+"cambios se aplican a las nuevas solicitudes de firma; las que ya están en "
+"curso conservan sus firmantes."
 
-#: certification/admin/templates/document-signing.php:36
+#: certification/admin/templates/document-signing.php:42
 msgid "Issued document:"
 msgstr "Documento emitido:"
 
-#: certification/admin/templates/document-signing.php:36
-msgid "only the system signers sign it (the roles do not). With at least one signer, \"Generate\" in the student file becomes \"Issue for signature\"."
-msgstr "solo lo firman los firmantes del sistema (los roles no). Con al menos un firmante, «Generar» en la ficha del estudiante pasa a ser «Emitir para firma»."
+#: certification/admin/templates/document-signing.php:42
+msgid ""
+"only the system signers sign it (the roles do not). With at least one "
+"signer, \"Generate\" in the student file becomes \"Issue for signature\"."
+msgstr ""
+"solo lo firman los firmantes del sistema (los roles no). Con al menos un "
+"firmante, «Generar» en la ficha del estudiante pasa a ser «Emitir para "
+"firma»."
 
-#: certification/admin/templates/document-signing.php:43
-msgid "Not configured yet: by default the users with the student role sign this document, if that role is active in \"Signing roles\"."
-msgstr "Aún sin configurar: por defecto firman este documento los usuarios con el rol estudiante, si ese rol está activo en «Roles que firman»."
+#: certification/admin/templates/document-signing.php:49
+msgid ""
+"Not configured yet: by default the users with the student role sign this "
+"document, if that role is active in \"Signing roles\"."
+msgstr ""
+"Aún sin configurar: por defecto firman este documento los usuarios con el "
+"rol estudiante, si ese rol está activo en «Roles que firman»."
 
-#: certification/admin/templates/document-signing.php:44
-msgid "Not configured yet: by default this document does not ask for user signatures."
-msgstr "Todavía sin configurar: por defecto este documento no pide firmas de usuarios."
+#: certification/admin/templates/document-signing.php:50
+msgid ""
+"Not configured yet: by default this document does not ask for user "
+"signatures."
+msgstr ""
+"Todavía sin configurar: por defecto este documento no pide firmas de "
+"usuarios."
 
-#: certification/admin/templates/document-signing.php:51
-msgid "This document asks for signatures"
-msgstr "Este documento pide firmas"
+#: certification/admin/templates/document-signing.php:62
+msgid "This is the only signature switch of the document. Save it with «Save document signers»: the document button does not save it."
+msgstr "Este es el único interruptor de firmas del documento. Se guarda con «Guardar firmantes del documento»: el botón del documento no lo guarda."
 
-#: certification/admin/templates/document-signing.php:54
+#: certification/admin/templates/document-signing.php:66
 #: certification/includes/signers.php:200
 msgid "Signer"
 msgstr "Firmante"
 
-#: certification/admin/templates/document-signing.php:54
+#: certification/admin/templates/document-signing.php:66
 msgid "Variables for the template"
 msgstr "Variables para la plantilla"
 
-#: certification/admin/templates/document-signing.php:57
+#: certification/admin/templates/document-signing.php:69
 msgid "Not in the template: it goes in {{signature_section}}."
 msgstr "No está en la plantilla: va en {{signature_section}}."
 
 #. translators: %s: name of the role
-#: certification/admin/templates/document-signing.php:66
+#: certification/admin/templates/document-signing.php:78
 #, php-format
 msgid "Role: %s"
 msgstr "Rol: %s"
 
 #. translators: %s: name of the role
-#: certification/admin/templates/document-signing.php:66
-msgid "Every user with this role receives their own document and signs it from their own account."
-msgstr "Cada usuario con este rol recibe su propio documento y lo firma desde su propia cuenta."
+#: certification/admin/templates/document-signing.php:78
+msgid ""
+"Every user with this role receives their own document and signs it from "
+"their own account."
+msgstr ""
+"Cada usuario con este rol recibe su propio documento y lo firma desde su "
+"propia cuenta."
 
-#: certification/admin/templates/document-signing.php:71
+#: certification/admin/templates/document-signing.php:83
 msgid "No role can sign yet: mark them in Certification > Signing roles."
-msgstr "Aún no puede firmar ningún rol: márquelos en Certificación > Roles que firman."
+msgstr ""
+"Aún no puede firmar ningún rol: márquelos en Certificación > Roles que "
+"firman."
 
-#: certification/admin/templates/document-signing.php:77
+#: certification/admin/templates/document-signing.php:89
 msgid "has not registered their signature yet"
 msgstr "todavía no ha registrado su firma"
 
-#: certification/admin/templates/document-signing.php:82
+#: certification/admin/templates/document-signing.php:94
 msgid "Not in the template: it goes in the signatures block at the end."
 msgstr "No está en la plantilla: va en el bloque de firmas al final."
 
-#: certification/admin/templates/document-signing.php:88
+#: certification/admin/templates/document-signing.php:100
 #, php-format
-msgid "This document asked these roles, which are no longer active in \"Signing roles\": %s. Requests in progress keep them; when you save, they are removed."
-msgstr "Este documento pedía estos roles, que ya no están activos en «Roles que firman»: %s. Las solicitudes en curso los conservan; al guardar, se quitan."
+msgid ""
+"This document asked these roles, which are no longer active in \"Signing "
+"roles\": %s. Requests in progress keep them; when you save, they are removed."
+msgstr ""
+"Este documento pedía estos roles, que ya no están activos en «Roles que "
+"firman»: %s. Las solicitudes en curso los conservan; al guardar, se quitan."
 
-#: certification/admin/templates/document-signing.php:91
+#: certification/admin/templates/document-signing.php:103
 msgid "How to place the signatures in the template"
 msgstr "Cómo colocar las firmas en la plantilla"
 
-#: certification/admin/templates/document-signing.php:92
+#: certification/admin/templates/document-signing.php:104
 msgid "The signatures of the roles that are not placed separately (as before)."
 msgstr "Las firmas de los roles que no se colocan por separado (como antes)."
 
-#: certification/admin/templates/document-signing.php:93
-msgid "Each signer separately: use the variables of their row. Signers not placed in the template go in {{signature_section}} (roles) or in a signatures block at the end (system signers)."
-msgstr "Cada firmante por separado: use las variables de su fila. Los firmantes que no estén en la plantilla van en {{signature_section}} (roles) o en un bloque de firmas al final (firmantes del sistema)."
+#: certification/admin/templates/document-signing.php:105
+msgid ""
+"Each signer separately: use the variables of their row. Signers not placed "
+"in the template go in {{signature_section}} (roles) or in a signatures block "
+"at the end (system signers)."
+msgstr ""
+"Cada firmante por separado: use las variables de su fila. Los firmantes que "
+"no estén en la plantilla van en {{signature_section}} (roles) o en un bloque "
+"de firmas al final (firmantes del sistema)."
 
-#: certification/admin/templates/document-signing.php:94
+#: certification/admin/templates/document-signing.php:106
 msgid "Template rules"
 msgstr "Reglas de la plantilla"
 
-#: certification/admin/templates/document-signing.php:94
-msgid "the text between the marks is shown only if the rule is met; with ^ , only if it is not:"
-msgstr "el texto entre las marcas se muestra solo si se cumple la regla; con ^ , solo si no se cumple:"
+#: certification/admin/templates/document-signing.php:106
+msgid ""
+"the text between the marks is shown only if the rule is met; with ^ , only "
+"if it is not:"
+msgstr ""
+"el texto entre las marcas se muestra solo si se cumple la regla; con ^ , "
+"solo si no se cumple:"
 
-#: certification/admin/templates/document-signing.php:96
+#: certification/admin/templates/document-signing.php:108
 msgid "the student signs this document"
 msgstr "el estudiante firma este documento"
 
-#: certification/admin/templates/document-signing.php:98
-msgid "The parent no longer signs: in old templates {{signature_parent}} is empty and {{#requires_parent_signature}} and {{#student_is_own_parent}} are never met."
-msgstr "El representante ya no firma: en las plantillas antiguas {{signature_parent}} queda vacío y {{#requires_parent_signature}} y {{#student_is_own_parent}} nunca se cumplen."
+#: certification/admin/templates/document-signing.php:110
+msgid ""
+"The parent no longer signs: in old templates {{signature_parent}} is empty "
+"and {{#requires_parent_signature}} and {{#student_is_own_parent}} are never "
+"met."
+msgstr ""
+"El representante ya no firma: en las plantillas antiguas "
+"{{signature_parent}} queda vacío y {{#requires_parent_signature}} y "
+"{{#student_is_own_parent}} nunca se cumplen."
 
-#: certification/admin/templates/document-signing.php:100
+#: certification/admin/templates/document-signing.php:112
 msgid "PDF layout"
 msgstr "Diseño del PDF"
 
-#: certification/admin/templates/document-signing.php:101
-msgid "Page break: what follows starts on a new page. In automatic documents, lines, paragraphs and table rows are never cut between pages; use it to decide where a section starts."
-msgstr "Salto de página: lo que sigue empieza en una página nueva. En los documentos automáticos, las líneas, párrafos y filas de tabla nunca se cortan entre páginas; úsela para decidir dónde empieza una sección."
+#: certification/admin/templates/document-signing.php:113
+msgid ""
+"Page break: what follows starts on a new page. In automatic documents, "
+"lines, paragraphs and table rows are never cut between pages; use it to "
+"decide where a section starts."
+msgstr ""
+"Salto de página: lo que sigue empieza en una página nueva. En los documentos "
+"automáticos, las líneas, párrafos y filas de tabla nunca se cortan entre "
+"páginas; úsela para decidir dónde empieza una sección."
 
-#: certification/admin/templates/document-signing.php:104
-msgid "There are no registered signers yet. Invite them from Certification > Users and signatures."
-msgstr "Todavía no hay firmantes registrados. Invítelos desde Certification > Users and signatures."
+#: certification/admin/templates/document-signing.php:116
+msgid ""
+"There are no registered signers yet. Invite them from Certification > Users "
+"and signatures."
+msgstr ""
+"Todavía no hay firmantes registrados. Invítelos desde Certification > Users "
+"and signatures."
 
-#: certification/admin/templates/document-signing.php:106
-msgid "Registered signers are saved in the configuration and will be required once their \"Documents to sign\" panel is active."
-msgstr "Los firmantes registrados se guardan en la configuración y se exigirán cuando esté activo su panel de «Documentos por firmar»."
+#: certification/admin/templates/document-signing.php:118
+msgid ""
+"Registered signers are saved in the configuration and will be required once "
+"their \"Documents to sign\" panel is active."
+msgstr ""
+"Los firmantes registrados se guardan en la configuración y se exigirán "
+"cuando esté activo su panel de «Documentos por firmar»."
 
-#: certification/admin/templates/document-signing.php:108
+#: certification/admin/templates/document-signing.php:120
 msgid "Save document signers"
 msgstr "Guardar firmantes del documento"
 
-#: certification/admin/templates/document-signing.php:132
+#: certification/admin/templates/document-signing.php:148
 msgid "✓ In the template"
 msgstr "✓ En la plantilla"
 
@@ -1674,7 +2419,8 @@ msgstr "Su firma registrada"
 
 #: certification/admin/templates/my-signature.php:29
 #, php-format
-msgid "Registered on %s. Changing it does not modify documents you already signed."
+msgid ""
+"Registered on %s. Changing it does not modify documents you already signed."
 msgstr "Registrada el %s. Cambiarla no modifica los documentos que ya firmó."
 
 #: certification/admin/templates/my-signature.php:33
@@ -1710,20 +2456,35 @@ msgid "Draw your signature in the box before saving."
 msgstr "Dibuje su firma en el recuadro antes de guardar."
 
 #: certification/admin/templates/signature-integrity.php:21
-msgid "Evidence of the signatures: every new signature is sealed with a fingerprint chained to the previous one, so any later change or deletion in the database can be detected."
-msgstr "Evidencia de las firmas: cada firma nueva se sella con una huella encadenada a la anterior, así que cualquier cambio o borrado posterior en la base de datos se puede detectar."
+msgid ""
+"Evidence of the signatures: every new signature is sealed with a fingerprint "
+"chained to the previous one, so any later change or deletion in the database "
+"can be detected."
+msgstr ""
+"Evidencia de las firmas: cada firma nueva se sella con una huella encadenada "
+"a la anterior, así que cualquier cambio o borrado posterior en la base de "
+"datos se puede detectar."
 
 #: certification/admin/templates/signature-integrity.php:24
 msgid "Verification completed."
 msgstr "Verificación completada."
 
 #: certification/admin/templates/signature-integrity.php:26
-msgid "A new key was created. New signatures use it; previous signatures are still verified with their own key."
-msgstr "Se creó una clave nueva. Las firmas nuevas la usan; las anteriores se siguen verificando con su propia clave."
+msgid ""
+"A new key was created. New signatures use it; previous signatures are still "
+"verified with their own key."
+msgstr ""
+"Se creó una clave nueva. Las firmas nuevas la usan; las anteriores se siguen "
+"verificando con su propia clave."
 
 #: certification/admin/templates/signature-integrity.php:30
-msgid "The database has not been updated yet. An administrator must open the admin once so the update runs; until then signatures are saved without fingerprint."
-msgstr "La base de datos aún no se ha actualizado. Un administrador debe entrar una vez en el admin para que se ejecute la actualización; hasta entonces las firmas se guardan sin huella."
+msgid ""
+"The database has not been updated yet. An administrator must open the admin "
+"once so the update runs; until then signatures are saved without fingerprint."
+msgstr ""
+"La base de datos aún no se ha actualizado. Un administrador debe entrar una "
+"vez en el admin para que se ejecute la actualización; hasta entonces las "
+"firmas se guardan sin huella."
 
 #: certification/admin/templates/signature-integrity.php:33
 msgid "Signing key"
@@ -1743,19 +2504,30 @@ msgstr "Reforzado: clave definida en wp-config.php"
 
 #: certification/admin/templates/signature-integrity.php:44
 msgid "Automatic: key generated by the plugin and stored in the database"
-msgstr "Automático: clave generada por el plugin y guardada en la base de datos"
+msgstr ""
+"Automático: clave generada por el plugin y guardada en la base de datos"
 
 #: certification/admin/templates/signature-integrity.php:53
 msgid "Keys kept for verification"
 msgstr "Claves conservadas para verificar"
 
 #: certification/admin/templates/signature-integrity.php:58
-msgid "The key is never shown. Rotate it if you suspect someone could read the database: new signatures will use a new key and previous ones keep being verified with theirs."
-msgstr "La clave nunca se muestra. Rótela si sospecha que alguien pudo leer la base de datos: las firmas nuevas usarán una clave nueva y las anteriores se seguirán verificando con la suya."
+msgid ""
+"The key is never shown. Rotate it if you suspect someone could read the "
+"database: new signatures will use a new key and previous ones keep being "
+"verified with theirs."
+msgstr ""
+"La clave nunca se muestra. Rótela si sospecha que alguien pudo leer la base "
+"de datos: las firmas nuevas usarán una clave nueva y las anteriores se "
+"seguirán verificando con la suya."
 
 #: certification/admin/templates/signature-integrity.php:60
-msgid "This site signs with the key of wp-config.php; rotating here only affects the automatic key."
-msgstr "Este sitio firma con la clave de wp-config.php; rotar aquí solo afecta a la clave automática."
+msgid ""
+"This site signs with the key of wp-config.php; rotating here only affects "
+"the automatic key."
+msgstr ""
+"Este sitio firma con la clave de wp-config.php; rotar aquí solo afecta a la "
+"clave automática."
 
 #: certification/admin/templates/signature-integrity.php:62
 msgid "Rotate key"
@@ -1780,18 +2552,26 @@ msgid "Last verification: %1$s by %2$s."
 msgstr "Última verificación: %1$s, por %2$s."
 
 #: certification/admin/templates/signature-integrity.php:76
-msgid "The head of the chain does not match its last link: signatures may have been deleted."
-msgstr "La cabeza de la cadena no coincide con su último eslabón: puede que se hayan borrado firmas."
+msgid ""
+"The head of the chain does not match its last link: signatures may have been "
+"deleted."
+msgstr ""
+"La cabeza de la cadena no coincide con su último eslabón: puede que se hayan "
+"borrado firmas."
 
 #. translators: 1: active signatures, 2: revoked signatures, 3: last link
 #: certification/admin/templates/signature-integrity.php:94
 #, php-format
-msgid "%1$d active signatures, %2$d revoked (kept after a rejection), last link of the chain: %3$d."
-msgstr "%1$d firmas vigentes, %2$d anuladas (conservadas tras un rechazo), último eslabón de la cadena: %3$d."
+msgid ""
+"%1$d active signatures, %2$d revoked (kept after a rejection), last link of "
+"the chain: %3$d."
+msgstr ""
+"%1$d firmas vigentes, %2$d anuladas (conservadas tras un rechazo), último "
+"eslabón de la cadena: %3$d."
 
 #: certification/admin/templates/signature-integrity.php:104
 #: certification/admin/templates/signature-integrity.php:143
-#: certification/includes/signature-integrity.php:500
+#: certification/includes/signature-integrity.php:538
 msgid "Automatic (typed name)"
 msgstr "Automática (nombre escrito)"
 
@@ -1804,7 +2584,7 @@ msgid "Switched session"
 msgstr "Sesión conmutada"
 
 #: certification/admin/templates/signature-integrity.php:107
-#: certification/includes/signature-integrity.php:514
+#: certification/includes/signature-integrity.php:552
 msgid "Signed on another site"
 msgstr "Firmada en otro sitio"
 
@@ -1832,15 +2612,23 @@ msgstr "Verificar ahora"
 
 #: certification/admin/templates/signature-integrity.php:136
 msgid "Also available from the command line: wp squuad-cert firmas verificar"
-msgstr "También disponible desde la línea de comandos: wp squuad-cert firmas verificar"
+msgstr ""
+"También disponible desde la línea de comandos: wp squuad-cert firmas "
+"verificar"
 
 #: certification/admin/templates/signature-integrity.php:138
 msgid "Legacy signatures (before the fingerprint)"
 msgstr "Firmas antiguas (anteriores a la huella)"
 
 #: certification/admin/templates/signature-integrity.php:139
-msgid "Signatures saved by the previous system (users_signatures) have no fingerprint and are only read here. Nothing is changed: this is a read-only diagnosis so each institution can decide what to do with them."
-msgstr "Las firmas guardadas por el sistema anterior (users_signatures) no tienen huella y aquí solo se leen. No se cambia nada: es un diagnóstico de solo lectura para que cada institución decida qué hacer con ellas."
+msgid ""
+"Signatures saved by the previous system (users_signatures) have no "
+"fingerprint and are only read here. Nothing is changed: this is a read-only "
+"diagnosis so each institution can decide what to do with them."
+msgstr ""
+"Las firmas guardadas por el sistema anterior (users_signatures) no tienen "
+"huella y aquí solo se leen. No se cambia nada: es un diagnóstico de solo "
+"lectura para que cada institución decida qué hacer con ellas."
 
 #: certification/admin/templates/signature-integrity.php:142
 msgid "Legacy signatures"
@@ -1873,8 +2661,14 @@ msgid "Decline this document"
 msgstr "Declinar este documento"
 
 #: certification/admin/templates/signer-inbox.php:56
-msgid "When you decline this document, the signature of the student linked to it (if any) will be revoked, and the document can no longer be approved or set back to pending. The user will have to send or sign a new document."
-msgstr "Al declinar este documento, se anulará la firma del estudiante vinculada a él (si la hay) y el documento ya no se podrá aprobar ni volver a pendiente. El usuario tendrá que enviar o firmar un documento nuevo."
+msgid ""
+"When you decline this document, the signature of the student linked to it "
+"(if any) will be revoked, and the document can no longer be approved or set "
+"back to pending. The user will have to send or sign a new document."
+msgstr ""
+"Al declinar este documento, se anulará la firma del estudiante vinculada a "
+"él (si la hay) y el documento ya no se podrá aprobar ni volver a pendiente. "
+"El usuario tendrá que enviar o firmar un documento nuevo."
 
 #: certification/admin/templates/signer-inbox.php:64
 #: certification/public/templates/signature-final-pdf.php:11
@@ -1905,8 +2699,13 @@ msgstr "Firmar los documentos marcados"
 
 #: certification/admin/templates/signer-inbox.php:126
 #: certification/public/templates/documents-to-sign-batch.php:17
-msgid "Review the list. Each document keeps its own signature and its own record; any document that changed or no longer waits for your signature is skipped."
-msgstr "Revise la lista. Cada documento conserva su propia firma y su propio registro; se omite cualquier documento que haya cambiado o que ya no espere su firma."
+msgid ""
+"Review the list. Each document keeps its own signature and its own record; "
+"any document that changed or no longer waits for your signature is skipped."
+msgstr ""
+"Revise la lista. Cada documento conserva su propia firma y su propio "
+"registro; se omite cualquier documento que haya cambiado o que ya no espere "
+"su firma."
 
 #: certification/admin/templates/signer-inbox.php:131
 #: certification/admin/templates/signer-inbox.php:176
@@ -2009,8 +2808,12 @@ msgstr "Esperando desde"
 #. translators: %d: maximum number of documents per batch
 #: certification/admin/templates/signer-inbox.php:224
 #, php-format
-msgid "Up to %d documents at once. You will review the list and confirm with your password."
-msgstr "Hasta %d documentos a la vez. Revisará la lista y confirmará con su contraseña."
+msgid ""
+"Up to %d documents at once. You will review the list and confirm with your "
+"password."
+msgstr ""
+"Hasta %d documentos a la vez. Revisará la lista y confirmará con su "
+"contraseña."
 
 #: certification/admin/templates/signer-inbox.php:237
 msgid "Signed documents waiting for the final PDF"
@@ -2034,8 +2837,16 @@ msgid "Retired"
 msgstr "Retirado"
 
 #: certification/admin/templates/signers.php:29
-msgid "Signers of the system (directors, coordinators...). Each one registers their own signature from their account after an invitation: nobody can upload the signature of another person. Students and parents sign their own documents and do not need an invitation."
-msgstr "Firmantes del sistema (directores, coordinadores...). Cada uno registra su propia firma desde su cuenta tras una invitación: nadie puede subir la firma de otra persona. Los estudiantes y representantes firman sus propios documentos y no necesitan invitación."
+msgid ""
+"Signers of the system (directors, coordinators...). Each one registers their "
+"own signature from their account after an invitation: nobody can upload the "
+"signature of another person. Students and parents sign their own documents "
+"and do not need an invitation."
+msgstr ""
+"Firmantes del sistema (directores, coordinadores...). Cada uno registra su "
+"propia firma desde su cuenta tras una invitación: nadie puede subir la firma "
+"de otra persona. Los estudiantes y representantes firman sus propios "
+"documentos y no necesitan invitación."
 
 #: certification/admin/templates/signers.php:36
 msgid "Invite a signer"
@@ -2068,8 +2879,12 @@ msgid "Invite"
 msgstr "Invitar"
 
 #: certification/admin/templates/signers.php:67
-msgid "No user with that name or email (students and parents are not listed). You can invite the person to register:"
-msgstr "No hay ningún usuario con ese nombre o correo (no se listan estudiantes ni representantes). Puede invitar a la persona a registrarse:"
+msgid ""
+"No user with that name or email (students and parents are not listed). You "
+"can invite the person to register:"
+msgstr ""
+"No hay ningún usuario con ese nombre o correo (no se listan estudiantes ni "
+"representantes). Puede invitar a la persona a registrarse:"
 
 #: certification/admin/templates/signers.php:72
 msgid "Invite someone without an account"
@@ -2084,8 +2899,15 @@ msgid "Send invitation to register"
 msgstr "Enviar invitación para registrarse"
 
 #: certification/admin/templates/signers.php:81
-msgid "An account with the Signer role is created (it can only access its own signature and the documents requested from it) and the person receives an email to create a password and draw the signature. The link expires in 72 hours."
-msgstr "Se crea una cuenta con el rol Firmante (solo puede acceder a su firma y a los documentos que se le soliciten) y la persona recibe un correo para crear su contraseña y dibujar su firma. El enlace caduca en 72 horas."
+msgid ""
+"An account with the Signer role is created (it can only access its own "
+"signature and the documents requested from it) and the person receives an "
+"email to create a password and draw the signature. The link expires in 72 "
+"hours."
+msgstr ""
+"Se crea una cuenta con el rol Firmante (solo puede acceder a su firma y a "
+"los documentos que se le soliciten) y la persona recibe un correo para crear "
+"su contraseña y dibujar su firma. El enlace caduca en 72 horas."
 
 #: certification/admin/templates/signers.php:87
 msgid "There are no signers yet."
@@ -2137,8 +2959,14 @@ msgid "Legacy signatures (uploaded images)"
 msgstr "Firmas heredadas (imágenes subidas)"
 
 #: certification/admin/templates/signers.php:135
-msgid "Signature images uploaded by an administrator before this system. Documents already issued with them remain valid; they are kept unchanged. Invite each person so that they register their own signature."
-msgstr "Imágenes de firma subidas por un administrador antes de este sistema. Los documentos ya emitidos con ellas siguen siendo válidos; se conservan sin cambios. Invite a cada persona para que registre su propia firma."
+msgid ""
+"Signature images uploaded by an administrator before this system. Documents "
+"already issued with them remain valid; they are kept unchanged. Invite each "
+"person so that they register their own signature."
+msgstr ""
+"Imágenes de firma subidas por un administrador antes de este sistema. Los "
+"documentos ya emitidos con ellas siguen siendo válidos; se conservan sin "
+"cambios. Invite a cada persona para que registre su propia firma."
 
 #: certification/admin/templates/signers.php:143
 msgid "Legacy (image uploaded by an administrator)"
@@ -2151,8 +2979,12 @@ msgstr "Invitar a este usuario"
 #. translators: %s: IDs de documentos
 #: certification/core/migration-documents-php.php:241
 #, php-format
-msgid "These documents contain PHP code that is no longer executed and must be replaced with variables: %s"
-msgstr "Estos documentos contienen código PHP que ya no se ejecuta y debe sustituirse por variables: %s"
+msgid ""
+"These documents contain PHP code that is no longer executed and must be "
+"replaced with variables: %s"
+msgstr ""
+"Estos documentos contienen código PHP que ya no se ejecuta y debe "
+"sustituirse por variables: %s"
 
 #: certification/includes/document-fields.php:21
 msgid "Text"
@@ -2186,8 +3018,12 @@ msgstr "El campo «%s» necesita una clave (letras minúsculas, números y _)."
 
 #: certification/includes/document-fields.php:138
 #, php-format
-msgid "The key \"%s\" must start with a letter and only use lowercase letters, numbers and _."
-msgstr "La clave «%s» debe empezar por una letra y usar solo letras minúsculas, números y _."
+msgid ""
+"The key \"%s\" must start with a letter and only use lowercase letters, "
+"numbers and _."
+msgstr ""
+"La clave «%s» debe empezar por una letra y usar solo letras minúsculas, "
+"números y _."
 
 #: certification/includes/document-fields.php:142
 #, php-format
@@ -2233,67 +3069,79 @@ msgstr "FIRME AQUÍ"
 msgid "Generate signature automatically"
 msgstr "Generar la firma automáticamente"
 
-#: certification/includes/html-signatures.php:78
-msgid "Cancel"
-msgstr "Cancelar"
-
-#: certification/includes/signature-integrity.php:478
+#: certification/includes/signature-integrity.php:516
 msgid "Verified"
 msgstr "Verificada"
 
-#: certification/includes/signature-integrity.php:479
+#: certification/includes/signature-integrity.php:517
 msgid "Altered"
 msgstr "Alterada"
 
-#: certification/includes/signature-integrity.php:480
+#: certification/includes/signature-integrity.php:518
 msgid "Signed with a retired key"
 msgstr "Sellada con una clave retirada"
 
-#: certification/includes/signature-integrity.php:481
+#: certification/includes/signature-integrity.php:519
 msgid "Signed content altered"
 msgstr "Contenido firmado alterado"
 
-#: certification/includes/signature-integrity.php:482
+#: certification/includes/signature-integrity.php:520
 msgid "Chain broken"
 msgstr "Cadena rota"
 
-#: certification/includes/signature-integrity.php:483
+#: certification/includes/signature-integrity.php:521
 msgid "Unknown key"
 msgstr "Clave desconocida"
 
-#: certification/includes/signature-integrity.php:484
+#: certification/includes/signature-integrity.php:522
 msgid "Legacy, no fingerprint"
 msgstr "Antigua, sin huella"
 
-#: certification/includes/signature-integrity.php:485
+#: certification/includes/signature-integrity.php:523
 msgid "No fingerprint (error)"
 msgstr "Sin huella (error)"
 
-#: certification/includes/signature-integrity.php:486
+#: certification/includes/signature-integrity.php:524
 msgid "No fingerprint"
 msgstr "Sin huella"
 
-#: certification/includes/signature-integrity.php:504
+#: certification/includes/signature-integrity.php:542
 #, php-format
 msgid "Switched session by user %d"
 msgstr "Sesión conmutada por el usuario %d"
 
-#: certification/includes/signature-integrity.php:509
+#: certification/includes/signature-integrity.php:547
 #, php-format
 msgid "Signed from the account of %s"
 msgstr "Firmada desde la cuenta de %s"
 
 #: certification/includes/signature-requests.php:841
-msgid "I agree to sign this document electronically. I understand that my electronic signature has the same validity as my handwritten signature, that it is recorded with the date, the time and the details of my connection, and that the signed document cannot be modified."
-msgstr "Acepto firmar este documento electrónicamente. Entiendo que mi firma electrónica tiene la misma validez que mi firma manuscrita, que queda registrada con la fecha, la hora y los datos de mi conexión, y que el documento firmado no podrá modificarse."
+msgid ""
+"I agree to sign this document electronically. I understand that my "
+"electronic signature has the same validity as my handwritten signature, that "
+"it is recorded with the date, the time and the details of my connection, and "
+"that the signed document cannot be modified."
+msgstr ""
+"Acepto firmar este documento electrónicamente. Entiendo que mi firma "
+"electrónica tiene la misma validez que mi firma manuscrita, que queda "
+"registrada con la fecha, la hora y los datos de mi conexión, y que el "
+"documento firmado no podrá modificarse."
 
 #: certification/includes/signature-requests.php:928
 msgid "Pending signature"
 msgstr "Pendiente de firma"
 
 #: certification/includes/signers.php:244
-msgid "I register this drawing as my electronic signature. I understand that it will only be used when I expressly sign each document requested from me, that each use is recorded with the date, the time and the details of my connection, and that nobody else can use it."
-msgstr "Registro este trazo como mi firma electrónica. Entiendo que solo se usará cuando firme expresamente cada documento que se me solicite, que cada uso queda registrado con la fecha, la hora y los datos de mi conexión, y que nadie más puede usarla."
+msgid ""
+"I register this drawing as my electronic signature. I understand that it "
+"will only be used when I expressly sign each document requested from me, "
+"that each use is recorded with the date, the time and the details of my "
+"connection, and that nobody else can use it."
+msgstr ""
+"Registro este trazo como mi firma electrónica. Entiendo que solo se usará "
+"cuando firme expresamente cada documento que se me solicite, que cada uso "
+"queda registrado con la fecha, la hora y los datos de mi conexión, y que "
+"nadie más puede usarla."
 
 #: certification/includes/signers.php:334
 #: certification/includes/signers.php:775
@@ -2315,7 +3163,8 @@ msgstr "Este firmante está suspendido."
 
 #: certification/includes/signers.php:369
 msgid "Too many invitations were sent to this user today. Try again tomorrow."
-msgstr "Se enviaron demasiadas invitaciones a este usuario hoy. Inténtelo mañana."
+msgstr ""
+"Se enviaron demasiadas invitaciones a este usuario hoy. Inténtelo mañana."
 
 #: certification/includes/signers.php:400
 #, php-format
@@ -2333,8 +3182,12 @@ msgstr "[%s] Invitación para registrar su firma"
 
 #: certification/includes/signers.php:415
 #, php-format
-msgid "%s invites you to register your electronic signature to sign the documents that require it."
-msgstr "%s le invita a registrar su firma electrónica para firmar los documentos que la requieran."
+msgid ""
+"%s invites you to register your electronic signature to sign the documents "
+"that require it."
+msgstr ""
+"%s le invita a registrar su firma electrónica para firmar los documentos que "
+"la requieran."
 
 #: certification/includes/signers.php:417
 msgid "Open this link to create your password and then draw your signature:"
@@ -2346,16 +3199,23 @@ msgstr "Inicie sesión con su cuenta y dibuje su firma aquí:"
 
 #: certification/includes/signers.php:420
 #, php-format
-msgid "The link expires in %d hours and can only be used once. If you were not expecting this invitation, ignore this email."
-msgstr "El enlace caduca en %d horas y solo se puede usar una vez. Si no esperaba esta invitación, ignore este correo."
+msgid ""
+"The link expires in %d hours and can only be used once. If you were not "
+"expecting this invitation, ignore this email."
+msgstr ""
+"El enlace caduca en %d horas y solo se puede usar una vez. Si no esperaba "
+"esta invitación, ignore este correo."
 
 #: certification/includes/signers.php:434
 msgid "Write a valid name and email."
 msgstr "Escriba un nombre y un correo válidos."
 
 #: certification/includes/signers.php:437
-msgid "That email already has an account: search for it and invite it from the results."
-msgstr "Ese correo ya tiene una cuenta: búsquela e invítela desde los resultados."
+msgid ""
+"That email already has an account: search for it and invite it from the "
+"results."
+msgstr ""
+"Ese correo ya tiene una cuenta: búsquela e invítela desde los resultados."
 
 #: certification/includes/signers.php:512
 msgid "You are not allowed to register a signature."
@@ -2387,12 +3247,18 @@ msgid "Your signature was registered."
 msgstr "Su firma quedó registrada."
 
 #: certification/includes/signers.php:806
-msgid "Choose at least one signer, or mark that the document does not require signatures."
+msgid ""
+"Choose at least one signer, or mark that the document does not require "
+"signatures."
 msgstr "Elija al menos un firmante, o marque que el documento no pide firmas."
 
 #: certification/includes/signers.php:855
-msgid "Document signers saved. They apply to new signature requests; requests already in progress keep their signers."
-msgstr "Firmantes del documento guardados. Se aplican a las solicitudes de firma nuevas; las solicitudes en curso conservan sus firmantes."
+msgid ""
+"Document signers saved. They apply to new signature requests; requests "
+"already in progress keep their signers."
+msgstr ""
+"Firmantes del documento guardados. Se aplican a las solicitudes de firma "
+"nuevas; las solicitudes en curso conservan sus firmantes."
 
 #: certification/includes/signers.php:1146
 #: certification/includes/signers.php:1188
@@ -2418,18 +3284,26 @@ msgstr "Este documento todavía espera firmas anteriores."
 #: certification/includes/signers.php:1552
 #: certification/public/functions/documents-signature.php:105
 #: certification/public/functions/documents-signature.php:165
-msgid "The document was updated while you had it open. Please reload the page and review it again before signing."
-msgstr "El documento se actualizó mientras lo tenía abierto. Por favor, recargue la página y revíselo de nuevo antes de firmar."
+msgid ""
+"The document was updated while you had it open. Please reload the page and "
+"review it again before signing."
+msgstr ""
+"El documento se actualizó mientras lo tenía abierto. Por favor, recargue la "
+"página y revíselo de nuevo antes de firmar."
 
 #: certification/includes/signers.php:1212
 #: certification/includes/signers.php:1574
 #: certification/public/functions/documents-signature.php:123
-msgid "Your signature could not be saved. Please reload the page and try again."
-msgstr "No se pudo guardar su firma. Por favor, recargue la página e inténtelo de nuevo."
+msgid ""
+"Your signature could not be saved. Please reload the page and try again."
+msgstr ""
+"No se pudo guardar su firma. Por favor, recargue la página e inténtelo de "
+"nuevo."
 
 #: certification/includes/signers.php:1225
 msgid "Signed. All signatures are complete: the final PDF is being generated."
-msgstr "Firmado. Todas las firmas están completas: se está generando el PDF final."
+msgstr ""
+"Firmado. Todas las firmas están completas: se está generando el PDF final."
 
 #: certification/includes/signers.php:1226
 msgid "Signed. The document is waiting for the remaining signatures."
@@ -2438,18 +3312,34 @@ msgstr "Firmado. El documento espera las firmas restantes."
 #. translators: %d: number of documents
 #: certification/includes/signers.php:1246
 #, php-format
-msgid "I agree to sign electronically, with the signature I draw on this page, the following %d document:"
-msgid_plural "I agree to sign electronically, with the signature I draw on this page, the following %d documents:"
-msgstr[0] "Acepto firmar electrónicamente, con la firma que dibujo en esta página, el siguiente documento (%d):"
-msgstr[1] "Acepto firmar electrónicamente, con la firma que dibujo en esta página, los siguientes %d documentos:"
+msgid ""
+"I agree to sign electronically, with the signature I draw on this page, the "
+"following %d document:"
+msgid_plural ""
+"I agree to sign electronically, with the signature I draw on this page, the "
+"following %d documents:"
+msgstr[0] ""
+"Acepto firmar electrónicamente, con la firma que dibujo en esta página, el "
+"siguiente documento (%d):"
+msgstr[1] ""
+"Acepto firmar electrónicamente, con la firma que dibujo en esta página, los "
+"siguientes %d documentos:"
 
 #. translators: %d: number of documents
 #: certification/includes/signers.php:1248
 #, php-format
-msgid "I agree to sign electronically, with my registered signature, the following %d document:"
-msgid_plural "I agree to sign electronically, with my registered signature, the following %d documents:"
-msgstr[0] "Acepto firmar electrónicamente, con mi firma registrada, el siguiente documento (%d):"
-msgstr[1] "Acepto firmar electrónicamente, con mi firma registrada, los siguientes %d documentos:"
+msgid ""
+"I agree to sign electronically, with my registered signature, the following "
+"%d document:"
+msgid_plural ""
+"I agree to sign electronically, with my registered signature, the following "
+"%d documents:"
+msgstr[0] ""
+"Acepto firmar electrónicamente, con mi firma registrada, el siguiente "
+"documento (%d):"
+msgstr[1] ""
+"Acepto firmar electrónicamente, con mi firma registrada, los siguientes %d "
+"documentos:"
 
 #. translators: 1: position, 2: document title, 3: student name, 4: round, 5: short content fingerprint
 #: certification/includes/signers.php:1254
@@ -2458,8 +3348,14 @@ msgid "%1$d. %2$s — %3$s — round %4$d — fingerprint %5$s"
 msgstr "%1$d. %2$s — %3$s — ronda %4$d — huella %5$s"
 
 #: certification/includes/signers.php:1262
-msgid "I understand that each signature has the same validity as my handwritten signature, that it is recorded with the date, the time and the details of my connection, and that the signed documents cannot be modified."
-msgstr "Entiendo que cada firma tiene la misma validez que mi firma manuscrita, que queda registrada con la fecha, la hora y los datos de mi conexión, y que los documentos firmados no se pueden modificar."
+msgid ""
+"I understand that each signature has the same validity as my handwritten "
+"signature, that it is recorded with the date, the time and the details of my "
+"connection, and that the signed documents cannot be modified."
+msgstr ""
+"Entiendo que cada firma tiene la misma validez que mi firma manuscrita, que "
+"queda registrada con la fecha, la hora y los datos de mi conexión, y que los "
+"documentos firmados no se pueden modificar."
 
 #: certification/includes/signers.php:1317
 msgid "Select at least one document to sign."
@@ -2472,8 +3368,11 @@ msgid "You can sign at most %d documents at once."
 msgstr "Puede firmar como máximo %d documentos a la vez."
 
 #: certification/includes/signers.php:1339
-msgid "None of the selected documents is waiting for your signature. Please reload the page."
-msgstr "Ninguno de los documentos marcados espera su firma. Recargue la página."
+msgid ""
+"None of the selected documents is waiting for your signature. Please reload "
+"the page."
+msgstr ""
+"Ninguno de los documentos marcados espera su firma. Recargue la página."
 
 #: certification/includes/signers.php:1357
 msgid "The batch could not be prepared. Please try again."
@@ -2504,34 +3403,52 @@ msgstr "Los documentos no se pueden emitir desde una sesión conmutada."
 
 #: certification/includes/signers.php:1679
 #: certification/includes/signers.php:1719
-msgid "This document has no system signers configured. Configure its signers or generate it as before."
-msgstr "Este documento no tiene firmantes del sistema configurados. Configure sus firmantes o genérelo como antes."
+msgid ""
+"This document has no system signers configured. Configure its signers or "
+"generate it as before."
+msgstr ""
+"Este documento no tiene firmantes del sistema configurados. Configure sus "
+"firmantes o genérelo como antes."
 
 #: certification/includes/signers.php:1683
-msgid "This document was already issued for this student and is waiting for signatures."
-msgstr "Este documento ya se emitió para este estudiante y está esperando firmas."
+msgid ""
+"This document was already issued for this student and is waiting for "
+"signatures."
+msgstr ""
+"Este documento ya se emitió para este estudiante y está esperando firmas."
 
 #: certification/includes/signers.php:1693
 msgid "That volume and folio cannot be reused."
 msgstr "Ese tomo y folio no se pueden reutilizar."
 
 #: certification/includes/signers.php:1696
-msgid "The previous issue of this document was declined and still holds its volume and folio: choose in \"Documents issued for signature\" whether to keep them or void them."
-msgstr "La emisión anterior de este documento fue declinada y conserva su tomo y folio: elija en \"Documentos emitidos para firma\" si mantenerlos o anularlos."
+msgid ""
+"The previous issue of this document was declined and still holds its volume "
+"and folio: choose in \"Documents issued for signature\" whether to keep them "
+"or void them."
+msgstr ""
+"La emisión anterior de este documento fue declinada y conserva su tomo y "
+"folio: elija en \"Documentos emitidos para firma\" si mantenerlos o "
+"anularlos."
 
 #: certification/includes/signers.php:1712
 msgid "The document could not be issued. Please try again."
 msgstr "No se pudo emitir el documento. Inténtelo de nuevo."
 
 #: certification/includes/signers.php:1726
-msgid "The registry book did not assign a volume and folio. The document was not issued."
-msgstr "El libro de registro no asignó tomo y folio. El documento no se emitió."
+msgid ""
+"The registry book did not assign a volume and folio. The document was not "
+"issued."
+msgstr ""
+"El libro de registro no asignó tomo y folio. El documento no se emitió."
 
 #. translators: %s: list of variables
 #: certification/includes/signers.php:1744
 #, php-format
-msgid "The document was not issued: these variables could not be filled in: %s."
-msgstr "El documento no se emitió: no se pudieron rellenar estas variables: %s."
+msgid ""
+"The document was not issued: these variables could not be filled in: %s."
+msgstr ""
+"El documento no se emitió: no se pudieron rellenar estas variables: %s."
 
 #. translators: 1: volume number, 2: folio number
 #: certification/includes/signers.php:1763
@@ -2541,11 +3458,16 @@ msgstr "Tomo: %1$d Folio: %2$d"
 
 #: certification/includes/signers.php:1780
 msgid "The document is too large or could not be saved. Please try again."
-msgstr "El documento es demasiado grande o no se pudo guardar. Inténtelo de nuevo."
+msgstr ""
+"El documento es demasiado grande o no se pudo guardar. Inténtelo de nuevo."
 
 #: certification/includes/signers.php:1813
-msgid "Document issued for signature. Each signer will find it in \"Documents to sign\"."
-msgstr "Documento emitido para firma. Cada firmante lo encontrará en \"Documentos por firmar\"."
+msgid ""
+"Document issued for signature. Each signer will find it in \"Documents to "
+"sign\"."
+msgstr ""
+"Documento emitido para firma. Cada firmante lo encontrará en \"Documentos "
+"por firmar\"."
 
 #: certification/includes/signers.php:1987
 msgid "The document was declined and its signatures were revoked."
@@ -2562,8 +3484,12 @@ msgid "The document \"%s\" is waiting for your signature."
 msgstr "El documento \"%s\" está esperando su firma."
 
 #: certification/includes/signers.php:2064
-msgid "Sign in with your own account and open \"Documents to sign\" to review it and sign it:"
-msgstr "Entre con su propia cuenta y abra \"Documentos por firmar\" para revisarlo y firmarlo:"
+msgid ""
+"Sign in with your own account and open \"Documents to sign\" to review it "
+"and sign it:"
+msgstr ""
+"Entre con su propia cuenta y abra \"Documentos por firmar\" para revisarlo y "
+"firmarlo:"
 
 #: certification/includes/signers.php:2065
 msgid "Only you can sign it: nobody else can sign on your behalf."
@@ -2587,21 +3513,31 @@ msgid "Pending: the parent or guardian must sign from their own account"
 msgstr "Pendiente: el representante debe firmar desde su propia cuenta"
 
 #: certification/public/functions/assets.php:45
-msgid "To continue, please sign in your area or generate your signature automatically."
-msgstr "Para continuar, firme en su recuadro o genere su firma automáticamente."
+msgid ""
+"To continue, please sign in your area or generate your signature "
+"automatically."
+msgstr ""
+"Para continuar, firme en su recuadro o genere su firma automáticamente."
 
 #: certification/public/functions/assets.php:46
-msgid "Your signature is saved. The document will be completed when the other person signs from their own account."
-msgstr "Su firma está guardada. El documento se completará cuando la otra persona firme desde su propia cuenta."
+msgid ""
+"Your signature is saved. The document will be completed when the other "
+"person signs from their own account."
+msgstr ""
+"Su firma está guardada. El documento se completará cuando la otra persona "
+"firme desde su propia cuenta."
 
 #: certification/public/functions/assets.php:48
-msgid "To proceed with your document, please select the last grade you completed"
-msgstr "Para continuar con su documento, seleccione el último grado que completó"
+msgid ""
+"To proceed with your document, please select the last grade you completed"
+msgstr ""
+"Para continuar con su documento, seleccione el último grado que completó"
 
 #: certification/public/functions/assets.php:49
 #: certification/public/templates/create-document-automatic.php:72
 msgid "The document could not be saved. Please reload the page and try again."
-msgstr "No se pudo guardar el documento. Recargue la página e inténtelo de nuevo."
+msgstr ""
+"No se pudo guardar el documento. Recargue la página e inténtelo de nuevo."
 
 #. translators: %s: name of the document (in lower case)
 #: certification/public/functions/assets.php:51
@@ -2627,20 +3563,32 @@ msgid "You can only sign your own part of the document."
 msgstr "Solo puede firmar su propia parte del documento."
 
 #: certification/public/functions/documents-signature.php:141
-msgid "The document was updated while you had it open. Please reload the page and review it again before saving."
-msgstr "El documento se actualizó mientras lo tenía abierto. Recargue la página y revíselo de nuevo antes de guardar."
+msgid ""
+"The document was updated while you had it open. Please reload the page and "
+"review it again before saving."
+msgstr ""
+"El documento se actualizó mientras lo tenía abierto. Recargue la página y "
+"revíselo de nuevo antes de guardar."
 
 #: certification/public/functions/documents-signature.php:162
-msgid "The document can only be completed when everyone has signed from their own account."
-msgstr "El documento solo se puede completar cuando todos hayan firmado desde su propia cuenta."
+msgid ""
+"The document can only be completed when everyone has signed from their own "
+"account."
+msgstr ""
+"El documento solo se puede completar cuando todos hayan firmado desde su "
+"propia cuenta."
 
 #: certification/public/functions/documents-signature.php:198
 msgid "This document was already completed. Please reload the page."
 msgstr "Este documento ya se completó. Por favor, recargue la página."
 
 #: certification/public/functions/signer-registration.php:27
-msgid "This invitation is not valid or has expired. Ask the administration to send it again."
-msgstr "Esta invitación no es válida o ha caducado. Pida a la administración que se la envíe de nuevo."
+msgid ""
+"This invitation is not valid or has expired. Ask the administration to send "
+"it again."
+msgstr ""
+"Esta invitación no es válida o ha caducado. Pida a la administración que se "
+"la envíe de nuevo."
 
 #: certification/public/functions/signer-registration.php:41
 msgid "Your session expired. Please try again."
@@ -2661,8 +3609,12 @@ msgstr "Registre su firma — %s"
 
 #: certification/public/functions/signer-registration.php:87
 #, php-format
-msgid "Hello %s. Create your password to access your account; then you will draw your signature."
-msgstr "Hola, %s. Cree su contraseña para acceder a su cuenta; después dibujará su firma."
+msgid ""
+"Hello %s. Create your password to access your account; then you will draw "
+"your signature."
+msgstr ""
+"Hola, %s. Cree su contraseña para acceder a su cuenta; después dibujará su "
+"firma."
 
 #: certification/public/functions/signer-registration.php:93
 msgid "Password"
@@ -2677,12 +3629,21 @@ msgid "Create password and continue"
 msgstr "Crear contraseña y continuar"
 
 #: certification/public/templates/create-document-automatic.php:31
-msgid "This document was updated to the new signature system: please sign it again. Everyone who has to sign it must do so from their own account."
-msgstr "Este documento se actualizó al nuevo sistema de firma: por favor, fírmelo de nuevo. Cada persona que deba firmarlo tiene que hacerlo desde su propia cuenta."
+msgid ""
+"This document was updated to the new signature system: please sign it again. "
+"Everyone who has to sign it must do so from their own account."
+msgstr ""
+"Este documento se actualizó al nuevo sistema de firma: por favor, fírmelo de "
+"nuevo. Cada persona que deba firmarlo tiene que hacerlo desde su propia "
+"cuenta."
 
 #: certification/public/templates/document-fields-form.php:24
-msgid "Before continuing, complete the following information. It will be used to fill in the document."
-msgstr "Antes de continuar, complete la siguiente información. Se usará para rellenar el documento."
+msgid ""
+"Before continuing, complete the following information. It will be used to "
+"fill in the document."
+msgstr ""
+"Antes de continuar, complete la siguiente información. Se usará para "
+"rellenar el documento."
 
 #: certification/public/templates/document-fields-form.php:37
 msgid "Continue"
@@ -2714,8 +3675,13 @@ msgid "Sign"
 msgstr "Firmar"
 
 #: certification/public/templates/documents-to-sign.php:54
-msgid "Only documents that someone else already signed can be signed together. You will review the list, draw your signature once and confirm with your password."
-msgstr "Solo se pueden firmar juntos los documentos que otra persona ya firmó. Revisará la lista, dibujará su firma una vez y confirmará con su contraseña."
+msgid ""
+"Only documents that someone else already signed can be signed together. You "
+"will review the list, draw your signature once and confirm with your "
+"password."
+msgstr ""
+"Solo se pueden firmar juntos los documentos que otra persona ya firmó. "
+"Revisará la lista, dibujará su firma una vez y confirmará con su contraseña."
 
 #: includes/api-keys.php:24
 msgid "Verify documents"
@@ -2723,7 +3689,9 @@ msgstr "Verificar documentos"
 
 #: includes/api-keys.php:24
 msgid "Check a document by its code and get the data needed to validate it."
-msgstr "Consultar un documento por su código y obtener los datos necesarios para validarlo."
+msgstr ""
+"Consultar un documento por su código y obtener los datos necesarios para "
+"validarlo."
 
 #: includes/api-keys.php:46
 msgid "The name of the connection is required."
@@ -2751,8 +3719,12 @@ msgstr "El documento no tiene libro de registro."
 
 #: includes/book.php:112
 #, php-format
-msgid "The registry book line could not be filled (variables without value: %s). The document was not issued."
-msgstr "No se pudo rellenar la línea del libro de registro (variables sin valor: %s). El documento no se emitió."
+msgid ""
+"The registry book line could not be filled (variables without value: %s). "
+"The document was not issued."
+msgstr ""
+"No se pudo rellenar la línea del libro de registro (variables sin valor: "
+"%s). El documento no se emitió."
 
 #: includes/book.php:117
 msgid "The registry book line is empty. The document was not issued."
@@ -2760,12 +3732,19 @@ msgstr "La línea del libro de registro está vacía. El documento no se emitió
 
 #: includes/book.php:122
 #, php-format
-msgid "The registry book line is longer than %d characters. The document was not issued."
-msgstr "La línea del libro de registro tiene más de %d caracteres. El documento no se emitió."
+msgid ""
+"The registry book line is longer than %d characters. The document was not "
+"issued."
+msgstr ""
+"La línea del libro de registro tiene más de %d caracteres. El documento no "
+"se emitió."
 
 #: includes/book.php:127
-msgid "The registry book is not available on this site. The document was not issued."
-msgstr "El libro de registro no está disponible en este sitio. El documento no se emitió."
+msgid ""
+"The registry book is not available on this site. The document was not issued."
+msgstr ""
+"El libro de registro no está disponible en este sitio. El documento no se "
+"emitió."
 
 #: includes/book.php:158
 msgid "The registry book is not available on this site."
@@ -2818,7 +3797,8 @@ msgstr "Elegir quién firma cada documento y en qué orden."
 
 #: includes/permissions.php:31
 msgid "Issue documents for signature from a student file, and decline them."
-msgstr "Emitir documentos para firma desde la ficha de un estudiante, y declinarlos."
+msgstr ""
+"Emitir documentos para firma desde la ficha de un estudiante, y declinarlos."
 
 #: includes/permissions.php:32
 msgid "Verify the signature chain and rotate the key."
@@ -2833,8 +3813,11 @@ msgid "Choose which roles can sign documents."
 msgstr "Elegir qué roles pueden firmar documentos."
 
 #: includes/permissions.php:35
-msgid "Create and revoke the keys that other systems use to check this platform."
-msgstr "Crear y revocar las claves con las que otros sistemas consultan esta plataforma."
+msgid ""
+"Create and revoke the keys that other systems use to check this platform."
+msgstr ""
+"Crear y revocar las claves con las que otros sistemas consultan esta "
+"plataforma."
 
 #: includes/permissions.php:36
 msgid "Give these permissions to the roles (this screen)."
@@ -2921,8 +3904,12 @@ msgid "My ID"
 msgstr "Mi carnet"
 
 #: public/templates/my-card.php:27
-msgid "You do not yet have a photo to use on the ID card, please check its status in the documents screen"
-msgstr "Aún no tiene una foto para usar en el carnet; revise su estado en la pantalla de documentos"
+msgid ""
+"You do not yet have a photo to use on the ID card, please check its status "
+"in the documents screen"
+msgstr ""
+"Aún no tiene una foto para usar en el carnet; revise su estado en la "
+"pantalla de documentos"
 
 #: public/templates/my-card.php:29
 msgid "here"
@@ -2964,8 +3951,14 @@ msgstr "La certificación está en pausa."
 #. translators: 1: installed EduSystem version, 2: required EduSystem version
 #: src/Pair.php:67
 #, php-format
-msgid "WP Certificates needs EduSystem %2$s or later and this site has EduSystem %1$s. Update EduSystem: until then, documents and signatures are paused (nothing is lost)."
-msgstr "WP Certificates necesita EduSystem %2$s o posterior y este sitio tiene EduSystem %1$s. Actualice EduSystem: hasta entonces, los documentos y las firmas están en pausa (no se pierde nada)."
+msgid ""
+"WP Certificates needs EduSystem %2$s or later and this site has EduSystem "
+"%1$s. Update EduSystem: until then, documents and signatures are paused "
+"(nothing is lost)."
+msgstr ""
+"WP Certificates necesita EduSystem %2$s o posterior y este sitio tiene "
+"EduSystem %1$s. Actualice EduSystem: hasta entonces, los documentos y las "
+"firmas están en pausa (no se pierde nada)."
 
 #: src/Variables.php:26
 msgid "Name of this document"
@@ -2984,8 +3977,12 @@ msgid "Page break in the PDF"
 msgstr "Salto de página en el PDF"
 
 #: src/Variables.php:30
-msgid "Signatures of the roles not placed separately (empty when the document does not ask for signatures)"
-msgstr "Firmas de los roles que no se colocan por separado (vacío cuando el documento no pide firmas)"
+msgid ""
+"Signatures of the roles not placed separately (empty when the document does "
+"not ask for signatures)"
+msgstr ""
+"Firmas de los roles que no se colocan por separado (vacío cuando el "
+"documento no pide firmas)"
 
 #: src/Variables.php:31
 msgid "QR code to validate the document"
@@ -3020,9 +4017,136 @@ msgid "Signature, name and position of institutional signer number N"
 msgstr "Firma, nombre y cargo del firmante institucional número N"
 
 #: src/Variables.php:39
-msgid "Signature, name and position of a system signer (see \"Document signers\")"
-msgstr "Firma, nombre y cargo de un firmante del sistema (ver «Firmantes del documento»)"
+msgid ""
+"Signature, name and position of a system signer (see \"Document signers\")"
+msgstr ""
+"Firma, nombre y cargo de un firmante del sistema (ver «Firmantes del "
+"documento»)"
 
 #: src/Variables.php:40
 msgid "Answers to the additional fields of this document (see \"Advanced\")"
 msgstr "Respuestas a los campos adicionales de este documento (ver «Avanzado»)"
+
+#: edusof-ui (biblioteca compartida Edusof UI)
+msgid "Institutional blue"
+msgstr "Azul institucional"
+
+#: edusof-ui (biblioteca compartida Edusof UI)
+msgid "Emerald green"
+msgstr "Verde esmeralda"
+
+#: edusof-ui (biblioteca compartida Edusof UI)
+msgid "Wine"
+msgstr "Vino"
+
+#: edusof-ui (biblioteca compartida Edusof UI)
+msgid "Terracotta"
+msgstr "Terracota"
+
+#: edusof-ui (biblioteca compartida Edusof UI)
+msgid "Graphite"
+msgstr "Grafito"
+
+#: edusof-ui (biblioteca compartida Edusof UI)
+msgid "Light"
+msgstr "Claro"
+
+#: edusof-ui (biblioteca compartida Edusof UI)
+msgid "White background. Recommended for most people."
+msgstr "Fondo blanco. Recomendado para la mayoría."
+
+#: edusof-ui (biblioteca compartida Edusof UI)
+msgid "Dark"
+msgstr "Oscuro"
+
+#: edusof-ui (biblioteca compartida Edusof UI)
+msgid "Dark background. Easier on the eyes in low light."
+msgstr "Fondo oscuro. Descansa la vista con poca luz."
+
+#: edusof-ui (biblioteca compartida Edusof UI)
+msgid "Same as the device"
+msgstr "Según el dispositivo"
+
+#: edusof-ui (biblioteca compartida Edusof UI)
+msgid "Follows the setting of the computer or phone."
+msgstr "Sigue el ajuste del ordenador o del móvil."
+
+#: edusof-ui (biblioteca compartida Edusof UI)
+msgid "Management panel"
+msgstr "Panel de gestión"
+
+#: edusof-ui (biblioteca compartida Edusof UI)
+msgid "Log out"
+msgstr "Salir"
+
+#: edusof-ui (biblioteca compartida Edusof UI)
+msgid "Appearance"
+msgstr "Apariencia"
+
+#: edusof-ui (biblioteca compartida Edusof UI)
+msgid "Sorry, you are not allowed to do this."
+msgstr "Lo sentimos, no tiene permiso para hacer esto."
+
+#: edusof-ui (biblioteca compartida Edusof UI)
+msgid "Same as the site"
+msgstr "Igual que el sitio"
+
+#: edusof-ui (biblioteca compartida Edusof UI)
+msgid "Appearance mode"
+msgstr "Modo de la apariencia"
+
+#: edusof-ui (biblioteca compartida Edusof UI)
+msgid "Light, dark or same as the device. Only applies when the Edusof design is on."
+msgstr "Claro, oscuro o según el dispositivo. Solo se aplica cuando el diseño Edusof está encendido."
+
+#: edusof-ui (biblioteca compartida Edusof UI)
+msgid "The appearance is the same in EduSystem and WP Certificates."
+msgstr "La apariencia es la misma en EduSystem y WP Certificates."
+
+#: edusof-ui (biblioteca compartida Edusof UI)
+msgid "Appearance saved."
+msgstr "Apariencia guardada."
+
+#: edusof-ui (biblioteca compartida Edusof UI)
+msgid "Edusof design"
+msgstr "Diseño Edusof"
+
+#: edusof-ui (biblioteca compartida Edusof UI)
+msgid "Turns on the new look of the EduSystem and WP Certificates panel. When it is off, everything looks as before."
+msgstr "Activa la nueva apariencia del panel de EduSystem y WP Certificates. Apagado, todo se ve como antes."
+
+#: edusof-ui (biblioteca compartida Edusof UI)
+msgid "The Edusof design is off: the panel looks as before. You can choose the theme and mode now; they are applied when you turn it on."
+msgstr "El diseño Edusof está apagado: el panel se ve como antes. Puede elegir el tema y el modo ahora; se aplican al encenderlo."
+
+#: edusof-ui (biblioteca compartida Edusof UI)
+msgid "Institution theme"
+msgstr "Tema de la institución"
+
+#: edusof-ui (biblioteca compartida Edusof UI)
+msgid "Chosen by the administrator for all staff. The colors are already tested to be easy to read."
+msgstr "Lo elige el administrador para todo el personal. Los colores ya vienen probados para que se lean bien."
+
+#: edusof-ui (biblioteca compartida Edusof UI)
+msgid "Contrast checked (AA)"
+msgstr "Contraste comprobado (AA)"
+
+#: edusof-ui (biblioteca compartida Edusof UI)
+msgid "Theme"
+msgstr "Tema"
+
+#: edusof-ui (biblioteca compartida Edusof UI)
+msgid "Light or dark mode"
+msgstr "Modo claro u oscuro"
+
+#: edusof-ui (biblioteca compartida Edusof UI)
+msgid "Site default. Each person can change it in their profile."
+msgstr "Valor por defecto del sitio. Cada persona puede cambiarlo en su perfil."
+
+#: edusof-ui (biblioteca compartida Edusof UI)
+msgid "Mode"
+msgstr "Modo"
+
+#: edusof-ui (biblioteca compartida Edusof UI)
+msgid "There is no free color picker: that way no change leaves text that cannot be read. If an institution needs its exact color, it is added as a new theme after checking the contrast."
+msgstr "No hay selector de colores libre: así ningún cambio deja textos que no se leen. Si una institución necesita su color exacto, se añade como tema nuevo después de comprobar el contraste."

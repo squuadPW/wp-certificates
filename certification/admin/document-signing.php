@@ -89,6 +89,11 @@ function squuad_cert_document_signing_handle_save(): void
     }
 
     $result = squuad_cert_signing_policy_save($document_id, $requires, $slots);
+    // Diseño Edusof: un solo interruptor de firmas. En los gestionados, el «requerirá firmas» de siempre
+    // (documents_certificates.signature_required) sigue a este: así no hay dos valores distintos
+    if ($result['ok'] && !empty($_POST['wpc_eds_sync_signature'])) {
+        squuad_cert_document_signing_sync_required($document_id, $requires);
+    }
     if (function_exists('squuad_cert_signers_notice')) {
         squuad_cert_signers_notice($result['message'], $result['ok']);
     }
@@ -98,6 +103,23 @@ function squuad_cert_document_signing_handle_save(): void
         'document_id' => $document_id,
     ], admin_url('admin.php')) . '#edusystem-document-signers');
     exit;
+}
+
+/**
+ * Pone signature_required del documento gestionado igual que «Este documento pide firmas» de su política (solo si
+ * cambia; los automáticos no usan ese campo). Queda en el log.
+ */
+function squuad_cert_document_signing_sync_required(int $document_id, bool $requires): void
+{
+    global $wpdb;
+
+    $table = $wpdb->prefix . 'documents_certificates';
+    $document = $wpdb->get_row($wpdb->prepare("SELECT id, `type`, signature_required FROM {$table} WHERE id = %d", $document_id));
+    if (!$document || 'automatic' === $document->type || (int) (bool) $document->signature_required === (int) $requires) {
+        return;
+    }
+    $wpdb->update($table, ['signature_required' => $requires ? 1 : 0], ['id' => $document_id]);
+    squuad_cert_log(sprintf('Documento %d: «requerirá firmas» pasa a %d al guardar sus firmantes (usuario %d)', $document_id, $requires ? 1 : 0, get_current_user_id()), 'signing_policy');
 }
 
 /* ---------------------------------------------------------------------------------------------------------------
@@ -342,6 +364,10 @@ function squuad_cert_missing_letter_conversion_notice(): void
         || !current_user_can(SQUUAD_CERT_MANAGE_SIGNING_POLICIES_CAP) || !squuad_cert_missing_letter_conversion_available()) {
         return;
     }
+    // Con el diseño Edusof, el aviso se dibuja dentro de la lista de documentos (admin/templates/eds-list-documents.php)
+    if (function_exists('wpc_eds_documents_enabled') && wpc_eds_documents_enabled()) {
+        return;
+    }
     ?>
     <div class="notice notice-info">
         <p><strong><?= esc_html__('Missing documents commitment letter', 'wp-certificates') ?></strong><br>
@@ -525,6 +551,10 @@ add_action('all_admin_notices', 'squuad_cert_legacy_signatures_admin_notice');
 function squuad_cert_legacy_signatures_admin_notice(): void
 {
     if (!current_user_can(SQUUAD_CERT_MANAGE_SIGNING_POLICIES_CAP) || get_option(SQUUAD_CERT_LEGACY_SIGNATURES_DISMISSED)) {
+        return;
+    }
+    // Con el diseño Edusof, solo en la lista de documentos, dentro de la página (admin/templates/eds-list-documents.php)
+    if (function_exists('wpc_eds_documents_enabled') && wpc_eds_documents_enabled()) {
         return;
     }
     $documents = squuad_cert_legacy_signature_affected_documents();

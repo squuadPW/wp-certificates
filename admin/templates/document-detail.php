@@ -1,3 +1,8 @@
+<?php // Diseño Edusof activo: la pantalla se dibuja con el marcado nuevo (eds-document-detail.php); si no, como siempre
+if (wpc_eds_documents_enabled()) {
+    include __DIR__ . '/eds-document-detail.php';
+    return;
+} ?>
 <div class="wrap">
     <?php if (isset($document) && !empty($document)): ?>
         <h2 style="margin-bottom:15px;"><?= esc_html__('Document details', 'wp-certificates'); ?></h2>
@@ -83,13 +88,13 @@
                                     <div style="font-weight:400;" class="space-offer">
                                         <label for="title"><b><?= esc_html__('Name', 'wp-certificates'); ?></b><span
                                                 class="text-danger">*</span></label><br>
-                                        <input type="text" name="title" value="<?= esc_attr($document->title ?? ''); ?>" required>
+                                        <input type="text" name="title" id="title" value="<?= esc_attr($document->title ?? ''); ?>" required>
                                     </div>
 
                                     <div style="font-weight:400;" class="space-offer">
-                                        <label for="title"><b><?= esc_html__('Identifier (can be the name of the document)', 'wp-certificates'); ?></b><span
+                                        <label for="document_identificator"><b><?= esc_html__('Identifier (can be the name of the document)', 'wp-certificates'); ?></b><span
                                                 class="text-danger">*</span></label><br>
-                                        <input type="text" name="document_identificator" value="<?= esc_attr($document->document_identificator ?? ''); ?>" required>
+                                        <input type="text" name="document_identificator" id="document_identificator" value="<?= esc_attr($document->document_identificator ?? ''); ?>" required>
                                     </div>
 
                                     <?php // Variables generales: definidas en el código de wp-certificates, sirven en cualquier sitio (Antigravity/variable.md) ?>
@@ -104,17 +109,16 @@
                                     </div>
 
                                     <div style="font-weight:400;" class="space-offer">
-                                        <label
-                                            for="variables-select"><b><?= esc_html__('Variables', 'wp-certificates'); ?></b></label><br>
+                                        <b><?= esc_html__('Variables', 'wp-certificates'); ?></b><br>
                                         <ul style="display: grid;grid-template-columns: 1fr 1fr;">
                                             <?php foreach ($variables as $key => $variable) { ?>
-                                                <li><strong><?= $variable->text ?></strong>: <?= $variable->visual ?></li>
+                                                <li><strong><?= esc_html($variable->text) ?></strong>: <?= esc_html($variable->visual) ?></li>
                                             <?php } ?>
                                         </ul>
                                     </div>
 
                                     <div style="font-weight:400;" class="space-offer">
-                                        <label for="title"><b><?= esc_html__('Header', 'wp-certificates'); ?></b><span
+                                        <label for="header"><b><?= esc_html__('Header', 'wp-certificates'); ?></b><span
                                                 class="text-danger">*</span></label><br>
                                         <?= wp_editor(
                                             isset($document->header) ? wp_unslash($document->header) : '',
@@ -128,7 +132,7 @@
                                     </div>
 
                                     <div style="font-weight:400;" class="space-offer">
-                                        <label for="title"><b><?= esc_html__('Content', 'wp-certificates'); ?></b><span
+                                        <label for="content"><b><?= esc_html__('Content', 'wp-certificates'); ?></b><span
                                                 class="text-danger">*</span></label><br>
                                         <?= wp_editor(
                                             isset($document->content) ? wp_unslash($document->content) : '',
@@ -142,7 +146,7 @@
                                     </div>
 
                                     <div style="font-weight:400;" class="space-offer">
-                                        <label for="title"><b><?= esc_html__('Footer', 'wp-certificates'); ?></b><span
+                                        <label for="footer"><b><?= esc_html__('Footer', 'wp-certificates'); ?></b><span
                                                 class="text-danger">*</span></label><br>
                                         <?= wp_editor(
                                             isset($document->footer) ? wp_unslash($document->footer) : '',
@@ -181,12 +185,12 @@
 
                                     <div style="font-weight:400; text-align: center" class="space-offer">
                                         <label for="id_requisito"><b><?= esc_html__('ID Requirement for the admin (ID requisito)', 'wp-certificates'); ?></b></label><br>
-                                        <input type="text" name="id_requisito" value="<?= esc_attr($document->id_requisito ?? ''); ?>">
+                                        <input type="text" name="id_requisito" id="id_requisito" value="<?= esc_attr($document->id_requisito ?? ''); ?>">
                                     </div>
 
                                     <div style="font-weight:400; text-align: center" class="space-offer">
                                         <label for="type_file"><b><?= esc_html__('Type file', 'wp-certificates'); ?></b></label><br>
-                                        <input type="text" name="type_file" value="<?= esc_attr($document->type_file ?? ''); ?>">
+                                        <input type="text" name="type_file" id="type_file" value="<?= esc_attr($document->type_file ?? ''); ?>">
                                     </div>
 
                                     <div style="font-weight:400; text-align: center" class="space-offer">
@@ -214,8 +218,8 @@
                                     </div>
 
                                     <div style="font-weight:400; text-align: center" class="space-offer">
-                                        <label for="hc"><b><?= esc_html__('Orientation', 'wp-certificates'); ?></b></label><br>
-                                        <select name="orientation" required>
+                                        <label for="orientation"><b><?= esc_html__('Orientation', 'wp-certificates'); ?></b></label><br>
+                                        <select name="orientation" id="orientation" required>
                                             <option value="portrait" <?= ($document->orientation == 'portrait' || !$document) ? 'selected' : ''; ?>><?= esc_html__('Portrait', 'wp-certificates') ?></option>
                                             <option value="landscape" <?= ($document->orientation == 'landscape') ? 'selected' : ''; ?>><?= esc_html__('Landscape', 'wp-certificates') ?></option>
                                         </select>
@@ -223,7 +227,7 @@
 
                                     <div style="font-weight:400; text-align: center" class="space-offer">
                                         <label for="paper_format"><b><?= esc_html__('Paper Format', 'wp-certificates'); ?></b></label><br>
-                                        <select name="paper_format" required>
+                                        <select name="paper_format" id="paper_format" required>
                                             <option value="a4" <?= ($document->paper_format == 'a4' || !$document) ? 'selected' : ''; ?>>A4</option>
                                             <option value="a3" <?= ($document->paper_format == 'a3') ? 'selected' : ''; ?>>A3</option>
                                             <option value="letter" <?= ($document->paper_format == 'letter') ? 'selected' : ''; ?>><?= esc_html__('Letter', 'wp-certificates'); ?></option>
@@ -234,8 +238,8 @@
                                     </div>
 
                                     <div style="font-weight:400; text-align: center" class="space-offer">
-                                        <label for="hc"><b><?= esc_html__('Type', 'wp-certificates'); ?></b></label><br>
-                                        <select name="type" required>
+                                        <label for="type"><b><?= esc_html__('Type', 'wp-certificates'); ?></b></label><br>
+                                        <select name="type" id="type" required>
                                             <option value="managed" <?= ($document->type == 'managed' || !$document) ? 'selected' : ''; ?>><?= esc_html__('Managed', 'wp-certificates') ?></option>
                                             <option value="automatic" <?= ($document->type == 'automatic') ? 'selected' : ''; ?>><?= esc_html__('Automatic', 'wp-certificates') ?></option>
                                         </select>
@@ -243,7 +247,7 @@
 
                                     <div style="font-weight:400; text-align: center" class="space-offer">
                                         <label for="unit"><b><?= esc_html__('Unit', 'wp-certificates'); ?></b></label><br>
-                                        <select name="unit" required>
+                                        <select name="unit" id="unit" required>
                                             <option value="mm" <?= ($document->unit == 'mm' || !$document) ? 'selected' : ''; ?>><?= esc_html__('mm (millimeters)', 'wp-certificates'); ?></option>
                                             <option value="pt" <?= ($document->unit == 'pt') ? 'selected' : ''; ?>><?= esc_html__('pt (points)', 'wp-certificates'); ?></option>
                                             <option value="cm" <?= ($document->unit == 'cm') ? 'selected' : ''; ?>><?= esc_html__('cm (centimeters)', 'wp-certificates'); ?></option>
@@ -254,12 +258,12 @@
 
                                     <div style="font-weight:400; text-align: center" class="space-offer">
                                         <label for="width_size"><b><?= esc_html__('Width size', 'wp-certificates'); ?></b></label><br>
-                                        <input type="number" name="width_size" placeholder="210mm" step="0.01" value="<?= esc_attr($document->width_size ?? ''); ?>">
+                                        <input type="number" name="width_size" id="width_size" placeholder="210mm" step="0.01" value="<?= esc_attr($document->width_size ?? ''); ?>">
                                     </div>
 
                                     <div style="font-weight:400; text-align: center" class="space-offer">
                                         <label for="height_size"><b><?= esc_html__('Height size', 'wp-certificates'); ?></b></label><br>
-                                        <input type="number" name="height_size" placeholder="287mm" step="0.01" value="<?= esc_attr($document->height_size ?? ''); ?>">
+                                        <input type="number" name="height_size" id="height_size" placeholder="287mm" step="0.01" value="<?= esc_attr($document->height_size ?? ''); ?>">
                                     </div>
 
                                     <div style="font-weight:400; text-align: center;" class="space-offer">

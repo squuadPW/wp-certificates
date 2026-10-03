@@ -7,6 +7,239 @@ function get_certificates_books_list(array $args = []): array
     return squuad_cert_books();
 }
 
+/* ---------------------------------------------------------------------------------------------------------------
+ * Diseño Edusof (rediseño 2.0.0, contrato Antigravity/docs/edusof-ui-contrato.md): la lista y el editor de documentos
+ * se dibujan con el marcado nuevo solo si la biblioteca edusof-ui existe y está activa; si no, como siempre.
+ * ------------------------------------------------------------------------------------------------------------ */
+
+/** ¿Se usa el diseño Edusof en las pantallas de documentos? */
+function wpc_eds_documents_enabled(): bool
+{
+    return class_exists('Edusof_UI') && Edusof_UI::enabled();
+}
+
+/** CSS y JS del diseño nuevo, solo en Documentos y solo con el diseño activo; en el editor, el editor de código del core. */
+add_action('admin_enqueue_scripts', 'wpc_eds_documents_assets', 20);
+function wpc_eds_documents_assets(): void
+{
+    if (($_GET['page'] ?? '') !== 'add_admin_form_documents_content' || !wpc_eds_documents_enabled()) {
+        return;
+    }
+    $version = '1.0.0'; // subir al cambiar eds-documentos.css o eds-documentos.js
+    wp_enqueue_style('wpc-eds-documentos', plugins_url('assets/css/eds-documentos.css', __FILE__), [], $version);
+    wp_enqueue_script('wpc-eds-documentos', plugins_url('assets/js/eds-documentos.js', __FILE__), [], $version, true);
+
+    $code_settings = false;
+    if (($_GET['section_tab'] ?? '') === 'document_detail' && absint($_GET['document_id'] ?? 0)) {
+        // CodeMirror del core: sin cierres automáticos de etiquetas ni de comillas (el HTML se guarda tal cual se escribe)
+        $code_settings = wp_enqueue_code_editor([
+            'type' => 'text/html',
+            'codemirror' => [
+                'lineWrapping' => true,
+                'lint' => false,
+                'autoCloseTags' => false,
+                'autoCloseBrackets' => false,
+            ],
+        ]);
+    }
+    wp_add_inline_script('wpc-eds-documentos', 'window.wpcEdsDocuments = ' . wp_json_encode([
+        'code' => $code_settings ?: null,
+        'text' => [
+            'cancel' => __('Cancel', 'wp-certificates'),
+            'close' => __('Close', 'wp-certificates'),
+            'delete' => __('Delete', 'wp-certificates'),
+            /* translators: %s: name of the document */
+            'deleteTitle' => __('Delete «%s»', 'wp-certificates'),
+            'deleteBody' => __('The document will be deleted permanently. This cannot be undone.', 'wp-certificates'),
+            /* translators: %s: name of the document */
+            'deleteBlockedTitle' => __('«%s» cannot be deleted', 'wp-certificates'),
+            /* translators: 1: number of issued certificates, 2: number of signature requests */
+            'deleteBlockedBody' => __('It has %1$s issued certificates and %2$s signature requests. If it were deleted, they would be left without their template. Deactivate it instead so that it is no longer used.', 'wp-certificates'),
+            'automaticTitle' => __('Save as a document signed by the person?', 'wp-certificates'),
+            /* translators: %s: number of students */
+            'automaticBody' => __('When you save, this document is added as a requirement to %s students who do not have it yet. They will see it in My Account.', 'wp-certificates'),
+            /* translators: %s: number of students */
+            'automaticBodyUpTo' => __('When you save, this document is added as a requirement to up to %s students who do not have it yet (the code changed). They will see it in My Account.', 'wp-certificates'),
+            'automaticConfirm' => __('Save and add the requirement', 'wp-certificates'),
+            'unsavedTitle' => __('There are unsaved changes', 'wp-certificates'),
+            'unsavedSigners' => __('You changed the signers and did not save them. If you save the document now, those changes are lost.', 'wp-certificates'),
+            'unsavedDocument' => __('You changed the document and did not save it. If you save the signers now, those changes are lost.', 'wp-certificates'),
+            'unsavedConfirm' => __('Save anyway', 'wp-certificates'),
+            /* translators: %s: variable, e.g. {{student_name}} */
+            'inserted' => __('%s inserted', 'wp-certificates'),
+            /* translators: %s: number of results */
+            'results' => __('%s results', 'wp-certificates'),
+        ],
+    ]) . ';', 'before');
+}
+
+/**
+ * Lo que impide borrar documentos: certificados emitidos (tabla certificates, por nombre del documento, o por id en las
+ * descargas) y solicitudes de firma (squuad_cert_requests, por id o por código). Devuelve [id => ['certificates', 'requests']].
+ */
+function wpc_documents_usage(array $documents): array
+{
+    global $wpdb;
+
+    $usage = [];
+    foreach ($documents as $document) {
+        $usage[(int) $document->id] = ['certificates' => 0, 'requests' => 0];
+    }
+    if (!$usage) {
+        return [];
+    }
+    $normalize = static fn($text): string => function_exists('mb_strtolower') ? mb_strtolower(trim((string) $text)) : strtolower(trim((string) $text));
+
+    $certificates = $wpdb->prefix . 'certificates';
+    if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $certificates)) === $certificates) {
+        $issued = (array) $wpdb->get_results("SELECT name_document, `type`, template_id, COUNT(*) AS n FROM {$certificates} GROUP BY name_document, `type`, template_id");
+        foreach ($documents as $document) {
+            $title = $normalize($document->title);
+            foreach ($issued as $row) {
+                if (('' !== $title && $normalize($row->name_document) === $title)
+                    || ('download_certificate' === $row->type && (int) $row->template_id === (int) $document->id)) {
+                    $usage[(int) $document->id]['certificates'] += (int) $row->n;
+                }
+            }
+        }
+    }
+
+    $requests = $wpdb->prefix . 'squuad_cert_requests';
+    if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $requests)) === $requests) {
+        $rows = (array) $wpdb->get_results("SELECT document_certificate_id, document_id, COUNT(*) AS n FROM {$requests} GROUP BY document_certificate_id, document_id");
+        foreach ($documents as $document) {
+            $code = (string) $document->document_identificator;
+            foreach ($rows as $row) {
+                if ((int) $row->document_certificate_id === (int) $document->id || ('' !== $code && (string) $row->document_id === $code)) {
+                    $usage[(int) $document->id]['requests'] += (int) $row->n;
+                }
+            }
+        }
+    }
+
+    return $usage;
+}
+
+/**
+ * Resumen de firmas de un documento para la lista y el editor: si las pide (la política de firmantes o, en los
+ * gestionados, el «requerirá firmas» de siempre), quién firma y si faltan firmantes.
+ * Devuelve ['asks' => bool, 'signers' => int, 'missing' => bool, 'label' => string].
+ */
+function wpc_document_signing_summary(object $document): array
+{
+    $legacy = !empty($document->signature_required);
+    if (!function_exists('squuad_cert_signing_policy') || !function_exists('squuad_cert_signers_enabled') || !squuad_cert_signers_enabled()) {
+        return [
+            'asks' => $legacy,
+            'signers' => 0,
+            'missing' => false,
+            'label' => $legacy ? __('Asks for signatures', 'wp-certificates') : __('Does not ask for signatures', 'wp-certificates'),
+        ];
+    }
+    $policy = squuad_cert_signing_policy($document);
+    $asks = !empty($policy['requires_signatures']) || ('automatic' !== $document->type && $legacy);
+    $slots = !empty($policy['requires_signatures']) ? (array) $policy['slots'] : [];
+    if (!$asks) {
+        return ['asks' => false, 'signers' => 0, 'missing' => false, 'label' => __('Does not ask for signatures', 'wp-certificates')];
+    }
+    if (!$slots) {
+        return ['asks' => true, 'signers' => 0, 'missing' => true, 'label' => __('Asks for signatures, but has no signers', 'wp-certificates')];
+    }
+    $roles = function_exists('squuad_cert_site_roles') ? squuad_cert_site_roles() : [];
+    $parts = [];
+    $signers = 0;
+    foreach ($slots as $slot) {
+        if ('role' === $slot['slot_type']) {
+            $parts[] = (string) ($roles[$slot['role']] ?? $slot['role']);
+        } else {
+            $signers++;
+        }
+    }
+    if ($signers) {
+        /* translators: %d: number of system signers */
+        $parts[] = sprintf(_n('%d signer', '%d signers', $signers, 'wp-certificates'), $signers);
+    }
+
+    return ['asks' => true, 'signers' => count($slots), 'missing' => false, 'label' => implode(' + ', $parts)];
+}
+
+/** Estudiantes a los que se añadiría el documento como requisito al guardarlo como automático (sin fila para ese código). */
+function wpc_document_automatic_pending_count(string $document_identificator): int
+{
+    global $wpdb;
+
+    if (!wpc_edusystem_active() || '' === $document_identificator) {
+        return 0;
+    }
+
+    return (int) $wpdb->get_var($wpdb->prepare(
+        "SELECT COUNT(*) FROM {$wpdb->prefix}students s
+         WHERE NOT EXISTS (SELECT 1 FROM {$wpdb->prefix}student_documents d WHERE d.student_id = s.id AND d.document_id = %s)",
+        $document_identificator
+    ));
+}
+
+/**
+ * El navegador envía los saltos de línea de un campo de texto como CRLF. Con el editor de código, si el texto no cambió
+ * (salvo saltos de línea) se conserva el guardado, byte a byte; si cambió, se usan los saltos que ya tenía el documento.
+ */
+function wpc_eds_keep_line_endings(string $posted, string $stored): string
+{
+    $normalize = static fn(string $text): string => str_replace(["\r\n", "\r"], "\n", $text);
+    if ($normalize($posted) === $normalize($stored)) {
+        return $stored;
+    }
+    if ('' !== $stored && false === strpos($stored, "\r")) {
+        return $normalize($posted);
+    }
+
+    return $posted;
+}
+
+/**
+ * Datos de la lista nueva de documentos: pestaña ('all', 'automatic', 'managed', 'inactive'), búsqueda por nombre o
+ * código y página. Devuelve ['rows', 'total', 'counts', 'usage', 'per_page'].
+ */
+function wpc_eds_documents_list_data(string $view, string $search, int $paged, int $per_page = 20): array
+{
+    global $wpdb;
+    $table = $wpdb->prefix . 'documents_certificates';
+
+    $views = [
+        'all' => '1=1',
+        'automatic' => "`type` = 'automatic'",
+        'managed' => "`type` <> 'automatic'",
+        'inactive' => '`status` <> 1',
+    ];
+    $view = isset($views[$view]) ? $view : 'all';
+
+    $search_sql = '';
+    if ('' !== $search) {
+        $like = '%' . $wpdb->esc_like($search) . '%';
+        $search_sql = $wpdb->prepare(' AND (title LIKE %s OR document_identificator LIKE %s)', $like, $like);
+    }
+
+    $counts = [];
+    foreach ($views as $key => $where) {
+        $counts[$key] = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table} WHERE {$where}{$search_sql}");
+    }
+    $offset = max(0, $paged - 1) * $per_page;
+    $rows = (array) $wpdb->get_results($wpdb->prepare(
+        "SELECT * FROM {$table} WHERE {$views[$view]}{$search_sql} ORDER BY created_at DESC, id DESC LIMIT %d OFFSET %d",
+        $per_page,
+        $offset
+    ));
+
+    return [
+        'view' => $view,
+        'rows' => $rows,
+        'total' => $counts[$view],
+        'counts' => $counts,
+        'usage' => wpc_documents_usage($rows),
+        'per_page' => $per_page,
+    ];
+}
+
 function add_admin_form_documents_content()
 {
 
@@ -147,6 +380,22 @@ function add_admin_form_documents_content()
             $content = isset($_POST['content']) ? wp_unslash($_POST['content']) : '';
             $footer = isset($_POST['footer']) ? wp_unslash($_POST['footer']) : '';
 
+            // Formulario del diseño Edusof (eds-document-detail.php): editor de código y confirmación de los automáticos
+            if (!empty($_POST['wpc_eds_form']) && $document_id > 0) {
+                $stored = get_document_detail($document_id);
+                if ($stored) {
+                    $header = wpc_eds_keep_line_endings($header, (string) $stored->header);
+                    $content = wpc_eds_keep_line_endings($content, (string) $stored->content);
+                    $footer = wpc_eds_keep_line_endings($footer, (string) $stored->footer);
+                }
+                // Al guardar como automático se añade como requisito a los estudiantes que no lo tienen: solo con confirmación
+                if ('automatic' === $type && empty($_POST['wpc_eds_automatic_confirmed']) && wpc_document_automatic_pending_count($document_identificator) > 0) {
+                    setcookie('message-error', esc_html__('The document was not saved: confirm that it is added as a requirement to the students who do not have it yet.', 'wp-certificates'), time() + 30, '/');
+                    wp_redirect(admin_url('admin.php?page=add_admin_form_documents_content&section_tab=document_detail&document_id=' . $document_id));
+                    exit;
+                }
+            }
+
             // Datos comunes para INSERT/UPDATE del documento maestro
             $document_data = array(
                 'title' => strtoupper($title),
@@ -281,6 +530,20 @@ function add_admin_form_documents_content()
 
             global $wpdb;
             $table_documents_certificates = $wpdb->prefix . 'documents_certificates';
+            // No se borra un documento con certificados emitidos o solicitudes de firma: quedarían sin su plantilla
+            $document = $document_id ? get_document_detail($document_id) : null;
+            $usage = $document ? (wpc_documents_usage([$document])[$document_id] ?? null) : null;
+            if ($usage && ($usage['certificates'] || $usage['requests'])) {
+                setcookie('message-error', sprintf(
+                    /* translators: 1: name of the document, 2: number of issued certificates, 3: number of signature requests */
+                    esc_html__('«%1$s» was not deleted: it has %2$d issued certificates and %3$d signature requests, which would be left without their template. Deactivate it instead.', 'wp-certificates'),
+                    (string) $document->title, // el aviso lo escapa al mostrarlo
+                    (int) $usage['certificates'],
+                    (int) $usage['requests']
+                ), time() + 30, '/');
+                wp_redirect(admin_url('/admin.php?page=add_admin_form_documents_content'));
+                exit;
+            }
             $wpdb->delete($table_documents_certificates, ['id' => $document_id]);
 
             setcookie('message', esc_html__('Document deleted successfully.', 'wp-certificates'), time() + 3600, '/');
@@ -289,8 +552,11 @@ function add_admin_form_documents_content()
         } else {
             // $card = get_card_detail(1);
             // include(plugin_dir_path(__FILE__) . 'templates/card-detail.php');
-            $list_documents = new TT_Documents_Certificates_List_Table;
-            $list_documents->prepare_items();
+            // Con el diseño Edusof la lista tiene sus propios datos (wpc_eds_documents_list_data, en la plantilla)
+            if (!wpc_eds_documents_enabled()) {
+                $list_documents = new TT_Documents_Certificates_List_Table;
+                $list_documents->prepare_items();
+            }
             include(plugin_dir_path(__FILE__) . 'templates/list-documents.php');
         }
     }
