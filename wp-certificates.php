@@ -48,6 +48,10 @@ define('WP_C_REQUIRES_EDUSYSTEM', (string) (get_file_data(__FILE__, ['requires_e
 if ( !class_exists('WP_List_Table') ) 
     require_once(ABSPATH . 'wp-admin/includes/class-wp-list-table.php');
 
+// Sistema de diseño Edusof UI (ADR 0006 de EduSystem): biblioteca compartida con EduSystem y prefijos de las pantallas propias
+require_once __DIR__ . '/edusof-ui/loader.php';
+add_filter('edusof_ui_screens', static fn($prefixes) => array_merge((array) $prefixes, ['add_admin_form_certificates', 'add_admin_form_documents_content', 'add_admin_form_users_signatures_certificate', 'add_admin_form_cards_content', 'add_admin_form_configuration_options_certificates', 'admin_certificate_', 'squuad-cert-']));
+
 require_once WP_C_PATH . 'includes/autoload.php';
 require_once WP_C_PATH . 'includes/contract.php';
 require_once WP_C_PATH . 'includes/variables.php';

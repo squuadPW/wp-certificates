@@ -1,0 +1,1414 @@
+/*
+ * Edusof UI 1.0.0: sistema de diseño de EduSystem y WP Certificates (ADR 0006).
+ * Contrato: Antigravity/docs/edusof-ui-contrato.md. CSS propio, sin dependencias ni recursos externos.
+ *
+ * 1. Variables por tema y modo (.edusof-ui en <body>, o .eds-scope en un contenedor).
+ * 2. Esqueleto de todo el admin bajo body.edusof-ui: fondo, cabecera propia, menú lateral, barra y pie.
+ * 3. Componentes y restilado del admin de WordPress SOLO bajo body.edusof-ui.eds-screen (o dentro de .eds-scope).
+ * 4. Pantalla Ajustes › Apariencia.
+ * 5. Pantalla de acceso (wp-login.php).
+ */
+
+/* ======================================================================= 1. Variables */
+
+.edusof-ui,
+.eds-scope {
+	--eds-bg: #F4F6F9;
+	--eds-surface: #FFFFFF;
+	--eds-surface-2: #F1F4F8;
+	--eds-ink: #1C2430;
+	--eds-ink-2: #3B4556;
+	--eds-muted: #4A5466;
+	--eds-muted-2: #5B6574;
+	--eds-line: #E3E7EE;
+	--eds-line-2: #EEF1F5;
+	--eds-field: #CBD2DD;
+	--eds-on-acc: #FFFFFF;
+	--eds-ok-bg: #E3F4EA;
+	--eds-ok-fg: #1D6B42;
+	--eds-warn-bg: #FFF1D6;
+	--eds-warn-fg: #7A4A00;
+	--eds-bad-bg: #FBE4E2;
+	--eds-bad-fg: #9B1C14;
+	--eds-bad-line: #E4A9A3;
+	--eds-note-bg: #FFF8E6;
+	--eds-note-line: #F2D58A;
+	--eds-note-fg: #5C3A00;
+	--eds-shadow: 0 12px 32px rgba(28, 36, 48, .14);
+	/* Azul institucional (por defecto) */
+	--eds-acc: #2347C6;
+	--eds-acc-soft: #E6ECFB;
+	--eds-acc-ink: #1E3FB4;
+	--eds-radius: 10px;
+	--eds-radius-sm: 8px;
+	--eds-font: system-ui, -apple-system, "Segoe UI", sans-serif;
+	/* Medidas del esqueleto */
+	--eds-header-h: 64px;
+	--eds-menu-w: 200px;
+	--eds-top: 32px;
+	color-scheme: light;
+}
+
+/* Acentos de cada tema, modo claro */
+.edusof-ui.eds-theme-azul, .eds-scope.eds-theme-azul { --eds-acc: #2347C6; --eds-acc-soft: #E6ECFB; --eds-acc-ink: #1E3FB4; }
+.edusof-ui.eds-theme-esmeralda, .eds-scope.eds-theme-esmeralda { --eds-acc: #0B6E5F; --eds-acc-soft: #DDF3EE; --eds-acc-ink: #0A5C50; }
+.edusof-ui.eds-theme-vino, .eds-scope.eds-theme-vino { --eds-acc: #8E2445; --eds-acc-soft: #F7E1E8; --eds-acc-ink: #7A1D3B; }
+.edusof-ui.eds-theme-terracota, .eds-scope.eds-theme-terracota { --eds-acc: #A8431B; --eds-acc-soft: #FBE6DC; --eds-acc-ink: #8C3716; }
+.edusof-ui.eds-theme-grafito, .eds-scope.eds-theme-grafito { --eds-acc: #2F3A4A; --eds-acc-soft: #E7EAEF; --eds-acc-ink: #1F2733; }
+
+/* Modo oscuro: neutros */
+.edusof-ui.eds-mode-dark,
+.eds-scope.eds-mode-dark {
+	--eds-bg: #0F141B;
+	--eds-surface: #171E28;
+	--eds-surface-2: #1F2733;
+	--eds-ink: #E8ECF2;
+	--eds-ink-2: #C6CEDA;
+	--eds-muted: #A9B3C2;
+	--eds-muted-2: #95A1B2;
+	--eds-line: #2A3442;
+	--eds-line-2: #232C38;
+	--eds-field: #3E4A5B;
+	--eds-on-acc: #0F141B;
+	--eds-ok-bg: #173126;
+	--eds-ok-fg: #86D9AB;
+	--eds-warn-bg: #3A2C0E;
+	--eds-warn-fg: #F5C66A;
+	--eds-bad-bg: #3A1A18;
+	--eds-bad-fg: #F4A39B;
+	--eds-bad-line: #7A3530;
+	--eds-note-bg: #2E250F;
+	--eds-note-line: #6B5320;
+	--eds-note-fg: #F2D8A0;
+	--eds-shadow: 0 12px 32px rgba(0, 0, 0, .45);
+	--eds-acc: #8AA6FF;
+	--eds-acc-soft: #1E2A4F;
+	--eds-acc-ink: #B7C8FF;
+	color-scheme: dark;
+}
+
+/* Acentos de cada tema, modo oscuro */
+.edusof-ui.eds-mode-dark.eds-theme-azul, .eds-scope.eds-mode-dark.eds-theme-azul { --eds-acc: #8AA6FF; --eds-acc-soft: #1E2A4F; --eds-acc-ink: #B7C8FF; }
+.edusof-ui.eds-mode-dark.eds-theme-esmeralda, .eds-scope.eds-mode-dark.eds-theme-esmeralda { --eds-acc: #4CC9B0; --eds-acc-soft: #12332D; --eds-acc-ink: #97E6D6; }
+.edusof-ui.eds-mode-dark.eds-theme-vino, .eds-scope.eds-mode-dark.eds-theme-vino { --eds-acc: #F08AA8; --eds-acc-soft: #3A1824; --eds-acc-ink: #F7B9CB; }
+.edusof-ui.eds-mode-dark.eds-theme-terracota, .eds-scope.eds-mode-dark.eds-theme-terracota { --eds-acc: #F29A6E; --eds-acc-soft: #3B2016; --eds-acc-ink: #F8C3A8; }
+.edusof-ui.eds-mode-dark.eds-theme-grafito, .eds-scope.eds-mode-dark.eds-theme-grafito { --eds-acc: #C3CCD9; --eds-acc-soft: #26303C; --eds-acc-ink: #E2E7EE; }
+
+/* Modo «según el dispositivo»: los mismos valores oscuros cuando el sistema los pide */
+@media (prefers-color-scheme: dark) {
+	.edusof-ui.eds-mode-auto,
+	.eds-scope.eds-mode-auto {
+		--eds-bg: #0F141B;
+		--eds-surface: #171E28;
+		--eds-surface-2: #1F2733;
+		--eds-ink: #E8ECF2;
+		--eds-ink-2: #C6CEDA;
+		--eds-muted: #A9B3C2;
+		--eds-muted-2: #95A1B2;
+		--eds-line: #2A3442;
+		--eds-line-2: #232C38;
+		--eds-field: #3E4A5B;
+		--eds-on-acc: #0F141B;
+		--eds-ok-bg: #173126;
+		--eds-ok-fg: #86D9AB;
+		--eds-warn-bg: #3A2C0E;
+		--eds-warn-fg: #F5C66A;
+		--eds-bad-bg: #3A1A18;
+		--eds-bad-fg: #F4A39B;
+		--eds-bad-line: #7A3530;
+		--eds-note-bg: #2E250F;
+		--eds-note-line: #6B5320;
+		--eds-note-fg: #F2D8A0;
+		--eds-shadow: 0 12px 32px rgba(0, 0, 0, .45);
+		--eds-acc: #8AA6FF;
+		--eds-acc-soft: #1E2A4F;
+		--eds-acc-ink: #B7C8FF;
+		color-scheme: dark;
+	}
+	.edusof-ui.eds-mode-auto.eds-theme-azul, .eds-scope.eds-mode-auto.eds-theme-azul { --eds-acc: #8AA6FF; --eds-acc-soft: #1E2A4F; --eds-acc-ink: #B7C8FF; }
+	.edusof-ui.eds-mode-auto.eds-theme-esmeralda, .eds-scope.eds-mode-auto.eds-theme-esmeralda { --eds-acc: #4CC9B0; --eds-acc-soft: #12332D; --eds-acc-ink: #97E6D6; }
+	.edusof-ui.eds-mode-auto.eds-theme-vino, .eds-scope.eds-mode-auto.eds-theme-vino { --eds-acc: #F08AA8; --eds-acc-soft: #3A1824; --eds-acc-ink: #F7B9CB; }
+	.edusof-ui.eds-mode-auto.eds-theme-terracota, .eds-scope.eds-mode-auto.eds-theme-terracota { --eds-acc: #F29A6E; --eds-acc-soft: #3B2016; --eds-acc-ink: #F8C3A8; }
+	.edusof-ui.eds-mode-auto.eds-theme-grafito, .eds-scope.eds-mode-auto.eds-theme-grafito { --eds-acc: #C3CCD9; --eds-acc-soft: #26303C; --eds-acc-ink: #E2E7EE; }
+}
+
+/* Personal: sin la barra de WordPress en escritorio */
+@media screen and (min-width: 783px) {
+	body.edusof-ui.eds-staff { --eds-top: 0px; }
+}
+
+.eds-scope {
+	color: var(--eds-ink);
+	font-family: var(--eds-font);
+}
+
+/* ======================================================================= 2. Esqueleto (todo el admin) */
+
+/* Fondo. Fuera de las pantallas de los plugins el contenido es el de WordPress (texto oscuro): en modo oscuro se
+   oscurece solo el esqueleto (cabecera y menú) y el área de contenido se queda clara para que se lea. */
+html:has(> body.edusof-ui) { background: #F4F6F9; }
+html:has(> body.edusof-ui.eds-screen.eds-mode-dark) { background: #0F141B; }
+@media (prefers-color-scheme: dark) {
+	html:has(> body.edusof-ui.eds-screen.eds-mode-auto) { background: #0F141B; }
+}
+body.edusof-ui { background: #F4F6F9; }
+body.edusof-ui.eds-screen { background: var(--eds-bg); }
+
+/* Barra de WordPress y pie: fuera para el personal */
+body.edusof-ui.eds-staff #wpfooter { display: none; }
+@media screen and (min-width: 783px) {
+	body.edusof-ui.eds-staff #wpadminbar { display: none; }
+}
+
+/* El logo que EduSystem pone como primer elemento del menú pasa a la cabecera */
+body.edusof-ui #adminmenu #toplevel_page_logo_based_menu { display: none; }
+
+/* ---- Cabecera propia */
+body.edusof-ui .eds-topbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	height: var(--eds-header-h);
+	padding: 0 24px;
+	box-sizing: border-box;
+	background: var(--eds-surface);
+	border-bottom: 1px solid var(--eds-line);
+	color: var(--eds-ink);
+	font-family: var(--eds-font);
+}
+@media screen and (min-width: 783px) {
+	body.edusof-ui .eds-topbar {
+		position: fixed;
+		top: var(--eds-top);
+		left: 0;
+		right: 0;
+		z-index: 9991;
+	}
+	body.edusof-ui #wpwrap {
+		padding-top: var(--eds-header-h);
+		box-sizing: border-box;
+	}
+	/* Cabeceras fijas de WooCommerce: bajan lo que ocupa la nuestra */
+	body.edusof-ui .woocommerce-layout__header {
+		top: calc(var(--eds-top) + var(--eds-header-h));
+	}
+}
+@media screen and (max-width: 782px) {
+	body.edusof-ui .eds-topbar {
+		margin: 0 0 0 -10px;
+		padding: 0 12px;
+		height: 56px;
+	}
+	body.edusof-ui .eds-topbar__names span,
+	body.edusof-ui .eds-topbar__name { display: none; }
+}
+body.edusof-ui .eds-topbar a { box-shadow: none; }
+body.edusof-ui .eds-topbar a:focus-visible {
+	outline: 2px solid var(--eds-acc);
+	outline-offset: 2px;
+}
+body.edusof-ui .eds-topbar__brand {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	min-width: 0;
+	color: inherit;
+	text-decoration: none;
+	border-radius: var(--eds-radius-sm);
+}
+body.edusof-ui .eds-topbar__brand:hover { color: inherit; }
+body.edusof-ui .eds-topbar__logo {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 40px;
+	max-width: 160px;
+	padding: 3px 6px;
+	box-sizing: border-box;
+	border-radius: var(--eds-radius);
+	background: #FFFFFF;
+	border: 1px solid var(--eds-line);
+	flex-shrink: 0;
+}
+body.edusof-ui .eds-topbar__logo img {
+	display: block;
+	max-height: 100%;
+	max-width: 100%;
+	width: auto;
+	object-fit: contain;
+}
+body.edusof-ui .eds-topbar__names {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	line-height: 1.3;
+}
+body.edusof-ui .eds-topbar__names strong {
+	font-size: 15px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+body.edusof-ui .eds-topbar__names span {
+	font-size: 12px;
+	color: var(--eds-muted-2);
+}
+body.edusof-ui .eds-topbar__user {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	flex-shrink: 0;
+}
+body.edusof-ui .eds-topbar__profile {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 4px 10px 4px 4px;
+	border-radius: 999px;
+	color: var(--eds-ink);
+	font-size: 14px;
+	text-decoration: none;
+}
+body.edusof-ui .eds-topbar__profile:hover {
+	background: var(--eds-surface-2);
+	color: var(--eds-ink);
+}
+body.edusof-ui .eds-topbar__avatar {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 36px;
+	height: 36px;
+	border-radius: 50%;
+	background: var(--eds-acc);
+	color: var(--eds-on-acc);
+	font-size: 13px;
+	font-weight: 600;
+}
+body.edusof-ui .eds-topbar__logout {
+	display: inline-flex;
+	align-items: center;
+	height: 36px;
+	padding: 0 14px;
+	border: 1px solid var(--eds-field);
+	border-radius: var(--eds-radius-sm);
+	background: var(--eds-surface);
+	color: var(--eds-ink);
+	font-size: 14px;
+	font-weight: 600;
+	text-decoration: none;
+}
+body.edusof-ui .eds-topbar__logout:hover {
+	background: var(--eds-surface-2);
+	color: var(--eds-ink);
+}
+
+/* ---- Menú lateral */
+body.edusof-ui #adminmenuback,
+body.edusof-ui #adminmenuwrap,
+body.edusof-ui #adminmenu {
+	background: var(--eds-surface);
+}
+body.edusof-ui #adminmenuback { box-shadow: inset -1px 0 0 var(--eds-line); }
+body.edusof-ui #adminmenu,
+body.edusof-ui #adminmenu .wp-submenu,
+body.edusof-ui #adminmenu .wp-menu-name { font-family: var(--eds-font); }
+body.edusof-ui #adminmenu a,
+body.edusof-ui #adminmenu a.menu-top { color: var(--eds-ink-2); }
+body.edusof-ui #adminmenu div.wp-menu-image:before { color: var(--eds-muted-2); }
+body.edusof-ui #adminmenu li.menu-top:hover,
+body.edusof-ui #adminmenu li.opensub > a.menu-top,
+body.edusof-ui #adminmenu li > a.menu-top:focus {
+	background: var(--eds-surface-2);
+	color: var(--eds-ink);
+}
+body.edusof-ui #adminmenu li.menu-top:hover div.wp-menu-image:before,
+body.edusof-ui #adminmenu li.opensub > a.menu-top div.wp-menu-image:before,
+body.edusof-ui #adminmenu li > a.menu-top:focus div.wp-menu-image:before { color: var(--eds-acc); }
+body.edusof-ui #adminmenu a:focus { box-shadow: inset 0 0 0 2px var(--eds-acc); outline: 0; }
+
+/* Elemento abierto/actual */
+body.edusof-ui #adminmenu li.wp-has-current-submenu,
+body.edusof-ui #adminmenu li.current.menu-top {
+	background: var(--eds-surface-2);
+}
+body.edusof-ui #adminmenu li.wp-has-current-submenu a.wp-has-current-submenu,
+body.edusof-ui #adminmenu li.current a.menu-top,
+body.edusof-ui #adminmenu .wp-menu-arrow,
+body.edusof-ui #adminmenu .wp-menu-arrow div,
+body.edusof-ui #adminmenu .wp-has-current-submenu .wp-submenu .wp-submenu-head {
+	background: var(--eds-surface-2);
+	color: var(--eds-ink);
+	font-weight: 600;
+}
+body.edusof-ui #adminmenu li.wp-has-current-submenu div.wp-menu-image:before,
+body.edusof-ui #adminmenu li.current div.wp-menu-image:before,
+body.edusof-ui #adminmenu a.current:hover div.wp-menu-image:before,
+body.edusof-ui #adminmenu li.wp-has-current-submenu a:focus div.wp-menu-image:before,
+body.edusof-ui #adminmenu li.wp-has-current-submenu.opensub div.wp-menu-image:before,
+body.edusof-ui #adminmenu li:hover div.wp-menu-image:before { color: var(--eds-acc); }
+body.edusof-ui ul#adminmenu a.wp-has-current-submenu:after,
+body.edusof-ui ul#adminmenu > li.current > a.current:after,
+body.edusof-ui #adminmenu li.wp-has-submenu.wp-not-current-submenu.opensub:hover:after,
+body.edusof-ui #adminmenu li.wp-has-submenu.wp-not-current-submenu:focus-within:after { display: none; }
+/* Flecha que algunos plugins (WooCommerce) ponen en el elemento abierto */
+body.edusof-ui #adminmenu li.menu-top:is(.wp-has-current-submenu, .current)::after { display: none !important; }
+
+/* Submenús (abierto y desplegable) */
+body.edusof-ui #adminmenu .wp-submenu,
+body.edusof-ui #adminmenu .wp-has-current-submenu .wp-submenu,
+body.edusof-ui #adminmenu .wp-has-current-submenu.opensub .wp-submenu,
+body.edusof-ui #adminmenu a.wp-has-current-submenu:focus + .wp-submenu {
+	background: var(--eds-surface-2);
+}
+body.edusof-ui #adminmenu .wp-not-current-submenu .wp-submenu,
+body.edusof-ui.folded #adminmenu .wp-has-current-submenu .wp-submenu {
+	background: var(--eds-surface);
+	border: 1px solid var(--eds-line);
+	border-radius: var(--eds-radius);
+	box-shadow: var(--eds-shadow);
+}
+body.edusof-ui #adminmenu .wp-submenu a { color: var(--eds-ink-2); }
+body.edusof-ui #adminmenu .wp-submenu a:hover,
+body.edusof-ui #adminmenu .wp-submenu a:focus {
+	color: var(--eds-ink);
+	background: var(--eds-surface);
+}
+body.edusof-ui #adminmenu .wp-not-current-submenu .wp-submenu a:hover,
+body.edusof-ui #adminmenu .wp-not-current-submenu .wp-submenu a:focus { background: var(--eds-surface-2); }
+body.edusof-ui #adminmenu .wp-submenu li.current a,
+body.edusof-ui #adminmenu .wp-submenu li.current a:hover,
+body.edusof-ui #adminmenu .wp-submenu li.current a:focus,
+body.edusof-ui #adminmenu a.wp-has-current-submenu:focus + .wp-submenu li.current a {
+	background: var(--eds-acc-soft);
+	color: var(--eds-acc-ink);
+	font-weight: 600;
+	box-shadow: inset 3px 0 0 var(--eds-acc);
+}
+body.edusof-ui #adminmenu .wp-submenu-head,
+body.edusof-ui #adminmenu a.menu-top.wp-has-current-submenu .wp-submenu-head { color: var(--eds-ink); }
+
+/* Contadores */
+body.edusof-ui #adminmenu .awaiting-mod,
+body.edusof-ui #adminmenu .update-plugins,
+body.edusof-ui #adminmenu li a.wp-has-current-submenu .update-plugins,
+body.edusof-ui #adminmenu li.current a .awaiting-mod,
+body.edusof-ui #adminmenu li:hover a .awaiting-mod,
+body.edusof-ui #adminmenu li.menu-top:hover > a .update-plugins {
+	background: var(--eds-warn-bg);
+	color: var(--eds-warn-fg);
+	font-weight: 600;
+}
+
+/* Plegar menú */
+body.edusof-ui #collapse-button { color: var(--eds-muted-2); }
+body.edusof-ui #collapse-button:hover,
+body.edusof-ui #collapse-button:focus { color: var(--eds-acc); }
+body.edusof-ui #adminmenu div.separator { border-color: var(--eds-line); }
+
+/* Geometría propia del menú (escritorio con el menú desplegado) */
+@media screen and (min-width: 961px) {
+	body.edusof-ui:not(.folded) #adminmenuback,
+	body.edusof-ui:not(.folded) #adminmenuwrap,
+	body.edusof-ui:not(.folded) #adminmenu { width: var(--eds-menu-w); }
+	body.edusof-ui:not(.folded) #wpcontent,
+	body.edusof-ui:not(.folded) #wpfooter { margin-left: var(--eds-menu-w); }
+	body.edusof-ui:not(.folded) .woocommerce-layout__header { width: calc(100% - var(--eds-menu-w)); }
+	body.edusof-ui:not(.folded) #adminmenu { padding: 8px 0; margin-top: 0; }
+	body.edusof-ui:not(.folded) #adminmenu li.menu-top {
+		margin: 1px 8px;
+		border-radius: var(--eds-radius-sm);
+	}
+	body.edusof-ui:not(.folded) #adminmenu li.wp-has-current-submenu,
+	body.edusof-ui:not(.folded) #adminmenu li.current.menu-top {
+		margin: 4px 8px;
+		border-radius: var(--eds-radius);
+		padding-bottom: 4px;
+	}
+	body.edusof-ui:not(.folded) #adminmenu a.menu-top {
+		border-radius: var(--eds-radius-sm);
+		font-size: 14px;
+	}
+	/* El icono flota: el enlace lo contiene para que los elementos no se escalonen */
+	body.edusof-ui:not(.folded) #adminmenu li.menu-top > a.menu-top { display: flow-root; }
+	body.edusof-ui:not(.folded) #adminmenu .wp-menu-name { padding: 8px 8px 8px 36px; }
+	body.edusof-ui:not(.folded) #adminmenu .wp-has-current-submenu ul > li > a {
+		margin: 1px 6px;
+		padding: 7px 10px 7px 30px;
+		border-radius: var(--eds-radius-sm);
+		font-size: 13px;
+	}
+	body.edusof-ui:not(.folded) #adminmenu .wp-has-current-submenu .wp-submenu { padding: 2px 0 4px; }
+	/* Desplegable de los elementos no abiertos: pegado al borde del menú */
+	body.edusof-ui:not(.folded) #adminmenu .wp-not-current-submenu .wp-submenu {
+		left: calc(var(--eds-menu-w) - 8px);
+		padding: 6px 0;
+	}
+	body.edusof-ui:not(.folded) #adminmenu .wp-not-current-submenu .wp-submenu a {
+		margin: 0 6px;
+		padding: 7px 12px;
+		border-radius: var(--eds-radius-sm);
+	}
+}
+
+/* ======================================================================= 3. Componentes (solo pantallas de los plugins) */
+
+:is(body.edusof-ui.eds-screen, .eds-scope) :focus-visible {
+	outline: 2px solid var(--eds-acc);
+	outline-offset: 2px;
+}
+body.edusof-ui.eds-screen #wpbody-content {
+	color: var(--eds-ink);
+	font-family: var(--eds-font);
+}
+body.edusof-ui.eds-screen #wpbody-content :where(a:not([class])) { color: var(--eds-acc-ink); }
+body.edusof-ui.eds-screen #wpbody-content :where(h1, h2, h3, h4, h5, h6, .wrap h1, .wrap h2) { color: var(--eds-ink); }
+body.edusof-ui.eds-screen #wpbody-content :where(p.description, .description, .howto) { color: var(--eds-muted); }
+
+.eds-sr-only {
+	position: absolute !important;
+	width: 1px !important;
+	height: 1px !important;
+	padding: 0 !important;
+	margin: -1px !important;
+	overflow: hidden !important;
+	clip: rect(0, 0, 0, 0) !important;
+	white-space: nowrap !important;
+	border: 0 !important;
+}
+
+/* ---- Página y cabecera de pantalla */
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-page {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	max-width: 1160px;
+	padding: 20px 12px 48px 4px;
+	box-sizing: border-box;
+	color: var(--eds-ink);
+	font-family: var(--eds-font);
+	font-size: 14px;
+	line-height: 1.5;
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-page-header {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	column-gap: 16px;
+	row-gap: 6px;
+	align-items: end;
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-page-header > * { grid-column: 1; }
+/* <hr class="wp-header-end"> tras la cabecera: WordPress coloca ahí los avisos (si falta, los mete tras el h1) */
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-page .wp-header-end { display: none; }
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-page-header > .eds-actions {
+	grid-column: 2;
+	grid-row: 1 / span 4;
+	align-self: end;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	gap: 8px;
+}
+@media screen and (max-width: 782px) {
+	:is(body.edusof-ui.eds-screen, .eds-scope) .eds-page-header { grid-template-columns: minmax(0, 1fr); }
+	:is(body.edusof-ui.eds-screen, .eds-scope) .eds-page-header > .eds-actions {
+		grid-column: 1;
+		grid-row: auto;
+		justify-content: flex-start;
+	}
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-breadcrumb {
+	font-size: 13px;
+	color: var(--eds-muted-2);
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-breadcrumb a { color: var(--eds-muted); text-decoration: none; }
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-breadcrumb a:hover { color: var(--eds-acc-ink); text-decoration: underline; }
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-title,
+:is(body.edusof-ui.eds-screen, .eds-scope) .wrap h1.eds-title {
+	margin: 0;
+	padding: 0;
+	font-size: 26px;
+	font-weight: 700;
+	line-height: 1.25;
+	color: var(--eds-ink);
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-subtitle {
+	margin: 0;
+	font-size: 14px;
+	color: var(--eds-muted);
+}
+
+/* ---- Botones */
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	height: 40px;
+	min-height: 40px;
+	padding: 0 16px;
+	box-sizing: border-box;
+	border: 1px solid var(--eds-field);
+	border-radius: var(--eds-radius);
+	background: var(--eds-surface);
+	color: var(--eds-ink);
+	font-family: var(--eds-font);
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 1;
+	text-decoration: none;
+	white-space: nowrap;
+	cursor: pointer;
+	box-shadow: none;
+	vertical-align: middle;
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-btn svg { flex-shrink: 0; }
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-btn:hover { background: var(--eds-surface-2); color: var(--eds-ink); }
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-btn--primary {
+	background: var(--eds-acc);
+	border-color: var(--eds-acc);
+	color: var(--eds-on-acc);
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-btn--primary:hover {
+	background: var(--eds-acc-ink);
+	border-color: var(--eds-acc-ink);
+	color: var(--eds-on-acc);
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-btn--secondary { background: var(--eds-surface); color: var(--eds-ink); }
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-btn--danger {
+	background: var(--eds-surface);
+	border-color: var(--eds-bad-line);
+	color: var(--eds-bad-fg);
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-btn--danger:hover {
+	background: var(--eds-bad-bg);
+	border-color: var(--eds-bad-fg);
+	color: var(--eds-bad-fg);
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-btn--link {
+	height: auto;
+	min-height: 0;
+	padding: 2px 4px;
+	border-color: transparent;
+	background: transparent;
+	color: var(--eds-acc-ink);
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-btn--link:hover {
+	background: transparent;
+	color: var(--eds-acc-ink);
+	text-decoration: underline;
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-btn--sm {
+	height: 32px;
+	min-height: 32px;
+	padding: 0 12px;
+	border-radius: var(--eds-radius-sm);
+	font-size: 13px;
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-btn:disabled,
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-btn[aria-disabled="true"] {
+	opacity: .55;
+	cursor: not-allowed;
+}
+
+/* ---- Pestañas */
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-tabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px 24px;
+	margin: 0;
+	padding: 0;
+	border-bottom: 1px solid var(--eds-line);
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-tab {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-bottom: -1px;
+	padding: 10px 2px;
+	border-bottom: 2px solid transparent;
+	color: var(--eds-muted);
+	font-size: 14px;
+	text-decoration: none;
+	box-shadow: none;
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-tab:hover { color: var(--eds-ink); }
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-tab[aria-current="page"] {
+	border-bottom-color: var(--eds-acc);
+	color: var(--eds-ink);
+	font-weight: 600;
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-tab__count {
+	color: var(--eds-muted-2);
+	font-weight: 400;
+}
+
+/* ---- Tarjeta */
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-card {
+	padding: 20px;
+	background: var(--eds-surface);
+	border: 1px solid var(--eds-line);
+	border-radius: 12px;
+	color: var(--eds-ink);
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-card > :first-child { margin-top: 0; }
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-card > :last-child { margin-bottom: 0; }
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-card h2 {
+	margin: 0 0 12px;
+	font-size: 17px;
+	font-weight: 700;
+	color: var(--eds-ink);
+}
+
+/* ---- Colas del Inicio (KPI) */
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-kpis {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	gap: 16px;
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-kpi {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	padding: 18px;
+	background: var(--eds-surface);
+	border: 1px solid var(--eds-line);
+	border-radius: 12px;
+	color: var(--eds-ink);
+	text-decoration: none;
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-kpi__label {
+	margin: 0;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--eds-muted);
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-kpi__value {
+	font-size: 34px;
+	font-weight: 700;
+	line-height: 1;
+	color: var(--eds-ink);
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-kpi__meta { font-size: 13px; color: var(--eds-muted); }
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-kpi__meta--warn { color: var(--eds-warn-fg); }
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-kpi__meta--ok { color: var(--eds-ok-fg); }
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-kpi__action {
+	align-self: flex-start;
+	margin-top: auto;
+}
+/* .eds-kpi__action sin .eds-btn: enlace */
+:is(body.edusof-ui.eds-screen, .eds-scope) a.eds-kpi__action:not(.eds-btn) {
+	color: var(--eds-acc-ink);
+	font-weight: 600;
+	text-decoration: none;
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) a.eds-kpi__action:not(.eds-btn):hover { text-decoration: underline; }
+
+/* ---- Filtros y campos */
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-filters {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: 12px;
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-field {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	color: var(--eds-ink-2);
+	font-size: 13px;
+	font-weight: 600;
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-filters > .eds-field:has(input[type="search"], input[type="text"]) { flex: 1 1 240px; }
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-field :is(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
+	min-height: 40px;
+	width: 100%;
+	max-width: none;
+	padding: 0 12px;
+	box-sizing: border-box;
+	border: 1px solid var(--eds-field);
+	border-radius: var(--eds-radius-sm);
+	background-color: var(--eds-surface);
+	color: var(--eds-ink);
+	font-family: var(--eds-font);
+	font-size: 14px;
+	font-weight: 400;
+	line-height: 1.4;
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-field textarea { padding: 8px 12px; min-height: 88px; }
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-field select { padding-right: 28px; }
+
+/* Campos del admin de WordPress dentro de las pantallas: colores del tema (sin cambiar medidas) */
+body.edusof-ui.eds-screen #wpbody-content :is(input:is([type="text"], [type="search"], [type="email"], [type="number"], [type="password"], [type="tel"], [type="url"], [type="date"], [type="datetime-local"], [type="month"], [type="time"]), select, textarea) {
+	background-color: var(--eds-surface);
+	border-color: var(--eds-field);
+	border-radius: var(--eds-radius-sm);
+	color: var(--eds-ink);
+}
+body.edusof-ui.eds-screen #wpbody-content :is(input, select, textarea):focus {
+	border-color: var(--eds-acc);
+	box-shadow: 0 0 0 1px var(--eds-acc);
+	outline: 0;
+}
+body.edusof-ui.eds-screen #wpbody-content :is(input, select, textarea):focus-visible {
+	outline: 2px solid transparent;
+}
+body.edusof-ui.eds-screen #wpbody-content :is(input, select, textarea)::placeholder { color: var(--eds-muted-2); }
+
+/* ---- Tablas propias */
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-table-wrap {
+	overflow-x: auto;
+	background: var(--eds-surface);
+	border: 1px solid var(--eds-line);
+	border-radius: 12px;
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 14px;
+	color: var(--eds-ink);
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-table th {
+	padding: 12px 16px;
+	border-bottom: 1px solid var(--eds-line);
+	color: var(--eds-muted);
+	font-size: 13px;
+	font-weight: 600;
+	text-align: left;
+	white-space: nowrap;
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-table td {
+	padding: 14px 16px;
+	border-bottom: 1px solid var(--eds-line-2);
+	vertical-align: middle;
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-table tbody tr:last-child td { border-bottom: 0; }
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-table tbody tr:hover { background: var(--eds-surface-2); }
+
+/* ---- WP_List_Table y contenedores del admin de WordPress dentro de las pantallas */
+body.edusof-ui.eds-screen #wpbody-content :is(.wrap h1.wp-heading-inline, .wrap > h1, .wrap > h2) { color: var(--eds-ink); }
+body.edusof-ui.eds-screen #wpbody-content .wp-list-table,
+body.edusof-ui.eds-screen #wpbody-content .widefat {
+	background: var(--eds-surface);
+	border: 1px solid var(--eds-line);
+	border-radius: 12px;
+	border-spacing: 0;
+	box-shadow: none;
+	color: var(--eds-ink);
+	overflow: hidden;
+}
+body.edusof-ui.eds-screen #wpbody-content .wp-list-table :is(thead, tfoot) :is(th, td) {
+	padding: 12px 10px;
+	background: var(--eds-surface);
+	border-color: var(--eds-line);
+	color: var(--eds-muted);
+	font-size: 13px;
+	font-weight: 600;
+}
+/* El CSS antiguo de EduSystem (admin/assets/css/style.css) fija cabecera y celdas con !important */
+body.edusof-ui.eds-screen #wpbody-content .wp-list-table :is(thead, tfoot) th {
+	background: var(--eds-surface) !important;
+	color: var(--eds-muted) !important;
+	border-bottom-color: var(--eds-line) !important;
+}
+body.edusof-ui.eds-screen #wpbody-content .wp-list-table tbody td { border-color: var(--eds-line-2) !important; }
+body.edusof-ui.eds-screen #wpbody-content .wp-list-table tbody tr:hover { background: var(--eds-surface-2) !important; }
+body.edusof-ui.eds-screen #wpbody-content .wp-list-table thead :is(th, td) { border-bottom: 1px solid var(--eds-line); }
+body.edusof-ui.eds-screen #wpbody-content .wp-list-table tfoot :is(th, td) { border-top: 1px solid var(--eds-line); }
+body.edusof-ui.eds-screen #wpbody-content .wp-list-table :is(thead, tfoot) :is(th, td) a { color: var(--eds-muted); }
+body.edusof-ui.eds-screen #wpbody-content .wp-list-table :is(thead, tfoot) :is(th, td) a:hover { color: var(--eds-ink); }
+body.edusof-ui.eds-screen #wpbody-content .wp-list-table tbody :is(th, td) {
+	padding-top: 12px;
+	padding-bottom: 12px;
+	border-bottom: 1px solid var(--eds-line-2);
+	color: var(--eds-ink-2);
+	font-size: 14px;
+}
+body.edusof-ui.eds-screen #wpbody-content .wp-list-table tbody tr:last-child :is(th, td) { border-bottom: 0; }
+body.edusof-ui.eds-screen #wpbody-content .wp-list-table :is(.striped > tbody > :nth-child(odd), tbody > tr, ul.striped > :nth-child(odd), .alternate) { background: var(--eds-surface); }
+body.edusof-ui.eds-screen #wpbody-content .wp-list-table tbody > tr:hover { background: var(--eds-surface-2); }
+body.edusof-ui.eds-screen #wpbody-content .wp-list-table :is(.row-title, .column-primary strong a) { color: var(--eds-ink); }
+body.edusof-ui.eds-screen #wpbody-content .wp-list-table .row-actions a { color: var(--eds-acc-ink); }
+body.edusof-ui.eds-screen #wpbody-content .wp-list-table .row-actions .delete a,
+body.edusof-ui.eds-screen #wpbody-content .wp-list-table .row-actions .trash a { color: var(--eds-bad-fg); }
+body.edusof-ui.eds-screen #wpbody-content .wp-list-table .no-items td { color: var(--eds-muted); padding: 24px 12px; }
+body.edusof-ui.eds-screen #wpbody-content :is(.tablenav, .tablenav .displaying-num, .subsubsub) { color: var(--eds-muted); }
+body.edusof-ui.eds-screen #wpbody-content .subsubsub a { color: var(--eds-acc-ink); }
+body.edusof-ui.eds-screen #wpbody-content .subsubsub a.current { color: var(--eds-ink); font-weight: 600; }
+body.edusof-ui.eds-screen #wpbody-content .subsubsub .count { color: var(--eds-muted-2); }
+body.edusof-ui.eds-screen #wpbody-content .tablenav .tablenav-pages :is(a, .tablenav-pages-navspan) {
+	min-width: 32px;
+	min-height: 32px;
+	line-height: 30px;
+	border: 1px solid var(--eds-field);
+	border-radius: var(--eds-radius-sm);
+	background: var(--eds-surface);
+	color: var(--eds-ink);
+}
+body.edusof-ui.eds-screen #wpbody-content .tablenav .tablenav-pages a:hover { background: var(--eds-surface-2); }
+body.edusof-ui.eds-screen #wpbody-content .tablenav .tablenav-pages .tablenav-pages-navspan { color: var(--eds-muted-2); opacity: .7; }
+body.edusof-ui.eds-screen #wpbody-content :is(.postbox, .stuffbox, .card, .welcome-panel) {
+	background: var(--eds-surface);
+	border: 1px solid var(--eds-line);
+	border-radius: 12px;
+	box-shadow: none;
+	color: var(--eds-ink);
+}
+body.edusof-ui.eds-screen #wpbody-content .postbox .postbox-header { border-bottom-color: var(--eds-line); }
+body.edusof-ui.eds-screen #wpbody-content .form-table th { color: var(--eds-ink); }
+body.edusof-ui.eds-screen #wpbody-content .form-table td { color: var(--eds-ink-2); }
+
+/* Botones del admin de WordPress dentro de las pantallas */
+body.edusof-ui.eds-screen #wpbody-content .button:not(.button-link) {
+	border-color: var(--eds-field);
+	border-radius: var(--eds-radius-sm);
+	background: var(--eds-surface);
+	color: var(--eds-ink);
+}
+body.edusof-ui.eds-screen #wpbody-content .button:not(.button-link):hover { background: var(--eds-surface-2); color: var(--eds-ink); }
+body.edusof-ui.eds-screen #wpbody-content :is(.button-primary, .button.button-primary, .page-title-action:is(.button-primary)) {
+	border-color: var(--eds-acc);
+	background: var(--eds-acc);
+	color: var(--eds-on-acc);
+}
+body.edusof-ui.eds-screen #wpbody-content :is(.button-primary, .button.button-primary):hover {
+	border-color: var(--eds-acc-ink);
+	background: var(--eds-acc-ink);
+	color: var(--eds-on-acc);
+}
+body.edusof-ui.eds-screen #wpbody-content .wrap .page-title-action {
+	border-color: var(--eds-acc);
+	border-radius: var(--eds-radius-sm);
+	background: var(--eds-surface);
+	color: var(--eds-acc-ink);
+}
+body.edusof-ui.eds-screen #wpbody-content .wrap .page-title-action:hover { background: var(--eds-acc-soft); }
+
+/* Avisos de WordPress dentro de las pantallas */
+body.edusof-ui.eds-screen #wpbody-content :is(.notice, div.updated, div.error) {
+	background: var(--eds-surface);
+	border: 1px solid var(--eds-line);
+	border-left-width: 4px;
+	border-radius: var(--eds-radius-sm);
+	box-shadow: none;
+	color: var(--eds-ink);
+}
+body.edusof-ui.eds-screen #wpbody-content :is(.notice, div.updated, div.error) :is(p, strong, li) { color: inherit; }
+body.edusof-ui.eds-screen #wpbody-content :is(.notice, div.updated, div.error) code { background: var(--eds-surface-2); color: var(--eds-ink); }
+body.edusof-ui.eds-screen #wpbody-content :is(.notice-success, div.updated) { border-left-color: var(--eds-ok-fg); }
+body.edusof-ui.eds-screen #wpbody-content :is(.notice-warning) { border-left-color: var(--eds-warn-fg); }
+body.edusof-ui.eds-screen #wpbody-content :is(.notice-error, div.error) { border-left-color: var(--eds-bad-fg); }
+body.edusof-ui.eds-screen #wpbody-content :is(.notice-info) { border-left-color: var(--eds-acc); }
+
+/* Pestañas clásicas (.nav-tab) dentro de las pantallas */
+body.edusof-ui.eds-screen #wpbody-content .nav-tab-wrapper { border-bottom-color: var(--eds-line); }
+body.edusof-ui.eds-screen #wpbody-content .nav-tab {
+	border-color: transparent;
+	background: transparent;
+	color: var(--eds-muted);
+}
+body.edusof-ui.eds-screen #wpbody-content .nav-tab:hover { color: var(--eds-ink); }
+body.edusof-ui.eds-screen #wpbody-content .nav-tab-active,
+body.edusof-ui.eds-screen #wpbody-content .nav-tab-active:hover {
+	border-color: transparent;
+	border-bottom: 2px solid var(--eds-acc);
+	background: transparent;
+	color: var(--eds-ink);
+	font-weight: 600;
+}
+
+/* Pantalla de opciones y ayuda */
+body.edusof-ui.eds-screen #screen-meta,
+body.edusof-ui.eds-screen #screen-meta-links .show-settings {
+	background: var(--eds-surface);
+	border-color: var(--eds-line);
+	color: var(--eds-ink-2);
+}
+
+/* ---- Insignias */
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-badge {
+	display: inline-block;
+	padding: 2px 10px;
+	border-radius: 999px;
+	background: var(--eds-line-2);
+	color: var(--eds-muted);
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.6;
+	white-space: nowrap;
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-badge--ok { background: var(--eds-ok-bg); color: var(--eds-ok-fg); }
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-badge--warn { background: var(--eds-warn-bg); color: var(--eds-warn-fg); }
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-badge--bad { background: var(--eds-bad-bg); color: var(--eds-bad-fg); }
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-badge--info { background: var(--eds-acc-soft); color: var(--eds-acc-ink); }
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-badge--neutral { background: var(--eds-line-2); color: var(--eds-muted); }
+
+/* ---- Avisos dentro de la pantalla */
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-notice {
+	display: flex;
+	align-items: flex-start;
+	gap: 12px;
+	margin: 0;
+	padding: 12px 16px;
+	border: 1px solid var(--eds-line);
+	border-radius: var(--eds-radius);
+	background: var(--eds-surface-2);
+	color: var(--eds-ink-2);
+	font-size: 14px;
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-notice > p { margin: 0; }
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-notice svg { flex-shrink: 0; margin-top: 1px; }
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-notice--warn { background: var(--eds-note-bg); border-color: var(--eds-note-line); color: var(--eds-note-fg); }
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-notice--warn svg { color: var(--eds-warn-fg); }
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-notice--ok { background: var(--eds-ok-bg); border-color: transparent; color: var(--eds-ok-fg); }
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-notice--info { background: var(--eds-acc-soft); border-color: transparent; color: var(--eds-acc-ink); }
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-notice--bad { background: var(--eds-bad-bg); border-color: var(--eds-bad-line); color: var(--eds-bad-fg); }
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-notice a { color: inherit; font-weight: 600; }
+
+/* ---- Estado vacío */
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-empty {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+	padding: 40px 20px;
+	border: 1px dashed var(--eds-field);
+	border-radius: 12px;
+	color: var(--eds-muted);
+	text-align: center;
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-empty strong { color: var(--eds-ink); font-size: 15px; }
+
+/* ---- Diálogo nativo */
+:is(body.edusof-ui.eds-screen, .eds-scope) dialog.eds-dialog {
+	width: min(520px, calc(100vw - 32px));
+	max-height: calc(100vh - 64px);
+	padding: 24px;
+	box-sizing: border-box;
+	border: 1px solid var(--eds-line);
+	border-radius: 14px;
+	background: var(--eds-surface);
+	color: var(--eds-ink);
+	box-shadow: 0 20px 50px rgba(0, 0, 0, .35);
+	font-family: var(--eds-font);
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) dialog.eds-dialog[open] {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) dialog.eds-dialog::backdrop { background: rgba(15, 20, 27, .55); }
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-dialog__title {
+	margin: 0;
+	font-size: 19px;
+	font-weight: 700;
+	color: var(--eds-ink);
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-dialog__body { color: var(--eds-ink-2); font-size: 14px; }
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-dialog__body > :first-child { margin-top: 0; }
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-dialog__actions {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	gap: 8px;
+}
+
+/* ---- Proceso (admisión) */
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-progress {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	counter-reset: eds-step;
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-progress__step {
+	display: flex;
+	flex: 1 1 140px;
+	align-items: center;
+	gap: 10px;
+	margin: 0;
+	padding: 10px 12px;
+	border: 1px solid var(--eds-line);
+	border-radius: var(--eds-radius);
+	background: var(--eds-surface);
+	color: var(--eds-muted);
+	font-size: 13px;
+	font-weight: 600;
+	counter-increment: eds-step;
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-progress__step::before {
+	content: counter(eds-step);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	width: 24px;
+	height: 24px;
+	border-radius: 50%;
+	background: var(--eds-line-2);
+	color: var(--eds-muted);
+	font-size: 12px;
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-progress__step--done { color: var(--eds-ok-fg); }
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-progress__step--done::before { content: "\2713"; background: var(--eds-ok-bg); color: var(--eds-ok-fg); }
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-progress__step--current {
+	border-color: var(--eds-acc);
+	background: var(--eds-acc-soft);
+	color: var(--eds-acc-ink);
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-progress__step--current::before { background: var(--eds-acc); color: var(--eds-on-acc); }
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-progress__step--todo { color: var(--eds-muted); }
+
+/* ---- Zona de acciones definitivas */
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-danger-zone {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 16px 20px;
+	border: 1px solid var(--eds-bad-line);
+	border-radius: 12px;
+	background: var(--eds-surface);
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-danger-zone :is(h2, h3, strong):first-child {
+	margin: 0;
+	color: var(--eds-bad-fg);
+	font-size: 15px;
+}
+
+/* ---- Listas de filas */
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-list {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-list__item {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	margin: 0;
+	padding: 12px 0;
+	border-bottom: 1px solid var(--eds-line-2);
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-list__item:last-child { border-bottom: 0; }
+
+/* ======================================================================= 4. Ajustes › Apariencia */
+
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-appearance__form {
+	display: flex;
+	flex-direction: column;
+	gap: 22px;
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-appearance .eds-card {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-appearance__head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-appearance__head h2 { margin: 0 0 4px; }
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-appearance__help {
+	margin: 0;
+	font-size: 14px;
+	color: var(--eds-muted);
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-appearance .eds-card.eds-appearance__switch {
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-appearance__switch h2 { margin: 0 0 4px; }
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-appearance__switch p { margin: 0; color: var(--eds-muted); }
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-appearance__note {
+	padding: 14px 16px;
+	border-radius: var(--eds-radius);
+	background: var(--eds-surface-2);
+	color: var(--eds-ink-2);
+	font-size: 14px;
+}
+
+/* Interruptor */
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-switch {
+	position: relative;
+	display: inline-flex;
+	flex-shrink: 0;
+	cursor: pointer;
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-switch input {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	opacity: 0;
+	cursor: pointer;
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-switch__track {
+	display: inline-flex;
+	align-items: center;
+	width: 52px;
+	height: 30px;
+	padding: 3px;
+	box-sizing: border-box;
+	border-radius: 999px;
+	background: var(--eds-field);
+	transition: background .15s;
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-switch__thumb {
+	width: 24px;
+	height: 24px;
+	border-radius: 50%;
+	background: #FFFFFF;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, .3);
+	transition: transform .15s;
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-switch input:checked + .eds-switch__track { background: var(--eds-acc); }
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-switch input:checked + .eds-switch__track .eds-switch__thumb { transform: translateX(22px); }
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-switch input:focus-visible + .eds-switch__track {
+	outline: 2px solid var(--eds-acc);
+	outline-offset: 2px;
+}
+
+/* Tarjetas de elección (radio) */
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-choices {
+	display: grid;
+	gap: 14px;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	min-width: 0;
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-choices--themes { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-choices--modes { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-choice {
+	position: relative;
+	display: block;
+	cursor: pointer;
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-choice > input {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	opacity: 0;
+	cursor: pointer;
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-choice__body {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	height: 100%;
+	padding: 12px;
+	box-sizing: border-box;
+	border: 1px solid var(--eds-line);
+	border-radius: 12px;
+	background: var(--eds-surface);
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-choice:hover .eds-choice__body { border-color: var(--eds-field); }
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-choice > input:checked + .eds-choice__body {
+	border: 2px solid var(--eds-acc);
+	padding: 11px;
+	box-shadow: 0 0 0 4px var(--eds-acc-soft);
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-choice > input:focus-visible + .eds-choice__body {
+	outline: 2px solid var(--eds-acc);
+	outline-offset: 3px;
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-choice__name {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	color: var(--eds-ink);
+	font-size: 14px;
+	font-weight: 700;
+}
+:is(body.edusof-ui.eds-screen, .eds-scope) .eds-choice__desc { color: var(--eds-muted); font-size: 13px; }
+
+/* Miniatura de tema (cada una lleva .eds-scope con su tema) */
+.eds-mini {
+	display: flex;
+	height: 96px;
+	overflow: hidden;
+	border: 1px solid var(--eds-line);
+	border-radius: var(--eds-radius-sm);
+	background: var(--eds-bg);
+}
+.eds-mini i { display: block; border-radius: 3px; }
+.eds-mini__side {
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+	width: 30%;
+	padding: 8px 6px;
+	box-sizing: border-box;
+	background: var(--eds-surface);
+}
+.eds-mini__side i { height: 5px; background: var(--eds-line); }
+.eds-mini__side i.eds-mini__acc { height: 6px; background: var(--eds-acc); }
+.eds-mini__main {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	gap: 6px;
+	padding: 10px;
+}
+.eds-mini__main i.eds-mini__title { width: 60%; height: 7px; background: var(--eds-ink-2); }
+.eds-mini__main i.eds-mini__soft { height: 22px; border-radius: 6px; background: var(--eds-acc-soft); }
+.eds-mini__main i.eds-mini__btn { width: 46%; height: 14px; margin-top: auto; border-radius: 5px; background: var(--eds-acc); }
+.eds-mini__dot {
+	display: inline-block;
+	flex-shrink: 0;
+	width: 14px;
+	height: 14px;
+	border-radius: 50%;
+	background: var(--eds-acc);
+}
+
+/* Vista previa de modo */
+.eds-mode-preview {
+	display: block;
+	height: 70px;
+	border: 1px solid var(--eds-line);
+	border-radius: var(--eds-radius-sm);
+}
+.eds-mode-preview--light { background: linear-gradient(90deg, #FFFFFF 30%, #F4F6F9 30%); }
+.eds-mode-preview--dark { background: linear-gradient(90deg, #171E28 30%, #0F141B 30%); }
+.eds-mode-preview--auto { background: linear-gradient(90deg, #FFFFFF 50%, #0F141B 50%); }
+
+/* ======================================================================= 5. Pantalla de acceso */
+
+body.edusof-ui.login {
+	background: var(--eds-bg);
+	color: var(--eds-ink);
+	font-family: var(--eds-font);
+}
+body.edusof-ui.login #login {
+	width: 360px;
+	max-width: calc(100vw - 32px);
+	padding-top: 6vh;
+}
+body.edusof-ui.login #login h1 a {
+	width: 120px;
+	height: 120px;
+	margin: 0 auto 20px;
+	background-image: var(--eds-login-logo, none);
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: contain;
+	border-radius: 0;
+}
+body.edusof-ui.login.eds-no-logo #login h1 a {
+	width: auto;
+	height: auto;
+	margin-bottom: 16px;
+	background: none;
+	text-indent: 0;
+	overflow: visible;
+	color: var(--eds-ink);
+	font-size: 22px;
+	font-weight: 700;
+	line-height: 1.3;
+}
+body.edusof-ui.login :is(#loginform, #lostpasswordform, #registerform, #resetpassform, .login-action-confirm_admin_email #login form) {
+	padding: 24px;
+	border: 1px solid var(--eds-line);
+	border-radius: 14px;
+	background: var(--eds-surface);
+	box-shadow: none;
+	color: var(--eds-ink);
+}
+body.edusof-ui.login label { color: var(--eds-ink-2); font-size: 14px; font-weight: 600; }
+body.edusof-ui.login form :is(.input, input[type="text"], input[type="password"], input[type="email"]) {
+	min-height: 44px;
+	padding: 6px 12px;
+	border: 1px solid var(--eds-field);
+	border-radius: var(--eds-radius-sm);
+	background: var(--eds-surface);
+	color: var(--eds-ink);
+	font-size: 16px;
+	box-shadow: none;
+}
+body.edusof-ui.login form :is(.input, input):focus {
+	border-color: var(--eds-acc);
+	box-shadow: 0 0 0 1px var(--eds-acc);
+	outline: 2px solid transparent;
+}
+body.edusof-ui.login .button.wp-hide-pw { color: var(--eds-muted); }
+body.edusof-ui.login .button.wp-hide-pw:focus { border-color: var(--eds-acc); box-shadow: 0 0 0 1px var(--eds-acc); }
+body.edusof-ui.login .button-primary {
+	min-height: 40px;
+	padding: 0 18px;
+	border-color: var(--eds-acc);
+	border-radius: var(--eds-radius);
+	background: var(--eds-acc);
+	color: var(--eds-on-acc);
+	font-size: 15px;
+	font-weight: 600;
+	text-shadow: none;
+	box-shadow: none;
+}
+body.edusof-ui.login .button-primary:hover,
+body.edusof-ui.login .button-primary:focus {
+	border-color: var(--eds-acc-ink);
+	background: var(--eds-acc-ink);
+	color: var(--eds-on-acc);
+}
+body.edusof-ui.login .button-primary:focus-visible,
+body.edusof-ui.login a:focus-visible {
+	outline: 2px solid var(--eds-acc);
+	outline-offset: 2px;
+	box-shadow: none;
+}
+body.edusof-ui.login input[type="checkbox"]:checked::before { filter: none; }
+body.edusof-ui.login :is(#nav, #backtoblog) a,
+body.edusof-ui.login .privacy-policy-link { color: var(--eds-muted); }
+body.edusof-ui.login :is(#nav, #backtoblog) a:hover { color: var(--eds-acc-ink); }
+body.edusof-ui.login :is(.message, .notice, #login_error) {
+	border: 1px solid var(--eds-line);
+	border-left: 4px solid var(--eds-acc);
+	border-radius: var(--eds-radius-sm);
+	background: var(--eds-surface);
+	color: var(--eds-ink);
+	box-shadow: none;
+}
+body.edusof-ui.login #login_error,
+body.edusof-ui.login .notice-error { border-left-color: var(--eds-bad-fg); }
+body.edusof-ui.login .language-switcher { color: var(--eds-muted); }
+
+/* Logo sobre fondo oscuro: placa clara para que se vea cualquier logo */
+body.edusof-ui.login.eds-mode-dark:not(.eds-no-logo) #login h1 a {
+	background-color: #FFFFFF;
+	background-size: 82%;
+	border-radius: 16px;
+}
+@media (prefers-color-scheme: dark) {
+	body.edusof-ui.login.eds-mode-auto:not(.eds-no-logo) #login h1 a {
+		background-color: #FFFFFF;
+		background-size: 82%;
+		border-radius: 16px;
+	}
+}
+body.edusof-ui.login .language-switcher select {
+	border-color: var(--eds-field);
+	border-radius: var(--eds-radius-sm);
+	background-color: var(--eds-surface);
+	color: var(--eds-ink);
+}
+body.edusof-ui.login .language-switcher .button {
+	border-color: var(--eds-field);
+	border-radius: var(--eds-radius-sm);
+	background: var(--eds-surface);
+	color: var(--eds-ink);
+}
