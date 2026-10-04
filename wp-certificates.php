@@ -322,7 +322,6 @@ function create_tables_certificates() {
     // Permisos propios de certificación (Certificación > Permisos)
     squuad_cert_permissions_install();
 
-    default_templates();
     default_templates_cards();
 }
 

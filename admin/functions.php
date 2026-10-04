@@ -106,10 +106,6 @@ add_action('admin_enqueue_scripts', function () {
 function admin_wp_certificates_scripts()
 {
     $version = '1.0.3'; // subir al cambiar los JS del admin
-    if (isset($_GET['page']) && !empty($_GET['page']) && $_GET['page'] == 'add_admin_form_certificates_templates_content') {
-        wp_enqueue_script('templates', plugins_url('wp-certificates') . '/admin/assets/js/templates.js', array('jquery'), $version, true);
-    }
-
     if (isset($_GET['page']) && !empty($_GET['page']) && $_GET['page'] == 'add_admin_form_cards_content') {
         wp_enqueue_script('cards', plugins_url('wp-certificates') . '/admin/assets/js/cards.js', array('jquery'), $version, true);
     }
@@ -140,7 +136,6 @@ function add_certificates_page_admin()
         add_submenu_page('add_admin_form_certificates_content', esc_html__('Documents', 'wp-certificates'), esc_html__('Documents', 'wp-certificates'), 'manager_documents_certificates', 'add_admin_form_documents_content', 'add_admin_form_documents_content', 10);
         // Asignar certificados: con EduSystem, a sus estudiantes; sin él, a usuarios de WordPress (titular wp_user)
         add_submenu_page('add_admin_form_certificates_content', esc_html__('Issue documents', 'wp-certificates'), esc_html__('Issue documents', 'wp-certificates'), 'manager_certificate_assignment', 'admin_certificate_assignment_content', 'admin_certificate_assignment_content', 10);
-        // add_submenu_page('add_admin_form_certificates_content', esc_html__('Certificates', 'wp-certificates'), esc_html__('Certificates', 'wp-certificates'), 'manager_certificates_templates', 'add_admin_form_certificates_templates_content', 'add_admin_form_certificates_templates_content', 10);
         // «Users and signatures» lo registra el módulo de firmas (certification/admin/signers.php), en esta misma URL
         add_submenu_page('add_admin_form_certificates_content', esc_html__('ID card', 'wp-certificates'), esc_html__('ID card', 'wp-certificates'), 'manager_id_card', 'add_admin_form_cards_content', 'add_admin_form_cards_content', 10);
         add_submenu_page('add_admin_form_certificates_content', esc_html__('Configuration', 'wp-certificates'), esc_html__('Configuration', 'wp-certificates'), 'manager_configuration_certificates', 'add_admin_form_configuration_options_certificates_content', 'add_admin_form_configuration_options_certificates_content', 10);
@@ -167,7 +162,6 @@ function add_certificates_to_administrator()
     $role->add_cap('manager_id_card');
     $role->add_cap('manager_certificate_assignment');
     $role->add_cap('manager_users_signatures_certificate');
-    $role->add_cap('manager_certificates_templates');
     $role->add_cap('manager_documents_certificates');
     $role->add_cap('manager_configuration_certificates');
 }

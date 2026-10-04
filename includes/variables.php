@@ -25,13 +25,13 @@ function squuad_cert_document_replacements(object $document): array
 
 /**
  * Valores de las variables generales, calculados por wp-certificates con el mismo resultado que antes
- * (get_replacements_variables() de EduSystem): fecha, salto de página, hueco del QR, tomo y folio de la plantilla de
- * certificado (ctx certificate_id), y nombre y código del documento (ctx document).
+ * (get_replacements_variables() de EduSystem): fecha, salto de página, hueco del QR, tomo y folio (vacíos: los pone
+ * la reserva del libro al emitir) y nombre y código del documento (ctx document).
  */
 function squuad_cert_general_replacements(array $ctx = []): array
 {
-    $certificate = !empty($ctx['certificate_id']) && function_exists('get_certificate_details') ? get_certificate_details($ctx['certificate_id']) : null;
-    $certificate = $certificate ?: (object) ['folio' => '', 'tomo' => ''];
+    // La plantilla de certificados antigua (certificates_templates) no tenía tomo ni folio: siempre salían vacíos
+    $certificate = (object) ['folio' => '', 'tomo' => ''];
     $replacements = [
         'today' => ['value' => date('M d, Y'), 'wrap' => false],
         'qrcode' => ['value' => '<div id="qrcode"></div>', 'wrap' => false],
