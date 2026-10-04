@@ -4,7 +4,8 @@
  * Cuenta (squuad_cert_modal_document_automatic, squuad_cert_signature_account_documents_to_sign). Movido desde
  * public/functions/account/dashboard.php (ADR 0004, paso 3c). Los modales antiguos de la carta de documentos
  * faltantes y de inscripción (plantillas PHP create-missing-documents.php y create-enrollment.php) no pasan a
- * wp-certificates: la carta es un documento del catálogo (squuad_cert_convert_missing_letter).
+ * wp-certificates: la carta es un documento automático del catálogo que crea cada sitio en Documentos (con la
+ * variable {{missing_documents}} de EduSystem); la conversión automática con plantilla fija se retiró (2026-10-04).
  */
 
 if (!defined('ABSPATH')) exit;

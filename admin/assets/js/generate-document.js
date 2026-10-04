@@ -250,7 +250,7 @@ document.addEventListener("DOMContentLoaded", function () {
           orientation: orientation,
           hotfixes: ["px_scaling"],
         },
-        html2canvas: {
+        html2canvas: { scrollX: 0, scrollY: 0,
           scale: 3,
           useCORS: true,
         },
@@ -270,7 +270,7 @@ document.addEventListener("DOMContentLoaded", function () {
         let imgDataHeader = "";
         let canvasHeader = null;
         if (headerElement) {
-          canvasHeader = await html2canvas(headerElement, { scale: 2 });
+          canvasHeader = await html2canvas(headerElement, { scrollX: 0, scrollY: 0, scale: 2 });
           imgDataHeader = canvasHeader.toDataURL("image/jpeg");
         }
 
@@ -279,7 +279,7 @@ document.addEventListener("DOMContentLoaded", function () {
         let imgData = "";
         let canvas = null;
         if (footerElement) {
-          canvas = await html2canvas(footerElement, { scale: 2 });
+          canvas = await html2canvas(footerElement, { scrollX: 0, scrollY: 0, scale: 2 });
           imgData = canvas.toDataURL("image/jpeg");
         }
 

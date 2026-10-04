@@ -285,7 +285,7 @@ async function download_document( document_config ) {
         margin: 0,
         filename: filename,
         image: { type: 'jpeg', quality: 1 },
-        html2canvas: { 
+        html2canvas: { scrollX: 0, scrollY: 0, 
             scale: 3,
             useCORS: true,
         },

@@ -88,7 +88,8 @@ $fingerprint = sprintf(__('Signature request #%1$d, round %2$d · Content finger
                 filename: "preview.pdf",
                 image: { type: "jpeg", quality: 0.98 },
                 jsPDF: automatic ? { unit: "in", format: "a4", orientation: "portrait" } : data.page.jspdf,
-                html2canvas: { scale: 2 },
+                // scrollX/scrollY a 0: con la página desplazada (el botón está abajo) html2canvas capturaba en blanco
+                html2canvas: { scale: 2, scrollX: 0, scrollY: 0 },
                 pagebreak: automatic ? { mode: ["avoid-all", "css", "legacy"], after: ".pagebreak" } : { after: ".pagebreak" }
             }).from(source).outputPdf("blob");
         }
@@ -122,7 +123,7 @@ $fingerprint = sprintf(__('Signature request #%1$d, round %2$d · Content finger
                 filename: "preview.pdf",
                 image: { type: "jpeg", quality: 1 },
                 jsPDF: { unit: g.unit, format: g.paper_format, orientation: g.orientation, hotfixes: ["px_scaling"] },
-                html2canvas: { scale: 3, useCORS: true },
+                html2canvas: { scale: 3, useCORS: true, scrollX: 0, scrollY: 0 },
                 pagebreak: { after: ".pagebreak" }
             }).from(content).toPdf().get("pdf");
 
@@ -132,7 +133,7 @@ $fingerprint = sprintf(__('Signature request #%1$d, round %2$d · Content finger
                 // medida no válida y fallaba toda la vista previa
                 const capture = async function (part, has) {
                     if (!has || part.offsetWidth < 1 || part.offsetHeight < 1) return null;
-                    const canvas = await html2canvas(part, { scale: 2 });
+                    const canvas = await html2canvas(part, { scale: 2, scrollX: 0, scrollY: 0 });
                     return canvas.width > 0 && canvas.height > 0 ? canvas : null;
                 };
                 const headerCanvas = await capture(header, data.header);

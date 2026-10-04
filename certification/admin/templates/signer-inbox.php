@@ -97,7 +97,7 @@ $frame = static function (string $html): string {
                         });
                     }
                     html2pdf().set({ margin: <?= wp_json_encode($pdf_page['margin']) ?>, filename: filename, image: { type: "jpeg", quality: 0.98 },
-                        jsPDF: <?= wp_json_encode($pdf_page['jspdf']) ?>, html2canvas: { scale: 2 }, pagebreak: <?= wp_json_encode($pdf_pagebreak) ?> })
+                        jsPDF: <?= wp_json_encode($pdf_page['jspdf']) ?>, html2canvas: { scrollX: 0, scrollY: 0, scale: 2 }, pagebreak: <?= wp_json_encode($pdf_pagebreak) ?> })
                         .from(source).outputPdf("blob").then(function (blob) {
                             const data = new FormData();
                             data.append("action", "create_enrollment_document");

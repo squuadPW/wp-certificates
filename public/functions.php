@@ -4,7 +4,7 @@ require plugin_dir_path(__FILE__) . 'endpoint.php';
 function wp_certificates_scripts() {
 
     global $wp;
-    $version = '1.6';
+    $version = '1.7'; // subir al cambiar los JS/CSS públicos
 
     // Hoja de estilos
     wp_enqueue_style('style-certificates', plugins_url('wp-certificates') . '/public/assets/css/style.css', [], $version, 'all');

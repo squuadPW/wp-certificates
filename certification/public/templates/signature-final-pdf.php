@@ -37,7 +37,7 @@ if (!defined('ABSPATH')) exit;
             const status = document.querySelector('#edusystem-final-pdf-status li[data-request="' + source.dataset.request + '"] span');
             try {
                 const blob = await html2pdf().set({ margin: [0.3, 0.3, 0.3, 0.3], filename: source.dataset.filename, image: { type: "jpeg", quality: 0.98 },
-                    jsPDF: { unit: "in", format: "a4", orientation: "portrait" }, html2canvas: { scale: 2 },
+                    jsPDF: { unit: "in", format: "a4", orientation: "portrait" }, html2canvas: { scrollX: 0, scrollY: 0, scale: 2 },
                     pagebreak: { mode: ["avoid-all", "css", "legacy"], after: ".pagebreak" } }) // sin cortar texto entre páginas
                     .from(source).outputPdf("blob");
                 const data = new FormData();

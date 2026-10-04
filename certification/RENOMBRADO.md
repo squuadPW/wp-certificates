@@ -364,3 +364,7 @@ a los nombres de wp-certificates, según la sección 2.1 del ADR 0004. Solo camb
 | `EDUSYSTEM_SIGNERS_PARENT` | `SQUUAD_CERT_SIGNERS_PARENT` |
 | `edusystem_switched_from` | `squuad_cert_switched_from` |
 | `edusystem_user_signatures` | `squuad_cert_signer_signatures` |
+
+> 2026-10-04: retiradas `squuad_cert_missing_letter_conversion_available`, `squuad_cert_missing_letter_conversion_notice`,
+> `squuad_cert_missing_letter_template`, `squuad_cert_missing_letter_convert_handle` y la acción
+> `squuad_cert_convert_missing_letter` (la carta se crea como documento normal en Documentos).

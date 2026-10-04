@@ -88,7 +88,7 @@
                         margin: [0.2, 0, 0, 0],
                         image: { type: "jpeg", quality: 0.98 },
                         jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
-                        html2canvas: { scale: 3 },
+                        html2canvas: { scrollX: 0, scrollY: 0, scale: 3 },
                         pagebreak: { mode: ["avoid-all", "css", "legacy"], after: ".pagebreak" },
                     }).from(document.getElementById("content-pdf")).outputPdf("blob").then(send).catch(() => fail(""));
                 });

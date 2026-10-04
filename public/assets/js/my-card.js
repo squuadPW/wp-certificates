@@ -105,7 +105,7 @@ if (download_card) {
 
     // Capturar frente
     const frontElement = document.getElementById("main-side");
-    const frontCanvas = await html2canvas(frontElement, {
+    const frontCanvas = await html2canvas(frontElement, { scrollX: 0, scrollY: 0,
       scale: 5, // Mayor resolución
       useCORS: true, // Para imágenes externas
       logging: false,
@@ -117,7 +117,7 @@ if (download_card) {
 
     // Capturar reverso
     const backElement = document.getElementById("rear-side");
-    const backCanvas = await html2canvas(backElement, {
+    const backCanvas = await html2canvas(backElement, { scrollX: 0, scrollY: 0,
       scale: 5,
       useCORS: true,
       logging: false,
@@ -138,7 +138,7 @@ if (share_card) {
     try {
       // Capturar el elemento
       const element = document.getElementById("main-side");
-      const canvas = await html2canvas(element, {
+      const canvas = await html2canvas(element, { scrollX: 0, scrollY: 0,
         scale: 5,
         useCORS: true,
         logging: false,

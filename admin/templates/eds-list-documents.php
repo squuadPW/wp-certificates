@@ -31,7 +31,6 @@ $view_url = static function (string $key, int $page = 1) use ($base_url, $search
 $can_policies = defined('SQUUAD_CERT_MANAGE_SIGNING_POLICIES_CAP') && current_user_can(SQUUAD_CERT_MANAGE_SIGNING_POLICIES_CAP);
 $affected = ($can_policies && function_exists('squuad_cert_legacy_signature_affected_documents') && !get_option('squuad_cert_legacy_signatures_notice_dismissed'))
     ? squuad_cert_legacy_signature_affected_documents() : [];
-$letter = $can_policies && function_exists('squuad_cert_missing_letter_conversion_available') && squuad_cert_missing_letter_conversion_available();
 $signers_notice = function_exists('squuad_cert_signers_take_notice') ? squuad_cert_signers_take_notice() : null;
 ?>
 <div class="wrap eds-page wpc-eds-documents">
@@ -83,17 +82,6 @@ $signers_notice = function_exists('squuad_cert_signers_take_notice') ? squuad_ce
         </div>
     <?php } ?>
 
-    <?php if ($letter) { ?>
-        <div class="eds-notice eds-notice--info">
-            <p><strong><?= esc_html__('Missing documents commitment letter', 'wp-certificates') ?></strong><br>
-                <?= esc_html__('This site uses the old fixed letter. Convert it into an automatic document: it will be editable here, signed with the new signature system (frozen content, consent, "Documents to sign"). Like every automatic document, it is shown while the student has not signed it. Letters already signed keep their validity and are not asked again.', 'wp-certificates') ?></p>
-            <form method="post" action="<?= esc_url(admin_url('admin-post.php')) ?>">
-                <input type="hidden" name="action" value="squuad_cert_convert_missing_letter">
-                <?php wp_nonce_field('squuad_cert_convert_missing_letter'); ?>
-                <button type="submit" class="eds-btn eds-btn--secondary eds-btn--sm"><?= esc_html__('Convert the letter into an automatic document', 'wp-certificates') ?></button>
-            </form>
-        </div>
-    <?php } ?>
 
     <nav class="eds-tabs" aria-label="<?= esc_attr__('Filter documents', 'wp-certificates') ?>">
         <?php foreach ($tabs as $key => $label) { ?>
