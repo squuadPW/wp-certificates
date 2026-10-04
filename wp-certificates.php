@@ -35,7 +35,9 @@ define('WP_C_REMOTE_INFO_URL', 'https://versions.squuad.com/plugins/wp-certifica
 // 13: ADR 0007, revisión de seguridad y calidad: columna signer_id_origin (quién registró el documento, en EDUSIG3),
 //     KEY user_id en las firmas anuladas, el permiso squuad_cert_manage_id_documents al administrator (los sitios que
 //     pasaron a la 12 a medias no lo tenían) y PDF firmados existentes marcados privados (includes/signed-pdf.php).
-define('WP_C_DB_VERSION', '13');
+// 14: PDF firmados del sistema de firma anterior (acuerdos de inscripción y cartas de documentos faltantes que ninguna
+//     tabla referencia) marcados privados con la marca 'legacy' (includes/signed-pdf.php, nivel 2 de la migración).
+define('WP_C_DB_VERSION', '14');
 
 // get_plugin_data() vive en wp-admin/includes/plugin.php, que en el front no está cargado (antes solo funcionaba
 // porque EduSystem lo cargaba primero)
@@ -335,8 +337,8 @@ function create_tables_certificates() {
     // evidencia se vuelven a comprobar con el esquema nuevo
     squuad_cert_id_document_install();
     squuad_cert_id_document_evidence_reset();
-    // PDF firmados ya guardados: privados, sin renombrar ni mover; una sola vez, al pasar de una versión previa a la 13
-    // (la versión guardada aún es la anterior: se actualiza después de esta función). Corrige siempre las marcas viejas
+    // PDF firmados ya guardados: privados, sin renombrar ni mover; cada nivel una sola vez (la versión guardada aún es
+    // la anterior: se actualiza después de esta función). Corrige siempre las marcas viejas
     squuad_cert_signed_pdf_migrate((string) get_option('wp_c_db_version'));
 
     default_templates_cards();

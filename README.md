@@ -41,7 +41,9 @@ Se publica junto con **EduSystem 6.0.0** (ADR 0004 de EduSystem). Resumen:
   también quién registró el documento (persona, secretaría o administración), máximo 5 intentos fallidos por hora,
   prefijos sin solapes ni reutilización, exportador y borrador de datos personales.
 - **PDF firmados protegidos:** nombre aleatorio, adjunto privado y fuera de la API REST de medios; los existentes se
-  marcan privados sin moverlos (la URL directa del archivo sigue respondiendo: pendiente servirlos con permisos).
+  marcan privados sin moverlos, también los del sistema de firma anterior (esquema v14). Su ficha solo la ven quien
+  tiene el permiso de certificación o quien lo subió (la URL directa del archivo sigue respondiendo: pendiente servirlos
+  con permisos).
 
 ### 1.0.29
 - Versión anterior (sin registro de cambios en este repositorio).
