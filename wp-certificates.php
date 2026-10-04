@@ -87,6 +87,45 @@ add_action('plugins_loaded', 'squuad_cert_load_textdomain');
 function squuad_cert_load_textdomain() {
     load_plugin_textdomain('wp-certificates', false, dirname(plugin_basename(__FILE__)) . '/languages');
 }
+
+add_filter('override_load_textdomain', 'squuad_cert_use_bundled_translations', 10, 4);
+/**
+ * Las traducciones que trae el plugin (languages/) mandan sobre copias externas del dominio «wp-certificates»
+ * (wp-content/languages/plugins/, Loco Translate…), que WordPress carga antes y que, si son antiguas, tapan las nuevas
+ * tras actualizar. Un sitio que necesite sus propias traducciones puede desactivarlo con el filtro
+ * 'squuad_cert_use_bundled_translations'.
+ */
+function squuad_cert_use_bundled_translations($override, $domain, $mofile, $locale = null)
+{
+    if ($override || 'wp-certificates' !== $domain || !is_string($mofile)) {
+        return $override;
+    }
+    $dir = wp_normalize_path(WP_C_PATH . 'languages/');
+    if (0 === strpos(wp_normalize_path($mofile), $dir)) {
+        return $override; // ya es el archivo del plugin
+    }
+    $locale = is_string($locale) && '' !== $locale ? $locale : determine_locale();
+    if (!apply_filters('squuad_cert_use_bundled_translations', true, $locale, $mofile)) {
+        return $override;
+    }
+    $bundled = $dir . 'wp-certificates-' . $locale . '.mo';
+    if (!is_readable($bundled) && !is_readable(substr($bundled, 0, -3) . '.l10n.php')) {
+        return $override; // el plugin no trae ese idioma: se usa el externo
+    }
+
+    // Sin reentrada: mientras se carga el archivo del plugin, otros complementos (Loco Translate) vuelven a llamar a
+    // load_textdomain() con su copia externa; se omite (true) para que no gane ni se forme un bucle
+    static $busy = false;
+    if ($busy) {
+        return true;
+    }
+    $busy = true;
+    try {
+        return load_textdomain($domain, $bundled, $locale);
+    } finally {
+        $busy = false;
+    }
+}
 function squuad_cert_load_signature_module() {
     if (defined('EDUSYSTEM_CERTIFICATION_PATH') || defined('SQUUAD_CERT_MODULE_PATH')) {
         return;
