@@ -1,7 +1,7 @@
 <?php
 /**
  * Mi Cuenta: confirmación y resultado de la firma en lote (ADR 0003, paso 6b). Variables: $batch, $dashboard,
- * $pdf_requests.
+ * $pdf_requests y $id_document_blocked (falta el documento de identidad: sin formulario de firma).
  */
 if (!defined('ABSPATH')) exit;
 
@@ -34,6 +34,7 @@ wp_enqueue_script('edusystem-signature-pad', SQUUAD_CERT_MODULE_URL . 'admin/ass
             </tbody>
         </table>
 
+        <?php if (empty($id_document_blocked)) : // Q3 (ADR 0007 de Edusof): sin documento de identidad no se firma el lote ?>
         <form method="post" action="<?= esc_url(admin_url('admin-post.php')) ?>" id="edusystem-batch-form">
             <input type="hidden" name="action" value="squuad_cert_holder_batch_confirm">
             <input type="hidden" name="batch_id" value="<?= (int) $batch->id ?>">
@@ -79,6 +80,7 @@ wp_enqueue_script('edusystem-signature-pad', SQUUAD_CERT_MODULE_URL . 'admin/ass
                 });
             });
         </script>
+        <?php endif; ?>
 
     <?php elseif ('finished' === $batch->status && $batch->result_data) : ?>
         <h3><?= esc_html__('Batch result', 'wp-certificates') ?></h3>

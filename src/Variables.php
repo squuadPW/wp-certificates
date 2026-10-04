@@ -25,6 +25,7 @@ final class Variables
         return [
             '{{document_name}}' => __('Name of this document', 'wp-certificates'),
             '{{document_code}}' => __('Code (identifier) of this document', 'wp-certificates'),
+            '{{holder_id_document}}' => __('Identity document of the person who receives the document (prefix and number, for example V12345678; empty if it is not registered)', 'wp-certificates'),
             '{{today}}' => __('Today\'s date', 'wp-certificates'),
             '{{page_break}}' => __('Page break in the PDF', 'wp-certificates'),
             '{{signature_section}}' => __('Signatures of the roles not placed separately (empty when the document does not ask for signatures)', 'wp-certificates'),

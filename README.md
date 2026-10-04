@@ -32,6 +32,16 @@ Se publica junto con **EduSystem 6.0.0** (ADR 0004 de EduSystem). Resumen:
 - **Conexiones API:** claves para que otros sistemas verifiquen documentos por código
   (`/wp-json/squuad-cert/v1/documents/<código>`); ver `api-conexiones-wp-certificates.md` en los informes de EduSystem.
 - **Traducciones propias** (dominio `wp-certificates`, español incluido).
+- **Documento de identidad de quien firma** (ADR 0007 de Edusof; apagado por defecto: mientras esté apagado no cambia
+  nada). En Certificación > Configuración se enciende «Pedir documento de identidad» y se gestionan los tipos de
+  documento (prefijo, país, formato). Quien firma sin documento ve primero el formulario y el servidor rechaza la firma
+  hasta que lo registre; el identificador (prefijo + número) es único entre cuentas, se corrige hasta la primera firma
+  (después, solo con el permiso «Documentos de identidad») y queda sellado en cada firma nueva (evidencia `EDUSIG3`;
+  las firmas anteriores siguen verificando igual). Variable `{{holder_id_document}}`. Esquemas v12 y v13: se sella
+  también quién registró el documento (persona, secretaría o administración), máximo 5 intentos fallidos por hora,
+  prefijos sin solapes ni reutilización, exportador y borrador de datos personales.
+- **PDF firmados protegidos:** nombre aleatorio, adjunto privado y fuera de la API REST de medios; los existentes se
+  marcan privados sin moverlos (la URL directa del archivo sigue respondiendo: pendiente servirlos con permisos).
 
 ### 1.0.29
 - Versión anterior (sin registro de cambios en este repositorio).

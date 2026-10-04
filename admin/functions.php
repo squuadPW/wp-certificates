@@ -66,6 +66,8 @@ require plugin_dir_path(__FILE__) . 'certificates.php';
 require plugin_dir_path(__FILE__) . 'assignment-users.php';
 require plugin_dir_path(__FILE__) . 'cards.php';
 require plugin_dir_path(__FILE__) . 'configuration-options.php';
+// Documento de identidad de quien firma (ADR 0007 de Edusof): sección de Configuración y perfil del usuario
+require plugin_dir_path(__FILE__) . 'id-document.php';
 require plugin_dir_path(__FILE__) . 'users-signatures.php';
 require plugin_dir_path(__FILE__) . 'documents.php';
 require plugin_dir_path(__FILE__) . 'variables.php';

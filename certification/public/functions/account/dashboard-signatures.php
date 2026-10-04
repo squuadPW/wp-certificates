@@ -36,6 +36,12 @@ function squuad_cert_modal_document_automatic()
     if (!$pending) {
         return;
     }
+    // Documento de identidad (ADR 0007 de Edusof): con «Pedir documento de identidad» encendido, quien aún no lo tiene ve
+    // primero el formulario; el documento no se abre (ni se crea su solicitud) hasta que lo registre
+    if (squuad_cert_id_document_missing((int) $current_user->ID) && squuad_cert_id_document_item_signs($pending, $current_user)) {
+        squuad_cert_id_document_render_self_form('modal');
+        return;
+    }
     // El documento es de la cuenta conectada; su ficha de EduSystem (si la tiene) solo aporta las variables
     $subject_id = (int) $pending['subject_id'];
     $student_id = $subject_id; // la plantilla del modal lo envía como student_user_id (cuenta que firma)
@@ -159,11 +165,18 @@ function squuad_cert_signature_account_documents_to_sign()
     if (function_exists('squuad_cert_signature_batch_print_notice')) {
         squuad_cert_signature_batch_print_notice();
     }
+    // Documento de identidad (ADR 0007 de Edusof): sin él no se firma (tampoco en lote); el formulario va primero
+    // Q3: en la confirmación del lote el formulario va encima y solo se quita el botón de firmar (el resultado del lote y
+    // los PDF finales siguen accesibles)
+    $id_document_blocked = squuad_cert_id_document_missing((int) $user->ID);
 
     // Firma en lote (ADR 0003, paso 6b): confirmación o resultado del lote, y PDF finales pendientes
     if (!empty($_GET['squuad_cert_batch']) && function_exists('squuad_cert_signature_batch_get')) {
         $batch = squuad_cert_signature_batch_get(absint($_GET['squuad_cert_batch']));
         if ($batch && 'holder' === ($batch->data['kind'] ?? '')) {
+            if ($id_document_blocked && 'prepared' === $batch->status) {
+                squuad_cert_id_document_render_self_form('inline');
+            }
             $pdf_requests = 'finished' === $batch->status && !empty($batch->result_data['completed'])
                 ? squuad_cert_signature_account_pdf_requests($user, array_map('intval', (array) $batch->result_data['completed']))
                 : [];
@@ -185,7 +198,9 @@ function squuad_cert_signature_account_documents_to_sign()
     if (!$items) {
         return;
     }
-    $batchable = function_exists('squuad_cert_signature_batch_holder_candidates')
+    // El formulario del documento de identidad solo si hay algo que firmar
+    $id_document_blocked = $id_document_blocked && (bool) array_filter($items, static fn(array $item): bool => squuad_cert_id_document_item_signs($item, $user));
+    $batchable = function_exists('squuad_cert_signature_batch_holder_candidates') && !$id_document_blocked
         ? array_map(static fn($row) => (int) $row->id, squuad_cert_signature_batch_holder_candidates($user))
         : [];
     include SQUUAD_CERT_MODULE_PATH . 'public/templates/documents-to-sign.php';

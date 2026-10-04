@@ -919,8 +919,10 @@ function squuad_cert_signature_render_slot_box(object $request, array $signer): 
 {
     global $wpdb;
 
+    // Documento de identidad sellado en la firma (EDUSIG3, esquema v12; ADR 0007 de Edusof)
+    $id_column = squuad_cert_id_document_evidence_enabled() ? ', signer_id_document' : '';
     $row = $wpdb->get_row($wpdb->prepare(
-        "SELECT signature, signed_at_utc FROM {$wpdb->prefix}squuad_cert_signatures WHERE request_id = %d AND signer_role = %s",
+        "SELECT signature, signed_at_utc{$id_column} FROM {$wpdb->prefix}squuad_cert_signatures WHERE request_id = %d AND signer_role = %s",
         $request->id,
         $signer['slot_key']
     ));
@@ -928,7 +930,16 @@ function squuad_cert_signature_render_slot_box(object $request, array $signer): 
         return '<div style="height:90px;display:flex;align-items:center;justify-content:center;color:#888;border:1px dashed #bbb">'
             . esc_html__('Pending signature', 'wp-certificates') . '</div>';
     }
+    $id_document = (string) ($row->signer_id_document ?? '');
+    if ('' !== $id_document && squuad_cert_id_document_mask_in_boxes()) {
+        $id_document = squuad_cert_id_document_mask($id_document); // B3: en pantalla, enmascarado; en el PDF final, completo
+    }
 
     return squuad_cert_signature_svg((string) $row->signature, $signer['name'])
+        . ('' !== $id_document ? '<div style="font-size:11px;color:#333">' . esc_html(sprintf(
+            /* translators: %s: identity document of the signer (prefix and number) */
+            __('ID document: %s', 'wp-certificates'),
+            $id_document
+        )) . '</div>' : '')
         . '<div style="font-size:10px;color:#666">' . esc_html(get_date_from_gmt((string) $row->signed_at_utc, 'Y-m-d H:i')) . ' UTC</div>';
 }

@@ -197,8 +197,12 @@ function squuad_cert_signer_inbox_page(): void
         $slot = $candidate ? squuad_cert_signature_request_role($candidate, $user_id) : '';
         if ($candidate && 0 === strpos($slot, 'signer:')) {
             $request = $candidate;
-            $final_html = squuad_cert_signature_request_render_final($candidate);
             $generate_pdf = !empty($_GET['generate_pdf']) && 'signed' === $candidate->status;
+            // B3 (ADR 0007 de Edusof): en pantalla, los documentos de identidad de los recuadros van enmascarados; al
+            // generar el PDF final, completos
+            squuad_cert_id_document_mask_in_boxes(!$generate_pdf);
+            $final_html = squuad_cert_signature_request_render_final($candidate);
+            squuad_cert_id_document_mask_in_boxes(false);
         }
     }
     $document_title = $request ? (string) $wpdb->get_var($wpdb->prepare(
@@ -212,6 +216,11 @@ function squuad_cert_signer_inbox_page(): void
     // Lote: confirmación (preparado) o resultado (terminado); cola de PDF finales pendientes
     $batch = !$request && !empty($_GET['batch_id']) ? squuad_cert_signature_batch_get(absint($_GET['batch_id'])) : null;
     $pdf_queue = $request ? [] : squuad_cert_signer_pdf_queue($user_id);
+    // Documento de identidad (ADR 0007 de Edusof): si tiene algo que firmar y le falta, el formulario va primero
+    $id_document_blocked = squuad_cert_id_document_missing($user_id)
+        && ($items || $pending_here || $batch);
+    // Q3: el formulario va encima; solo se quitan los botones de firma (PDF final, cola de PDF, resultado del lote y
+    // «Declinar» siguen accesibles)
 
     include SQUUAD_CERT_MODULE_PATH . 'admin/templates/signer-inbox.php';
 }

@@ -1172,6 +1172,11 @@ function squuad_cert_signature_sign_as_signer_with(int $request_id, string $show
     if (0 !== strpos($slot_key, 'signer:') || !$signer || 'active' !== $signer->status) {
         return $fail(__('You are not allowed to sign this document.', 'wp-certificates'));
     }
+    // Documento de identidad del firmante del sistema (ADR 0007 de Edusof)
+    $id_document_error = squuad_cert_id_document_signing_error($user_id);
+    if (null !== $id_document_error) {
+        return $fail($id_document_error);
+    }
     if (!in_array($request->status, ['open', 'partially_signed'], true) || null === $request->frozen_at_utc) {
         return $fail(__('This document no longer accepts signatures. Please reload the page.', 'wp-certificates'));
     }
@@ -1303,6 +1308,11 @@ function squuad_cert_signature_batch_prepare(array $request_ids, string $kind = 
     if (function_exists('squuad_cert_signature_session_switched_from') && squuad_cert_signature_session_switched_from()) {
         return $fail(__('Documents cannot be signed from a switched session. Each person must sign from their own account.', 'wp-certificates'));
     }
+    // Documento de identidad (ADR 0007 de Edusof): antes de preparar nada
+    $id_document_error = squuad_cert_id_document_signing_error($user_id);
+    if (null !== $id_document_error) {
+        return $fail($id_document_error);
+    }
     if (!$holder) {
         $signer = squuad_cert_signer_by_user($user_id);
         if (!$signer || 'active' !== $signer->status) {
@@ -1396,6 +1406,11 @@ function squuad_cert_signature_batch_confirm(int $batch_id, string $password, st
     $strokes = $holder ? squuad_cert_signer_normalize_strokes($drawn_strokes) : null;
     if ($holder && null === $strokes) {
         return $fail(__('Draw your signature before signing.', 'wp-certificates'));
+    }
+    // Documento de identidad (ADR 0007 de Edusof): el lote no empieza sin él
+    $id_document_error = squuad_cert_id_document_signing_error((int) $user->ID);
+    if (null !== $id_document_error) {
+        return $fail($id_document_error);
     }
     if ('' === $password || !wp_check_password($password, $user->user_pass, $user->ID)) {
         return $fail(__('The password is not correct.', 'wp-certificates'));
@@ -1538,6 +1553,11 @@ function squuad_cert_signature_sign_as_holder_with(int $request_id, string $show
     $role = squuad_cert_signature_request_role($request, $user_id);
     if (!squuad_cert_is_holder_slot($role)) {
         return $fail(__('You are not allowed to sign this document.', 'wp-certificates'));
+    }
+    // Documento de identidad de quien firma (ADR 0007 de Edusof)
+    $id_document_error = squuad_cert_id_document_signing_error($user_id);
+    if (null !== $id_document_error) {
+        return $fail($id_document_error);
     }
     if (!in_array($request->status, ['open', 'partially_signed'], true) || null === $request->frozen_at_utc) {
         return $fail(__('This document no longer accepts signatures. Please reload the page.', 'wp-certificates'));

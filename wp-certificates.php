@@ -30,7 +30,12 @@ define('WP_C_REMOTE_INFO_URL', 'https://versions.squuad.com/plugins/wp-certifica
 //    cadena, firmantes, políticas, lotes y libro) y clave del sitio (ADR 0004 de EduSystem, paso 3b).
 // 10: permisos propios de certificación (squuad_cert_*); concesión inicial una sola vez (includes/permissions.php).
 // 11: permiso squuad_cert_manage_api_keys (Conexiones API) para el administrator.
-define('WP_C_DB_VERSION', '11');
+// 12: documento de identidad de quien firma (ADR 0007 de Edusof): columna signer_id_document en las firmas (evidencia
+//     EDUSIG3), permiso squuad_cert_manage_id_documents para el administrator y tipos de documento de ejemplo.
+// 13: ADR 0007, revisión de seguridad y calidad: columna signer_id_origin (quién registró el documento, en EDUSIG3),
+//     KEY user_id en las firmas anuladas, el permiso squuad_cert_manage_id_documents al administrator (los sitios que
+//     pasaron a la 12 a medias no lo tenían) y PDF firmados existentes marcados privados (includes/signed-pdf.php).
+define('WP_C_DB_VERSION', '13');
 
 // get_plugin_data() vive en wp-admin/includes/plugin.php, que en el front no está cargado (antes solo funcionaba
 // porque EduSystem lo cargaba primero)
@@ -62,6 +67,11 @@ require_once WP_C_PATH . 'includes/book.php';
 require_once WP_C_PATH . 'includes/automatic.php';
 require_once WP_C_PATH . 'includes/signing-roles.php';
 require_once WP_C_PATH . 'includes/permissions.php';
+// Documento de identidad de quien firma (ADR 0007 de Edusof): apagado por defecto
+require_once WP_C_PATH . 'includes/id-document.php';
+require_once WP_C_PATH . 'includes/id-document-privacy.php';
+// PDF firmados privados y fuera de la API de medios (decisión D3 del dueño, ADR 0007 de Edusof)
+require_once WP_C_PATH . 'includes/signed-pdf.php';
 require_once WP_C_PATH . 'includes/api-keys.php';
 require_once WP_C_PATH . 'includes/rest-v1.php';
 
@@ -321,6 +331,13 @@ function create_tables_certificates() {
     squuad_cert_signatures_install();
     // Permisos propios de certificación (Certificación > Permisos)
     squuad_cert_permissions_install();
+    // Tipos de documento de identidad de ejemplo, solo si nunca se configuraron (ADR 0007 de Edusof); las columnas de la
+    // evidencia se vuelven a comprobar con el esquema nuevo
+    squuad_cert_id_document_install();
+    squuad_cert_id_document_evidence_reset();
+    // PDF firmados ya guardados: privados, sin renombrar ni mover; una sola vez, al pasar de una versión previa a la 13
+    // (la versión guardada aún es la anterior: se actualiza después de esta función). Corrige siempre las marcas viejas
+    squuad_cert_signed_pdf_migrate((string) get_option('wp_c_db_version'));
 
     default_templates_cards();
 }

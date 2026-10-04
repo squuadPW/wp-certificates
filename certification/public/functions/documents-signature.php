@@ -86,6 +86,13 @@ function squuad_cert_signature_handle_request_submission(int $request_id): void
         wp_send_json_error(__('You can only sign your own part of the document.', 'wp-certificates'), 403);
     }
     $signature = $signature_student;
+    // Documento de identidad (ADR 0007 de Edusof): sin él no se firma (con «Pedir documento de identidad» encendido).
+    // Solo se pide a quien firma: guardar las respuestas de un automático sin firma y el PDF final no lo exigen
+    $id_document_error = squuad_cert_id_document_signing_error($user_id);
+    if (null !== $id_document_error && $signature) {
+        squuad_cert_log(sprintf('Firma rechazada: el usuario %d no tiene documento de identidad (solicitud %d)', $user_id, $request_id), 'signature_blocked');
+        wp_send_json_error($id_document_error, 403);
+    }
     $file = !empty($_FILES['document']) ? $_FILES['document'] : null;
     $signed_roles = squuad_cert_signature_request_signed_roles((int) $request->id);
 
@@ -172,17 +179,20 @@ function squuad_cert_signature_handle_request_submission(int $request_id): void
             wp_send_json_error('Invalid file type');
         }
         $pdf = (string) file_get_contents($file['tmp_name']);
-        $filename = sanitize_file_name(preg_replace('/\.pdf$/i', '', (string) $file['name'])) . '.pdf';
-        $upload = wp_upload_bits($filename, null, $pdf);
+        // D3 (ADR 0007 de Edusof): nombre aleatorio no predecible y adjunto privado, fuera de la API de medios y de la
+        // biblioteca (includes/signed-pdf.php). El título conserva el nombre del documento para quien lo administra
+        $title = sanitize_file_name(preg_replace('/\.pdf$/i', '', (string) $file['name'])) . '.pdf';
+        $upload = wp_upload_bits(squuad_cert_signed_pdf_filename(), null, $pdf);
         if (!empty($upload['error'])) {
             wp_send_json_error('Failed to upload file');
         }
         $attach_id = wp_insert_attachment([
             'post_mime_type' => $upload['type'],
-            'post_title' => $filename,
+            'post_title' => $title,
             'post_content' => '',
-            'post_status' => 'inherit',
+            'post_status' => 'private',
         ], $upload['file']);
+        squuad_cert_signed_pdf_protect((int) $attach_id, 'request:' . (int) $request->id);
         require_once ABSPATH . 'wp-admin/includes/image.php';
         wp_update_attachment_metadata($attach_id, wp_generate_attachment_metadata($attach_id, $upload['file']));
 

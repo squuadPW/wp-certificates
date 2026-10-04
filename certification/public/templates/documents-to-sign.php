@@ -1,7 +1,8 @@
 <?php
 /**
  * Mi Cuenta: "Documentos por firmar" (public/functions/account/dashboard.php). Variables: $items, $dashboard,
- * $batchable (ids de solicitudes que se pueden firmar en lote).
+ * $batchable (ids de solicitudes que se pueden firmar en lote) y $id_document_blocked (falta el documento de identidad:
+ * el formulario va primero y no hay botones de firma; ADR 0007 de Edusof).
  */
 if (!defined('ABSPATH')) exit;
 
@@ -13,6 +14,9 @@ $statuses = [
 ?>
 <section class="edusystem-documents-to-sign" id="edusystem-documents-to-sign" style="margin-bottom:24px">
     <h3><?= esc_html__('Documents to sign', 'wp-certificates') ?></h3>
+    <?php if (!empty($id_document_blocked)) {
+        squuad_cert_id_document_render_self_form('inline');
+    } ?>
     <form method="post" action="<?= esc_url(admin_url('admin-post.php')) ?>">
     <input type="hidden" name="action" value="squuad_cert_holder_batch_prepare">
     <?php wp_nonce_field('squuad_cert_holder_batch_prepare'); ?>
@@ -39,7 +43,7 @@ $statuses = [
                     <td data-title="<?= esc_attr__('Name', 'wp-certificates') ?>"><?= esc_html(squuad_cert_account_name((int) $item['subject_id'])) ?></td>
                     <td data-title="<?= esc_attr__('Status', 'wp-certificates') ?>"><?= esc_html($statuses[$item['state']] ?? '') ?></td>
                     <td>
-                        <?php if ('to_sign' === $item['state']) : ?>
+                        <?php if ('to_sign' === $item['state'] && empty($id_document_blocked)) : ?>
                             <a class="woocommerce-button button" href="<?= esc_url(add_query_arg('squuad_cert_sign', (int) $item['subject_id'] . '-' . (int) $item['document']->id, $dashboard)) ?>"><?= esc_html__('Sign', 'wp-certificates') ?></a>
                         <?php elseif ('pdf' === $item['state']) : ?>
                             <a class="woocommerce-button button" href="<?= esc_url(add_query_arg('squuad_cert_pdf', $request_id, $dashboard)) ?>"><?= esc_html__('Generate PDF', 'wp-certificates') ?></a>

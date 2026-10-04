@@ -50,4 +50,9 @@
       </form>
     </div>
   </div>
+
+  <?php // Documento de identidad de quien firma (ADR 0007 de Edusof): solo con el permiso squuad_cert_manage_id_documents
+  if (function_exists('squuad_cert_id_document_settings_section')) {
+    squuad_cert_id_document_settings_section();
+  } ?>
 </div>

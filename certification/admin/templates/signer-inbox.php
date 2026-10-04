@@ -1,7 +1,9 @@
 <?php
 /**
  * "Documentos por firmar" (admin/signer-inbox.php). Variables: $notice, $items, $profile, $request, $final_html,
- * $generate_pdf, $document_title, $pending_here, $batch, $pdf_queue.
+ * $generate_pdf, $document_title, $pending_here, $batch, $pdf_queue y $id_document_blocked (falta el documento de
+ * identidad: su formulario va encima y se quitan solo los botones de firma; el PDF final, la cola de PDF, el resultado
+ * del lote y «Declinar» siguen accesibles; ADR 0007 de Edusof, Q3).
  */
 if (!defined('ABSPATH')) exit;
 
@@ -26,6 +28,10 @@ $frame = static function (string $html): string {
         </p></div>
     <?php endif; ?>
 
+    <?php if (!empty($id_document_blocked)) {
+        squuad_cert_id_document_render_self_form('admin');
+    } ?>
+
     <?php if ($request && null !== $final_html) : ?>
         <p><a href="<?= esc_url($page_url) ?>">&larr; <?= esc_html__('Back to the list', 'wp-certificates') ?></a></p>
         <h2><?= esc_html($document_title ?: $request->document_id) ?></h2>
@@ -34,6 +40,7 @@ $frame = static function (string $html): string {
         <?= $frame($final_html) // phpcs:ignore -- iframe aislado con el contenido congelado (datos escapados al generarlo) ?>
 
         <?php if ($pending_here && $profile) : ?>
+            <?php if (empty($id_document_blocked)) : ?>
             <form method="post" action="<?= esc_url(admin_url('admin-post.php')) ?>" style="max-width:760px;margin-top:16px">
                 <input type="hidden" name="action" value="squuad_cert_sign_as_signer">
                 <input type="hidden" name="request_id" value="<?= (int) $request->id ?>">
@@ -45,6 +52,7 @@ $frame = static function (string $html): string {
                     <?= esc_html(squuad_cert_signature_consent_text(SQUUAD_CERT_SIGNATURE_CONSENT_CURRENT)) ?></label></p>
                 <p><button type="submit" class="button button-primary"><?= esc_html__('Sign this document', 'wp-certificates') ?></button></p>
             </form>
+            <?php endif; ?>
 
             <details style="max-width:760px;margin-top:16px">
                 <summary style="cursor:pointer;color:#b32d2e;font-weight:600"><?= esc_html__('Decline this document', 'wp-certificates') ?></summary>
@@ -146,6 +154,7 @@ $frame = static function (string $html): string {
                     <?php endforeach; ?>
                 </tbody>
             </table>
+            <?php if (empty($id_document_blocked)) : ?>
             <form method="post" action="<?= esc_url(admin_url('admin-post.php')) ?>" style="max-width:760px;margin-top:16px">
                 <input type="hidden" name="action" value="squuad_cert_signer_batch_confirm">
                 <input type="hidden" name="batch_id" value="<?= (int) $batch->id ?>">
@@ -169,6 +178,7 @@ $frame = static function (string $html): string {
                     get_date_from_gmt((string) $batch->expires_at_utc, get_option('date_format') . ' ' . get_option('time_format'))
                 )) ?></p>
             </form>
+            <?php endif; ?>
         <?php elseif ('finished' === $batch->status && $batch->result_data) : ?>
             <h2><?= esc_html__('Batch result', 'wp-certificates') ?></h2>
             <?php $titles = array_column((array) $batch->data['items'], null, 'request_id'); ?>
@@ -197,7 +207,7 @@ $frame = static function (string $html): string {
             <?php wp_nonce_field('squuad_cert_signer_batch_prepare'); ?>
             <table class="widefat striped" style="max-width:1100px">
                 <thead><tr>
-                    <td class="check-column" style="padding:8px 0 0 3px"><input type="checkbox" id="edusystem-batch-all" aria-label="<?= esc_attr__('Select all', 'wp-certificates') ?>"></td>
+                    <td class="check-column" style="padding:8px 0 0 3px"><?php if (empty($id_document_blocked)) : ?><input type="checkbox" id="edusystem-batch-all" aria-label="<?= esc_attr__('Select all', 'wp-certificates') ?>"><?php endif; ?></td>
                     <th><?= esc_html__('Document', 'wp-certificates') ?></th>
                     <th><?= esc_html__('Holder', 'wp-certificates') ?></th>
                     <th><?= esc_html__('Round', 'wp-certificates') ?></th>
@@ -207,17 +217,17 @@ $frame = static function (string $html): string {
                 <tbody>
                     <?php foreach ($items as $item) : ?>
                         <tr>
-                            <th scope="row" class="check-column" style="padding:8px 0 0 3px"><input type="checkbox" name="request_ids[]" value="<?= (int) $item->id ?>" class="edusystem-batch-item"></th>
+                            <th scope="row" class="check-column" style="padding:8px 0 0 3px"><?php if (empty($id_document_blocked)) : ?><input type="checkbox" name="request_ids[]" value="<?= (int) $item->id ?>" class="edusystem-batch-item"><?php endif; ?></th>
                             <td><?= esc_html((string) ($item->document_title ?: $item->document_id)) ?><br><span class="description"><?= esc_html(substr((string) $item->content_sha256, 0, 12)) ?>…</span></td>
                             <td><?= esc_html(trim((string) $item->student_name . ' ' . (string) $item->student_last_name)) ?></td>
                             <td><?= (int) $item->round ?></td>
                             <td><?= esc_html(get_date_from_gmt((string) $item->frozen_at_utc, get_option('date_format') . ' ' . get_option('time_format'))) ?></td>
-                            <td><a class="button button-primary" href="<?= esc_url(add_query_arg('request_id', (int) $item->id, $page_url)) ?>"><?= esc_html__('Review and sign', 'wp-certificates') ?></a></td>
+                            <td><a class="button button-primary" href="<?= esc_url(add_query_arg('request_id', (int) $item->id, $page_url)) ?>"><?= esc_html(empty($id_document_blocked) ? __('Review and sign', 'wp-certificates') : __('View document', 'wp-certificates')) ?></a></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
             </table>
-            <?php if ($profile) : ?>
+            <?php if ($profile && empty($id_document_blocked)) : ?>
                 <p><button type="submit" class="button"><?= esc_html__('Sign selected documents', 'wp-certificates') ?></button>
                     <span class="description"><?= esc_html(sprintf(
                         /* translators: %d: maximum number of documents per batch */
@@ -227,7 +237,8 @@ $frame = static function (string $html): string {
             <?php endif; ?>
             </form>
             <script>
-                document.getElementById("edusystem-batch-all").addEventListener("change", function () {
+                const batchAll = document.getElementById("edusystem-batch-all"); // no existe sin documento de identidad
+                if (batchAll) batchAll.addEventListener("change", function () {
                     document.querySelectorAll(".edusystem-batch-item").forEach((box) => { box.checked = this.checked; });
                 });
             </script>

@@ -4380,3 +4380,441 @@ msgstr "La apariencia se aplica a todas las pantallas de WP Certificates."
 
 msgid "Turns on the new look of the WP Certificates panel. When it is off, everything looks as before."
 msgstr "Activa la nueva apariencia del panel de WP Certificates. Apagado, todo se ve como antes."
+
+#: admin/assignment-users.php:139
+msgid "not issued, the person has no identity document. Write its type and number in their row."
+msgstr "no se emitió: la persona no tiene documento de identidad. Escriba su tipo y número en su fila."
+
+#: admin/assignment-users.php:144
+msgid "not issued"
+msgstr "no se emitió"
+
+#: admin/id-document.php:51
+msgid "Activate at least one document type before asking for the identity document."
+msgstr "Active al menos un tipo de documento antes de pedir el documento de identidad."
+
+#: admin/id-document.php:56
+msgid "The identity document is now required: whoever signs must register it first."
+msgstr "El documento de identidad ya es obligatorio: quien firme deberá registrarlo primero."
+
+#: admin/id-document.php:57
+msgid "The identity document is no longer required."
+msgstr "El documento de identidad ya no es obligatorio."
+
+#: admin/id-document.php:81
+msgid "Document type saved."
+msgstr "Tipo de documento guardado."
+
+#: admin/id-document.php:81
+msgid "Document type created."
+msgstr "Tipo de documento creado."
+
+#: admin/id-document.php:94
+msgid "The last active document type cannot be deactivated while the identity document is required."
+msgstr "No se puede desactivar el último tipo de documento activo mientras el documento de identidad sea obligatorio."
+
+#: admin/id-document.php:96
+msgid "Document type activated."
+msgstr "Tipo de documento activado."
+
+#: admin/id-document.php:96
+msgid "Document type deactivated: it is no longer offered, and the people who have it keep it."
+msgstr "Tipo de documento desactivado: ya no se ofrece, y las personas que lo tienen lo conservan."
+
+#: admin/id-document.php:108
+msgid "The last active document type cannot be deleted while the identity document is required."
+msgstr "No se puede eliminar el último tipo de documento activo mientras el documento de identidad sea obligatorio."
+
+#: admin/id-document.php:112
+msgid "A document type that people use cannot be deleted: deactivate it instead."
+msgstr "Un tipo de documento que usan personas no se puede eliminar: desactívelo."
+
+#: admin/templates/certificate-assignment-users.php:59
+#: admin/templates/id-document-profile.php:13
+#: admin/templates/id-document-settings.php:17
+#: certification/public/templates/id-document-form.php:58
+#: certification/public/templates/id-document-form.php:89
+msgid "Identity document"
+msgstr "Documento de identidad"
+
+#: admin/templates/certificate-assignment-users.php:86
+#: includes/id-document.php:531
+msgid "Document type"
+msgstr "Tipo de documento"
+
+#: admin/templates/certificate-assignment-users.php:88
+msgid "Type…"
+msgstr "Tipo…"
+
+#: admin/templates/certificate-assignment-users.php:93
+#: includes/id-document.php:539
+msgid "Document number"
+msgstr "Número del documento"
+
+#: admin/templates/certificate-assignment-users.php:94
+msgid "Number"
+msgstr "Número"
+
+#: admin/templates/certificate-assignment-users.php:113
+msgid "Every person must have an identity document. For those who do not have one yet, write its type and number in their row: it is saved in their account and the document is issued. If you do not write it, the document is not issued to that person."
+msgstr "Toda persona debe tener documento de identidad. Para quien aún no lo tiene, escriba su tipo y número en su fila: se guarda en su cuenta y se emite el documento. Si no lo escribe, no se le emite el documento a esa persona."
+
+#: admin/templates/id-document-profile.php:15
+msgid "Current identifier:"
+msgstr "Identificador actual:"
+
+#: admin/templates/id-document-profile.php:18
+msgid "You have not registered your identity document yet. It is needed to sign documents."
+msgstr "Aún no ha registrado su documento de identidad. Es necesario para firmar documentos."
+
+#: admin/templates/id-document-profile.php:18
+msgid "This person has not registered an identity document yet. It is needed to sign documents."
+msgstr "Esta persona aún no ha registrado su documento de identidad. Es necesario para firmar documentos."
+
+#: admin/templates/id-document-profile.php:35
+msgid "As administrator you can correct it at any time; each change is kept in the activity log (without the full number). The new value is recorded only in the signatures made from now on."
+msgstr "Como administrador puede corregirlo en cualquier momento; cada cambio queda en el registro de actividad (sin el número completo). El valor nuevo solo queda en las firmas que se hagan a partir de ahora."
+
+#: admin/templates/id-document-profile.php:37
+#: certification/public/templates/id-document-form.php:73
+#: certification/public/templates/id-document-form.php:104
+msgid "You can correct it until your first signature; after that, only the administration can change it."
+msgstr "Puede corregirlo hasta su primera firma; después, solo la administración puede cambiarlo."
+
+#: admin/templates/id-document-profile.php:41
+#: includes/id-document.php:460
+msgid "Your identity document can no longer be changed because you already signed with it. Ask the administration to correct it."
+msgstr "Su documento de identidad ya no se puede cambiar porque ya firmó con él. Pida a la administración que lo corrija."
+
+#: admin/templates/id-document-settings.php:28
+msgid "Ask for the identity document"
+msgstr "Pedir documento de identidad"
+
+#: admin/templates/id-document-settings.php:37
+msgid "On"
+msgstr "Encendido"
+
+#: admin/templates/id-document-settings.php:37
+msgid "Off"
+msgstr "Apagado"
+
+#: admin/templates/id-document-settings.php:40
+#: admin/templates/id-document-settings.php:48
+msgid "Document types"
+msgstr "Tipos de documento"
+
+#: admin/templates/id-document-settings.php:41
+msgid "The identifier of each person is the prefix plus the number without dots, dashes or spaces (V + 12.345.678 = V12345678), and it cannot be repeated between accounts. A type that people use cannot be deleted: deactivate it."
+msgstr "El identificador de cada persona es el prefijo más el número sin puntos, guiones ni espacios (V + 12.345.678 = V12345678), y no se puede repetir entre cuentas. Un tipo que usan personas no se puede eliminar: desactívelo."
+
+#: admin/templates/id-document-settings.php:44
+msgid "There are no document types yet."
+msgstr "Aún no hay tipos de documento."
+
+#: admin/templates/id-document-settings.php:52
+#: admin/templates/id-document-settings.php:104
+msgid "Prefix"
+msgstr "Prefijo"
+
+#: admin/templates/id-document-settings.php:53
+msgid "Country"
+msgstr "País"
+
+#: admin/templates/id-document-settings.php:54
+#: admin/templates/id-document-settings.php:110
+msgid "Format"
+msgstr "Formato"
+
+#: admin/templates/id-document-settings.php:56
+msgid "People"
+msgstr "Personas"
+
+#: admin/templates/id-document-settings.php:77
+msgid "Deactivate"
+msgstr "Desactivar"
+
+#: admin/templates/id-document-settings.php:77
+msgid "Activate"
+msgstr "Activar"
+
+#: admin/templates/id-document-settings.php:80
+msgid "Delete this document type? Nobody uses it."
+msgstr "¿Eliminar este tipo de documento? Nadie lo usa."
+
+#: admin/templates/id-document-settings.php:99
+msgid "Edit document type"
+msgstr "Editar tipo de documento"
+
+#: admin/templates/id-document-settings.php:99
+msgid "Add a document type"
+msgstr "Agregar un tipo de documento"
+
+#: admin/templates/id-document-settings.php:107
+msgid "Country (ISO, optional)"
+msgstr "País (ISO, opcional)"
+
+#. translators: %d: number of people
+#: admin/templates/id-document-settings.php:124
+#, php-format
+msgid "%d person uses this type: its prefix cannot be changed."
+msgid_plural "%d people use this type: its prefix cannot be changed."
+msgstr[0] "%d persona usa este tipo: su prefijo no se puede cambiar."
+msgstr[1] "%d personas usan este tipo: su prefijo no se puede cambiar."
+
+#: admin/templates/id-document-settings.php:129
+msgid "Save document type"
+msgstr "Guardar tipo de documento"
+
+#: admin/templates/id-document-settings.php:129
+msgid "Add document type"
+msgstr "Agregar tipo de documento"
+
+#. translators: %s: identity document of the signer (prefix and number)
+#: certification/includes/signature-requests.php:938
+#, php-format
+msgid "ID document: %s"
+msgstr "Documento de identidad: %s"
+
+#: certification/public/templates/id-document-form.php:62
+msgid "Before reviewing and signing documents, register your identity document. It will be recorded with each signature you make."
+msgstr "Antes de revisar y firmar documentos, registre su documento de identidad. Quedará sellado en cada firma que haga."
+
+#: certification/public/templates/id-document-form.php:64
+#: certification/public/templates/id-document-form.php:95
+msgid "There are no active document types. Contact the administration."
+msgstr "No hay tipos de documento activos. Comuníquese con la administración."
+
+#: certification/public/templates/id-document-form.php:74
+#: certification/public/templates/id-document-form.php:106
+msgid "Save and continue"
+msgstr "Guardar y continuar"
+
+#: certification/public/templates/id-document-form.php:93
+msgid "Before reviewing and signing your documents, register your identity document. It will be recorded with each signature you make."
+msgstr "Antes de revisar y firmar sus documentos, registre su documento de identidad. Quedará sellado en cada firma que haga."
+
+#: includes/id-document.php:51
+msgid "Numbers only"
+msgstr "Solo números"
+
+#: includes/id-document.php:52
+msgid "Letters and numbers"
+msgstr "Letras y números"
+
+#: includes/id-document.php:64
+msgid "Venezuelan identity card"
+msgstr "Cédula venezolana"
+
+#: includes/id-document.php:65
+msgid "Foreign identity card"
+msgstr "Cédula de extranjero"
+
+#: includes/id-document.php:66
+msgid "Passport"
+msgstr "Pasaporte"
+
+#: includes/id-document.php:159
+msgid "That document type does not exist."
+msgstr "Ese tipo de documento no existe."
+
+#: includes/id-document.php:169
+msgid "Write the name of the document type (at most 80 characters)."
+msgstr "Escriba el nombre del tipo de documento (máximo 80 caracteres)."
+
+#: includes/id-document.php:175
+msgid "The country must be a two-letter ISO code (for example VE), or be left empty."
+msgstr "El país debe ser un código ISO de dos letras (por ejemplo VE) o quedar vacío."
+
+#: includes/id-document.php:179
+msgid "Another document type already uses that prefix."
+msgstr "Otro tipo de documento ya usa ese prefijo."
+
+#: includes/id-document.php:183
+msgid "The prefix of a document type that people already use cannot be changed: their identifiers contain it. Create a new type instead."
+msgstr "El prefijo de un tipo de documento que ya usan personas no se puede cambiar: sus identificadores lo contienen. Cree un tipo nuevo."
+
+#: includes/id-document.php:296
+msgid "Write the number of the identity document."
+msgstr "Escriba el número del documento de identidad."
+
+#. translators: %s: name of the document type
+#: includes/id-document.php:300
+#, php-format
+msgid "The number of the document \"%s\" can only have numbers."
+msgstr "El número del documento «%s» solo puede tener números."
+
+#. translators: %s: name of the document type
+#: includes/id-document.php:304
+#, php-format
+msgid "The number of the document \"%s\" can only have letters (without accents) and numbers."
+msgstr "El número del documento «%s» solo puede tener letras (sin acentos) y números."
+
+#. translators: 1: minimum length, 2: maximum length
+#: includes/id-document.php:309
+#, php-format
+msgid "The number must have from %1$d to %2$d characters."
+msgstr "El número debe tener de %1$d a %2$d caracteres."
+
+#: includes/id-document.php:359
+msgid "Before signing, register your identity document."
+msgstr "Antes de firmar, registre su documento de identidad."
+
+#: includes/id-document.php:461
+msgid "You are not allowed to change this identity document."
+msgstr "No tiene permiso para cambiar este documento de identidad."
+
+#: includes/id-document.php:466
+msgid "Choose the type of identity document."
+msgstr "Elija el tipo de documento de identidad."
+
+#: includes/id-document.php:480
+msgid "The identity document could not be saved. Please try again."
+msgstr "No se pudo guardar el documento de identidad. Inténtelo de nuevo."
+
+#: includes/id-document.php:533
+msgid "Choose…"
+msgstr "Elija…"
+
+#. translators: 1: minimum length, 2: maximum length
+#: includes/id-document.php:545
+#, php-format
+msgid "Write it as it appears on the document; dots, dashes and spaces are removed. From %1$d to %2$d characters."
+msgstr "Escríbalo como aparece en el documento; los puntos, guiones y espacios se quitan. De %1$d a %2$d caracteres."
+
+#: includes/id-document.php:591
+msgid "This site does not ask for the identity document."
+msgstr "Este sitio no pide el documento de identidad."
+
+#: includes/permissions.php:39
+msgid "Identity documents"
+msgstr "Documentos de identidad"
+
+#: src/Variables.php:28
+msgid "Identity document of the person who receives the document (prefix and number, for example V12345678; empty if it is not registered)"
+msgstr "Documento de identidad de la persona que recibe el documento (prefijo y número, por ejemplo V12345678; vacío si no lo tiene registrado)"
+
+#: admin/id-document.php:112
+msgid "Document type deleted. Its prefix stays reserved and is not reused."
+msgstr "Tipo de documento eliminado. Su prefijo queda reservado y no se reutiliza."
+
+#: admin/templates/id-document-profile.php:55
+#: includes/id-document.php:648
+msgid "You can register your identity document when you have a document to sign."
+msgstr "Podrá registrar su documento de identidad cuando tenga un documento por firmar."
+
+#: admin/templates/id-document-settings.php:56
+msgid "The types marked as examples come preinstalled for Venezuela: edit them, deactivate them or add the ones of your country. A prefix has at least one letter and cannot be the start of another prefix."
+msgstr "Los tipos marcados como ejemplo vienen preinstalados para Venezuela: edítelos, desactívelos o agregue los de su país. Un prefijo tiene al menos una letra y no puede ser el comienzo de otro prefijo."
+
+#. translators: %s: list of prefixes
+#: admin/templates/id-document-settings.php:60
+#, php-format
+msgid "Prefixes of deleted types, which are not reused: %s."
+msgstr "Prefijos de tipos eliminados, que no se reutilizan: %s."
+
+#: admin/templates/id-document-settings.php:87
+msgid "Example (Venezuela)"
+msgstr "Ejemplo (Venezuela)"
+
+#: includes/id-document-privacy.php:20
+#: includes/id-document-privacy.php:31
+msgid "Identity document (WP Certificates)"
+msgstr "Documento de identidad (WP Certificates)"
+
+#: includes/id-document-privacy.php:77
+#: includes/id-document-privacy.php:91
+msgid "Identifier"
+msgstr "Identificador"
+
+#: includes/id-document-privacy.php:78
+#: includes/id-document-privacy.php:92
+msgid "Origin"
+msgstr "Origen"
+
+#: includes/id-document-privacy.php:79
+msgid "Registered on (UTC)"
+msgstr "Registrado el (UTC)"
+
+#: includes/id-document-privacy.php:86
+msgid "Identity document recorded in signatures"
+msgstr "Documento de identidad sellado en las firmas"
+
+#: includes/id-document-privacy.php:90
+msgid "Signed on (UTC)"
+msgstr "Firmado el (UTC)"
+
+#: includes/id-document-privacy.php:93
+msgid "Revoked"
+msgstr "Anulada"
+
+#: includes/id-document-privacy.php:93
+msgid "Yes"
+msgstr "Sí"
+
+#: includes/id-document-privacy.php:93
+msgid "No"
+msgstr "No"
+
+#: includes/id-document-privacy.php:120
+msgid "The identity document recorded in the signatures of this person was kept: it is part of the legal evidence of each signature and cannot be removed without breaking its verification."
+msgstr "Se conservó el documento de identidad sellado en las firmas de esta persona: forma parte de la evidencia legal de cada firma y no se puede quitar sin romper su verificación."
+
+#. translators: %s: prefix of another document type
+#: includes/id-document.php:208
+#, php-format
+msgid "The prefix cannot start with the prefix of another document type, or be the start of it (%s)."
+msgstr "El prefijo no puede empezar por el prefijo de otro tipo de documento ni ser el comienzo de él (%s)."
+
+#. translators: %s: prefix of a deleted document type
+#: includes/id-document.php:214
+#, php-format
+msgid "The prefix %s belonged to a deleted document type and cannot be used again (old identifiers contain it)."
+msgstr "El prefijo %s perteneció a un tipo de documento eliminado y no se puede volver a usar (los identificadores antiguos lo contienen)."
+
+#: includes/id-document.php:246
+msgid "The prefix must have from 1 to 5 capital letters or numbers, with at least one letter (for example V, E, P or J)."
+msgstr "El prefijo debe tener de 1 a 5 letras mayúsculas o números, con al menos una letra (por ejemplo V, E, P o J)."
+
+#: includes/id-document.php:437
+msgid "Registered by the person"
+msgstr "Registrado por la propia persona"
+
+#: includes/id-document.php:438
+msgid "Registered by the office when issuing a document"
+msgstr "Registrado por la secretaría al emitir un documento"
+
+#: includes/id-document.php:439
+msgid "Registered or corrected by the administration"
+msgstr "Registrado o corregido por la administración"
+
+#: includes/id-document.php:442
+msgid "Origin not recorded"
+msgstr "Origen no registrado"
+
+#. translators: %d: maximum number of failed attempts
+#: includes/id-document.php:656
+#, php-format
+msgid "You made %d failed attempts in the last hour. Please try again later or contact the administration."
+msgstr "Hizo %d intentos fallidos en la última hora. Inténtelo más tarde o comuníquese con la administración."
+
+#. translators: %d: id of the account that already has the identity document
+#: includes/id-document.php:694
+#, php-format
+msgid "That identity document already belongs to account #%d."
+msgstr "Ese documento de identidad ya pertenece a la cuenta n.º %d."
+
+#: includes/id-document.php:695
+msgid "That identity document could not be registered. Check the type and the number; if they are correct, contact the administration."
+msgstr "No se pudo registrar ese documento de identidad. Revise el tipo y el número; si son correctos, comuníquese con la administración."
+
+#: includes/permissions.php:39
+msgid "Activate «Ask for the identity document» and manage the types and the documents of the people."
+msgstr "Activar «Pedir documento de identidad» y gestionar los tipos y los documentos de las personas."
+
+#: admin/templates/id-document-settings.php:42
+msgid "Every person who signs (holders, roles and system signers) must register their identity document before signing; whoever only fills in the fields of a document without signature is not asked. It is recorded with each new signature. When it is off, nothing is asked."
+msgstr "Toda persona que firma (titulares, roles y firmantes del sistema) debe registrar su documento de identidad antes de firmar; a quien solo rellena los campos de un documento sin firma no se le pide. Queda sellado en cada firma nueva. Mientras esté apagado, no se pide nada."
+
+#: includes/id-document.php:256
+msgid "The format of a document type that people already use cannot be changed. Create a new type instead."
+msgstr "El formato de un tipo de documento que ya usan personas no se puede cambiar. Cree un tipo nuevo."

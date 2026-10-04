@@ -1,7 +1,7 @@
 <?php
 /**
  * Certificación > Asignación de certificados sin EduSystem (admin/assignment-users.php). Variables: $search, $searched,
- * $users, $total_users, $documents, $notice.
+ * $users, $total_users, $documents, $notice e $id_required (columna «Documento de identidad», ADR 0007 de Edusof).
  */
 defined('ABSPATH') || exit;
 
@@ -56,17 +56,18 @@ $page_url = admin_url('admin.php?page=admin_certificate_assignment_content');
                     <td class="check-column"><span class="screen-reader-text"><?= esc_html__('Select', 'wp-certificates') ?></span></td>
                     <th><?= esc_html__('Name', 'wp-certificates') ?></th>
                     <th><?= esc_html__('Email', 'wp-certificates') ?></th>
+                    <?php if ($id_required) : ?><th style="min-width: 260px"><?= esc_html__('Identity document', 'wp-certificates') ?></th><?php endif; ?>
                 </tr>
             </thead>
             <tbody>
                 <?php if (!$searched) : ?>
-                    <tr><td colspan="3"><?= esc_html(sprintf(
+                    <tr><td colspan="<?= $id_required ? 4 : 3 ?>"><?= esc_html(sprintf(
                         /* translators: %d: minimum number of characters */
                         __('Search the person by name or email (at least %d characters).', 'wp-certificates'),
                         SQUUAD_CERT_ASSIGN_USERS_MIN_SEARCH
                     )) ?></td></tr>
                 <?php elseif (!$users) : ?>
-                    <tr><td colspan="3"><?= esc_html__('No users found.', 'wp-certificates') ?></td></tr>
+                    <tr><td colspan="<?= $id_required ? 4 : 3 ?>"><?= esc_html__('No users found.', 'wp-certificates') ?></td></tr>
                 <?php endif; ?>
                 <?php foreach ($users as $user) : ?>
                     <tr>
@@ -75,6 +76,18 @@ $page_url = admin_url('admin.php?page=admin_certificate_assignment_content');
                         </th>
                         <td><label for="squuad-cert-user-<?= (int) $user->ID ?>"><?= esc_html(squuad_cert_wp_user_full_name((int) $user->ID)) ?></label></td>
                         <td><?= esc_html((string) $user->user_email) ?></td>
+                        <?php if ($id_required) : ?>
+                            <td>
+                                <?php $masked = squuad_cert_id_document_masked((int) $user->ID); ?>
+                                <?php if ('' !== $masked) : // en la lista, enmascarado ?>
+                                    <code><?= esc_html($masked) ?></code>
+                                <?php else : ?>
+                                    <span class="squuad-cert-iddoc-inline" style="display: inline-flex; gap: 6px; align-items: center; white-space: nowrap">
+                                        <?= squuad_cert_id_document_fields_html('squuad-cert-iddoc-' . (int) $user->ID, 0, '', 'id_doc_type[' . (int) $user->ID . ']', 'id_doc_number[' . (int) $user->ID . ']', false, true) ?>
+                                    </span>
+                                <?php endif; ?>
+                            </td>
+                        <?php endif; ?>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
@@ -88,6 +101,9 @@ $page_url = admin_url('admin.php?page=admin_certificate_assignment_content');
             )) ?></p>
         <?php endif; ?>
 
+        <?php if ($id_required) : ?>
+            <p class="description" style="max-width: 900px"><?= esc_html__('Every person must have an identity document. For those who do not have one yet, write its type and number in their row: it is saved in their account and the document is issued. If you do not write it, the document is not issued to that person.', 'wp-certificates') ?></p>
+        <?php endif; ?>
         <p><button type="submit" class="button button-primary"<?= $documents && $users ? '' : ' disabled' ?>><?= esc_html__('Issue to the selected people', 'wp-certificates') ?></button></p>
     </form>
 </div>

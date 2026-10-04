@@ -142,6 +142,7 @@ function squuad_cert_document_preview_replacements(object $document, string $mod
         'name' => $text('Juan Carlos'),
         'last_name' => $text('Pérez Gómez'),
         'id_student' => $text('V-12345678'),
+        'holder_id_document' => ['value' => 'V12345678', 'wrap' => false],
         'folio' => $text('125'),
         'tomo' => $text('3'),
         'tomo_folio' => $text('Tomo: 3 Folio: 125'),

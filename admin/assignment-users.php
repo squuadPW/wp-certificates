@@ -63,6 +63,8 @@ function squuad_cert_assignment_users_page(): void
     }
     $documents = squuad_cert_assignment_users_documents();
     $notice = squuad_cert_assignment_users_notice();
+    // Documento de identidad (ADR 0007 de Edusof): columna propia solo con «Pedir documento de identidad» encendido
+    $id_required = squuad_cert_id_document_required();
 
     include WP_C_PATH . 'admin/templates/certificate-assignment-users.php';
 }
@@ -105,14 +107,21 @@ function squuad_cert_issue_to_users_handle(): void
     check_admin_referer('squuad_cert_issue_to_users');
     $back = admin_url('admin.php?page=admin_certificate_assignment_content');
 
-    $document_id = absint($_POST['document_id'] ?? 0);
-    $user_ids = array_values(array_unique(array_filter(array_map('absint', (array) wp_unslash($_POST['user_ids'] ?? [])))));
+    $document_id = is_scalar($_POST['document_id'] ?? null) ? absint($_POST['document_id']) : 0;
+    $user_ids = array_values(array_unique(array_filter(array_map(static fn($v): int => is_scalar($v) ? absint($v) : 0, (array) wp_unslash($_POST['user_ids'] ?? [])))));
     $allowed = array_map(static fn($document): int => (int) $document->id, squuad_cert_assignment_users_documents());
     if (!$document_id || !in_array($document_id, $allowed, true) || !$user_ids) {
         squuad_cert_assignment_users_notice(['ok' => false, 'lines' => [__('Choose a document and at least one user.', 'wp-certificates')]]);
         wp_safe_redirect($back);
         exit;
     }
+
+    // Documento de identidad (ADR 0007 de Edusof, decisión 3): con «Pedir documento de identidad» encendido, a quien aún no
+    // lo tiene se le escribe aquí (tipo + número de su fila); si no se escribe, no se le emite
+    $id_required = squuad_cert_id_document_required();
+    // Q5: solo valores escalares (un array anidado se descarta)
+    $id_types = $id_required ? array_map(static fn($v): int => is_scalar($v) ? absint($v) : 0, (array) wp_unslash($_POST['id_doc_type'] ?? [])) : [];
+    $id_numbers = $id_required ? array_map(static fn($v): string => is_string($v) ? sanitize_text_field($v) : '', (array) wp_unslash($_POST['id_doc_number'] ?? [])) : [];
 
     $emission_date = current_time('mysql');
     $issued = [];
@@ -123,6 +132,19 @@ function squuad_cert_issue_to_users_handle(): void
         if (!squuad_cert_assignment_users_allowed($user_id)) {
             $errors[] = $name . ': ' . __('This account cannot receive documents from here.', 'wp-certificates');
             continue;
+        }
+        if ($id_required && '' === squuad_cert_id_document_identifier($user_id)) {
+            $typed_type = (int) ($id_types[$user_id] ?? 0);
+            $typed_number = trim((string) ($id_numbers[$user_id] ?? ''));
+            if (!$typed_type && '' === $typed_number) {
+                $errors[] = $name . ': ' . __('not issued, the person has no identity document. Write its type and number in their row.', 'wp-certificates');
+                continue;
+            }
+            $saved = squuad_cert_id_document_save($user_id, $typed_type, $typed_number, 'issue');
+            if (is_wp_error($saved)) {
+                $errors[] = $name . ': ' . __('not issued', 'wp-certificates') . ' (' . $saved->get_error_message() . ')';
+                continue;
+            }
         }
         $already = false;
         $result = squuad_cert_issue_document_to_user($user_id, $document_id, $emission_date, 'download_certificate', $already);

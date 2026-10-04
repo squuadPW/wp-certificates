@@ -26,7 +26,8 @@ function squuad_cert_document_replacements(object $document): array
 /**
  * Valores de las variables generales, calculados por wp-certificates con el mismo resultado que antes
  * (get_replacements_variables() de EduSystem): fecha, salto de página, hueco del QR, tomo y folio (vacíos: los pone
- * la reserva del libro al emitir) y nombre y código del documento (ctx document).
+ * la reserva del libro al emitir), nombre y código del documento (ctx document) y documento de identidad del titular
+ * (ctx holder_type/holder_id).
  */
 function squuad_cert_general_replacements(array $ctx = []): array
 {
@@ -45,6 +46,11 @@ function squuad_cert_general_replacements(array $ctx = []): array
     if (isset($ctx['document']) && is_object($ctx['document'])) {
         $replacements = array_merge($replacements, squuad_cert_document_replacements($ctx['document']));
     }
+    // {{holder_id_document}} (ADR 0007 de Edusof): documento de identidad del titular cuando es una cuenta de WordPress;
+    // vacío si no lo tiene o si el titular es otro (p. ej. la ficha de EduSystem)
+    $holder_id = SQUUAD_CERT_SUBJECT_ACCOUNT === ($ctx['holder_type'] ?? '') ? (int) ($ctx['holder_id'] ?? 0) : 0;
+    $identifier = $holder_id ? squuad_cert_id_document_identifier($holder_id) : '';
+    $replacements['holder_id_document'] = ['value' => str_replace(['{', '}'], ['&#123;', '&#125;'], esc_html($identifier)), 'wrap' => false];
 
     return $replacements;
 }

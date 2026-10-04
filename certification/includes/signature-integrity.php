@@ -215,10 +215,40 @@ function squuad_cert_signature_canonical_v2(array $row): string
     ]));
 }
 
+/**
+ * Mensaje EDUSIG3 (ADR 0007 de Edusof): los campos de EDUSIG2 con la cabecera EDUSIG3 más, al final y en este orden,
+ * el documento de identidad de quien firma (signer_id_document, prefijo + número normalizado) y quién lo registró
+ * (signer_id_origin, «origen|usuario|fecha UTC», con origen self, issue, admin o unknown). Solo lo llevan las firmas
+ * nuevas hechas con «Pedir documento de identidad» encendido; EDUSIG1 y EDUSIG2 no cambian, así las firmas anteriores
+ * verifican igual. No cambiar sin subir la versión.
+ *
+ * Las firmas EDUSIG3 de prueba anteriores al origen (solo en probar-plugin.local, 2026-10-04) tienen signer_id_origin
+ * NULL y se sellaron sin esa línea: se verifican igual. Toda firma EDUSIG3 nueva lleva origen, nunca NULL; vaciar el
+ * origen de una firma cambia el mensaje y la huella deja de coincidir («Alterada»).
+ */
+function squuad_cert_signature_canonical_v3(array $row): string
+{
+    $lines = explode("\n", squuad_cert_signature_canonical_v2($row));
+    $lines[0] = 'EDUSIG3';
+    $lines[] = rawurlencode((string) ($row['signer_id_document'] ?? ''));
+    if (isset($row['signer_id_origin'])) {
+        $lines[] = rawurlencode((string) $row['signer_id_origin']);
+    }
+
+    return implode("\n", $lines);
+}
+
 /** Mensaje sellado de una fila según su formato (evidence_format; sin él, EDUSIG1). */
 function squuad_cert_signature_canonical_for(array $row): string
 {
-    return 'EDUSIG2' === ($row['evidence_format'] ?? '') ? squuad_cert_signature_canonical_v2($row) : squuad_cert_signature_canonical($row);
+    switch ($row['evidence_format'] ?? '') {
+        case 'EDUSIG3':
+            return squuad_cert_signature_canonical_v3($row);
+        case 'EDUSIG2':
+            return squuad_cert_signature_canonical_v2($row);
+    }
+
+    return squuad_cert_signature_canonical($row);
 }
 
 /** Fija la cabeza de la cadena (llamar solo bajo el bloqueo de la cadena). */
@@ -252,7 +282,9 @@ function squuad_cert_signature_lock_name(): string
  * solicitud (la cuenta dueña del documento o la ficha del estudiante en un documento emitido).
  * $request_evidence (ADR 0002): request_id, external_ref, round, content_sha256,
  * request_created_fingerprint, template_version_sha256, consent_version, consent_sha256, signature_method y
- * reused_signature_id. Con ella la firma se sella en formato EDUSIG2; sin ella, EDUSIG1.
+ * reused_signature_id. Con ella la firma se sella en formato EDUSIG2; sin ella, EDUSIG1. Con «Pedir documento de
+ * identidad» encendido (ADR 0007 de Edusof), la firma con solicitud lleva además el documento de quien firma y se sella
+ * en formato EDUSIG3; si a quien firma le falta el documento, no se guarda (defensa: cada punto de firma ya lo exige).
  * Devuelve el id de la fila o 0 si el INSERT falla.
  */
 function squuad_cert_signature_insert(array $data, int $subject_id, string $signer_role, array $request_evidence = [], string $subject_type = SQUUAD_CERT_SUBJECT_ACCOUNT): int
@@ -262,6 +294,15 @@ function squuad_cert_signature_insert(array $data, int $subject_id, string $sign
 
     if (!squuad_cert_signature_evidence_enabled()) {
         return 0;
+    }
+    // Documento de identidad de quien firma (ADR 0007 de Edusof): solo con el interruptor encendido
+    $id_document = null;
+    if (squuad_cert_id_document_required()) {
+        $id_document = squuad_cert_id_document_get((int) $data['user_id']);
+        if (!$id_document) {
+            squuad_cert_log(sprintf('Firma rechazada: el usuario %d no tiene documento de identidad (%s)', (int) $data['user_id'], (string) $data['document_id']), 'signature_blocked');
+            return 0;
+        }
     }
 
     $key = squuad_cert_signature_current_key();
@@ -305,6 +346,12 @@ function squuad_cert_signature_insert(array $data, int $subject_id, string $sign
             $row['doc_version_sha256'] = (string) $request_evidence['template_version_sha256'];
         }
         $row['evidence_format'] = 'EDUSIG2';
+        // Sin las columnas (migración incompleta) se sella EDUSIG2 en vez de fallar (M4)
+        if ($id_document && squuad_cert_id_document_evidence_enabled()) {
+            $row['signer_id_document'] = $id_document['identifier'];
+            $row['signer_id_origin'] = $id_document['origin'];
+            $row['evidence_format'] = 'EDUSIG3';
+        }
     } elseif ($v5) {
         $row['evidence_format'] = 'EDUSIG1';
     }
@@ -386,6 +433,10 @@ function squuad_cert_revoke_signatures(array $ids, string $reason, int $actor_us
         signature_sha256, document_fields_sha256, signed_at_utc, ip, ip_hmac, user_agent, ua_sha256, session_hash,
         ratifies_id, prev_fingerprint, fingerprint, request_id, round, content_sha256, request_created_fingerprint,
         consent_version, consent_sha256, signature_method, reused_signature_id, evidence_format';
+    // Documento de identidad y su origen sellados en EDUSIG3 (esquemas v12 y v13)
+    if (squuad_cert_id_document_evidence_enabled()) {
+        $columns .= ', signer_id_document, signer_id_origin';
+    }
 
     // Requisito de la anulación: el indicado o el que ya guarda la propia firma
     $document_expression = "COALESCE(NULLIF(%s, ''), external_ref)";
@@ -469,8 +520,8 @@ function squuad_cert_signature_verify_row(object $row, ?string $previous_fingerp
         return 'retired_key';
     }
 
-    // EDUSIG2: el contenido que firmó tiene que ser el de su solicitud, y ese contenido tiene que estar íntegro
-    if ('EDUSIG2' === ($row->evidence_format ?? '') && function_exists('squuad_cert_signature_request_get')) {
+    // EDUSIG2 y EDUSIG3: el contenido que firmó tiene que ser el de su solicitud, y ese contenido tiene que estar íntegro
+    if (in_array($row->evidence_format ?? '', ['EDUSIG2', 'EDUSIG3'], true) && function_exists('squuad_cert_signature_request_get')) {
         $request = squuad_cert_signature_request_get((int) $row->request_id);
         if (!$request || !hash_equals((string) $request->content_sha256, (string) $row->content_sha256)
             || null === squuad_cert_signature_request_content((int) $row->request_id)) {

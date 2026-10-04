@@ -69,7 +69,7 @@ function squuad_cert_document_fields_reserved_keys()
 
     if (null === $reserved) {
         $reserved = [
-            'user_sign', 'position_user_charge', 'signature', 'show_parent_info', 'document_name', 'document_code',
+            'user_sign', 'position_user_charge', 'signature', 'show_parent_info', 'document_name', 'document_code', 'holder_id_document',
             'academic_year', 'address', 'admission_requirements_table', 'admission_signature_fgu', 'birth_date',
             'career_mention', 'city', 'country', 'created_at', 'educational_background_information', 'email',
             'end_academic_year', 'end_term_student_entered', 'ethinicity_selected', 'fax', 'folio', 'full_name', 'gender',
