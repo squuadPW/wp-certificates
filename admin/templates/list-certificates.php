@@ -18,10 +18,10 @@
 		<form action="" id="post-filter" method="get">
 			<!-- <p class="search-box">
 				<label class="screen-reader-text" for="search-box-id-search-input"><?= esc_html__('Search', 'wp-certificates') . ':'; ?></label>
-				<input value="<?= isset($_GET['s']) ? $_GET['s'] : '' ?>" type="search" id="search-box-id-search-input" name="s" placeholder="<?= esc_html__('Search for a person', 'wp-certificates'); ?>" value="<?= (!empty($_POST['s'])) ? $_POST['s'] : ''; ?>">
+				<input value="<?= isset($_GET['s']) ? esc_attr(wp_unslash($_GET['s'])) : '' ?>" type="search" id="search-box-id-search-input" name="s" placeholder="<?= esc_html__('Search for a person', 'wp-certificates'); ?>" value="<?= (!empty($_POST['s'])) ? $_POST['s'] : ''; ?>">
 				<input type="submit" id="search-submit" class="button" value="Search">
 			</p> -->
-			<input type="hidden" name="page" value="<?php echo $_REQUEST['page'] ?>" />
+			<input type="hidden" name="page" value="<?php echo esc_attr(isset($_REQUEST['page']) ? sanitize_key(wp_unslash($_REQUEST['page'])) : '') ?>" />
 			<?php $list_certificates->display() ?>
 		</form>
 	</div>
