@@ -14,8 +14,8 @@ declare(strict_types=1);
 
 defined('ABSPATH') || exit;
 
-/** Variables de firma: recuadros de los roles ({{signature_role_<rol>}}, {{signature_student}}), de los firmantes por variable ({{signature_var_<variable>}}, ADR 0009 de Edusof) y firmas de los firmantes del sistema. */
-const SQUUAD_CERT_SIGNATURE_VARIABLE_PATTERN = '/\{\{(?:signature_section|signature_student|signature|signature_\d+|signature_signer_\d+|signature_role_[a-z0-9_]+|signature_var_[a-z0-9_]+)\}\}/';
+/** Variables de firma: recuadros de los roles ({{signature_role_<rol>}}, {{signature_student}}), de los firmantes por variable ({{signature_var_<variable>}}, ADR 0009 de Edusof), de cada firmante numerado ({{signature_F2}}, ADR 0010) y firmas de los firmantes del sistema. */
+const SQUUAD_CERT_SIGNATURE_VARIABLE_PATTERN = '/\{\{(?:signature_section|signature_student|signature|signature_\d+|signature_signer_\d+|signature_role_[a-z0-9_]+|signature_var_[a-z0-9_]+|signature_F[1-9][0-9]?)\}\}/';
 
 /** Prioridad máxima admitida (0 es la más urgente). */
 const SQUUAD_CERT_PRIORITY_MAX = 999;

@@ -182,9 +182,11 @@ function squuad_cert_sanitize_document_fields($rows)
             $errors[] = sprintf(__('The field "%s" has an invalid type.', 'wp-certificates'), $label);
             continue;
         }
-        // También las familias de los firmantes por variable ({{signature_var_X}}…, ADR 0009 de Edusof)
+        // También las familias de los firmantes por variable ({{signature_var_X}}…, ADR 0009 de Edusof) y las numeradas
+        // por firmante ({{full_name_F2}}, {{F2}}…, ADR 0010; la clave se guarda en minúsculas: también full_name_f2)
         if (in_array($key, $reserved, true) || in_array($key . '_list', $reserved, true)
-            || preg_match('/^(?:signature_var|signer_name_var|signer_charge_var)_/', $key)) {
+            || preg_match('/^(?:signature_var|signer_name_var|signer_charge_var)_/', $key)
+            || preg_match('/^(?:(?:full_name|name|last_name|email|id_document|charge|signature)_)?f[1-9][0-9]?(?:_list)?$/i', $key)) {
             $errors[] = sprintf(__('The key "%s" is already a system variable; choose another one.', 'wp-certificates'), $key);
             continue;
         }

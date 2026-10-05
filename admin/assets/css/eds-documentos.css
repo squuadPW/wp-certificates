@@ -440,3 +440,23 @@ body.edusof-ui .wpc-eds-code-panel .CodeMirror-selected { background: var(--eds-
 body.edusof-ui .wpc-eds-code-panel .CodeMirror-matchingtag { background: var(--eds-acc-soft, #E6ECFB); }
 body.edusof-ui .wpc-eds-code-panel .CodeMirror-activeline-background { background: var(--eds-surface-2, #F1F4F8); }
 body.edusof-ui .wpc-eds-code-panel .CodeMirror-activeline-gutter { background: var(--eds-surface-2, #F1F4F8); }
+
+/* Variables por firmante numeradas (ADR 0010 de Edusof): color de cada firmante (F1 azul, F2 verde, F3 naranja,
+   F4 morado…) en el editor y en el panel «Datos». Solo en el admin: el documento nunca lleva estos colores. */
+body.edusof-ui .wpc-eds-code-panel .cm-fn { border-radius: 3px; font-weight: 600; }
+body.edusof-ui .wpc-eds-code-panel .cm-fn-1 { color: var(--eds-signer-1, #1D4ED8); background: var(--eds-signer-1-soft, #E3EAFD); }
+body.edusof-ui .wpc-eds-code-panel .cm-fn-2 { color: var(--eds-signer-2, #166534); background: var(--eds-signer-2-soft, #DDF4E5); }
+body.edusof-ui .wpc-eds-code-panel .cm-fn-3 { color: var(--eds-signer-3, #9A4806); background: var(--eds-signer-3-soft, #FDEFDC); }
+body.edusof-ui .wpc-eds-code-panel .cm-fn-4 { color: var(--eds-signer-4, #7E22CE); background: var(--eds-signer-4-soft, #F2E6FC); }
+body.edusof-ui .wpc-eds-code-panel .cm-fn-5 { color: var(--eds-signer-5, #BE185D); background: var(--eds-signer-5-soft, #FCE4EF); }
+body.edusof-ui .wpc-eds-code-panel .cm-fn-6 { color: var(--eds-signer-6, #0F766E); background: var(--eds-signer-6-soft, #DAF2EF); }
+body.edusof-ui .wpc-eds-data__group[data-fn] { border-left: 4px solid var(--wpc-fn-color, var(--eds-line)); padding-left: 8px; }
+body.edusof-ui .wpc-eds-data__group[data-fn] h4 { display: flex; align-items: center; gap: 6px; }
+body.edusof-ui .wpc-eds-fn-badge { display: inline-block; min-width: 2.2em; padding: 0 6px; border-radius: 999px; font-size: 12px; font-weight: 700; text-align: center; color: var(--wpc-fn-color); background: var(--wpc-fn-soft); border: 1px solid currentColor; }
+body.edusof-ui .wpc-eds-data__group[data-fn] .wpc-eds-var code { color: var(--wpc-fn-color); background: var(--wpc-fn-soft); }
+body.edusof-ui [data-fn-color="1"] { --wpc-fn-color: var(--eds-signer-1, #1D4ED8); --wpc-fn-soft: var(--eds-signer-1-soft, #E3EAFD); }
+body.edusof-ui [data-fn-color="2"] { --wpc-fn-color: var(--eds-signer-2, #166534); --wpc-fn-soft: var(--eds-signer-2-soft, #DDF4E5); }
+body.edusof-ui [data-fn-color="3"] { --wpc-fn-color: var(--eds-signer-3, #9A4806); --wpc-fn-soft: var(--eds-signer-3-soft, #FDEFDC); }
+body.edusof-ui [data-fn-color="4"] { --wpc-fn-color: var(--eds-signer-4, #7E22CE); --wpc-fn-soft: var(--eds-signer-4-soft, #F2E6FC); }
+body.edusof-ui [data-fn-color="5"] { --wpc-fn-color: var(--eds-signer-5, #BE185D); --wpc-fn-soft: var(--eds-signer-5-soft, #FCE4EF); }
+body.edusof-ui [data-fn-color="6"] { --wpc-fn-color: var(--eds-signer-6, #0F766E); --wpc-fn-soft: var(--eds-signer-6-soft, #DAF2EF); }

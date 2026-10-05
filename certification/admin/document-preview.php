@@ -254,6 +254,14 @@ function squuad_cert_document_preview_replacements(object $document, string $mod
 
     $replacements['signature_section'] = $html(SQUUAD_CERT_SIGNATURE_SLOT);
     $replacements['admission_signature_fgu'] = $html(SQUUAD_CERT_SIGNATURE_SLOT);
+    // F1 equivale a las variables sin sufijo (ADR 0010 de Edusof): {{full_name_F1}} = {{full_name}}…, también al generar
+    if (function_exists('squuad_cert_fn_f1_aliases')) {
+        foreach (squuad_cert_fn_f1_aliases() as $alias => $key) {
+            if (isset($replacements[$key])) {
+                $replacements[$alias] = $replacements[$key];
+            }
+        }
+    }
 
     // "Generar" no tiene variables por firmante (quedan como texto, igual que en el documento real); la firma-imagen
     // heredada solo existe si el documento la pide y el sitio aún la permite
@@ -309,6 +317,36 @@ function squuad_cert_document_preview_replacements(object $document, string $mod
         $replacements['signer_charge_' . $signer['signer_id']] = $values['position_user_charge'];
     }
 
+    // Variables por firmante numeradas (ADR 0010 de Edusof), con datos de ejemplo de cada firmante del panel
+    if (function_exists('squuad_cert_fn_template_uses')) {
+        $template = squuad_cert_fn_document_template($document);
+        if (squuad_cert_fn_template_uses($template)) {
+            $map = squuad_cert_fn_map($document);
+            $by_slot = array_column($signers, null, 'slot_key');
+            $holder = (string) (array_values(array_filter($slots, 'squuad_cert_is_holder_slot'))[0] ?? '');
+            foreach (squuad_cert_fn_template_numbers($template) as $fn) {
+                if (1 === $fn) {
+                    $replacements['F1'] = $html('1');
+                    $replacements['charge_F1'] = $text('' !== $holder ? squuad_cert_holder_slot_label($holder) : '');
+                    $replacements['signature_F1'] = $html('' !== $holder ? squuad_cert_signer_slot_marker($holder) : '');
+                    continue;
+                }
+                $signer = $by_slot[$map[$fn] ?? ''] ?? null;
+                $replacements['F' . $fn] = $html($signer ? '1' : '');
+                /* translators: %d: number of the signer, e.g. 2 for F2 */
+                $first = sprintf(__('Signer %d', 'wp-certificates'), $fn);
+                $last = __('Example', 'wp-certificates');
+                $replacements['full_name_F' . $fn] = $signer ? $text($last . ', ' . $first) : $html('');
+                $replacements['name_F' . $fn] = $signer ? $text($first) : $html('');
+                $replacements['last_name_F' . $fn] = $signer ? $text($last) : $html('');
+                $replacements['email_F' . $fn] = $signer ? $text('signer' . $fn . '@example.com') : $html('');
+                $replacements['id_document_F' . $fn] = $html($signer ? 'V1000000' . $fn : '');
+                $replacements['charge_F' . $fn] = $signer ? $text((string) $signer['charge']) : $html('');
+                $replacements['signature_F' . $fn] = $html($signer ? squuad_cert_signer_slot_marker($signer['slot_key']) : '');
+            }
+        }
+    }
+
     // QR: el PDF final del documento automático no lo lleva; el emitido lo dibuja con una URL (aquí de ejemplo)
     $replacements['qrcode'] = $html('automatic' === $mode ? '' : '<div data-edusig-qr="https://example.com/verify/EXAMPLE"></div>');
 
@@ -335,6 +373,10 @@ function squuad_cert_document_preview_data(object $document): array
     $unknown = array_values(array_unique(array_diff($found[1], array_keys($replacements))));
     // Las de un firmante por variable que no está en el panel no son desconocidas: quedan vacías (ADR 0009 de Edusof)
     $unknown = array_values(array_filter($unknown, static fn(string $key): bool => !preg_match('/^(?:signature_var|signer_name_var|signer_charge_var)_/', $key)));
+    // Ni las numeradas por firmante en un documento que se firma (ADR 0010 de Edusof): sin firmante quedan vacías
+    if ('generate' !== $mode) {
+        $unknown = array_values(array_filter($unknown, static fn(string $key): bool => !preg_match('/^(?:(?:full_name|name|last_name|email|id_document|charge|signature)_)?F[1-9][0-9]?$/', $key)));
+    }
 
     if ('generate' === $mode) {
         foreach ($parts as $key => $part) {
@@ -365,21 +407,37 @@ function squuad_cert_document_preview_data(object $document): array
         }
     }
 
+    // Borde del color de cada firmante (F1 azul, F2 verde…; ADR 0010 de Edusof) en los recuadros: solo en esta vista
+    // previa, para reconocer a cada uno; el documento real nunca lleva colores
+    $fn_numbers = function_exists('squuad_cert_fn_numbering') ? array_flip(squuad_cert_fn_numbering(squuad_cert_signing_policy($document))) : [];
+    $outline = static function (string $slot_key, string $box) use ($fn_numbers): string {
+        $fn = squuad_cert_is_holder_slot($slot_key) ? 1 : (int) ($fn_numbers[$slot_key] ?? 0);
+        if (!$fn || !defined('SQUUAD_CERT_FN_PREVIEW_COLORS')) {
+            return $box;
+        }
+        $color = SQUUAD_CERT_FN_PREVIEW_COLORS[squuad_cert_fn_color($fn)];
+
+        // Borde (no outline: el PDF de la vista previa no dibuja outline)
+        return '<div class="wpc-preview-fn" style="border:2px solid ' . esc_attr($color) . ';padding:4px;border-radius:4px;position:relative">'
+            . '<span style="position:absolute;top:-9px;right:-6px;background:' . esc_attr($color) . ';color:#fff;font:700 9px/1.4 sans-serif;padding:0 4px;border-radius:6px">F' . $fn . '</span>'
+            . $box . '</div>';
+    };
+
     // Recuadros de firma de ejemplo en lugar de los marcadores: uno por rol del panel (al generar sin panel, el del rol student)
     $labels = [];
     foreach ('generate' === $mode ? ['role:student'] : array_filter(array_column($signers, 'slot_key'), 'squuad_cert_is_holder_slot') as $slot_key) {
         $labels[$slot_key] = ['Juan Carlos Pérez Gómez', squuad_cert_holder_slot_label($slot_key)];
     }
     $section = '';
-    $render = static function (string $text) use (&$section, $signers, $labels): string {
+    $render = static function (string $text) use (&$section, $signers, $labels, $outline): string {
         foreach ($signers as $signer) {
             $marker = squuad_cert_signer_slot_marker($signer['slot_key']);
             if ($signer['phase'] >= 2) {
-                $text = str_replace($marker, squuad_cert_document_preview_signature_box($signer['name']), $text);
+                $text = str_replace($marker, $outline($signer['slot_key'], squuad_cert_document_preview_signature_box($signer['name'])), $text);
             }
         }
         foreach ($labels as $role => [$name, $label]) {
-            $text = str_replace(squuad_cert_signer_slot_marker($role), squuad_cert_document_preview_signature_block($name, $label), $text);
+            $text = str_replace(squuad_cert_signer_slot_marker($role), $outline($role, squuad_cert_document_preview_signature_block($name, $label)), $text);
         }
         return $text;
     };
@@ -388,7 +446,7 @@ function squuad_cert_document_preview_data(object $document): array
     foreach ($labels as $role => [$name, $label]) {
         $in_policy = 'generate' === $mode || in_array($role, array_column($signers, 'slot_key'), true);
         if ($in_policy && false === strpos($all, squuad_cert_signer_slot_marker($role))) {
-            $users .= squuad_cert_document_preview_signature_block($name, $label);
+            $users .= $outline($role, squuad_cert_document_preview_signature_block($name, $label));
         }
     }
     $users_block = '<div style="display:flex;flex-wrap:wrap;gap:24px;margin-top:16px">' . $users . '</div>';

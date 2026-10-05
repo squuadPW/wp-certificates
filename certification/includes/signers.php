@@ -99,10 +99,40 @@ function squuad_cert_request_signers(object $request): array
 }
 
 /**
+ * Puestos por variable omitidos al fijar los firmantes de una solicitud (ADR 0009 de Edusof), para sellarlos en su
+ * evento 'created'. squuad_cert_request_signers_fix() los guarda ($set) y quien crea la solicitud los lee (sin $set);
+ * solo duran la petición.
+ */
+function squuad_cert_request_signers_omitted(int $request_id, ?array $set = null): array
+{
+    static $omitted = [];
+    if (null !== $set) {
+        $omitted[$request_id] = $set;
+    }
+
+    return $omitted[$request_id] ?? [];
+}
+
+/**
+ * Mapa Fn → puesto de la plantilla al crear una solicitud (ADR 0010 de Edusof), para sellarlo en su evento 'created'
+ * (solo si la plantilla usa variables por firmante numeradas). Igual que los omitidos: solo dura la petición.
+ */
+function squuad_cert_request_signers_fn_map(int $request_id, ?array $set = null): array
+{
+    static $maps = [];
+    if (null !== $set) {
+        $maps[$request_id] = $set;
+    }
+
+    return $maps[$request_id] ?? [];
+}
+
+/**
  * Fija los firmantes de una solicitud recién creada (esquema v6) según la política del documento: el estudiante y los
  * firmantes del sistema, con el nombre de la cuenta de cada uno en ese momento. Guarda también
- * el documento y el origen en la solicitud. Devuelve la lista fijada para sellarla en el evento 'created', o [] si el
- * esquema no está en v6.
+ * el documento y el origen en la solicitud. Devuelve la lista fijada para sellarla en el evento 'created' (solo puestos:
+ * los puestos por variable omitidos se leen aparte con squuad_cert_request_signers_omitted()), o [] si el esquema no
+ * está en v6. En un puesto por variable cada elemento lleva además el método que resolvió la variable y su fase.
  */
 function squuad_cert_request_signers_fix(object $request, array $signers, int $document_certificate_id = 0, string $origin = 'opened'): array
 {
@@ -156,6 +186,9 @@ function squuad_cert_request_signers_fix(object $request, array $signers, int $d
     [$slots, $omitted] = squuad_cert_request_slots_finalize($request, $slots);
 
     $fixed = [];
+    // Variables por firmante numeradas (ADR 0010 de Edusof): si la plantilla las usa, los datos de cada persona se fijan
+    // y se sellan ahora en 'created' (nombre, correo, documento de identidad y puesto en el idioma del sitio)
+    $numbered = $document && function_exists('squuad_cert_fn_template_uses') && squuad_cert_fn_template_uses(squuad_cert_fn_document_template($document));
     foreach ($slots as $position => $slot) {
         $user = get_userdata($slot['user_id']);
         $name = $user ? trim($user->first_name . ' ' . $user->last_name) ?: $user->display_name : '';
@@ -172,7 +205,14 @@ function squuad_cert_request_signers_fix(object $request, array $signers, int $d
             $slot['charge'],
             $slot['phase']
         ));
-        $fixed[] = ['slot' => $slot['slot_key'], 'user_id' => $slot['user_id'], 'name' => $name] + ($slot['charge'] ? ['charge' => $slot['charge']] : []);
+        $fixed[] = ['slot' => $slot['slot_key'], 'user_id' => $slot['user_id'], 'name' => $name] + ($slot['charge'] ? ['charge' => $slot['charge']] : [])
+            // Firmante por variable (ADR 0009 de Edusof): con qué método se resolvió la cuenta y en qué fase firma
+            + (squuad_cert_is_var_slot($slot['slot_key']) ? ['method' => (string) ($slot['method'] ?? ''), 'phase' => (int) $slot['phase']] : [])
+            + ($numbered ? squuad_cert_fn_created_person($slot, $name) : []);
+    }
+    // Mapa Fn → puesto con el que se rellena esta solicitud (ADR 0010 de Edusof), sellado en 'created'
+    if ($numbered && $fixed) {
+        squuad_cert_request_signers_fn_map((int) $request->id, squuad_cert_fn_map($document));
     }
 
     $wpdb->update($wpdb->prefix . 'squuad_cert_requests', [
@@ -182,9 +222,7 @@ function squuad_cert_request_signers_fix(object $request, array $signers, int $d
     ], ['id' => (int) $request->id]);
 
     // Los puestos por variable omitidos (variable vacía o inválida, misma cuenta) quedan sellados en el evento 'created'
-    if ($omitted) {
-        $fixed[] = ['omitted' => $omitted];
-    }
+    squuad_cert_request_signers_omitted((int) $request->id, $omitted);
 
     return $fixed;
 }
@@ -1079,7 +1117,10 @@ function squuad_cert_signature_signer_replacements(object $request): array
     $replacements['student_is_own_parent'] = ['value' => false, 'wrap' => false];
 
     // Firmantes por variable (ADR 0009 de Edusof): {{signature_var_X}}, {{signer_name_var_X}}, {{signer_charge_var_X}}
-    return array_merge($replacements, squuad_cert_signature_var_replacements($request));
+    $replacements = array_merge($replacements, squuad_cert_signature_var_replacements($request));
+
+    // Variables por firmante numeradas (ADR 0010 de Edusof): {{full_name_F2}}, {{signature_F3}}, {{#F2}}…
+    return function_exists('squuad_cert_fn_replacements') ? array_merge($replacements, squuad_cert_fn_replacements($request)) : $replacements;
 }
 
 /**
@@ -1090,6 +1131,10 @@ function squuad_cert_signature_strip_unused_signer_tags(string $html): string
 {
     // También las de un firmante por variable omitido o que no está en el panel (ADR 0009 de Edusof)
     $html = (string) preg_replace(SQUUAD_CERT_SIGNER_VAR_TAG_PATTERN, '', $html);
+    // Y las numeradas de un firmante que no está en la solicitud (ADR 0010 de Edusof): {{full_name_F4}} sin firmante
+    if (defined('SQUUAD_CERT_FN_TAG_PATTERN')) {
+        $html = (string) preg_replace('/\{\{(?:full_name|name|last_name|email|id_document|charge|signature)_F[1-9][0-9]?\}\}/', '', $html);
+    }
 
     return (string) preg_replace('/\{\{(?:signature_signer|signer_name|signer_charge)_\d+\}\}/', '', $html);
 }
@@ -2099,7 +2144,6 @@ function squuad_cert_signer_notify_open_slots(int $request_id): int
         (int) $request->document_certificate_id
     )) ?: (string) $request->document_id;
     $site = wp_specialchars_decode((string) get_bloginfo('name'), ENT_QUOTES);
-    $link = add_query_arg(['page' => 'squuad-cert-documents-to-sign', 'request_id' => $request_id], admin_url('admin.php'));
 
     $sent = 0;
     foreach (squuad_cert_request_signers($request) as $signer) {

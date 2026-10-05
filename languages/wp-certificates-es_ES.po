@@ -4878,3 +4878,160 @@ msgid ""
 "signers\")"
 msgstr "Firma, nombre y puesto de la persona cuya cuenta da una variable, por ejemplo el representante con {{signature_var_parent_user_id}} (vea «Firmantes del documento»)"
 
+
+# --- Cadenas nuevas (2026-10-05): traducirlas ---
+#: admin/templates/eds-document-detail.php:145
+msgid "Full name (same as {{full_name}})"
+msgstr "Nombre completo (igual que {{full_name}})"
+
+#: admin/templates/eds-document-detail.php:145
+msgid "Full name (last names, first names)"
+msgstr "Nombre completo (apellidos, nombres)"
+
+#: admin/templates/eds-document-detail.php:146
+msgid "First names"
+msgstr "Nombres"
+
+#: admin/templates/eds-document-detail.php:147
+msgid "Last names"
+msgstr "Apellidos"
+
+#: admin/templates/eds-document-detail.php:148
+msgid "Email of their account"
+msgstr "Correo de su cuenta"
+
+#: admin/templates/eds-document-detail.php:149
+msgid "Identity document (if the site asks for it)"
+msgstr "Documento de identidad (si el sitio lo pide)"
+
+#: admin/templates/eds-document-detail.php:150
+msgid "Position or role"
+msgstr "Cargo o puesto"
+
+#: admin/templates/eds-document-detail.php:151
+msgid "Signature box"
+msgstr "Recuadro de firma"
+
+#: admin/templates/eds-document-detail.php:152
+msgid "Text shown only if this signer is in the request"
+msgstr "Texto que solo se muestra si este firmante está en la solicitud"
+
+#. translators: 1: number, e.g. F2, 2: name of the signer
+#: admin/templates/eds-document-detail.php:155
+#, php-format
+msgid "%1$s · %2$s"
+msgstr "%1$s · %2$s"
+
+#. translators: %d: number of the signer, e.g. 2 for F2
+#: certification/admin/document-preview.php:337
+#, php-format
+msgid "Signer %d"
+msgstr "Firmante %d"
+
+#: certification/admin/document-preview.php:338
+msgid "Example"
+msgstr "Ejemplo"
+
+#: certification/admin/templates/document-signing.php:86
+msgid "Signer number in the template variables (F1, F2…)"
+msgstr "Número del firmante en las variables de la plantilla (F1, F2…)"
+
+#: certification/admin/templates/document-signing.php:86
+msgid "No."
+msgstr "N.º"
+
+#: certification/admin/templates/document-signing.php:143
+msgid "Variables by signer number"
+msgstr "Variables por número de firmante"
+
+#: certification/admin/templates/document-signing.php:143
+msgid ""
+"each signer has a number: F1 is whoever receives the document (all the "
+"roles) and F2, F3… are the other signers in the order of this list. In the "
+"template, for signer 2:"
+msgstr "cada firmante tiene un número: F1 es quien recibe el documento (todos los roles) y F2, F3… son los demás firmantes en el orden de esta lista. En la plantilla, para el firmante 2:"
+
+#: certification/admin/templates/document-signing.php:145
+msgid ""
+"and {{#F2}} … {{/F2}} (shown only if that signer is in the request). "
+"{{full_name_F1}} is the same as {{full_name}}. If you change the order, the "
+"template is renumbered so that each number keeps pointing to the same person."
+msgstr "y {{#F2}} … {{/F2}} (solo se muestra si ese firmante está en la solicitud). {{full_name_F1}} es lo mismo que {{full_name}}. Si cambia el orden, la plantilla se renumera para que cada número siga apuntando a la misma persona."
+
+#: certification/admin/templates/document-signing.php:259
+msgid "The template will be renumbered"
+msgstr "La plantilla se renumerará"
+
+#. translators: 1: old number, e.g. F2, 2: name of the signer, 3: new number
+#: certification/admin/templates/document-signing.php:261
+#, php-format
+msgid ""
+"The template uses %1$s (%2$s); now it is %3$s: the template will be updated."
+msgstr "La plantilla usa %1$s (%2$s); ahora es %3$s: se actualizará la plantilla."
+
+#. translators: 1: number, e.g. F2, 2: name of the signer
+#: certification/admin/templates/document-signing.php:263
+#, php-format
+msgid ""
+"The template uses %1$s (%2$s), who will no longer sign this document: those "
+"variables will be renamed to a free number and will be empty."
+msgstr "La plantilla usa %1$s (%2$s), que dejará de firmar este documento: esas variables pasarán a un número libre y quedarán vacías."
+
+#: certification/admin/templates/document-signing.php:264
+msgid "Save signers"
+msgstr "Guardar firmantes"
+
+#: certification/includes/signer-numbers.php:282
+msgid "Whoever receives the document"
+msgstr "Quien recibe el documento"
+
+#. translators: %d: id of the system signer
+#: certification/includes/signer-numbers.php:292
+#, php-format
+msgid "System signer %d"
+msgstr "Firmante del sistema %d"
+
+#. translators: 1: old number, e.g. F2, 2: name of the signer, 3: new number
+#: certification/includes/signer-numbers.php:374
+#, php-format
+msgid ""
+"The template used %1$s (%2$s), who no longer signs this document: those "
+"variables were renamed to %3$s and will be empty. Remove them from the "
+"template or add that signer again."
+msgstr "La plantilla usaba %1$s (%2$s), que ya no firma este documento: esas variables pasaron a %3$s y quedarán vacías. Quítelas de la plantilla o vuelva a añadir a ese firmante."
+
+#. translators: 1: old number, 2: new number
+#: certification/includes/signer-numbers.php:382
+#, php-format
+msgid ""
+"The template used %1$s, which had no signer: it was renamed to %2$s so that "
+"it does not point to another person."
+msgstr "La plantilla usaba %1$s, que no tenía firmante: pasó a %2$s para que no apunte a otra persona."
+
+#. translators: 1: old number, e.g. F2, 2: name of the signer, 3: new number
+#: certification/includes/signer-numbers.php:389
+#, php-format
+msgid ""
+"The template used %1$s (%2$s); now it is %3$s: the template was updated."
+msgstr "La plantilla usaba %1$s (%2$s); ahora es %3$s: la plantilla se actualizó."
+
+#. translators: 1: number, e.g. F4, 2: how many signers the document has
+#: certification/includes/signer-numbers.php:507
+#, php-format
+msgid ""
+"The template uses %1$s but this document has only %2$d signer: those "
+"variables will be empty."
+msgid_plural ""
+"The template uses %1$s but this document has only %2$d signers: those "
+"variables will be empty."
+msgstr[0] "La plantilla usa %1$s, pero este documento solo tiene %2$d firmante: esas variables quedarán vacías."
+msgstr[1] "La plantilla usa %1$s, pero este documento solo tiene %2$d firmantes: esas variables quedarán vacías."
+
+#. translators: 1: number, e.g. F2, 2: name of the signer, 3: variable, e.g. {{signature_F2}}
+#: certification/includes/signer-numbers.php:532
+#, php-format
+msgid ""
+"%1$s (%2$s) signs, but the template does not have %3$s: the signature goes "
+"to the signatures block at the end."
+msgstr "%1$s (%2$s) firma, pero la plantilla no tiene %3$s: su firma irá al bloque «Firmas» del final."
+

@@ -136,6 +136,29 @@ $save_url = admin_url('admin.php?page=add_admin_form_documents_content&action=sa
         }
         $groups['fields'][1][] = ['var' => '{{' . $field['key'] . '}}', 'label' => (string) ($field['label'] ?? $field['key']), 'insert' => true];
     }
+    // Variables por firmante numeradas (ADR 0010 de Edusof): un grupo por firmante del panel, con su número y su color,
+    // justo después de «Firmas». F1 es quien recibe el documento (sus datos son los de siempre: {{full_name}}…)
+    $fn_groups = [];
+    if (function_exists('squuad_cert_fn_document_signers')) {
+        foreach (squuad_cert_fn_document_signers($document) as $fn => $fn_signer) {
+            $fn_items = [
+                ['var' => '{{full_name_F' . $fn . '}}', 'label' => 1 === $fn ? __('Full name (same as {{full_name}})', 'wp-certificates') : __('Full name (last names, first names)', 'wp-certificates'), 'insert' => true],
+                ['var' => '{{name_F' . $fn . '}}', 'label' => __('First names', 'wp-certificates'), 'insert' => true],
+                ['var' => '{{last_name_F' . $fn . '}}', 'label' => __('Last names', 'wp-certificates'), 'insert' => true],
+                ['var' => '{{email_F' . $fn . '}}', 'label' => __('Email of their account', 'wp-certificates'), 'insert' => true],
+                ['var' => '{{id_document_F' . $fn . '}}', 'label' => __('Identity document (if the site asks for it)', 'wp-certificates'), 'insert' => true],
+                ['var' => '{{charge_F' . $fn . '}}', 'label' => __('Position or role', 'wp-certificates'), 'insert' => true],
+                ['var' => '{{signature_F' . $fn . '}}', 'label' => __('Signature box', 'wp-certificates'), 'insert' => true],
+                ['var' => '{{#F' . $fn . '}}{{/F' . $fn . '}}', 'label' => __('Text shown only if this signer is in the request', 'wp-certificates'), 'insert' => true],
+            ];
+            /* translators: 1: number, e.g. F2, 2: name of the signer */
+            $fn_groups['fn' . $fn] = [sprintf(__('%1$s · %2$s', 'wp-certificates'), 'F' . $fn, $fn_signer['label']), $fn_items, $fn];
+        }
+    }
+    if ($fn_groups) {
+        $position = array_search('signatures', array_keys($groups), true);
+        $groups = array_slice($groups, 0, (int) $position + 1, true) + $fn_groups + array_slice($groups, (int) $position + 1, null, true);
+    }
     $code_parts = [
         'header' => __('Header', 'wp-certificates'),
         'content' => __('Content', 'wp-certificates'),
@@ -181,6 +204,8 @@ $save_url = admin_url('admin.php?page=add_admin_form_documents_content&action=sa
             $shadowed_key
         )) ?></p></div>
     <?php endforeach; ?>
+    <?php // Avisos de otros módulos (p. ej. variables por firmante numeradas, ADR 0010 de Edusof)
+    do_action('wpc_document_notices', $document); ?>
     <?php // Documento automático que no se mostrará en Mi Cuenta (ni pide firma ni tiene campos adicionales)
     $automatic_status = squuad_cert_automatic_status($document);
     if ($automatic && $automatic_status && !$automatic_status['signature'] && !$automatic_status['fields']) : ?>
@@ -205,6 +230,8 @@ $save_url = admin_url('admin.php?page=add_admin_form_documents_content&action=sa
         <input type="hidden" name="document_id" value="<?= (int) $document->id ?>">
         <input type="hidden" name="wpc_eds_form" value="1">
         <input type="hidden" name="wpc_eds_automatic_confirmed" value="" id="wpc-eds-automatic-confirmed">
+        <?php // Mapa Fn → firmante con el que se abrió la plantilla: si el panel cambia mientras se edita, al guardar se renumera (ADR 0010 de Edusof) ?>
+        <input type="hidden" name="wpc_fn_map" value="<?= esc_attr(function_exists('squuad_cert_fn_map') ? (string) wp_json_encode((object) squuad_cert_fn_map($document)) : '') ?>">
 
         <section class="eds-card" id="wpc-sec-content" aria-labelledby="wpc-sec-content-title">
             <h2 class="wpc-eds-section-title" id="wpc-sec-content-title"><?= esc_html__('Content', 'wp-certificates') ?></h2>
@@ -245,12 +272,14 @@ $save_url = admin_url('admin.php?page=add_admin_form_documents_content&action=sa
                     </label>
                     <p class="wpc-eds-help"><?= esc_html__('Click to insert it where the cursor is.', 'wp-certificates') ?></p>
                     <div class="wpc-eds-data__list">
-                        <?php foreach ($groups as $group_key => [$group_label, $items]) {
+                        <?php foreach ($groups as $group_key => $group) {
+                            [$group_label, $items] = $group;
+                            $group_fn = (int) ($group[2] ?? 0); // firmante numerado (ADR 0010 de Edusof): su color
                             if (!$items) {
                                 continue;
                             } ?>
-                            <div class="wpc-eds-data__group" role="group" aria-labelledby="wpc-eds-group-<?= esc_attr($group_key) ?>">
-                                <h4 id="wpc-eds-group-<?= esc_attr($group_key) ?>"><?= esc_html($group_label) ?></h4>
+                            <div class="wpc-eds-data__group" role="group" aria-labelledby="wpc-eds-group-<?= esc_attr($group_key) ?>"<?= $group_fn ? ' data-fn="' . $group_fn . '" data-fn-color="' . (int) squuad_cert_fn_color($group_fn) . '"' : '' ?>>
+                                <h4 id="wpc-eds-group-<?= esc_attr($group_key) ?>"><?php if ($group_fn) { ?><span class="wpc-eds-fn-badge" aria-hidden="true">F<?= (int) $group_fn ?></span><?php } ?><?= esc_html($group_label) ?></h4>
                                 <ul>
                                     <?php foreach ($items as $item) { ?>
                                         <li class="wpc-eds-data__item" data-search="<?= esc_attr(strtolower($item['label'] . ' ' . $item['var'])) ?>">

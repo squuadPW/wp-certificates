@@ -25,7 +25,7 @@ function wpc_eds_documents_assets(): void
     if (($_GET['page'] ?? '') !== 'add_admin_form_documents_content' || !wpc_eds_documents_enabled()) {
         return;
     }
-    $version = '1.0.0'; // subir al cambiar eds-documentos.css o eds-documentos.js
+    $version = '1.1.0'; // subir al cambiar eds-documentos.css o eds-documentos.js
     wp_enqueue_style('wpc-eds-documentos', plugins_url('assets/css/eds-documentos.css', __FILE__), [], $version);
     wp_enqueue_script('wpc-eds-documentos', plugins_url('assets/js/eds-documentos.js', __FILE__), [], $version, true);
 
@@ -436,6 +436,10 @@ function add_admin_form_documents_content()
                 $document_data['fields'] = $document_fields ? wp_json_encode($document_fields) : null;
             }
 
+            // Otros módulos ajustan lo que se guarda (p. ej. certification/includes/signer-numbers.php renumera las variables
+            // por firmante {{full_name_F2}} si el panel de firmantes cambió mientras se editaba la plantilla, ADR 0010)
+            $document_data = (array) apply_filters('wpc_document_save_data', $document_data, $document_id);
+
             // --- 2. Actualización o Inserción del Documento Maestro ---
             $result = false;
             if ($document_id > 0) {
@@ -452,6 +456,7 @@ function add_admin_form_documents_content()
                 wp_redirect($redirect_url);
                 exit;
             }
+            do_action('wpc_document_saved', (int) $redirect_id, $document_data);
 
             // --- 3. Ejecución del Lote de Documentos/Firmas de Estudiantes (Optimización N+1) ---
             // La variable de identificación para las tablas relacionadas (documentos de estudiantes y firmas)

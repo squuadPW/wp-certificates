@@ -72,7 +72,12 @@ function squuad_cert_template_replacements(string $template, int $subject_id, ar
     if ($holder) {
         $ctx['holder_keys'] = $holder['keys'];
     }
-    $resolved = \Squuad\Certificados\VariableRunner::resolve($template, $subject_id, $ctx);
+    // F1 equivale a las variables sin sufijo (ADR 0010 de Edusof): {{full_name_F1}} se resuelve como {{full_name}}
+    $aliases = function_exists('squuad_cert_fn_f1_aliases')
+        ? array_filter(squuad_cert_fn_f1_aliases(), static fn(string $alias): bool => false !== strpos($template, '{{' . $alias . '}}'), ARRAY_FILTER_USE_KEY)
+        : [];
+    $resolve_template = $template . implode('', array_map(static fn(string $key): string => '{{' . $key . '}}', array_unique(array_values($aliases))));
+    $resolved = \Squuad\Certificados\VariableRunner::resolve($resolve_template, $subject_id, $ctx);
     $replacements = array_merge(squuad_cert_general_replacements($ctx), $resolved['replacements']);
 
     if ($holder) {
@@ -90,6 +95,12 @@ function squuad_cert_template_replacements(string $template, int $subject_id, ar
         foreach (squuad_cert_document_fields_shadowed_keys($ctx['document']) as $key) {
             unset($replacements[$key]);
             unset($resolved['failed'][$key]);
+        }
+    }
+
+    foreach ($aliases as $alias => $key) {
+        if (isset($replacements[$key]) && !isset($replacements[$alias])) {
+            $replacements[$alias] = $replacements[$key];
         }
     }
 

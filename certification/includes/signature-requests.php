@@ -209,11 +209,13 @@ function squuad_cert_signature_request_get_or_create(
             $fixed = function_exists('squuad_cert_request_signers_fix')
                 ? squuad_cert_request_signers_fix($request, $signers, $document_certificate_id, $origin)
                 : [];
-            // Puestos por variable omitidos (ADR 0009 de Edusof): el último elemento de la lista, sellado aparte
-            $last = $fixed ? end($fixed) : null;
-            $omitted = is_array($last) && isset($last['omitted']) ? (array) array_pop($fixed)['omitted'] : [];
+            // Puestos por variable omitidos (ADR 0009 de Edusof), sellados aparte
+            $omitted = function_exists('squuad_cert_request_signers_omitted') ? squuad_cert_request_signers_omitted((int) $request->id) : [];
+            // Variables por firmante numeradas (ADR 0010 de Edusof): a qué puesto apunta cada Fn de la plantilla
+            $fn_map = function_exists('squuad_cert_request_signers_fn_map') ? squuad_cert_request_signers_fn_map((int) $request->id) : [];
             squuad_cert_signature_request_log_event((int) $request->id, 'created', ['round' => $round]
-                + ($fixed ? ['signers' => $fixed] : []) + ($omitted ? ['omitted_signers' => $omitted] : []));
+                + ($fixed ? ['signers' => $fixed] : []) + ($omitted ? ['omitted_signers' => $omitted] : [])
+                + ($fn_map ? ['fn_map' => array_combine(array_map(static fn($n): string => 'F' . $n, array_keys($fn_map)), array_values($fn_map))] : []));
         }
 
         return $request;

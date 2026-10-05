@@ -4,6 +4,8 @@
  * - Editor: editor de código del core (wp.codeEditor) para encabezado, contenido y pie; panel «Datos» con buscador que
  *   inserta la variable donde está el cursor; confirmación al guardar como automático; aviso de cambios sin guardar
  *   entre el formulario del documento y el de «Firmantes del documento».
+ * - Variables por firmante numeradas (ADR 0010 de Edusof): en el editor, {{full_name_F2}}, {{signature_F2}}, {{#F2}}…
+ *   resaltadas con el color de su firmante (solo en el admin; nunca en el documento).
  */
 (function () {
   "use strict";
@@ -28,11 +30,12 @@
    */
   function ask(options) {
     if (typeof HTMLDialogElement !== "function") {
+      const plain = [].concat(options.body).join("\n\n");
       if (!options.confirmText) {
-        window.alert(options.title + "\n\n" + options.body);
+        window.alert(options.title + "\n\n" + plain);
         return Promise.resolve(false);
       }
-      return Promise.resolve(window.confirm(options.title + "\n\n" + options.body));
+      return Promise.resolve(window.confirm(options.title + "\n\n" + plain));
     }
     return new Promise(function (resolve) {
       const dialog = document.createElement("dialog");
@@ -48,9 +51,12 @@
       const body = document.createElement("div");
       body.className = "eds-dialog__body";
       body.id = id + "-body";
-      const paragraph = document.createElement("p");
-      paragraph.textContent = options.body;
-      body.appendChild(paragraph);
+      // Un texto o una lista de textos (un párrafo cada uno)
+      [].concat(options.body).forEach(function (text) {
+        const paragraph = document.createElement("p");
+        paragraph.textContent = text;
+        body.appendChild(paragraph);
+      });
       const actions = document.createElement("div");
       actions.className = "eds-dialog__actions";
 
@@ -95,6 +101,29 @@
       cancel.focus();
     });
   }
+
+  // El panel «Firmantes del documento» usa el mismo diálogo (aviso del renumerado de la plantilla, ADR 0010 de Edusof)
+  window.wpcEdsAsk = ask;
+
+  /**
+   * Resaltado de las variables por firmante numeradas (capa de CodeMirror): cm-fn y cm-fn-<color> según su número
+   * (F1 azul, F2 verde, F3 naranja, F4 morado…; se repiten a partir del 7.º, como en el panel).
+   */
+  const fnColors = Number(config.fnColors) || 6;
+  const fnOverlay = {
+    token: function (stream) {
+      const match = stream.match(/^\{\{(?:(?:full_name|name|last_name|email|id_document|charge|signature)_F|[#^\/]F)([1-9][0-9]?)\}\}/);
+      if (match) {
+        return "fn fn-" + (((Number(match[1]) - 1) % fnColors) + 1);
+      }
+      while (stream.next() != null) {
+        if (stream.match(/^\{\{/, false)) {
+          break;
+        }
+      }
+      return null;
+    },
+  };
 
   /* ---------------------------------------------------------------- Lista: eliminar ---------------------------- */
   document.addEventListener("click", function (event) {
@@ -143,6 +172,7 @@
         const instance = wp.codeEditor.initialize(area, config.code);
         const cm = instance.codemirror;
         editors[part] = cm;
+        cm.addOverlay(fnOverlay);
         cm.on("change", function () {
           cm.save();
           documentDirty = true;

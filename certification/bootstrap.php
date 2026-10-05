@@ -21,6 +21,7 @@ require_once SQUUAD_CERT_MODULE_PATH . 'includes/signature-integrity-cli.php';
 require_once SQUUAD_CERT_MODULE_PATH . 'includes/signature-requests.php';
 require_once SQUUAD_CERT_MODULE_PATH . 'includes/signers.php';
 require_once SQUUAD_CERT_MODULE_PATH . 'includes/signer-variables.php';
+require_once SQUUAD_CERT_MODULE_PATH . 'includes/signer-numbers.php';
 require_once SQUUAD_CERT_MODULE_PATH . 'includes/certification-orders.php';
 require_once SQUUAD_CERT_MODULE_PATH . 'includes/html-signatures.php';
 

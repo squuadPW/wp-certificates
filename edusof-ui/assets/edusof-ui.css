@@ -1,5 +1,5 @@
 /*
- * Edusof UI 1.0.2: sistema de diseño de EduSystem y WP Certificates (ADR 0006).
+ * Edusof UI 1.0.4: sistema de diseño de EduSystem y WP Certificates (ADR 0006).
  * Contrato: Antigravity/docs/edusof-ui-contrato.md. CSS propio, sin dependencias ni recursos externos.
  *
  * 1. Variables por tema y modo (.edusof-ui en <body>, o .eds-scope en un contenedor).
@@ -94,6 +94,38 @@
 .edusof-ui.eds-mode-dark.eds-theme-vino, .eds-scope.eds-mode-dark.eds-theme-vino { --eds-acc: #F08AA8; --eds-acc-soft: #3A1824; --eds-acc-ink: #F7B9CB; }
 .edusof-ui.eds-mode-dark.eds-theme-terracota, .eds-scope.eds-mode-dark.eds-theme-terracota { --eds-acc: #F29A6E; --eds-acc-soft: #3B2016; --eds-acc-ink: #F8C3A8; }
 .edusof-ui.eds-mode-dark.eds-theme-grafito, .eds-scope.eds-mode-dark.eds-theme-grafito { --eds-acc: #C3CCD9; --eds-acc-soft: #26303C; --eds-acc-ink: #E2E7EE; }
+
+/* Colores de los firmantes F1, F2… del editor de documentos (1.0.4, ADR 0010 de Edusof): texto y fondo suave con
+   contraste AA (≥ 4,5:1) en claro y oscuro. Solo para el admin: nunca en un documento. A partir del 7.º se repiten. */
+.edusof-ui,
+.eds-scope {
+	--eds-signer-1: #1D4ED8; --eds-signer-1-soft: #E3EAFD;
+	--eds-signer-2: #166534; --eds-signer-2-soft: #DDF4E5;
+	--eds-signer-3: #9A4806; --eds-signer-3-soft: #FDEFDC;
+	--eds-signer-4: #7E22CE; --eds-signer-4-soft: #F2E6FC;
+	--eds-signer-5: #BE185D; --eds-signer-5-soft: #FCE4EF;
+	--eds-signer-6: #0F766E; --eds-signer-6-soft: #DAF2EF;
+}
+.edusof-ui.eds-mode-dark,
+.eds-scope.eds-mode-dark {
+	--eds-signer-1: #93B4FF; --eds-signer-1-soft: #1C2A4D;
+	--eds-signer-2: #6EE7A0; --eds-signer-2-soft: #12301F;
+	--eds-signer-3: #FDBA74; --eds-signer-3-soft: #3A2612;
+	--eds-signer-4: #D3A6FF; --eds-signer-4-soft: #2E1D47;
+	--eds-signer-5: #F9A8CB; --eds-signer-5-soft: #3D1828;
+	--eds-signer-6: #5EEAD4; --eds-signer-6-soft: #0F302C;
+}
+@media (prefers-color-scheme: dark) {
+	.edusof-ui.eds-mode-auto,
+	.eds-scope.eds-mode-auto {
+		--eds-signer-1: #93B4FF; --eds-signer-1-soft: #1C2A4D;
+		--eds-signer-2: #6EE7A0; --eds-signer-2-soft: #12301F;
+		--eds-signer-3: #FDBA74; --eds-signer-3-soft: #3A2612;
+		--eds-signer-4: #D3A6FF; --eds-signer-4-soft: #2E1D47;
+		--eds-signer-5: #F9A8CB; --eds-signer-5-soft: #3D1828;
+		--eds-signer-6: #5EEAD4; --eds-signer-6-soft: #0F302C;
+	}
+}
 
 /* Modo «según el dispositivo»: los mismos valores oscuros cuando el sistema los pide */
 @media (prefers-color-scheme: dark) {

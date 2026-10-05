@@ -121,16 +121,52 @@ function squuad_cert_signer_variable_label(string $variable): string
 }
 
 /**
- * Resuelve la cuenta que firma un puesto por variable para el titular de una solicitud. $subject_id: el que reciben los
- * métodos de las variables (la ficha de EduSystem del titular; 0 si no tiene). Ejecuta el método aislado (ADR 0005) y
- * exige un id de usuario que existe en el sitio. Nunca lee campos adicionales.
- *
- * @return array{user_id: int, reason: string, label: string} reason: '' si se resolvió; si no, por qué se omite
- *   (invalid_name, unavailable, no_subject, failed, empty, no_user).
+ * Idioma del sitio (Ajustes › Generales), sin los filtros que lo cambian por usuario (EduSystem pone en el front el
+ * idioma de la cuenta conectada): la opción WPLANG o, si está vacía, la constante WPLANG; en_US por defecto.
  */
-function squuad_cert_signer_variable_resolve(string $variable, int $subject_id, ?object $document = null): array
+function squuad_cert_site_locale(): string
 {
-    $result = static fn(int $user_id, string $reason, string $label = ''): array => ['user_id' => $user_id, 'reason' => $reason, 'label' => $label];
+    $locale = (string) get_option('WPLANG');
+    if ('' === $locale && is_multisite()) {
+        $locale = (string) get_site_option('WPLANG');
+    }
+    if ('' === $locale && defined('WPLANG')) {
+        $locale = (string) WPLANG;
+    }
+
+    return '' !== $locale ? $locale : 'en_US';
+}
+
+/**
+ * Ejecuta $callback con las traducciones del idioma del sitio y devuelve su resultado. Para los textos que se fijan en
+ * una solicitud (p. ej. el puesto «Representante» de un firmante por variable): no dependen del idioma de quien la abre.
+ */
+function squuad_cert_in_site_locale(callable $callback)
+{
+    $switched = function_exists('switch_to_locale') && switch_to_locale(squuad_cert_site_locale());
+    try {
+        return $callback();
+    } finally {
+        if ($switched) {
+            restore_previous_locale();
+        }
+    }
+}
+
+/**
+ * Resuelve la cuenta que firma un puesto por variable para el titular de una solicitud. $subject_id: el que reciben los
+ * métodos de las variables (la ficha de EduSystem del titular; 0 si no tiene). $holder: el titular de la solicitud
+ * (['holder_type' => subject_type, 'holder_id' => subject_id]), que llega al método en su contexto para que el plugin
+ * compruebe que esa ficha es de verdad de ese titular (ADR 0009 de Edusof: EduSystem exige el vínculo estricto).
+ * Ejecuta el método aislado (ADR 0005) y exige un id de usuario que existe en el sitio. Nunca lee campos adicionales.
+ * El nombre del puesto (label) sale en el idioma del sitio, no en el de quien abre la solicitud.
+ *
+ * @return array{user_id: int, reason: string, label: string, method: string} reason: '' si se resolvió; si no, por qué
+ *   se omite (invalid_name, unavailable, no_subject, failed, empty, no_user). method: identificador del método usado.
+ */
+function squuad_cert_signer_variable_resolve(string $variable, int $subject_id, ?object $document = null, array $holder = []): array
+{
+    $result = static fn(int $user_id, string $reason, string $label = '', string $method = ''): array => ['user_id' => $user_id, 'reason' => $reason, 'label' => $label, 'method' => $method];
 
     if (!squuad_cert_signer_variable_name_valid($variable)) {
         return $result(0, 'invalid_name');
@@ -139,24 +175,30 @@ function squuad_cert_signer_variable_resolve(string $variable, int $subject_id, 
     if (!$method) {
         return $result(0, 'unavailable');
     }
-    $label = '' !== (string) $method['signer_label'] ? (string) $method['signer_label'] : (string) $method['label'];
+    $label = (string) squuad_cert_in_site_locale(static fn(): string => squuad_cert_signer_variable_label($variable));
+    $method_id = (string) $method['id'];
     if ($subject_id <= 0 && !empty($method['subject'])) {
-        return $result(0, 'no_subject', $label);
+        return $result(0, 'no_subject', $label, $method_id);
     }
-    $resolved = \Squuad\Certificados\VariableRunner::resolve('{{' . $variable . '}}', $subject_id, array_filter(['document' => $document]));
+    $ctx = array_filter(['document' => $document]);
+    if (isset($holder['holder_type'], $holder['holder_id'])) {
+        $ctx['holder_type'] = (string) $holder['holder_type'];
+        $ctx['holder_id'] = (int) $holder['holder_id'];
+    }
+    $resolved = \Squuad\Certificados\VariableRunner::resolve('{{' . $variable . '}}', $subject_id, $ctx);
     if (isset($resolved['failed'][$variable])) {
-        return $result(0, 'failed', $label);
+        return $result(0, 'failed', $label, $method_id);
     }
     $value = trim((string) ($resolved['replacements'][$variable]['value'] ?? ''));
     if (!preg_match('/^[1-9][0-9]{0,19}$/', $value)) {
-        return $result(0, 'empty', $label);
+        return $result(0, 'empty', $label, $method_id);
     }
     $user = get_userdata((int) $value);
     if (!$user || (is_multisite() && !is_user_member_of_blog((int) $user->ID))) {
-        return $result(0, 'no_user', $label);
+        return $result(0, 'no_user', $label, $method_id);
     }
 
-    return $result((int) $user->ID, '', $label);
+    return $result((int) $user->ID, '', $label, $method_id);
 }
 
 /**
@@ -210,12 +252,16 @@ function squuad_cert_request_var_slot(object $request, ?object $document, string
     if (!$document || 'automatic' !== ($document->type ?? '')) {
         return ['slot_key' => $slot_key, 'omitted' => 'not_automatic'];
     }
-    $resolved = squuad_cert_signer_variable_resolve($variable, squuad_cert_request_student_id($request), $document);
+    // El titular de la solicitud va en el contexto del método: el plugin comprueba que la ficha es de ese titular
+    $resolved = squuad_cert_signer_variable_resolve($variable, squuad_cert_request_student_id($request), $document, [
+        'holder_type' => (string) $request->subject_type,
+        'holder_id' => (int) $request->subject_id,
+    ]);
     if (!$resolved['user_id']) {
-        return ['slot_key' => $slot_key, 'omitted' => $resolved['reason']];
+        return ['slot_key' => $slot_key, 'omitted' => $resolved['reason']] + ('' !== $resolved['method'] ? ['method' => $resolved['method']] : []);
     }
 
-    return ['slot_key' => $slot_key, 'user_id' => $resolved['user_id'], 'signer_id' => 0, 'charge' => $resolved['label'], 'phase' => 0];
+    return ['slot_key' => $slot_key, 'user_id' => $resolved['user_id'], 'signer_id' => 0, 'charge' => $resolved['label'], 'phase' => 0, 'method' => $resolved['method']];
 }
 
 /**
@@ -238,13 +284,13 @@ function squuad_cert_request_slots_finalize(object $request, array $slots): arra
     $kept = [];
     foreach ($slots as $slot) {
         if (isset($slot['omitted'])) {
-            $omitted[] = ['slot' => $slot['slot_key'], 'reason' => $slot['omitted']];
+            $omitted[] = ['slot' => $slot['slot_key'], 'reason' => $slot['omitted']] + (isset($slot['method']) ? ['method' => $slot['method']] : []);
             continue;
         }
         if (squuad_cert_is_var_slot($slot['slot_key'])) {
             $user_id = (int) $slot['user_id'];
             if (isset($users[$user_id])) {
-                $omitted[] = ['slot' => $slot['slot_key'], 'reason' => 'same_account', 'signs_as' => $users[$user_id]];
+                $omitted[] = ['slot' => $slot['slot_key'], 'reason' => 'same_account', 'signs_as' => $users[$user_id]] + (isset($slot['method']) ? ['method' => $slot['method']] : []);
                 continue;
             }
             $users[$user_id] = $slot['slot_key'];

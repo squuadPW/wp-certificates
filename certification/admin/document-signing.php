@@ -68,7 +68,12 @@ function squuad_cert_document_signing_panel(): void
     $available_variables = function_exists('squuad_cert_signer_variables') ? squuad_cert_signer_variables() : [];
     $policy_variables = array_column(array_filter($policy['slots'], static fn(array $slot): bool => 'var' === $slot['slot_type']), 'role');
     $template_variables = function_exists('squuad_cert_template_signer_variables') ? squuad_cert_template_signer_variables($template_text) : [];
-    foreach (array_unique(array_merge($policy_variables, $template_variables, array_keys($available_variables))) as $variable) {
+    // Solo los documentos automáticos ofrecen firmantes por variable; en uno gestionado solo se muestran los que su
+    // política ya pide (para poder quitarlos), con el aviso de que se omiten
+    $offered_variables = 'automatic' === $document->type
+        ? array_merge($policy_variables, $template_variables, array_keys($available_variables))
+        : $policy_variables;
+    foreach (array_unique($offered_variables) as $variable) {
         $variable = (string) $variable;
         $signer_variables[$variable] = [
             'available' => isset($available_variables[$variable]),
@@ -76,6 +81,16 @@ function squuad_cert_document_signing_panel(): void
             'in_template' => in_array($variable, $template_variables, true),
         ];
     }
+
+    // Variables por firmante numeradas (ADR 0010 de Edusof): número de cada fila (F1 los roles; F2… los demás, por el
+    // orden del panel), mapa Fn → puesto con el que está escrita la plantilla y avisos del último guardado
+    $fn_numbering = function_exists('squuad_cert_fn_numbering') ? array_flip(squuad_cert_fn_numbering($policy)) : [];
+    $fn_map = function_exists('squuad_cert_fn_map') ? squuad_cert_fn_map($document) : [];
+    $fn_labels = [];
+    foreach ($fn_map as $fn_slot) {
+        $fn_labels[$fn_slot] = squuad_cert_fn_slot_label($fn_slot);
+    }
+    $fn_notices = function_exists('squuad_cert_fn_notice_take') ? squuad_cert_fn_notice_take('panel') : [];
 
     include SQUUAD_CERT_MODULE_PATH . 'admin/templates/document-signing.php';
 }
@@ -103,7 +118,15 @@ function squuad_cert_document_signing_handle_save(): void
             : ['slot_type' => $type, 'role' => '', 'signer_id' => (int) $value, 'position' => (int) ($slot['position'] ?? 0)];
     }
 
+    // Variables por firmante numeradas (ADR 0010 de Edusof): mapa Fn → puesto de antes de guardar, para renumerar la
+    // plantilla si alguien cambió de número
+    $document = $document_id ? $GLOBALS['wpdb']->get_row($GLOBALS['wpdb']->prepare("SELECT * FROM {$GLOBALS['wpdb']->prefix}documents_certificates WHERE id = %d", $document_id)) : null;
+    $old_fn_map = $document && function_exists('squuad_cert_fn_map') ? squuad_cert_fn_map($document) : [];
+
     $result = squuad_cert_signing_policy_save($document_id, $requires, $slots);
+    if ($result['ok'] && $document && function_exists('squuad_cert_fn_after_policy_save')) {
+        squuad_cert_fn_notice_add(squuad_cert_fn_after_policy_save($document_id, $old_fn_map), 'panel');
+    }
     // Diseño Edusof: un solo interruptor de firmas. En los gestionados, el «requerirá firmas» de siempre
     // (documents_certificates.signature_required) sigue a este: así no hay dos valores distintos
     if ($result['ok'] && !empty($_POST['wpc_eds_sync_signature'])) {

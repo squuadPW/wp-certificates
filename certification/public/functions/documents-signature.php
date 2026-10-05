@@ -102,6 +102,12 @@ function squuad_cert_signature_handle_request_submission(int $request_id): void
         if (in_array($role, $signed_roles, true)) {
             wp_send_json_error(__('You already signed this document.', 'wp-certificates'), 409);
         }
+        // Un firmante por variable (ADR 0009 de Edusof) nunca congela el documento: firma lo que quien lo recibe ya dejó
+        // fijado con su firma o sus respuestas
+        if (function_exists('squuad_cert_is_var_slot') && squuad_cert_is_var_slot($role) && null === $request->frozen_at_utc) {
+            squuad_cert_log(sprintf('Firma rechazada: el usuario %d firma por variable la solicitud %d, que aún no está congelada', $user_id, $request_id), 'signature_blocked');
+            wp_send_json_error(__('This document is still waiting for previous signatures.', 'wp-certificates'), 409);
+        }
         // Consentimiento explícito (ADR 0002, punto 7): sin la casilla no hay firma, también con la firma automática
         $consent = squuad_cert_signature_consent_evidence(
             is_string($_POST['consent_version'] ?? null) ? sanitize_text_field(wp_unslash($_POST['consent_version'])) : ''
