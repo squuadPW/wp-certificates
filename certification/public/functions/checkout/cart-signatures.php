@@ -10,7 +10,11 @@ if (!defined('ABSPATH')) exit;
 add_action('wp_ajax_load_signatures_data', 'squuad_cert_load_signatures_data');
 
 /**
- * Firma ya guardada del estudiante en una solicitud (la pinta create-enrollment.js), solo para sus firmantes.
+ * OBSOLETO desde el ADR 0011 de Edusof (2026-10-05): la ventana de firma nueva no la llama (las firmas ya dadas las
+ * pinta el servidor en el documento). Se mantiene por compatibilidad con páginas antiguas en caché; se puede retirar en
+ * una versión posterior.
+ *
+ * Firma ya guardada del estudiante en una solicitud (la pintaba create-enrollment.js), solo para sus firmantes.
  * parent_signature va siempre vacía: el representante ya no firma (el JS antiguo la sigue esperando).
  */
 function squuad_cert_load_signatures_data()

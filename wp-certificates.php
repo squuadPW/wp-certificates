@@ -37,7 +37,11 @@ define('WP_C_REMOTE_INFO_URL', 'https://versions.squuad.com/plugins/wp-certifica
 //     pasaron a la 12 a medias no lo tenían) y PDF firmados existentes marcados privados (includes/signed-pdf.php).
 // 14: PDF firmados del sistema de firma anterior (acuerdos de inscripción y cartas de documentos faltantes que ninguna
 //     tabla referencia) marcados privados con la marca 'legacy' (includes/signed-pdf.php, nivel 2 de la migración).
-define('WP_C_DB_VERSION', '14');
+// 15: flujo de firma nuevo (ADR 0011 de Edusof): columna signature_image_sha256 en las firmas vivas y anuladas (huella del
+//     PNG de la firma escrita o subida, sellada en EDUSIG4). Solo añade una columna vacía: las firmas existentes no cambian.
+// 16: índice signature_image_sha256 en las firmas vivas y anuladas (rechazar que otra cuenta reutilice una imagen de firma)
+//     y nueva comprobación de la columna (squuad_cert_signature_image_evidence_enabled). Idempotente.
+define('WP_C_DB_VERSION', '16');
 
 // get_plugin_data() vive en wp-admin/includes/plugin.php, que en el front no está cargado (antes solo funcionaba
 // porque EduSystem lo cargaba primero)
@@ -376,6 +380,12 @@ function create_tables_certificates() {
     // evidencia se vuelven a comprobar con el esquema nuevo
     squuad_cert_id_document_install();
     squuad_cert_id_document_evidence_reset();
+    // Columna de la huella de la imagen de la firma (ADR 0011 de Edusof): se vuelve a comprobar con el esquema nuevo
+    if (function_exists('squuad_cert_signature_image_evidence_reset')) {
+        squuad_cert_signature_image_evidence_reset();
+    } else {
+        delete_option('squuad_cert_signature_image_columns');
+    }
     // PDF firmados ya guardados: privados, sin renombrar ni mover; cada nivel una sola vez (la versión guardada aún es
     // la anterior: se actualiza después de esta función). Corrige siempre las marcas viejas
     squuad_cert_signed_pdf_migrate((string) get_option('wp_c_db_version'));

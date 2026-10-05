@@ -22,6 +22,7 @@ require_once SQUUAD_CERT_MODULE_PATH . 'includes/signature-requests.php';
 require_once SQUUAD_CERT_MODULE_PATH . 'includes/signers.php';
 require_once SQUUAD_CERT_MODULE_PATH . 'includes/signer-variables.php';
 require_once SQUUAD_CERT_MODULE_PATH . 'includes/signer-numbers.php';
+require_once SQUUAD_CERT_MODULE_PATH . 'includes/signature-format.php'; // flujo de firma nuevo (ADR 0011 de Edusof)
 require_once SQUUAD_CERT_MODULE_PATH . 'includes/certification-orders.php';
 require_once SQUUAD_CERT_MODULE_PATH . 'includes/html-signatures.php';
 
@@ -35,6 +36,7 @@ require_once SQUUAD_CERT_MODULE_PATH . 'admin/document-signing.php';
 require_once SQUUAD_CERT_MODULE_PATH . 'admin/document-preview.php';
 require_once SQUUAD_CERT_MODULE_PATH . 'admin/signer-inbox.php';
 require_once SQUUAD_CERT_MODULE_PATH . 'admin/subject-panel.php';
+require_once SQUUAD_CERT_MODULE_PATH . 'admin/signing-settings.php'; // Configuración › Firma de documentos (ADR 0011 de Edusof)
 
 // Público (antes public/functions.php de EduSystem)
 require_once SQUUAD_CERT_MODULE_PATH . 'public/functions/documents-signature.php';

@@ -55,4 +55,9 @@
   if (function_exists('squuad_cert_id_document_settings_section')) {
     squuad_cert_id_document_settings_section();
   } ?>
+
+  <?php // Firma de documentos (ADR 0011 de Edusof): «Subir imagen» en la ventana de firma y nota legal del certificado
+  if (function_exists('squuad_cert_signing_settings_section')) {
+    squuad_cert_signing_settings_section();
+  } ?>
 </div>

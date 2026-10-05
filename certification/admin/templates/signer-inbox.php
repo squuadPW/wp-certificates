@@ -79,9 +79,11 @@ $frame = static function (string $html): string {
             <?php // Fuera de pantalla el envoltorio, no el origen: html2pdf clona el origen y, si este va en posición absoluta, lo pinta
             // con alto 0 (PDF en blanco). El origen ocupa el 100 %: en el clon, el ancho útil de la página (sin recortar el borde derecho) ?>
             <div style="position:absolute;left:-10000px;top:0;width:<?= (int) $pdf_page['width_px'] ?>px"><div id="edusystem-pdf-source" style="width:100%;box-sizing:border-box;background:#fff;padding:16px;font-family:Arial,sans-serif;color:#111">
-                <?= $final_html // phpcs:ignore -- contenido congelado (escapado al generarlo) con las firmas en SVG ?>
-                <p style="margin-top:16px;font-size:9px;color:#666;word-break:break-all"><?= esc_html(sprintf(__('Signature request #%1$d, round %2$d · Content fingerprint (SHA-256): %3$s', 'wp-certificates'), (int) $request->id, (int) $request->round, $request->content_sha256)) ?></p>
+                <?= $final_html // phpcs:ignore -- contenido congelado (escapado al generarlo) con las firmas, la línea de la solicitud y el certificado de firmas ?>
             </div></div>
+            <?php // Fuentes de las firmas y generador del QR del certificado de firmas (ADR 0011 de Edusof) ?>
+            <link rel="stylesheet" href="<?= esc_url(add_query_arg('ver', squuad_cert_signing_assets_version(), SQUUAD_CERT_MODULE_URL . 'public/assets/css/signature-fonts.css')) ?>">
+            <script src="<?= esc_url(add_query_arg('ver', squuad_cert_signing_assets_version(), squuad_cert_qrcode_script_url())) ?>"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
                 integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg=="
                 crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -96,6 +98,12 @@ $frame = static function (string $html): string {
                     const status = document.querySelector("#edusystem-pdf-status p");
                     const source = document.getElementById("edusystem-pdf-source");
                     const filename = <?= wp_json_encode(sanitize_file_name(strtolower($document_title ?: (string) $request->document_id)) . '.pdf') ?>;
+                    // QR de verificación del certificado de firmas (generador del plugin)
+                    if (typeof window.QRCode === "function") {
+                        source.querySelectorAll("[data-wpc-qr]").forEach(function (box) {
+                            if (box.dataset.wpcQr && !box.childElementCount) new QRCode(box, { text: box.dataset.wpcQr, width: 120, height: 120, correctLevel: QRCode.CorrectLevel.M });
+                        });
+                    }
                     // QR sellado en el contenido del documento emitido (su URL): se dibuja antes de generar el PDF
                     if (window.QRCodeStyling) {
                         source.querySelectorAll("[data-edusig-qr]").forEach(function (box) {

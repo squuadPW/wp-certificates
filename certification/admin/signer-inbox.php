@@ -201,7 +201,8 @@ function squuad_cert_signer_inbox_page(): void
             // B3 (ADR 0007 de Edusof): en pantalla, los documentos de identidad de los recuadros van enmascarados; al
             // generar el PDF final, completos
             squuad_cert_id_document_mask_in_boxes(!$generate_pdf);
-            $final_html = squuad_cert_signature_request_render_final($candidate);
+            // El PDF final lleva además la línea de la solicitud y el certificado de firmas (ADR 0011 de Edusof)
+            $final_html = $generate_pdf ? squuad_cert_signature_final_pdf_html($candidate) : squuad_cert_signature_request_render_final($candidate);
             squuad_cert_id_document_mask_in_boxes(false);
         }
     }

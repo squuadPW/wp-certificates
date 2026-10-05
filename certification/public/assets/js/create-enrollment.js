@@ -1,581 +1,627 @@
-let signaturePadStudent;
-let signaturePadParent;
+/**
+ * Ventana de firma de Mi Cuenta (ADR 0011 de Edusof; maqueta aprobada el 2026-10-05). Sin dependencias de terceros
+ * salvo html2pdf.js (ADR 0004) y el generador de QR que ya usa el plugin (pendiente de reescribir, ADR 0011).
+ *
+ * 1. Consentimiento (mismo texto y versión v1) y «Empezar».
+ * 2. Etiquetas «Firmar aquí» de quien mira (una por cada vez que la plantilla coloca su variable): «Siguiente» lleva a
+ *    la próxima; la primera abre «Adoptar su firma» (Escribir, Dibujar o Subir imagen) y la firma adoptada se reutiliza
+ *    en las demás; «Cambiar» permite rehacerla antes de finalizar.
+ * 3. «Finalizar»: la misma petición de siempre (create_enrollment_document, nonce, solicitud, huella del contenido y
+ *    consentimiento) con la firma en formato v2; el servidor lo revalida todo. Si con esta firma ya firmaron todos, el
+ *    servidor devuelve el documento final con el certificado de firmas: el navegador genera el PDF y lo sube.
+ * 4. Panel de éxito con el estado de cada firmante (datos del servidor), en lugar de alert() y recargar.
+ *
+ * Quien solo rellena (campos adicionales, sin firma) usa su propio script en la plantilla; los campos adicionales se
+ * guardan en sessionStorage (abajo), como antes.
+ */
 let gradeSelected = null;
-let downloading = false;
-let first_time = false;
-// Firma por rol (ADR 0001): quién firma aquí y qué firmas ya están guardadas
-let myRole = "";
-let twoSigners = false;
-let otherSigned = false;
-let myStoredSignature = false;
-let save_signatures = null;
 
 function signaturesText(key) {
     return (window.edusystemSignatures && edusystemSignatures.i18n && edusystemSignatures.i18n[key]) || key;
 }
 
-document.addEventListener("DOMContentLoaded", (event) => {
+/** Texto traducido con %s, %d, %1$s, %2$d… */
+function signaturesFormat(key, ...args) {
+    let i = 0;
+    return signaturesText(key).replace(/%(?:(\d+)\$)?[sd]/g, (match, position) => String(args[position ? Number(position) - 1 : i++] ?? ""));
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    const root = document.getElementById("wpc-sign");
 
     if (document.getElementById("modal_open")) {
         document.body.classList.add("modal-open");
-        setTimeout(() => {
-            window.scrollTo(0, 0);
-        }, 1000);
-    }
-
-    const closeModalEnrollment = document.getElementById("close-modal-enrollment");
-    if (closeModalEnrollment) {
-        closeModalEnrollment.addEventListener("click", () => {
-            const modalContrasena = document.getElementById("modal-contraseña");
-            const modalContent = document.getElementById("modal-content");
-
-            if (modalContrasena) modalContrasena.style.display = "none";
-            
-            if (modalContent) modalContent.style.display = "none";
-            
-            document.body.classList.remove("modal-open");
-
-        });
-    }
-
-    function resizeCanvas(canvasId, timmeout) {
-        const canvas = document.getElementById(canvasId);
-        if (canvas && !downloading) {
-            const ratio = Math.max(window.devicePixelRatio || 1, 1);
-            let width, height;
-
-            setTimeout(() => {
-                let multiply = canvas.parentNode
-                ? canvas.parentNode.offsetWidth < 500
-                    ? 0.6
-                    : 0.8
-                : 0.8;
-                width = canvas.parentNode
-                ? canvas.parentNode.offsetWidth * multiply
-                : window.innerWidth;
-                height = 120;
-
-                canvas.width = width * ratio;
-                canvas.height = height * ratio;
-                canvas.style.width = `${width}px`;
-                canvas.style.height = `${height}px`;
-                canvas.getContext("2d").scale(ratio, ratio);
-
-                loadSignatures();
-            }, timmeout);
+        if (root) {
+            document.documentElement.classList.add("wpc-sign-open");
+            document.body.classList.add("wpc-sign-open");
         }
     }
 
-    // Función para detectar si es un dispositivo táctil
-    function isTouchDevice() {
-        return (
-            "ontouchstart" in window ||
-            navigator.maxTouchPoints > 0 ||
-            navigator.msMaxTouchPoints > 0
-        );
-    }
-
-    // Ejecutar solo en dispositivos NO táctiles
-    if (!isTouchDevice()) {
-        window.addEventListener("resize", function () {
-            resizeCanvas("signature-student", 100);
-            resizeCanvas("signature-parent", 100);
-        });
-    }
-
-    // window.addEventListener("orientationchange", function () {
-    //   resizeCanvas("signature-student", 0);
-    //   resizeCanvas("signature-parent", 0);
-    // });
-
-    resizeCanvas("signature-student", 2500);
-    resizeCanvas("signature-parent", 2500);
-
-    // Create the SignaturePad objects after the canvas elements have been resized
-    if (document.getElementById("signature-student")) {
-        const studentElement = document.getElementById("signature-student");
-        const parentElement = document.getElementById("signature-parent");
-
-        // Recuadro de firma propio (signature-pad-edusystem.js), sin librerías de terceros
-        if (studentElement) signaturePadStudent = new EdusystemSignaturePad(studentElement);
-
-        if (parentElement) signaturePadParent = new EdusystemSignaturePad(parentElement);
-
-        save_signatures = document.getElementById("saveSignatures");
-        sign_here_parent = document.getElementById("sign-here-parent");
-        sign_here_student = document.getElementById("sign-here-student");
-        // Sin panel de firma del representante (el documento oculta su parte) se firma como si no hubiera representante
-        let show_parent_info = signaturePadParent ? document.querySelector('input[name="show_parent_info"]').value : "0";
-
-        // Cada usuario firma solo su parte, desde su propia cuenta (ADR 0001). Con dos firmantes, el recuadro del
-        // otro se muestra (con su firma si ya firmó), pero no se puede usar.
-        twoSigners = show_parent_info == 1 && !!signaturePadParent;
-        const currentUserId = String((window.edusystemSignatures && edusystemSignatures.currentUserId) || "");
-        const studentUserInput = document.querySelector('input[name="student_user_id"]');
-        const parentUserInput = document.querySelector('input[name="parent_user_id"]');
-        // Firmantes exigidos por el documento (ADR 0003): el recuadro de quien no firma se oculta
-        const requiredInput = document.querySelector('input[name="required_roles"]');
-        const requiredRoles = requiredInput ? requiredInput.value.split(",").filter(Boolean) : null;
-        if (requiredRoles) {
-            ["student", "parent"].forEach((role) => {
-                if (!requiredRoles.includes(role)) {
-                    const box = document.getElementById(`signature-pad-${role}`);
-                    const square = box ? box.closest(".signature_square_field") : null;
-                    if (square) square.style.display = "none";
-                }
-            });
-            if (!(requiredRoles.includes("student") && requiredRoles.includes("parent"))) {
-                twoSigners = false;
-            }
-        }
-        if (!twoSigners) {
-            const onlyParent = requiredRoles && requiredRoles.includes("parent") && !requiredRoles.includes("student");
-            myRole = onlyParent && parentUserInput && currentUserId === String(parentUserInput.value) ? "parent" : "student";
-        } else if (studentUserInput && currentUserId === String(studentUserInput.value)) {
-            myRole = "student";
-        } else if (parentUserInput && currentUserId === String(parentUserInput.value)) {
-            myRole = "parent";
-        }
-        if (twoSigners) lockOtherSignature(myRole === "student" ? "parent" : "student");
-        if (!myRole) save_signatures.disabled = true;
-
-        document.getElementById("clear-student").addEventListener("click", () => {
-            signaturePadStudent.clear();
-            sign_here_student.style.display = "block";
-            document.getElementById("signature-student").style.border = "1px solid gray";
-            document.getElementById("signature-student").style.backgroundColor = "#ffff005c";
-            refreshSaveLabel();
-        });
-
-        document.getElementById("clear-student-signature").addEventListener("click", () => {
-            signaturePadStudent.clear();
-            document.querySelector('input[name="auto_signature_student"]').value = 0;
-            sign_here_student.style.display = "block";
-            document.getElementById("signature-student").style.border = "1px solid gray";
-            document.getElementById("signature-student").style.backgroundColor = "#ffff005c";
-
-            document.getElementById("clear-student-signature").style.display = "none";
-            document.getElementById("signature-text-student").style.display = "none";
-            document.getElementById("signature-pad-student").style.display = "block";
-            document.getElementById("clear-student").style.display = "block";
-            document.getElementById("generate-signature-student").style.display = "block";
-            refreshSaveLabel();
-        });
-
-        let clearParentElement = document.getElementById("clear-parent");
-        if (clearParentElement) {
-            clearParentElement.addEventListener("click", () => {
-
-                signaturePadParent.clear();
-                sign_here_parent.style.display = "block";
-                document.getElementById("signature-parent").style.border = "1px solid gray";
-                document.getElementById("signature-parent").style.backgroundColor = "#ffff005c";
-                refreshSaveLabel();
-            });
-
-            document.getElementById("clear-parent-signature").addEventListener("click", () => {
-                signaturePadParent.clear();
-                document.querySelector('input[name="auto_signature_parent"]').value = 0;
-                sign_here_parent.style.display = "block";
-                document.getElementById("signature-parent").style.border = "1px solid gray";
-                document.getElementById("signature-parent").style.backgroundColor = "#ffff005c";
-
-                document.getElementById("clear-parent-signature").style.display = "none";
-                document.getElementById("signature-text-parent").style.display = "none";
-                document.getElementById("signature-pad-parent").style.display = "block";
-                document.getElementById("clear-parent").style.display = "block";
-                document.getElementById("generate-signature-parent").style.display = "block";
-                refreshSaveLabel();
-            });
-        }
-
-        if (signaturePadParent) {
-            signaturePadParent.addEventListener("afterUpdateStroke", () => {
-                refreshSaveLabel();
-
-                if (signaturePadParent && !signaturePadParent.isEmpty()) {
-                    sign_here_parent.style.display = "none";
-                    document.getElementById("signature-parent").style.border = "none";
-                    document.getElementById("signature-parent").style.borderBottom = "1px solid gray";
-                    document.getElementById("signature-parent").style.backgroundColor = "#fff";
-                } else {
-                    sign_here_parent.style.display = "block";
-                    document.getElementById("signature-parent").style.border = "1px solid gray";
-                    document.getElementById("signature-parent").style.backgroundColor = "#ffff005c";
-                }
-            });
-        }
-
-        signaturePadStudent.addEventListener("afterUpdateStroke", () => {
-            refreshSaveLabel();
-
-            if (!signaturePadStudent.isEmpty()) {
-                sign_here_student.style.display = "none";
-                document.getElementById("signature-student").style.border = "none";
-                document.getElementById("signature-student").style.borderBottom = "1px solid gray";
-                document.getElementById("signature-student").style.backgroundColor = "#fff";
-            } else {
-                sign_here_student.style.display = "block";
-                document.getElementById("signature-student").style.border = "1px solid gray";
-                document.getElementById("signature-student").style.backgroundColor = "#ffff005c";
-            }
-        });
-
-        save_signatures.addEventListener("click", function () {
-            save_signatures.disabled = true;
-
-            if (
-                !gradeSelected &&
-                document.getElementById("please_select_grade") &&
-                document.getElementById("select_grade")
-            ) {
-                save_signatures.disabled = false;
-                document.getElementById("please_select_grade").style.display = "block";
-                document.getElementById("select_grade").style.color = "red";
-                document.getElementById("select_grade").scrollIntoView({ behavior: "smooth" });
-                alert(signaturesText("selectGrade"));
-                return;
-            }
-
-            // Ya firmó y falta el otro firmante: no hay nada más que hacer desde esta cuenta
-            if (myStoredSignature && twoSigners && !otherSigned) {
-                save_signatures.disabled = false;
-                alert(signaturesText("waitingOther"));
-                return;
-            }
-
-            if (!mySignatureReady()) {
-                save_signatures.disabled = false;
-                alert(signaturesText("signYourPart"));
-                return;
-            }
-
-            // Consentimiento explícito (ADR 0002): obligatorio para firmar, también con la firma automática
-            const consent = document.querySelector('input[name="consent_version"]');
-            if (consent && !myStoredSignature && !consent.checked) {
-                save_signatures.disabled = false;
-                alert(signaturesText("consentRequired"));
-                consent.focus();
-                return;
-            }
-
-            // Con todas las firmas se genera el PDF; si falta la del otro (o de un firmante institucional), solo se
-            // guarda la propia: el PDF lo generará el último firmante
-            const institutionalInput = document.querySelector('input[name="institutional_pending"]');
-            const institutionalPending = institutionalInput && institutionalInput.value === "1";
-            if ((!twoSigners || otherSigned) && !institutionalPending) {
-                generateDocEnrollment();
-            } else {
-                generateDocEnrollmentSend();
-            }
-        });
-    }
-
-    function generateDocEnrollment() {
-
-        if (document.getElementById("please_select_grade")) {
-            document.getElementById("please_select_grade").style.display = "none";
-        }
-
-        document.getElementById("clear-student").style.display = "none";
-        document.getElementById("generate-signature-student").style.display = "none";
-        document.getElementById("clear-student-signature").style.display = "none";
-
-        let clearParentElement = document.getElementById("clear-parent");
-        if (clearParentElement) {
-            clearParentElement.style.display = "none";
-            document.getElementById("clear-parent-signature").style.display = "none";
-        }
-
-        let generateSignatureParentElement = document.getElementById( "generate-signature-parent");
-        if (generateSignatureParentElement) generateSignatureParentElement.style.display = "none";
-
-        let document_id = "ENROLLMENT";
-        if (document.querySelector("input[name=document_id]")) {
-            document_id = document.querySelector("input[name=document_id]").value;
-        }
-
-        let document_name = null;
-        if (document.querySelector("input[name=document_name]")) {
-            document_name = document.querySelector("input[name=document_name]").value;
-        }
-
-        let filename = "Student Enrollment Agreement.pdf";
-        if (document_name) {
-            filename = `${document_name.toLowerCase()}.pdf`;
-        } else if (document_id != "ENROLLMENT") {
-            filename = "Student Missing Document Agreement.pdf";
-        }
-
-        downloading = true;
-        var element = document.getElementById("content-pdf");
-        var opt = {
-            margin: [0.2, 0, 0, 0],
-            filename: filename,
-            image: { type: "jpeg", quality: 0.98 },
-            jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
-            html2canvas: { scrollX: 0, scrollY: 0, scale: 3 },
-            pagebreak: { mode: ["avoid-all", "css", "legacy"], after: ".pagebreak" }, // sin cortar texto entre páginas
-        };
-
-        html2pdf()
-        .set(opt)
-        .from(element)
-        .outputPdf("blob", filename)
-        .then((response) => {
-            generateDocEnrollmentSend(response);
-        });
-    }
-
-    function generateDocEnrollmentSend(doc = null) {
-        sendSignatures(doc);
-    }
-
-    function sendSignatures(doc = null) {
-        auto_signature_student = document.querySelector('input[name="auto_signature_student"]').value;
-        auto_signature_parent = 0;
-        if (document.querySelector('input[name="auto_signature_parent"]')) {
-            auto_signature_parent = document.querySelector('input[name="auto_signature_parent"]').value;
-        }
-
-        let student_user_id = null;
-        if (document.querySelector('input[name="student_user_id"]')) {
-            student_user_id = document.querySelector('input[name="student_user_id"]').value;
-        }
-
-        let partner_user_id = null;
-        if (document.querySelector('input[name="parent_user_id"]')) {
-            partner_user_id = document.querySelector('input[name="parent_user_id"]').value;
-        }
-
-        const formData = new FormData();
-        formData.append("action", "create_enrollment_document");
-        formData.append("_ajax_nonce", window.edusystemSignatures ? edusystemSignatures.nonce : "");
-        // Solo la firma propia (el servidor rechaza la del otro firmante), y solo si aún no está guardada
-        if (!myStoredSignature) {
-            if (myRole === "parent" && signaturePadParent) {
-                formData.append("signature_parent", auto_signature_parent == 1 ? JSON.stringify(["automatic"]) : JSON.stringify(signaturePadParent.toData()));
-            } else if (myRole === "student") {
-                formData.append("signature_student", auto_signature_student == 1 ? JSON.stringify(["automatic"]) : JSON.stringify(signaturePadStudent.toData()));
-            }
-        }
-
-        // Solicitud de firma (ADR 0002): el servidor deduce de ella quién firma; se envía la huella del contenido mostrado
-        const requestInput = document.querySelector('input[name="request_id"]');
-        const contentHashInput = document.querySelector('input[name="content_sha256"]');
-        if (requestInput) formData.append("request_id", requestInput.value);
-        const consentInput = document.querySelector('input[name="consent_version"]');
-        if (consentInput && consentInput.checked) formData.append("consent_version", consentInput.value);
-        if (contentHashInput) formData.append("content_sha256", contentHashInput.value);
-
-        if (student_user_id) formData.append("student_user_id", student_user_id);
-    
-        if (partner_user_id) formData.append("partner_user_id", partner_user_id);
-    
-        if (gradeSelected) formData.append("grade_selected", gradeSelected);
-
-        // Respuestas de los campos adicionales: el servidor las guarda si solo firma uno de los dos
-        const documentFieldsValues = document.querySelector("input[name=document_fields_values]");
-        if (documentFieldsValues) formData.append("document_fields", documentFieldsValues.value);
-
-        let document_id = "ENROLLMENT";
-        if (document.querySelector("input[name=document_id]")) {
-            document_id = document.querySelector("input[name=document_id]").value;
-        }
-
-        formData.append("document_id", document_id);
-
-        let document_name = null;
-        if (document.querySelector("input[name=document_name]")) {
-            document_name = document.querySelector("input[name=document_name]").value;
-        }
-
-        let filename = "Student Enrollment Agreement.pdf";
-        if (document_name) {
-            filename = `${document_name.toLowerCase()}.pdf`;
-        } else if (document_id != "ENROLLMENT") {
-            filename = "Student Missing Document Agreement.pdf";
-        }
-
-        if (doc) formData.append("document", doc, filename);
-
-        const XHR = new XMLHttpRequest();
-        XHR.open("POST", `${ajax_object.ajax_url}?action=create_enrollment_document`, true );
-        XHR.send(formData); // Remove the Content-type header
-
-        XHR.onload = function () {
-            let response = null;
-            try {
-                response = JSON.parse(XHR.responseText);
-            } catch (e) {}
-
-            // Rechazada (sesión caducada, sin permiso, PDF o respuestas inválidas): se avisa y se puede reintentar
-            if (XHR.status !== 200 || !response || !response.success) {
-                const message = response && typeof response.data === "string" ? response.data : "";
-                alert(message || signaturesText("saveFailed"));
-                const button = document.getElementById("saveSignatures");
-                if (button) button.disabled = false;
-                return;
-            }
-
-            if (XHR.status === 200) {
-                // document.getElementById("modal-contraseña").style.display = "none";
-                // document.getElementById("modal-content").style.display = "none";
-                // document.body.classList.remove("modal-open");
-
-                // Firmado: las respuestas de los campos adicionales ya están en el PDF o guardadas con la firma parcial
-                clearDocumentFieldsStorage();
-                // GET a la misma URL (la página pudo llegar por POST con los campos adicionales: reload() la reenviaría).
-                // Sin el «#…»: con él, replace() solo movería la página al ancla sin recargarla.
-                window.location.replace(window.location.href.split("#")[0]);
-            }
-        };
-    }
-
-    function loadSignatures() {
-        const XHR = new XMLHttpRequest();
-        XHR.open("POST", ajax_object.ajax_url, true);
-        XHR.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-        XHR.responseType = "text";
-        let document_id = "ENROLLMENT";
-        if (document.querySelector("input[name=document_id]")) {
-            document_id = document.querySelector("input[name=document_id]").value;
-        }
-        const nonce = window.edusystemSignatures ? edusystemSignatures.nonce : "";
-        const requestInput = document.querySelector('input[name="request_id"]');
-        const requestParam = requestInput ? `&request_id=${encodeURIComponent(requestInput.value)}` : "";
-        XHR.send(`action=load_signatures_data&document=${encodeURIComponent(document_id)}&_ajax_nonce=${encodeURIComponent(nonce)}${requestParam}`);
-        XHR.onload = function () {
-            if (XHR.status === 200) {
-                let grade_selected = JSON.parse(XHR.responseText).grade_selected;
-
-                let parent_signature = JSON.parse(XHR.responseText).parent_signature;
-                if (parent_signature.length > 0 && signaturePadParent) {
-                    markStoredSignature("parent");
-                    if (parent_signature[0] == "automatic") {
-                        document.querySelector('input[name="auto_signature_parent"]').value = 1;
-                        document.getElementById("signature-text-parent").style.display = "block";
-                        document.getElementById("signature-pad-parent").style.display = "none";
-                        document.getElementById("clear-parent").style.display = "none";
-                        document.getElementById("generate-signature-parent").style.display = "none";
-
-                        sign_here_parent.style.display = "none";
-                        document.getElementById("signature-parent").style.border = "none";
-                        document.getElementById("signature-parent").style.borderBottom = "1px solid gray";
-                        document.getElementById("signature-parent").style.backgroundColor = "#fff";
-                    } else {
-                        signaturePadParent.fromData(parent_signature);
-                        signaturePadParent.off();
-                        document.getElementById("clear-parent").style.display = "none";
-                        document.getElementById("generate-signature-parent").style.display = "none";
-
-                        sign_here_parent.style.display = "none";
-                        document.getElementById("signature-parent").style.border = "none";
-                        document.getElementById("signature-parent").style.borderBottom = "1px solid gray";
-                        document.getElementById("signature-parent").style.backgroundColor = "#fff";
-                    }
-                }
-
-                let student_signature = JSON.parse(XHR.responseText).student_signature;
-                if (student_signature.length > 0) {
-                    markStoredSignature("student");
-                    if (student_signature[0] == "automatic") {
-                        document.querySelector('input[name="auto_signature_student"]').value = 1;
-                        document.getElementById("signature-text-student").style.display = "block";
-                        document.getElementById("signature-pad-student").style.display = "none";
-                        document.getElementById("clear-student").style.display = "none";
-                        document.getElementById( "generate-signature-student" ).style.display = "none";
-
-                        sign_here_student.style.display = "none";
-                        document.getElementById("signature-student").style.border = "none";
-                        document.getElementById("signature-student").style.borderBottom = "1px solid gray";
-                        document.getElementById("signature-student").style.backgroundColor = "#fff";
-
-                    } else {
-                        signaturePadStudent.fromData(student_signature);
-                        signaturePadStudent.off();
-                        document.getElementById("clear-student").style.display = "none";
-                        document.getElementById( "generate-signature-student" ).style.display = "none";
-
-                        sign_here_student.style.display = "none";
-                        document.getElementById("signature-student").style.border = "none";
-                        document.getElementById("signature-student").style.borderBottom = "1px solid gray";
-                        document.getElementById("signature-student").style.backgroundColor = "#fff";
-                    }
-                }
-
-                if (grade_selected) updateGrade(grade_selected);
-                refreshSaveLabel();
-            }
-        };
-    }
-
-    // Firma ya guardada de un firmante: la propia ya no se vuelve a enviar; la del otro permite completar el documento
-    function markStoredSignature(role) {
-        if (role === myRole) {
-            myStoredSignature = true;
-        } else {
-            otherSigned = true;
-            const pending = document.getElementById(`sign-here-${role}`);
-            if (pending) pending.style.display = "none";
-        }
-    }
-
-    // Recuadro del otro firmante: visible, sin poder dibujar ni generar la firma, con el aviso de que falta la suya
-    function lockOtherSignature(role) {
-        const pad = role === "parent" ? signaturePadParent : signaturePadStudent;
-        if (pad) pad.off();
-        [`clear-${role}`, `generate-signature-${role}`, `clear-${role}-signature`].forEach((id) => {
+    // Cerrar sin firmar (vuelve a insistir en la siguiente visita). También el formulario de campos adicionales
+    const closeModal = () => {
+        ["modal-contraseña", "modal-content"].forEach((id) => {
             const element = document.getElementById(id);
             if (element) element.style.display = "none";
         });
-        const canvas = document.getElementById(`signature-${role}`);
-        if (canvas) canvas.style.backgroundColor = "#f0f0f0";
-        const pending = document.getElementById(`sign-here-${role}`);
-        if (pending) {
-            pending.style.fontSize = "14px";
-            pending.style.textAlign = "center";
-            pending.style.width = "90%";
-            pending.textContent = signaturesText(role === "parent" ? "pendingParent" : "pendingStudent");
-        }
-    }
+        if (root) root.hidden = true;
+        document.body.classList.remove("modal-open", "wpc-sign-open");
+        document.documentElement.classList.remove("wpc-sign-open");
+    };
+    const closeButton = document.getElementById("close-modal-enrollment");
+    if (closeButton) closeButton.addEventListener("click", () => {
+        if (root && root.dataset.wpcSigned && !window.confirm(signaturesText("closeConfirm"))) return;
+        closeModal();
+    });
 
-    function mySignatureReady() {
-        if (myStoredSignature) return true;
-        if (myRole === "parent") {
-            return document.querySelector('input[name="auto_signature_parent"]').value == 1 || (signaturePadParent && !signaturePadParent.isEmpty());
-        }
-        if (myRole === "student") {
-            return document.querySelector('input[name="auto_signature_student"]').value == 1 || !signaturePadStudent.isEmpty();
-        }
-        return false;
-    }
-
-    function refreshSaveLabel() {
-        if (!save_signatures) return;
-        save_signatures.textContent = mySignatureReady() && (!twoSigners || otherSigned) ? signaturesText("generate").replace("%s", returnButtonTitle()) : signaturesText("save");
-    }
-
-    function returnButtonTitle() {
-        let document_id = "ENROLLMENT";
-        let document_name = null;
-        if (document.querySelector("input[name=document_id]")) {
-            document_id = document.querySelector("input[name=document_id]").value;
-        }
-
-        if (document.querySelector("input[name=document_name]")) {
-            document_name = document.querySelector("input[name=document_name]").value;
-        }
-
-        if (document_name) {
-            return document_name.toLowerCase();
-        } else if (document_id == "ENROLLMENT") {
-            return signaturesText("enrollment");
-        } else {
-            return signaturesText("missingDocument");
-        }
-    }
+    if (root) initSigningWindow(root, closeModal);
 });
+
+function initSigningWindow(root, closeModal) {
+    const $ = (selector, scope = root) => scope.querySelector(selector);
+    const $$ = (selector, scope = root) => Array.from(scope.querySelectorAll(selector));
+    const field = (name) => {
+        const input = root.querySelector(`input[name="${name}"]`);
+        return input ? input.value : "";
+    };
+    const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const ajaxUrl = (window.ajax_object && window.ajax_object.ajax_url) || "/wp-admin/admin-ajax.php";
+    const nonce = window.edusystemSignatures ? edusystemSignatures.nonce : "";
+
+    // Foco atrapado en la ventana (el <dialog> de adopción ya lo hace solo)
+    const windowEl = $(".wpc-sign-window");
+    root.addEventListener("keydown", (event) => {
+        const dialog = $("#wpc-adopt");
+        if (dialog && dialog.open) return;
+        if (event.key === "Escape") {
+            // Con una firma ya adoptada en el documento, se pregunta antes de cerrar (se perdería)
+            if (!root.dataset.wpcSigned || window.confirm(signaturesText("closeConfirm"))) closeModal();
+            return;
+        }
+        if (event.key !== "Tab" || !windowEl) return;
+        const focusable = $$("a[href], button:not([disabled]), input:not([disabled]):not([type=hidden]), [tabindex]:not([tabindex='-1'])", windowEl)
+            .filter((element) => element.offsetParent !== null);
+        if (!focusable.length) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+            last.focus();
+            event.preventDefault();
+        } else if (!event.shiftKey && document.activeElement === last) {
+            first.focus();
+            event.preventDefault();
+        }
+    });
+    const title = $("#wpc-sign-title");
+    if (title) setTimeout(() => title.focus({ preventScroll: true }), 50);
+
+    const tags = $$("[data-wpc-tag]");
+    if (!tags.length) return; // solo rellena, o nada que firmar aquí
+
+    const consentBox = $("[data-wpc-consent-box]");
+    const consentBand = $("[data-wpc-consent]");
+    const consentError = $("[data-wpc-consent-err]");
+    const startButton = $("[data-wpc-start]");
+    const guide = $("[data-wpc-guide]");
+    const guideText = $("[data-wpc-guide-text]");
+    const counter = $("[data-wpc-count]");
+    const mobileCounter = $("[data-wpc-count-m]");
+    const mainButton = $("[data-wpc-main]");
+    const mobileButton = $("[data-wpc-main-m]");
+    const alertBox = $("[data-wpc-alert]");
+    const scrollBox = $("[data-wpc-scroll]");
+    const total = tags.length;
+    const state = { started: false, adoption: null, signed: new Set(), busy: false, done: false };
+
+    const nextTag = () => tags.find((tag) => !state.signed.has(tag));
+    const showAlert = (message, info = false) => {
+        if (!alertBox) return;
+        alertBox.textContent = message || "";
+        alertBox.classList.toggle("is-info", info);
+        alertBox.hidden = !message;
+    };
+
+    function refresh() {
+        const done = state.signed.size;
+        const next = nextTag();
+        const count = signaturesFormat("counter", done, total);
+        if (counter) counter.textContent = count;
+        if (mobileCounter) mobileCounter.textContent = state.started ? count : "";
+        if (guide) {
+            guide.hidden = !state.started || state.done;
+            guide.classList.toggle("is-done", !next);
+        }
+        if (guideText) guideText.textContent = signaturesText(next ? "guideNext" : "guideDone");
+        const label = !state.started ? signaturesText("start") : signaturesText(next ? "next" : "finish");
+        if (mainButton) {
+            mainButton.hidden = !state.started || state.done;
+            mainButton.textContent = label;
+            mainButton.disabled = state.busy;
+        }
+        if (mobileButton) {
+            mobileButton.textContent = label;
+            mobileButton.disabled = state.busy;
+            mobileButton.closest("[data-wpc-foot]").hidden = state.done;
+        }
+        tags.forEach((tag, index) => {
+            const tagLabel = tag.dataset.label || "";
+            tag.classList.toggle("is-target", state.started && tag === next);
+            const flag = tag.querySelector(".wpc-sign-flag");
+            if (flag) flag.textContent = signaturesText(done === 0 ? "start" : "next");
+            tag.setAttribute("aria-label", signaturesFormat("tagLabel", tagLabel, index + 1, total));
+            const doneBox = doneBoxOf(tag);
+            if (doneBox) {
+                const change = doneBox.querySelector("[data-wpc-change]");
+                if (change) change.setAttribute("aria-label", signaturesFormat("tagSigned", tagLabel, index + 1, total));
+            }
+        });
+    }
+
+    function doneBoxOf(tag) {
+        const area = tag.closest(".wpc-sign-area") || tag.parentElement;
+        return area ? area.querySelector("[data-wpc-done]") : null;
+    }
+
+    function requireConsent() {
+        if (consentBox && !consentBox.checked) {
+            if (consentError) consentError.hidden = false;
+            if (consentBand) consentBand.hidden = false;
+            consentBox.focus();
+            return false;
+        }
+        if (consentError) consentError.hidden = true;
+        return true;
+    }
+
+    function goTo(tag) {
+        if (!tag) return;
+        tag.scrollIntoView({ block: "center", behavior: reducedMotion ? "auto" : "smooth" });
+        tag.focus({ preventScroll: true });
+    }
+
+    function start() {
+        if (!requireConsent()) return false;
+        state.started = true;
+        if (consentBand) consentBand.hidden = true;
+        refresh();
+        goTo(nextTag());
+        return true;
+    }
+
+    function main() {
+        if (state.busy || state.done) return;
+        if (!state.started) {
+            start();
+            return;
+        }
+        const next = nextTag();
+        if (next) goTo(next);
+        else finish();
+    }
+
+    if (consentBox) consentBox.addEventListener("change", () => { if (consentBox.checked && consentError) consentError.hidden = true; });
+    if (startButton) startButton.addEventListener("click", start);
+    if (mainButton) mainButton.addEventListener("click", main);
+    if (mobileButton) mobileButton.addEventListener("click", main);
+
+    tags.forEach((tag) => tag.addEventListener("click", () => {
+        if (state.busy || state.done) return;
+        if (!state.started && !start()) return;
+        if (!state.adoption) adopt.open(tag);
+        else signTag(tag);
+    }));
+    $$("[data-wpc-change]").forEach((button) => button.addEventListener("click", () => {
+        if (!state.busy && !state.done) adopt.open(null);
+    }));
+
+    // Firma adoptada en una etiqueta: la etiqueta se cambia por la firma (con «Cambiar», fuera del PDF)
+    function signatureMarkup() {
+        const adoption = state.adoption;
+        if (!adoption) return "";
+        if (adoption.method === "typed") {
+            const span = document.createElement("span");
+            span.className = `wpc-typed wpc-font-${adoption.style}`;
+            span.textContent = adoption.text;
+            return span.outerHTML;
+        }
+        const img = document.createElement("img");
+        img.src = adoption.preview;
+        img.alt = signaturesFormat("signatureOf", root.dataset.ownName || "");
+        return img.outerHTML;
+    }
+
+    function paintTag(tag) {
+        const doneBox = doneBoxOf(tag);
+        if (!doneBox) return;
+        doneBox.querySelector("[data-wpc-done-img]").innerHTML = signatureMarkup();
+        doneBox.hidden = false;
+        tag.hidden = true;
+    }
+
+    function signTag(tag) {
+        state.signed.add(tag);
+        root.dataset.wpcSigned = "1";
+        paintTag(tag);
+        refresh();
+        const next = nextTag();
+        if (next) goTo(next);
+        else if (mainButton && !mainButton.hidden && mainButton.offsetParent) mainButton.focus();
+        else if (mobileButton) mobileButton.focus();
+    }
+
+    const adopt = createAdoptDialog(root, tags, (adoption, target) => {
+        state.adoption = adoption;
+        state.signed.forEach(paintTag); // «Cambiar»: todas las firmas ya puestas pasan a la nueva
+        if (target && !state.signed.has(target)) signTag(target);
+        else refresh();
+    });
+
+    // Finalizar: misma petición, nonce, huella y consentimiento; firma en formato v2
+    async function finish() {
+        if (state.busy || state.done || nextTag() || !state.adoption) return;
+        if (!requireConsent()) return;
+        state.busy = true;
+        refresh();
+        showAlert(signaturesText("saving"), true);
+
+        const adoption = state.adoption;
+        const signature = { v: 2, method: adoption.method };
+        // Escrita: solo el texto y el estilo; la imagen la dibuja siempre el servidor
+        if (adoption.method === "typed") Object.assign(signature, { style: adoption.style, text: adoption.text });
+        if (adoption.method === "drawn") signature.strokes = adoption.strokes;
+        if (adoption.method === "image") Object.assign(signature, { png: adoption.png, own_signature_confirmed: true });
+
+        const data = new FormData();
+        data.append("action", "create_enrollment_document");
+        data.append("_ajax_nonce", nonce);
+        data.append("request_id", field("request_id"));
+        data.append("content_sha256", field("content_sha256"));
+        data.append("document_id", field("document_id") || "ENROLLMENT");
+        data.append("student_user_id", field("student_user_id"));
+        if (consentBox && consentBox.checked) data.append("consent_version", consentBox.value);
+        const fieldsValues = field("document_fields_values");
+        if (fieldsValues) data.append("document_fields", fieldsValues);
+        if (gradeSelected) data.append("grade_selected", gradeSelected);
+        data.append("signature_v2", JSON.stringify(signature));
+
+        let result = null;
+        try {
+            const response = await fetch(`${ajaxUrl}?action=create_enrollment_document`, { method: "POST", body: data, credentials: "same-origin" });
+            result = await response.json().catch(() => null);
+        } catch (error) {
+            result = null;
+        }
+        if (!result || !result.success) {
+            state.busy = false;
+            showAlert((result && typeof result.data === "string" && result.data) || signaturesText("saveFailed"));
+            refresh();
+            return;
+        }
+
+        clearDocumentFieldsStorage();
+        state.busy = false;
+        state.done = true;
+        showAlert("");
+        const payload = result.data || {};
+        showSuccess(payload.signers || [], !!payload.final);
+        if (payload.final) {
+            const ok = await generateFinalPdf(payload.final);
+            const status = $("[data-wpc-pdf-status]");
+            if (status) {
+                status.hidden = false;
+                status.textContent = signaturesText(ok ? "pdfOk" : "pdfFail");
+            }
+        }
+    }
+
+    function showSuccess(signers, complete) {
+        if (consentBand) consentBand.hidden = true;
+        if (guide) guide.hidden = true;
+        if (scrollBox) scrollBox.hidden = true;
+        refresh();
+        const panel = $("[data-wpc-success]");
+        if (!panel) return;
+        panel.hidden = false;
+        $("[data-wpc-success-title]").textContent = signaturesText(complete ? "completeTitle" : "signedTitle");
+        $("[data-wpc-success-text]").textContent = signaturesText(complete ? "completeText" : "signedText");
+        const list = $("[data-wpc-steps]");
+        list.innerHTML = "";
+        signers.forEach((signer) => {
+            const item = document.createElement("li");
+            const chip = document.createElement("span");
+            chip.className = `wpc-chip wpc-signer-c${Number(signer.color) || 1}`;
+            chip.innerHTML = '<span class="wpc-chip-dot" aria-hidden="true"></span><b></b>';
+            chip.querySelector("b").textContent = `F${Number(signer.n) || 1}`;
+            const who = document.createElement("span");
+            who.className = "wpc-steps-who";
+            const name = document.createElement("b");
+            name.textContent = signer.own ? `${signaturesText("you")} (${signer.name})` : `${signer.label} (${signer.name})`;
+            const sub = document.createElement("span");
+            sub.textContent = signer.state === "signed" ? signer.signed_at : signaturesText(signer.state === "turn" ? "turnHint" : "pendingHint");
+            who.append(name, sub);
+            const badge = document.createElement("span");
+            badge.className = `wpc-badge wpc-badge--${signer.state === "signed" ? "ok" : signer.state === "turn" ? "info" : "neutral"}`;
+            badge.textContent = signaturesText(signer.state === "signed" ? "stateSigned" : signer.state === "turn" ? "stateTurn" : "statePending");
+            item.append(chip, who, badge);
+            list.append(item);
+        });
+        // Chips del orden de firma con el estado nuevo
+        signers.forEach((signer) => {
+            const chip = root.querySelector(`[data-wpc-chip="${CSS.escape(signer.slot)}"]`);
+            if (!chip || signer.state !== "signed") return;
+            chip.removeAttribute("aria-current");
+            const own = chip.querySelector("[data-wpc-own-state]");
+            if (own) {
+                own.className = "wpc-chip-st wpc-chip-st--ok";
+                own.textContent = `· ${signaturesText("signedChip")}`;
+            }
+        });
+        const heading = $("[data-wpc-success-title]");
+        if (heading) heading.focus();
+        const back = $("[data-wpc-return]");
+        if (back) back.addEventListener("click", (event) => {
+            event.preventDefault();
+            window.location.replace(back.href.split("#")[0]);
+        });
+    }
+
+    // PDF final con el HTML del servidor (contenido congelado, firmas y certificado de firmas): sin colores ni botones
+    async function generateFinalPdf(final) {
+        if (typeof window.html2pdf !== "function") return false;
+        const wrapper = document.createElement("div");
+        wrapper.style.cssText = `position:absolute;left:-10000px;top:0;width:${Number(final.width) || 794}px`;
+        const source = document.createElement("div");
+        source.style.cssText = "width:100%;box-sizing:border-box;background:#fff;padding:16px;font-family:Arial,sans-serif;color:#111";
+        source.innerHTML = final.html;
+        wrapper.append(source);
+        document.body.append(wrapper);
+        try {
+            drawQrCodes(source);
+            if (document.fonts && document.fonts.ready) await document.fonts.ready;
+            await new Promise((resolve) => setTimeout(resolve, 150));
+            const blob = await html2pdf().set({
+                margin: final.margin, filename: final.filename, image: { type: "jpeg", quality: 0.98 },
+                jsPDF: final.jspdf, html2canvas: { scrollX: 0, scrollY: 0, scale: 2 },
+                pagebreak: { mode: ["avoid-all", "css", "legacy"], after: ".pagebreak" },
+            }).from(source).outputPdf("blob");
+            const data = new FormData();
+            data.append("action", "create_enrollment_document");
+            data.append("_ajax_nonce", nonce);
+            data.append("request_id", field("request_id"));
+            data.append("content_sha256", final.sha);
+            if (final.token) data.append("pdf_token", final.token);
+            data.append("document", blob, final.filename);
+            const response = await fetch(`${ajaxUrl}?action=create_enrollment_document`, { method: "POST", body: data, credentials: "same-origin" });
+            const result = await response.json().catch(() => null);
+            return !!(result && result.success);
+        } catch (error) {
+            return false;
+        } finally {
+            wrapper.remove();
+        }
+    }
+
+    refresh();
+}
+
+/** QR de verificación del certificado de firmas (generador del plugin; pendiente de reescribir, ADR 0011). */
+function drawQrCodes(scope) {
+    if (typeof window.QRCode !== "function") return;
+    scope.querySelectorAll("[data-wpc-qr]").forEach((box) => {
+        if (!box.dataset.wpcQr || box.childElementCount) return;
+        new QRCode(box, { text: box.dataset.wpcQr, width: 120, height: 120, colorDark: "#000000", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.M });
+    });
+}
+
+/**
+ * Ventana «Adoptar su firma»: pestañas accesibles (flechas, Inicio y Fin), Escribir (por defecto), Dibujar y Subir
+ * imagen (si el sitio la permite), vista previa y «Se usará en…». onAdopt(adopción, etiqueta pulsada o null).
+ */
+function createAdoptDialog(root, tags, onAdopt) {
+    const dialog = root.querySelector("#wpc-adopt");
+    const $ = (selector) => dialog.querySelector(selector);
+    const $$ = (selector) => Array.from(dialog.querySelectorAll(selector));
+    const tabs = $$("[data-wpc-tab]");
+    const panels = $$("[data-wpc-panel]");
+    const typedInput = $("[data-wpc-typed]");
+    const preview = $("[data-wpc-preview]");
+    const errorBox = $("[data-wpc-adopt-err]");
+    const canvas = $("[data-wpc-canvas]");
+    const placeholder = $("[data-wpc-pad-ph]");
+    const fileInput = $("[data-wpc-file]");
+    const filePreview = $("[data-wpc-file-preview]");
+    const ownConfirm = $("[data-wpc-own-confirm]");
+    const drop = $("[data-wpc-drop]");
+    const config = window.edusystemSignatures || {};
+    const maxBytes = Number(config.uploadMaxBytes) || 2097152;
+    let target = null;
+    let current = tabs.length ? tabs[0].dataset.wpcTab : "drawn"; // «Escribir» si el servidor la puede dibujar
+    let pad = null;
+    let image = null; // data URI de la imagen elegida
+
+    const style = () => Number((dialog.querySelector('input[name="wpc_style"]:checked') || {}).value || 1);
+    const typedText = () => (typedInput ? typedInput.value || "" : "").trim();
+    const showError = (message) => {
+        errorBox.textContent = message || "";
+        errorBox.hidden = !message;
+    };
+
+    function selectTab(name, focus = false) {
+        current = name;
+        tabs.forEach((tab) => {
+            const selected = tab.dataset.wpcTab === name;
+            tab.setAttribute("aria-selected", String(selected));
+            tab.tabIndex = selected ? 0 : -1;
+            if (selected && focus) tab.focus();
+        });
+        panels.forEach((panel) => { panel.hidden = panel.dataset.wpcPanel !== name; });
+        if (name === "drawn") setupPad();
+        showError("");
+        updatePreview();
+    }
+
+    tabs.forEach((tab, index) => {
+        tab.addEventListener("click", () => selectTab(tab.dataset.wpcTab));
+        tab.addEventListener("keydown", (event) => {
+            const moves = { ArrowRight: index + 1, ArrowLeft: index - 1, Home: 0, End: tabs.length - 1 };
+            if (!(event.key in moves)) return;
+            event.preventDefault();
+            const next = (moves[event.key] + tabs.length) % tabs.length;
+            selectTab(tabs[next].dataset.wpcTab, true);
+        });
+    });
+
+    // Escribir: el texto se ve en los cuatro estilos
+    if (typedInput) typedInput.addEventListener("input", () => {
+        $$("[data-wpc-sample]").forEach((sample) => { sample.textContent = typedText() || root.dataset.ownName || ""; });
+        updatePreview();
+    });
+    $$('input[name="wpc_style"]').forEach((radio) => radio.addEventListener("change", updatePreview));
+
+    // Dibujar: lienzo blanco con línea base, táctil (EdusystemSignaturePad, propio)
+    function setupPad() {
+        if (!canvas || typeof window.EdusystemSignaturePad !== "function") return;
+        requestAnimationFrame(() => {
+            const ratio = Math.max(window.devicePixelRatio || 1, 1);
+            const box = canvas.getBoundingClientRect();
+            if (!box.width) return;
+            canvas.width = Math.round(box.width * ratio);
+            canvas.height = Math.round(box.height * ratio);
+            if (!pad) {
+                pad = new EdusystemSignaturePad(canvas, { lineWidth: 2.4, penColor: "#10182a" });
+                pad.addEventListener("afterUpdateStroke", () => {
+                    if (placeholder) placeholder.hidden = !pad.isEmpty();
+                    updatePreview();
+                });
+            }
+        });
+    }
+    const undo = $("[data-wpc-undo]");
+    if (undo) undo.addEventListener("click", () => {
+        if (!pad) return;
+        const data = pad.toData();
+        data.pop();
+        pad.fromData(data);
+        if (placeholder) placeholder.hidden = !pad.isEmpty();
+        updatePreview();
+    });
+    const clear = $("[data-wpc-clear]");
+    if (clear) clear.addEventListener("click", () => {
+        if (!pad) return;
+        pad.clear();
+        if (placeholder) placeholder.hidden = false;
+        updatePreview();
+    });
+
+    // Subir imagen: PNG o JPG de hasta 2 MB (el servidor la vuelve a comprobar y la recodifica)
+    function takeFile(file) {
+        image = null;
+        if (filePreview) filePreview.hidden = true;
+        if (!file) return updatePreview();
+        if (!["image/png", "image/jpeg"].includes(file.type) || file.size > maxBytes) {
+            showError(signaturesText("imageType"));
+            return updatePreview();
+        }
+        const reader = new FileReader();
+        reader.onload = () => {
+            image = String(reader.result || "");
+            if (filePreview) {
+                filePreview.src = image;
+                filePreview.hidden = false;
+            }
+            showError("");
+            updatePreview();
+        };
+        reader.readAsDataURL(file);
+    }
+    if (fileInput) fileInput.addEventListener("change", () => takeFile(fileInput.files && fileInput.files[0]));
+    if (drop) {
+        ["dragenter", "dragover"].forEach((type) => drop.addEventListener(type, (event) => { event.preventDefault(); drop.classList.add("is-over"); }));
+        ["dragleave", "drop"].forEach((type) => drop.addEventListener(type, (event) => { event.preventDefault(); drop.classList.remove("is-over"); }));
+        drop.addEventListener("drop", (event) => takeFile(event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]));
+    }
+
+    function updatePreview() {
+        preview.innerHTML = "";
+        if (current === "typed" && typedText()) {
+            const span = document.createElement("span");
+            span.className = `wpc-typed wpc-font-${style()}`;
+            span.textContent = typedText();
+            preview.append(span);
+        } else if (current === "drawn" && pad && !pad.isEmpty()) {
+            const img = document.createElement("img");
+            img.src = canvas.toDataURL("image/png");
+            img.alt = "";
+            preview.append(img);
+        } else if (current === "image" && image) {
+            const img = document.createElement("img");
+            img.src = image;
+            img.alt = "";
+            preview.append(img);
+        }
+    }
+
+    function fillUses() {
+        const list = $("[data-wpc-uses]");
+        list.innerHTML = "";
+        tags.forEach((tag, index) => {
+            const item = document.createElement("li");
+            item.textContent = signaturesFormat("usePlace", index + 1, tag.dataset.label || "");
+            list.append(item);
+        });
+        const description = $("[data-wpc-adopt-desc]");
+        if (description) description.textContent = signaturesFormat(tags.length === 1 ? "adoptDescOne" : "adoptDesc", tags.length);
+    }
+
+    async function collect() {
+        if (current === "typed") {
+            const text = typedText();
+            if (!text || text.length > (Number(config.typedMax) || 80)) throw new Error(signaturesText("typedEmpty"));
+            return { method: "typed", style: style(), text };
+        }
+        if (current === "drawn") {
+            const strokes = pad ? pad.toData() : [];
+            const points = strokes.reduce((sum, stroke) => sum + (stroke.points ? stroke.points.length : 0), 0);
+            if (points < 10) throw new Error(signaturesText("drawnEmpty"));
+            return { method: "drawn", strokes, preview: canvas.toDataURL("image/png") };
+        }
+        if (!image) throw new Error(signaturesText("imageEmpty"));
+        if (!ownConfirm || !ownConfirm.checked) {
+            if (ownConfirm) ownConfirm.focus();
+            throw new Error(signaturesText("imageConfirm"));
+        }
+        return { method: "image", png: image, preview: image };
+    }
+
+    const adoptButton = $("[data-wpc-adopt]");
+    adoptButton.addEventListener("click", async () => {
+        adoptButton.disabled = true;
+        try {
+            const adoption = await collect();
+            dialog.close();
+            onAdopt(adoption, target);
+        } catch (error) {
+            showError(error.message);
+        } finally {
+            adoptButton.disabled = false;
+        }
+    });
+    $$("[data-wpc-adopt-close]").forEach((button) => button.addEventListener("click", () => dialog.close()));
+    dialog.addEventListener("close", () => {
+        if (target && !target.hidden) target.focus();
+    });
+
+    return {
+        open(tag) {
+            target = tag;
+            showError("");
+            fillUses();
+            if (typeof dialog.showModal === "function") dialog.showModal();
+            else dialog.setAttribute("open", "");
+            selectTab(current);
+            if (current === "typed" && typedInput) typedInput.focus();
+        },
+    };
+}
 
 function updateGrade(id) {
     const selectedSpan = document.getElementById(id);
@@ -585,31 +631,10 @@ function updateGrade(id) {
     gradeSpans.forEach((span) => { span.textContent = "( )"; });// reset all spans to blank space
     selectedSpan.textContent = "(✓)"; // set the selected span to "✓"
     gradeSelected = id;
-    document.getElementById("please_select_grade").style.display = "none";
-    document.getElementById("select_grade").style.color = "#000";
-}
-
-function autoSignature(hide, show, button_hide, clear_hide = null) {
-    document.getElementById(hide).style.display = "none";
-    document.getElementById(show).style.display = "block";
-    document.getElementById(button_hide).style.display = "none";
-
-    if (button_hide == "generate-signature-student") {
-        document.querySelector('input[name="auto_signature_student"]').value = 1;
-        document.getElementById("clear-student-signature").style.display = "block";
-    } else {
-        document.querySelector('input[name="auto_signature_parent"]').value = 1;
-        document.getElementById("clear-parent-signature").style.display = "block";
-    }
-
-    if (clear_hide) document.getElementById(clear_hide).style.display = "none";
-
-    const button = document.getElementById("saveSignatures");
-    if (button && myRole && (!twoSigners || otherSigned)) {
-        const title = document.querySelector("input[name=document_name]");
-        const name = title ? title.value.toLowerCase() : (document.querySelector("input[name=document_id]") && document.querySelector("input[name=document_id]").value !== "ENROLLMENT" ? signaturesText("missingDocument") : signaturesText("enrollment"));
-        button.textContent = signaturesText("generate").replace("%s", name);
-    }
+    const notice = document.getElementById("please_select_grade");
+    if (notice) notice.style.display = "none";
+    const select = document.getElementById("select_grade");
+    if (select) select.style.color = "#000";
 }
 
 // Campos adicionales del documento (public/templates/document-fields-form.php): las respuestas se copian

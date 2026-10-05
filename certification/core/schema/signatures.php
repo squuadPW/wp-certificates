@@ -100,7 +100,10 @@ function squuad_cert_schema_signatures()
     // Firmas nuevas con su evidencia (ADR 0001/0002). signer_role es el puesto de la solicitud ('role:<rol>',
     // 'signer:<id>'). signer_id_document (esquema v12) y signer_id_origin (v13), ADR 0007 de Edusof: documento de
     // identidad de quien firma y quién lo registró, sellados en el mensaje EDUSIG3; vacíos (NULL) en las firmas
-    // anteriores o con «Pedir documento de identidad» apagado. La tabla de anuladas lleva además KEY user_id (v13)
+    // anteriores o con «Pedir documento de identidad» apagado. La tabla de anuladas lleva además KEY user_id (v13).
+    // signature_image_sha256 (esquema 15, ADR 0011 de Edusof): huella del PNG de la firma (escrita o imagen subida),
+    // sellada en EDUSIG4; vacía (NULL) en las firmas anteriores y en las dibujadas. Con índice (esquema 16) para rechazar
+    // que otra cuenta reutilice la misma imagen
     dbDelta(
         "CREATE TABLE " . $wpdb->prefix . "squuad_cert_signatures (
         id INT(11) NOT NULL AUTO_INCREMENT,
@@ -143,11 +146,13 @@ function squuad_cert_schema_signatures()
         evidence_format VARCHAR(10) NULL,
         signer_id_document VARCHAR(40) NULL,
         signer_id_origin VARCHAR(80) NULL,
+        signature_image_sha256 CHAR(64) NULL,
         PRIMARY KEY (id),
         UNIQUE KEY chain_seq (chain_seq),
         UNIQUE KEY request_role (request_id,signer_role),
         KEY subject (subject_type,subject_id),
-        KEY user_id (user_id))$charset_collate;"
+        KEY user_id (user_id),
+        KEY signature_image_sha256 (signature_image_sha256))$charset_collate;"
     );
 
     // Firmas anuladas: la fila completa (con su huella) se mueve aquí, para que la cadena se siga pudiendo verificar
@@ -197,12 +202,14 @@ function squuad_cert_schema_signatures()
         evidence_format VARCHAR(10) NULL,
         signer_id_document VARCHAR(40) NULL,
         signer_id_origin VARCHAR(80) NULL,
+        signature_image_sha256 CHAR(64) NULL,
         PRIMARY KEY (id),
         UNIQUE KEY chain_seq (chain_seq),
         KEY signature_row_id (signature_row_id),
         KEY request_id (request_id),
         KEY subject (subject_type,subject_id),
-        KEY user_id (user_id))$charset_collate;"
+        KEY user_id (user_id),
+        KEY signature_image_sha256 (signature_image_sha256))$charset_collate;"
     );
 }
 

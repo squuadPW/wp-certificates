@@ -793,12 +793,12 @@ function squuad_cert_signature_inline_images(string $html): string
 }
 
 /**
- * HTML para mostrar el contenido de una solicitud al firmante: los marcadores se sustituyen por los recuadros de
- * firma y el hueco del QR. El contenido guardado (y su huella) no cambia.
+ * HTML para mostrar el contenido de una solicitud al firmante: los marcadores se sustituyen por las etiquetas y los
+ * bloques de firma y el hueco del QR. El contenido guardado (y su huella) no cambia.
  *
- * Según quién mira (la cuenta conectada): su propio puesto sin firmar lleva el recuadro para firmar; los demás puestos,
- * su firma si ya existe o «pendiente» (firmantes del sistema, firmantes por variable y, para un firmante por variable,
- * el de quien recibe el documento). Así, quien da la última firma genera el PDF final con todas.
+ * Según quién mira (la cuenta conectada): su propio puesto sin firmar lleva una etiqueta «Firmar aquí» por cada vez que
+ * la plantilla coloca su variable (numeradas: ADR 0011 de Edusof); los demás puestos, su bloque de firma si ya firmaron
+ * o «Pendiente de firma: <puesto>» con el color de su número de firmante (solo en la ventana de firma, nunca en el PDF).
  */
 function squuad_cert_signature_render_content(string $content, ?object $request = null): string
 {
@@ -806,37 +806,43 @@ function squuad_cert_signature_render_content(string $content, ?object $request 
     $content = str_replace('<div data-edusig-slot="parent"></div>', '', $content);
     $section = '';
     if ($request && function_exists('squuad_cert_request_signers')) {
-        // Recuadro para firmar: el puesto de quien mira si firma desde aquí (quien recibe el documento o un firmante por
-        // variable); si no (p. ej. un firmante del sistema), el de quien recibe el documento, como siempre
-        $own = squuad_cert_signature_request_role($request, get_current_user_id());
-        $own = squuad_cert_is_person_slot($own) ? $own : squuad_cert_request_holder_slot($request);
+        // Etiquetas para firmar: solo en el puesto de quien mira, si firma desde aquí (quien recibe el documento o un
+        // firmante por variable) y aún no firmó
+        $viewer = squuad_cert_signature_request_role($request, get_current_user_id());
+        $viewer = squuad_cert_is_person_slot($viewer) ? $viewer : '';
+        $rows = squuad_cert_signature_request_rows((int) $request->id);
+        $tag_index = 0;
+        squuad_cert_signature_render_interactive(true);
         foreach (squuad_cert_request_signers($request) as $signer) {
             $slot = (string) $signer['slot_key'];
             $marker = squuad_cert_signer_slot_marker($slot);
-            $placed = false !== strpos($content, $marker);
-            if ($slot === $own) {
-                // El puesto de quien mira: donde la plantilla lo coloca o, si no, en {{signature_section}}
-                $box = squuad_cert_signature_pad_box($slot, $request);
-            } elseif (squuad_cert_is_holder_slot($slot)) {
-                // Quien recibe el documento, visto por otra persona (firmante por variable): su firma con nombre y rol
-                $box = '<div style="min-width:260px;text-align:center">' . squuad_cert_signature_render_slot_box($request, $signer)
-                    . '<div style="border-top:1px solid #333;margin-top:4px;padding-top:4px"><strong>' . esc_html($signer['name']) . '</strong><br>'
-                    . esc_html(squuad_cert_holder_slot_label($slot)) . '</div></div>';
-            } else {
-                // Firmantes del sistema y por variable: su firma o «pendiente» (nombre y cargo, en la plantilla o el bloque)
-                $box = $placed ? squuad_cert_signature_render_slot_box($request, $signer) : '';
+            $block_marker = squuad_cert_signature_block_marker($slot);
+            $placed = false !== strpos($content, $marker) || false !== strpos($content, $block_marker);
+            $named = squuad_cert_signature_slot_named($request, $slot, $content);
+            if ('' !== $viewer && $slot === $viewer && !isset($rows[$slot])) {
+                $content = squuad_cert_signature_replace_each($content, $block_marker, static fn(int $i): string => squuad_cert_signature_tag_html($slot, $request, $i, true), $tag_index);
+                $content = squuad_cert_signature_replace_each($content, $marker, static fn(int $i): string => squuad_cert_signature_tag_html($slot, $request, $i, !$named), $tag_index);
+                if (!$placed) {
+                    // En {{signature_section}}
+                    $section .= squuad_cert_signature_tag_html($slot, $request, $tag_index++, true);
+                }
+                continue;
             }
-            if ($placed) {
-                $content = str_replace($marker, $box, $content);
-            } elseif (squuad_cert_is_holder_slot($slot) || $slot === $own) {
-                $section .= $box;
+            $full = squuad_cert_signature_block_html($request, $signer, true, $rows);
+            $content = str_replace($block_marker, $full, $content);
+            if (false !== strpos($content, $marker)) {
+                $content = str_replace($marker, $named ? squuad_cert_signature_block_html($request, $signer, false, $rows) : $full, $content);
+            } elseif (squuad_cert_is_holder_slot($slot) && !$placed) {
+                // Quien recibe el documento, visto por otra persona (firmante por variable): en {{signature_section}}
+                $section .= $full;
             }
         }
+        squuad_cert_signature_render_interactive(false);
     }
 
     return str_replace(
         [SQUUAD_CERT_SIGNATURE_SLOT, SQUUAD_CERT_SIGNATURE_QR_SLOT],
-        ['' !== $section && false !== strpos($section, 'signature_square_field') ? $section : ('' !== $section ? '<div style="display:flex;flex-wrap:wrap;gap:24px;margin-top:16px">' . $section . '</div>' : ''), '<div id="qrcode"></div>'],
+        ['' !== $section ? '<div class="wpc-sign-section" style="display:flex;flex-wrap:wrap;gap:4px 0;margin-top:16px">' . $section . '</div>' : '', '<div id="qrcode"></div>'],
         $content
     );
 }
@@ -945,32 +951,12 @@ function squuad_cert_signature_request_close_by_upload(int $external_ref, string
     ] + array_intersect_key($extra, array_flip(['origin', 'during_pause', 'uploaded_at_utc', 'file_sha256'])));
 }
 
-/** Hueco de un firmante institucional pintado: su firma en SVG con la fecha, o "Pendiente de firma". */
+/**
+ * Hueco de un firmante colocado por la plantilla: su firma con la fecha y hora local, su documento de identidad y
+ * «Firmado electrónicamente», o «Pendiente de firma: <puesto>» (bloque compacto: la plantilla pone nombre y cargo).
+ * Bloque de firma común del ADR 0011 de Edusof (certification/includes/signature-format.php).
+ */
 function squuad_cert_signature_render_slot_box(object $request, array $signer): string
 {
-    global $wpdb;
-
-    // Documento de identidad sellado en la firma (EDUSIG3, esquema v12; ADR 0007 de Edusof)
-    $id_column = squuad_cert_id_document_evidence_enabled() ? ', signer_id_document' : '';
-    $row = $wpdb->get_row($wpdb->prepare(
-        "SELECT signature, signed_at_utc{$id_column} FROM {$wpdb->prefix}squuad_cert_signatures WHERE request_id = %d AND signer_role = %s",
-        $request->id,
-        $signer['slot_key']
-    ));
-    if (!$row) {
-        return '<div style="height:90px;display:flex;align-items:center;justify-content:center;color:#888;border:1px dashed #bbb">'
-            . esc_html__('Pending signature', 'wp-certificates') . '</div>';
-    }
-    $id_document = (string) ($row->signer_id_document ?? '');
-    if ('' !== $id_document && squuad_cert_id_document_mask_in_boxes()) {
-        $id_document = squuad_cert_id_document_mask($id_document); // B3: en pantalla, enmascarado; en el PDF final, completo
-    }
-
-    return squuad_cert_signature_svg((string) $row->signature, $signer['name'])
-        . ('' !== $id_document ? '<div style="font-size:11px;color:#333">' . esc_html(sprintf(
-            /* translators: %s: identity document of the signer (prefix and number) */
-            __('ID document: %s', 'wp-certificates'),
-            $id_document
-        )) . '</div>' : '')
-        . '<div style="font-size:10px;color:#666">' . esc_html(get_date_from_gmt((string) $row->signed_at_utc, 'Y-m-d H:i')) . ' UTC</div>';
+    return squuad_cert_signature_block_html($request, $signer, false);
 }

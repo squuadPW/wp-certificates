@@ -1,0 +1,290 @@
+/*
+ * WP Certificates - Ventana de firma de Mi Cuenta (ADR 0011 de Edusof; maqueta aprobada el 2026-10-05).
+ *
+ * Se carga solo en la página que abre la ventana. Usa las variables de Edusof UI dentro de .eds-scope (claro, oscuro o
+ * según el dispositivo). Los colores de firmante (--eds-signer-N) se permiten aquí, en la interfaz de firma del front
+ * (contrato de Edusof UI, §6), siempre con texto (el color nunca es la única señal) y nunca en el PDF: el PDF final se
+ * genera con el HTML del servidor, en gris.
+ */
+
+/* ======================================================================= Ventana */
+html.wpc-sign-open, body.wpc-sign-open { overflow: hidden !important; }
+.wpc-sign-modal { position: fixed; inset: 0; z-index: 100000; display: block; font: 15px/1.5 var(--eds-font); color: var(--eds-ink); -webkit-font-smoothing: antialiased; --wpc-backdrop: rgba(15, 20, 27, .55); }
+.wpc-sign-modal.eds-mode-dark { --wpc-backdrop: rgba(0, 0, 0, .66); }
+@media (prefers-color-scheme: dark) { .wpc-sign-modal.eds-mode-auto { --wpc-backdrop: rgba(0, 0, 0, .66); } }
+.wpc-sign-modal[hidden] { display: none !important; }
+.wpc-sign-modal *, .wpc-sign-modal *::before, .wpc-sign-modal *::after { box-sizing: border-box; }
+.wpc-sign-modal [hidden] { display: none !important; }
+.wpc-sign-modal :focus-visible { outline: 2px solid var(--eds-acc); outline-offset: 2px; }
+.wpc-sign-modal h2, .wpc-sign-modal h3 { font-family: var(--eds-font); color: var(--eds-ink); letter-spacing: normal; text-transform: none; }
+.wpc-sign-modal button, .wpc-sign-modal input, .wpc-sign-modal select { font: inherit; letter-spacing: normal; text-transform: none; text-shadow: none; box-shadow: none; margin: 0; }
+/* El tema pone márgenes y alturas de línea propios a títulos, párrafos, etiquetas y leyendas: aquí mandan los de la ventana */
+.wpc-sign-modal :is(.wpc-sign-head, .wpc-sign-consent, .wpc-adopt, .wpc-sign-card, .wpc-preview) :is(h2, h3, p) { margin-top: 0; line-height: 1.4; }
+.wpc-sign-modal .wpc-sign-head h2, .wpc-sign-modal .wpc-adopt-head h2 { margin: 0 !important; }
+.wpc-sign-modal label { line-height: 1.45; }
+.wpc-sign-modal .wpc-help { display: block; line-height: 1.45; }
+.wpc-sign-modal legend { float: none; width: auto; margin: 0 0 8px; padding: 0; border: 0; line-height: 1.4; }
+.wpc-sign-modal svg { flex-shrink: 0; }
+.wpc-sr-only { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.wpc-sign-backdrop { position: absolute; inset: 0; background: var(--wpc-backdrop); }
+.wpc-sign-window { position: absolute; inset: 24px; margin: 0 auto; max-width: 1080px; display: flex; flex-direction: column;
+	background: var(--eds-surface); border-radius: 14px; box-shadow: var(--eds-shadow); overflow: hidden; }
+
+/* Botones (como .eds-btn) */
+.wpc-sign-modal .wpc-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; min-height: 40px; padding: 0 16px;
+	border: 1px solid var(--eds-field); border-radius: var(--eds-radius-sm); background: var(--eds-surface); color: var(--eds-ink);
+	font-size: 14px; font-weight: 600; line-height: 1; cursor: pointer; text-decoration: none; white-space: nowrap; }
+.wpc-sign-modal .wpc-btn:hover { background: var(--eds-surface-2); color: var(--eds-ink); }
+.wpc-sign-modal .wpc-btn--primary { background: var(--eds-acc); border-color: var(--eds-acc); color: var(--eds-on-acc); }
+.wpc-sign-modal .wpc-btn--primary:hover { background: var(--eds-acc-ink); border-color: var(--eds-acc-ink); color: var(--eds-on-acc); }
+.wpc-sign-modal .wpc-btn--lg { height: 44px; padding: 0 20px; font-size: 15px; }
+.wpc-sign-modal .wpc-btn--sm { height: 32px; min-height: 32px; padding: 0 10px; font-size: 13px; }
+.wpc-sign-modal .wpc-btn--ghost { border-color: transparent; background: transparent; }
+.wpc-sign-modal .wpc-btn--ghost:hover { background: var(--eds-surface-2); }
+.wpc-sign-modal .wpc-btn[disabled] { opacity: .6; cursor: progress; }
+.wpc-sign-modal .wpc-icon-btn { width: 40px; padding: 0; }
+
+/* Cabecera */
+.wpc-sign-head { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; padding: 14px 20px; border-bottom: 1px solid var(--eds-line); }
+.wpc-sign-doc { flex: 1 1 280px; min-width: 0; }
+.wpc-sign-head h2 { margin: 0; font-size: 18px; line-height: 1.3; font-weight: 700; }
+.wpc-sign-head h2:focus { outline: none; }
+.wpc-sign-docmeta { margin: 2px 0 0; font-size: 13px; color: var(--eds-muted); }
+.wpc-sign-acts { display: flex; align-items: center; gap: 8px; }
+
+/* Colores de firmante (solo interfaz) */
+.wpc-signer-c1 { --wpc-c: var(--eds-signer-1); --wpc-cs: var(--eds-signer-1-soft); }
+.wpc-signer-c2 { --wpc-c: var(--eds-signer-2); --wpc-cs: var(--eds-signer-2-soft); }
+.wpc-signer-c3 { --wpc-c: var(--eds-signer-3); --wpc-cs: var(--eds-signer-3-soft); }
+.wpc-signer-c4 { --wpc-c: var(--eds-signer-4); --wpc-cs: var(--eds-signer-4-soft); }
+.wpc-signer-c5 { --wpc-c: var(--eds-signer-5); --wpc-cs: var(--eds-signer-5-soft); }
+.wpc-signer-c6 { --wpc-c: var(--eds-signer-6); --wpc-cs: var(--eds-signer-6-soft); }
+
+/* Orden de firma */
+.wpc-sign-order { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 4px; margin: 0; padding: 10px 20px; list-style: none;
+	border-bottom: 1px solid var(--eds-line); font-size: 13px; }
+.wpc-sign-order::before { content: attr(aria-label); color: var(--eds-muted); margin-right: 6px; font-weight: 600; }
+.wpc-sign-order li { display: flex; align-items: center; gap: 4px; margin: 0; padding: 0; }
+.wpc-sign-order li + li::before { content: ""; width: 18px; height: 10px; margin: 0 2px;
+	background: no-repeat center / 18px 10px url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 10'%3E%3Cpath d='M0 5h15M11 1l4 4-4 4' fill='none' stroke='%238793a4' stroke-width='1.6'/%3E%3C/svg%3E"); }
+.wpc-chip { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; padding: 0 10px 0 8px; border-radius: 999px;
+	border: 1px solid var(--eds-line); color: var(--eds-ink-2); background: var(--eds-surface); white-space: nowrap; }
+.wpc-chip-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--wpc-c); }
+.wpc-chip b { font-weight: 700; color: var(--wpc-c); }
+.wpc-chip[aria-current="step"] { background: var(--wpc-cs); border-color: var(--wpc-c); color: var(--eds-ink); font-weight: 600; }
+.wpc-chip-st { font-size: 12px; color: var(--eds-muted); font-weight: 500; }
+.wpc-chip-st--ok { color: var(--eds-ok-fg); font-weight: 600; }
+
+/* Consentimiento */
+.wpc-sign-consent { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; padding: 16px 20px; background: var(--eds-acc-soft); border-bottom: 1px solid var(--eds-line); }
+.wpc-sign-consent-txt { flex: 1 1 520px; min-width: 0; }
+.wpc-sign-consent h3 { margin: 0 0 6px; font-size: 16px; font-weight: 700; }
+.wpc-sign-consent-label { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; color: var(--eds-ink-2); cursor: pointer; margin: 0; font-weight: 400; }
+.wpc-sign-consent-label input { width: 20px; height: 20px; margin: 1px 0 0; flex: none; accent-color: var(--eds-acc); }
+.wpc-sign-err { margin: 6px 0 0 30px; font-size: 13px; color: var(--eds-bad-fg); font-weight: 600; }
+.wpc-adopt .wpc-sign-err { margin: 12px 0 0; }
+
+/* Guía y avisos */
+.wpc-sign-guide { display: flex; align-items: center; gap: 10px; padding: 10px 20px; border-bottom: 1px solid var(--eds-line); background: var(--eds-surface-2); font-size: 14px; color: var(--eds-ink-2); }
+.wpc-sign-count { margin-left: auto; font-weight: 700; color: var(--eds-ink); white-space: nowrap; }
+.wpc-sign-guide.is-done { background: var(--eds-ok-bg); color: var(--eds-ok-fg); }
+.wpc-sign-guide.is-done .wpc-sign-count { color: var(--eds-ok-fg); }
+.wpc-sign-alert { padding: 10px 20px; background: var(--eds-bad-bg); color: var(--eds-bad-fg); font-size: 14px; font-weight: 600; border-bottom: 1px solid var(--eds-line); }
+.wpc-sign-alert.is-info { background: var(--eds-acc-soft); color: var(--eds-acc-ink); }
+
+/* Área del documento: el papel es siempre blanco (también en modo oscuro), con la paleta clara de firmantes (AA sobre blanco) */
+.wpc-sign-body { flex: 1; overflow: auto; background: var(--eds-surface-2); padding: 28px 20px 40px; scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { .wpc-sign-body { scroll-behavior: auto; } }
+.wpc-sign-body:focus { outline: none; }
+.wpc-sign-paper { position: relative; max-width: 794px; margin: 0 auto; background: #fff; color: #1C2430; padding: 48px 56px; border-radius: 4px;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, .12), 0 8px 24px rgba(0, 0, 0, .08); font-size: 13.5px; line-height: 1.55; color-scheme: light;
+	--eds-signer-1: #1D4ED8; --eds-signer-1-soft: #E3EAFD; --eds-signer-2: #166534; --eds-signer-2-soft: #DDF4E5;
+	--eds-signer-3: #9A4806; --eds-signer-3-soft: #FDEFDC; --eds-signer-4: #7E22CE; --eds-signer-4-soft: #F2E6FC;
+	--eds-signer-5: #BE185D; --eds-signer-5-soft: #FCE4EF; --eds-signer-6: #0F766E; --eds-signer-6-soft: #DAF2EF; }
+.wpc-sign-paper :focus-visible { outline-color: #2347C6; }
+.wpc-sign-notice { margin: 0 0 12px; padding: 10px 12px; border-left: 4px solid #dba617; background: #fcf9e8; color: #1C2430; }
+
+/* Puesto de quien firma: etiqueta «Firmar aquí» (color del firmante) y, al adoptar, su firma con «Cambiar» */
+.wpc-sign-slot { display: inline-block; vertical-align: top; width: 240px; max-width: 100%; margin: 0 24px 16px 0; text-align: left; }
+.wpc-sign-slot--compact { width: auto; margin: 0; }
+.wpc-sign-area { position: relative; min-height: 84px; display: flex; align-items: flex-end; }
+.wpc-sign-line { border-top: 1.5px solid #1C2430; margin-top: 4px; padding-top: 6px; font-size: 12px; line-height: 1.45; color: #4A5466; }
+.wpc-sign-name { font-weight: 700; font-size: 13px; color: #1C2430; }
+.wpc-sign-meta { font-size: 11.5px; color: #4A5466; margin-top: 4px; }
+.wpc-sign-modal .wpc-sign-tag { position: relative; display: inline-flex; align-items: center; gap: 10px; min-height: 56px; width: 100%; max-width: 240px;
+	padding: 6px 14px 6px 10px; border: 2px solid var(--wpc-c); background: var(--wpc-cs); color: var(--wpc-c); border-radius: 6px;
+	font-weight: 700; font-size: 15px; line-height: 1.25; cursor: pointer; text-align: left; }
+.wpc-sign-modal .wpc-sign-tag:hover { filter: brightness(.97); background: var(--wpc-cs); color: var(--wpc-c); }
+.wpc-sign-modal .wpc-sign-tag:focus-visible { outline: 3px solid #1C2430; outline-offset: 3px; }
+.wpc-sign-fn { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--wpc-c); color: #fff; font-size: 12px; font-weight: 800; flex: none; }
+.wpc-sign-tag-text small { display: block; font-size: 11.5px; font-weight: 600; opacity: .9; }
+.wpc-sign-tag.is-target { box-shadow: 0 0 0 4px #fff, 0 0 0 7px var(--wpc-c); }
+@media (prefers-reduced-motion: no-preference) {
+	.wpc-sign-tag.is-target { animation: wpc-pulse 1.6s ease-in-out infinite; }
+	@keyframes wpc-pulse { 50% { box-shadow: 0 0 0 4px #fff, 0 0 0 10px color-mix(in srgb, var(--wpc-c) 35%, transparent); } }
+}
+/* Banderita «Siguiente» al margen de la etiqueta activa (solo escritorio) */
+.wpc-sign-flag { display: none; position: absolute; right: calc(100% + 14px); top: 50%; transform: translateY(-50%); align-items: center; height: 30px;
+	padding: 0 16px 0 8px; background: var(--wpc-c); color: #fff; font-size: 12px; font-weight: 700; white-space: nowrap; pointer-events: none;
+	clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%); }
+.wpc-sign-tag.is-target .wpc-sign-flag { display: inline-flex; }
+.wpc-sign-done { position: relative; width: 100%; }
+.wpc-sign-done-img { min-height: 60px; display: flex; align-items: flex-end; }
+.wpc-sign-done-img img { display: block; max-width: 220px; max-height: 76px; width: auto; height: auto; }
+.wpc-sign-done-img .wpc-typed { font-size: 38px; line-height: 1.15; color: #10182a; white-space: nowrap; padding-bottom: 4px; }
+.wpc-sign-modal .wpc-sign-change { position: absolute; right: 0; top: -22px; padding: 2px 0; border: 0; background: none; color: #1D4ED8; font-size: 12px; font-weight: 600;
+	text-decoration: underline; cursor: pointer; min-height: 0; height: auto; }
+.wpc-sign-modal .wpc-sign-change:hover { background: none; color: #1E3FB4; }
+
+/* Puestos de las otras personas: «Pendiente de firma: <puesto>» discreto, con su color (y siempre con texto) */
+.wpc-sign-pending { display: flex; align-items: center; gap: 8px; width: 100%; max-width: 240px; min-height: 56px; padding: 6px 12px;
+	border: 1.5px dashed var(--wpc-c); border-radius: 6px; color: var(--wpc-c); font-size: 12.5px; font-weight: 600; line-height: 1.3;
+	background: color-mix(in srgb, var(--wpc-cs) 55%, #fff); }
+.wpc-sign-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--wpc-c); flex: none; }
+
+/* Pie fijo (móvil) y botón principal de la cabecera (escritorio) */
+.wpc-sign-foot { display: none; }
+.wpc-sign-holder-foot { padding: 14px 20px; border-top: 1px solid var(--eds-line); text-align: center; }
+
+/* ======================================================================= Éxito */
+.wpc-sign-success { flex: 1; overflow: auto; display: grid; place-items: center; padding: 32px 20px; background: var(--eds-surface-2); }
+.wpc-sign-card { width: min(560px, 100%); background: var(--eds-surface); border: 1px solid var(--eds-line); border-radius: 14px; padding: 32px 28px; text-align: center; }
+.wpc-sign-success-ic { width: 64px; height: 64px; margin: 0 auto 14px; border-radius: 50%; display: grid; place-items: center; background: var(--eds-ok-bg); color: var(--eds-ok-fg); }
+.wpc-sign-card h3 { margin: 0 0 6px; font-size: 22px; font-weight: 700; }
+.wpc-sign-card h3:focus { outline: none; }
+.wpc-sign-card > p { margin: 0 0 20px; color: var(--eds-ink-2); }
+.wpc-steps { list-style: none; margin: 0 0 20px; padding: 0; text-align: left; border: 1px solid var(--eds-line); border-radius: var(--eds-radius-sm); }
+.wpc-steps li { display: flex; align-items: center; gap: 12px; padding: 12px 14px; margin: 0; }
+.wpc-steps li + li { border-top: 1px solid var(--eds-line); }
+.wpc-steps .wpc-chip { padding: 0 8px; }
+.wpc-steps-who { flex: 1; min-width: 0; }
+.wpc-steps-who b { display: block; font-size: 14px; color: var(--eds-ink); }
+.wpc-steps-who span { font-size: 12.5px; color: var(--eds-muted); }
+.wpc-badge { display: inline-flex; align-items: center; height: 24px; padding: 0 8px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.wpc-badge--ok { background: var(--eds-ok-bg); color: var(--eds-ok-fg); }
+.wpc-badge--info { background: var(--eds-acc-soft); color: var(--eds-acc-ink); }
+.wpc-badge--neutral { background: var(--eds-surface-2); color: var(--eds-muted); border: 1px solid var(--eds-line); }
+.wpc-sign-pdf-status { margin: 0 0 20px !important; font-size: 13.5px; }
+.wpc-sign-success-btns { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+
+/* ======================================================================= Adoptar su firma (<dialog>) */
+.wpc-adopt { width: min(680px, calc(100vw - 32px)); max-height: calc(100vh - 48px); padding: 0; border: 0; border-radius: 14px; box-shadow: var(--eds-shadow);
+	background: var(--eds-surface); color: var(--eds-ink); font: 15px/1.5 var(--eds-font); overflow: hidden; flex-direction: column; }
+.wpc-adopt[open] { display: flex; }
+.wpc-adopt::backdrop { background: rgba(15, 20, 27, .55); }
+.wpc-adopt-head { display: flex; align-items: flex-start; gap: 12px; padding: 18px 22px 12px; }
+.wpc-adopt-head h2 { margin: 0; font-size: 19px; font-weight: 700; }
+.wpc-adopt-head p { margin: 4px 0 0; font-size: 14px; color: var(--eds-muted); }
+.wpc-adopt-head .wpc-icon-btn { margin-left: auto; }
+.wpc-adopt-body { overflow: auto; padding: 0 22px 16px; flex: 1; }
+.wpc-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--eds-line); margin-bottom: 16px; }
+.wpc-sign-modal .wpc-tabs button { display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 14px; border: 0; border-radius: 0; background: none; color: var(--eds-muted);
+	font-weight: 600; font-size: 14px; border-bottom: 3px solid transparent; margin-bottom: -1px; cursor: pointer; }
+.wpc-sign-modal .wpc-tabs button[aria-selected="true"] { color: var(--eds-acc-ink); border-bottom-color: var(--eds-acc); }
+.wpc-sign-modal .wpc-tabs button:hover { color: var(--eds-ink); background: none; }
+.wpc-field { display: grid; gap: 6px; margin: 0 0 14px; }
+.wpc-field > span:first-child { font-size: 13px; font-weight: 600; color: var(--eds-ink-2); }
+.wpc-sign-modal .wpc-field input[type="text"] { height: 40px; padding: 0 12px; border: 1px solid var(--eds-field); border-radius: var(--eds-radius-sm); background: var(--eds-surface); color: var(--eds-ink); width: 100%; }
+.wpc-help { font-size: 12.5px; color: var(--eds-muted); }
+.wpc-styles-set { border: 0; padding: 0; margin: 0; min-width: 0; }
+.wpc-styles-set legend { font-size: 13px; font-weight: 600; color: var(--eds-ink-2); margin-bottom: 8px; padding: 0; }
+.wpc-styles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.wpc-style { position: relative; display: flex; flex-direction: column; justify-content: center; min-height: 82px; padding: 8px 14px; margin: 0; border: 1.5px solid var(--eds-line);
+	border-radius: var(--eds-radius-sm); background: #fff; color: #10182a; cursor: pointer; overflow: hidden; }
+.wpc-style input { position: absolute; opacity: 0; pointer-events: none; }
+.wpc-style-sample { font-size: 32px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: clip; }
+.wpc-style-sample.wpc-font-2 { font-size: 36px; }
+.wpc-style-sample.wpc-font-3 { font-size: 30px; }
+.wpc-style-name { font-size: 11.5px; color: #4A5466; font-family: var(--eds-font); }
+.wpc-style:has(input:checked) { border-color: var(--eds-acc); box-shadow: 0 0 0 2px var(--eds-acc); }
+.wpc-style:has(input:focus-visible) { outline: 2px solid var(--eds-acc); outline-offset: 3px; }
+.wpc-style-tick { position: absolute; right: 8px; top: 8px; width: 22px; height: 22px; border-radius: 50%; background: #2347C6; color: #fff; display: none; place-items: center; }
+.wpc-style:has(input:checked) .wpc-style-tick { display: grid; }
+.wpc-pad { position: relative; height: 200px; border: 1.5px solid var(--eds-field); border-radius: var(--eds-radius-sm); background: #fff; touch-action: none; overflow: hidden; }
+.wpc-pad canvas { position: absolute; inset: 0; width: 100%; height: 100%; cursor: crosshair; touch-action: none; }
+.wpc-pad-base { position: absolute; left: 22px; right: 22px; bottom: 52px; border-top: 1.5px solid #8793A4; pointer-events: none; }
+.wpc-pad-x { position: absolute; left: 24px; bottom: 56px; font-size: 22px; color: #4A5466; pointer-events: none; }
+.wpc-pad-ph { position: absolute; inset: 0 0 60px; display: grid; place-items: center; color: #5B6574; font-size: 15px; pointer-events: none; text-align: center; padding: 0 16px; }
+.wpc-pad-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; }
+.wpc-pad-tools .wpc-help { margin-left: auto; }
+.wpc-drop { display: grid; justify-items: center; gap: 8px; padding: 26px 16px; border: 2px dashed var(--eds-field); border-radius: var(--eds-radius); background: var(--eds-surface-2); text-align: center; color: var(--eds-ink); }
+.wpc-drop svg { color: var(--eds-muted); }
+.wpc-drop.is-over { border-color: var(--eds-acc); background: var(--eds-acc-soft); }
+.wpc-drop-big { font-weight: 600; }
+.wpc-drop-preview { max-width: 100%; max-height: 120px; background: #fff; border-radius: 4px; padding: 4px; }
+.wpc-helplist { margin: 12px 0 0; padding-left: 20px; font-size: 13px; color: var(--eds-ink-2); }
+.wpc-helplist li { margin: 2px 0; }
+.wpc-notice { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: var(--eds-radius-sm); font-size: 13.5px; margin-top: 12px; }
+.wpc-notice--warn { background: var(--eds-warn-bg); color: var(--eds-warn-fg); }
+.wpc-check { display: flex; gap: 10px; align-items: flex-start; margin: 12px 0 0; font-size: 14px; font-weight: 600; color: var(--eds-ink); cursor: pointer; }
+.wpc-check input { width: 20px; height: 20px; margin: 1px 0 0; flex: none; accent-color: var(--eds-acc); }
+.wpc-preview { margin-top: 16px; padding: 14px 16px; border-radius: var(--eds-radius-sm); border: 1px solid var(--eds-line); background: var(--eds-surface-2); }
+.wpc-preview h3 { margin: 0 0 8px; font-size: 13px; font-weight: 700; color: var(--eds-ink-2); }
+.wpc-preview-row { display: grid; grid-template-columns: minmax(0, 300px) 1fr; gap: 16px; align-items: start; }
+.wpc-paper-mini { background: #fff; color: #1C2430; padding: 10px 14px 12px; border-radius: 4px; max-width: 300px; }
+.wpc-mini-area { height: 64px; display: flex; align-items: flex-end; overflow: hidden; }
+.wpc-mini-area img { max-height: 60px; max-width: 100%; }
+.wpc-mini-area .wpc-typed { font-size: 32px; line-height: 1.15; color: #10182a; white-space: nowrap; }
+.wpc-mini-e { font-size: 11px; }
+.wpc-uses { margin: 0; font-size: 13px; color: var(--eds-ink-2); }
+.wpc-uses ol { margin: 4px 0 8px; padding-left: 18px; }
+.wpc-adopt-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 14px 22px; border-top: 1px solid var(--eds-line); }
+.wpc-adopt-legal { flex: 1 1 260px; margin: 0; font-size: 12.5px; color: var(--eds-muted); }
+
+/* ======================================================================= Escritorio ancho: banderita al margen */
+@media (min-width: 1000px) {
+	.wpc-sign-paper .wpc-sign-tag.is-target .wpc-sign-flag { display: inline-flex; }
+}
+@media (max-width: 999px) {
+	.wpc-sign-modal .wpc-sign-tag.is-target .wpc-sign-flag { display: none; }
+}
+
+/* ======================================================================= Móvil */
+@media (max-width: 700px) {
+	.wpc-sign-window { inset: 0; border-radius: 0; }
+	.wpc-sign-head { padding: 10px 12px 10px 16px; gap: 8px; flex-wrap: nowrap; }
+	.wpc-sign-head h2 { font-size: 16px; }
+	.wpc-sign-docmeta { font-size: 12px; }
+	.wpc-sign-head .wpc-sign-main { display: none !important; }
+	.wpc-sign-order { padding: 8px 16px; font-size: 12.5px; }
+	.wpc-sign-order::before { display: none; }
+	.wpc-chip { min-height: 26px; padding: 0 8px 0 6px; }
+	.wpc-sign-consent { padding: 14px 16px; }
+	.wpc-sign-consent-txt { flex-basis: 100%; }
+	.wpc-sign-consent [data-wpc-start] { width: 100%; }
+	.wpc-sign-guide { padding: 8px 16px; font-size: 13px; }
+	.wpc-sign-body { padding: 14px 10px 96px; }
+	.wpc-sign-paper { padding: 22px 18px; font-size: 12.5px; }
+	.wpc-sign-slot { width: 100%; margin-right: 0; }
+	.wpc-sign-modal .wpc-sign-tag, .wpc-sign-pending { max-width: none; }
+	.wpc-sign-foot { display: flex; position: absolute; left: 0; right: 0; bottom: 0; gap: 10px; align-items: center; padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+		background: var(--eds-surface); border-top: 1px solid var(--eds-line); box-shadow: 0 -6px 18px rgba(0, 0, 0, .08); z-index: 2; }
+	.wpc-sign-foot .wpc-btn { flex: 1; height: 48px; font-size: 16px; }
+	.wpc-sign-foot-info { font-size: 12.5px; color: var(--eds-muted); flex: none; max-width: 40%; }
+	.wpc-adopt { width: 100vw; max-width: 100vw; height: 100%; max-height: 100%; border-radius: 0; margin: 0; }
+	.wpc-adopt-head { padding: 14px 16px 8px; }
+	.wpc-adopt-body { padding: 0 16px 16px; }
+	.wpc-sign-modal .wpc-tabs button { flex: 1; justify-content: center; padding: 0 6px; font-size: 13.5px; }
+	.wpc-tabs button svg { display: none; }
+	.wpc-styles { grid-template-columns: minmax(0, 1fr); }
+	.wpc-preview-row { grid-template-columns: minmax(0, 1fr); }
+	.wpc-style { min-height: 68px; }
+	.wpc-pad { height: 220px; }
+	.wpc-pad-tools .wpc-help { margin-left: 0; flex-basis: 100%; }
+	.wpc-adopt-foot { padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); }
+	.wpc-adopt-legal { flex-basis: 100%; }
+	.wpc-adopt-foot .wpc-btn { flex: 1; height: 48px; }
+	.wpc-sign-card { padding: 24px 18px; }
+	.wpc-sign-success-btns .wpc-btn { flex: 1 1 100%; }
+}
+
+/* Enlaces con aspecto de botón: el tema no les cambia el color */
+.wpc-sign-modal a.wpc-btn--primary, .wpc-sign-modal a.wpc-btn--primary:visited, .wpc-sign-modal a.wpc-btn--primary:hover { color: var(--eds-on-acc) !important; text-decoration: none; }
+
+/* Títulos con el color de la ventana (el tema fija el suyo con más prioridad) */
+.wpc-sign-modal .wpc-sign-head h2, .wpc-sign-modal .wpc-adopt-head h2, .wpc-sign-modal .wpc-sign-consent h3, .wpc-sign-modal .wpc-sign-card h3 { color: var(--eds-ink) !important; }
+.wpc-sign-modal .wpc-preview h3 { color: var(--eds-ink-2) !important; }
+
+/* PDF del flujo «solo rellena»: el papel sin el relleno, la sombra ni el redondeo de la ventana */
+.wpc-sign-paper.wpc-sign-paper--print { max-width: none; margin: 0; padding: 0; border-radius: 0; box-shadow: none; }

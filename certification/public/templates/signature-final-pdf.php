@@ -1,8 +1,9 @@
 <?php
 /**
  * Genera en el navegador el PDF final de solicitudes con todas las firmas (ADR 0003, punto 11), una tras otra, a
- * partir del contenido congelado con las firmas dibujadas en el servidor, y lo sube una sola vez por solicitud (el
- * servidor comprueba el estado y la huella). Variables: $pdf_requests (['request', 'title', 'html']).
+ * partir del contenido congelado con las firmas dibujadas en el servidor y la página «Certificado de firmas» (ADR 0011
+ * de Edusof), y lo sube una sola vez por solicitud (el servidor comprueba el estado y la huella). Variables:
+ * $pdf_requests (['request', 'title', 'html']).
  */
 if (!defined('ABSPATH')) exit;
 ?>
@@ -18,11 +19,13 @@ if (!defined('ABSPATH')) exit;
     <div class="edusystem-final-pdf-source" data-request="<?= (int) $pdf['request']->id ?>" data-sha="<?= esc_attr($pdf['request']->content_sha256) ?>"
         data-filename="<?= esc_attr(sanitize_file_name(strtolower($pdf['title'] ?: (string) $pdf['request']->document_id)) . '.pdf') ?>"
         style="box-sizing:border-box;width:100%;background:#fff;padding:16px;font-family:Arial,sans-serif;color:#111">
-        <?= $pdf['html'] // phpcs:ignore -- contenido congelado (escapado al generarlo) con las firmas en SVG ?>
-        <p style="margin-top:16px;font-size:9px;color:#666;word-break:break-all"><?= esc_html(sprintf(__('Signature request #%1$d, round %2$d · Content fingerprint (SHA-256): %3$s', 'wp-certificates'), (int) $pdf['request']->id, (int) $pdf['request']->round, $pdf['request']->content_sha256)) ?></p>
+        <?= $pdf['html'] // phpcs:ignore -- contenido congelado (escapado al generarlo) con las firmas, la línea de la solicitud y el certificado de firmas ?>
     </div>
 <?php endforeach; ?>
 </div>
+<?php // Fuentes de las firmas y generador del QR del certificado (ADR 0011 de Edusof) ?>
+<link rel="stylesheet" href="<?= esc_url(add_query_arg('ver', squuad_cert_signing_assets_version(), SQUUAD_CERT_MODULE_URL . 'public/assets/css/signature-fonts.css')) ?>">
+<script src="<?= esc_url(add_query_arg('ver', squuad_cert_signing_assets_version(), squuad_cert_qrcode_script_url())) ?>"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
     integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg=="
     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -36,6 +39,13 @@ if (!defined('ABSPATH')) exit;
         for (const source of document.querySelectorAll(".edusystem-final-pdf-source")) {
             const status = document.querySelector('#edusystem-final-pdf-status li[data-request="' + source.dataset.request + '"] span');
             try {
+                // QR de verificación del certificado de firmas
+                if (typeof window.QRCode === "function") {
+                    source.querySelectorAll("[data-wpc-qr]").forEach(function (box) {
+                        if (box.dataset.wpcQr && !box.childElementCount) new QRCode(box, { text: box.dataset.wpcQr, width: 120, height: 120, correctLevel: QRCode.CorrectLevel.M });
+                    });
+                    await new Promise(function (resolve) { setTimeout(resolve, 150); });
+                }
                 const blob = await html2pdf().set({ margin: [0.3, 0.3, 0.3, 0.3], filename: source.dataset.filename, image: { type: "jpeg", quality: 0.98 },
                     jsPDF: { unit: "in", format: "a4", orientation: "portrait" }, html2canvas: { scrollX: 0, scrollY: 0, scale: 2 },
                     pagebreak: { mode: ["avoid-all", "css", "legacy"], after: ".pagebreak" } }) // sin cortar texto entre páginas

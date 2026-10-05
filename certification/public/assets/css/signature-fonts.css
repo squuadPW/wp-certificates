@@ -1,0 +1,16 @@
+/*
+ * WP Certificates - Fuentes manuscritas de la firma escrita (ADR 0011 de Edusof). Licencia SIL Open Font License 1.1
+ * (textos en ../fonts/OFL-*.txt), servidas desde el plugin: sin Google Fonts ni CDN. Las mismas fuentes dibujan la
+ * firma escrita en el servidor (GD), así lo que se ve al elegir el estilo es lo que queda en el documento.
+ */
+@font-face { font-family: "WPC Firma 1"; src: url("../fonts/GreatVibes-Regular.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "WPC Firma 2"; src: url("../fonts/Caveat-Variable.ttf") format("truetype"); font-weight: 400 700; font-display: swap; }
+@font-face { font-family: "WPC Firma 3"; src: url("../fonts/DancingScript-Variable.ttf") format("truetype"); font-weight: 400 700; font-display: swap; }
+@font-face { font-family: "WPC Firma 4"; src: url("../fonts/Allura-Regular.ttf") format("truetype"); font-display: swap; }
+/* Firmas automáticas anteriores (["automatic"], formato anterior): se pintan con Great Vibes, ahora desde el plugin */
+@font-face { font-family: "Great Vibes"; src: url("../fonts/GreatVibes-Regular.ttf") format("truetype"); font-display: swap; }
+
+.wpc-font-1 { font-family: "WPC Firma 1", cursive; }
+.wpc-font-2 { font-family: "WPC Firma 2", cursive; }
+.wpc-font-3 { font-family: "WPC Firma 3", cursive; }
+.wpc-font-4 { font-family: "WPC Firma 4", cursive; }

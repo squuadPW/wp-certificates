@@ -998,11 +998,16 @@ function squuad_cert_signer_inbox(int $user_id): array
 
 /**
  * Firma dibujada (JSON de trazos, o ["automatic"] con el nombre) como SVG estático, para mostrarla en el documento
- * final y en el PDF sin depender de los recuadros del navegador. Escala los trazos al recuadro.
+ * final y en el PDF sin depender de los recuadros del navegador. Escala los trazos al recuadro. Una firma v2 (ADR 0011
+ * de Edusof) sale como imagen PNG (escrita o subida) o como SVG de sus trazos (dibujada).
  */
 function squuad_cert_signature_svg(string $signature_json, string $name = '', int $width = 260, int $height = 90): string
 {
     $data = json_decode($signature_json, true);
+    // Formato v2 (ADR 0011 de Edusof): escrita o imagen subida (PNG recodificado en el servidor) o trazos dibujados
+    if (is_array($data) && 2 === ($data['v'] ?? null) && function_exists('squuad_cert_signature_v2_html')) {
+        return squuad_cert_signature_v2_html(squuad_cert_signature_info($signature_json), $name, $width, $height);
+    }
     if (['automatic'] === $data) {
         return '<svg xmlns="http://www.w3.org/2000/svg" width="' . $width . '" height="' . $height . '" role="img" aria-label="' . esc_attr($name) . '">'
             . '<text x="50%" y="65%" text-anchor="middle" font-family="Great Vibes, cursive" font-size="28">' . esc_html($name) . '</text></svg>';
@@ -1156,11 +1161,15 @@ function squuad_cert_signature_append_institutional_block(string $html, object $
     if (!$missing) {
         return $html;
     }
-    $block = '<div class="edusystem-institutional-signatures" style="margin-top:24px;display:flex;flex-wrap:wrap;gap:24px">';
+    // Bloque de firma común (ADR 0011 de Edusof): el marcador se pinta al mostrar el documento con la firma sobre la línea,
+    // el nombre, el puesto y la fecha. Los contenidos ya congelados conservan su bloque anterior (marcador + nombre + cargo)
+    $block = '<div class="edusystem-institutional-signatures" style="margin-top:24px;display:flex;flex-wrap:wrap;gap:4px 0">';
     foreach ($missing as $signer) {
-        $block .= '<div style="min-width:260px;text-align:center">' . squuad_cert_signer_slot_marker($signer['slot_key'])
-            . '<div style="border-top:1px solid #333;margin-top:4px;padding-top:4px"><strong>' . esc_html($signer['name']) . '</strong><br>'
-            . esc_html($signer['charge']) . '</div></div>';
+        $block .= function_exists('squuad_cert_signature_block_marker')
+            ? squuad_cert_signature_block_marker($signer['slot_key'])
+            : '<div style="min-width:260px;text-align:center">' . squuad_cert_signer_slot_marker($signer['slot_key'])
+                . '<div style="border-top:1px solid #333;margin-top:4px;padding-top:4px"><strong>' . esc_html($signer['name']) . '</strong><br>'
+                . esc_html($signer['charge']) . '</div></div>';
     }
 
     return $html . $block . '</div>';
@@ -1177,28 +1186,27 @@ function squuad_cert_signature_request_render_final(object $request): ?string
     if (null === $content) {
         return null;
     }
-    $box = static fn(array $signer): string => squuad_cert_signature_render_slot_box($request, $signer);
-
+    // Bloque de firma común (ADR 0011 de Edusof): firma sobre la línea, nombre, puesto, fecha y hora local; compacto
+    // donde la plantilla ya pone el nombre y el cargo junto a la firma
+    $rows = squuad_cert_signature_request_rows((int) $request->id);
     $users_block = '';
     foreach (squuad_cert_request_signers($request) as $signer) {
-        $marker = squuad_cert_signer_slot_marker($signer['slot_key']);
-        // Firmantes del sistema y por variable: su recuadro (nombre y cargo los pone la plantilla o el bloque «Firmas»)
-        if (squuad_cert_is_signer_slot($signer['slot_key']) || squuad_cert_is_var_slot($signer['slot_key'])) {
-            $content = str_replace($marker, $box($signer), $content);
-        } elseif (false !== strpos($content, $marker)) {
-            // Colocado por separado en la plantilla ({{signature_role_<rol>}})
-            $label = squuad_cert_holder_slot_label($signer['slot_key']);
-            $content = str_replace($marker, '<div style="min-width:260px;text-align:center">' . $box($signer)
-                . '<div style="border-top:1px solid #333;margin-top:4px;padding-top:4px"><strong>' . esc_html($signer['name']) . '</strong><br>' . esc_html($label) . '</div></div>', $content);
-        } else {
-            $label = squuad_cert_holder_slot_label($signer['slot_key']);
-            $users_block .= '<div style="min-width:260px;text-align:center">' . $box($signer)
-                . '<div style="border-top:1px solid #333;margin-top:4px;padding-top:4px"><strong>' . esc_html($signer['name']) . '</strong><br>' . esc_html($label) . '</div></div>';
+        $slot = (string) $signer['slot_key'];
+        $marker = squuad_cert_signer_slot_marker($slot);
+        $block_marker = squuad_cert_signature_block_marker($slot);
+        $placed = false !== strpos($content, $marker) || false !== strpos($content, $block_marker);
+        $full = squuad_cert_signature_block_html($request, $signer, true, $rows);
+        $named = squuad_cert_signature_slot_named($request, $slot, $content);
+        $content = str_replace($block_marker, $full, $content);
+        if (false !== strpos($content, $marker)) {
+            $content = str_replace($marker, $named ? squuad_cert_signature_block_html($request, $signer, false, $rows) : $full, $content);
+        } elseif (!$placed && squuad_cert_is_holder_slot($slot)) {
+            $users_block .= $full;
         }
     }
     $content = str_replace(
         [SQUUAD_CERT_SIGNATURE_SLOT, SQUUAD_CERT_SIGNATURE_QR_SLOT],
-        ['<div style="display:flex;flex-wrap:wrap;gap:24px;margin-top:16px">' . $users_block . '</div>', ''],
+        ['' !== $users_block ? '<div style="display:flex;flex-wrap:wrap;gap:4px 0;margin-top:16px">' . $users_block . '</div>' : '', ''],
         $content
     );
 

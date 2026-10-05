@@ -238,10 +238,30 @@ function squuad_cert_signature_canonical_v3(array $row): string
     return implode("\n", $lines);
 }
 
+/**
+ * Mensaje EDUSIG4 (ADR 0011 de Edusof, flujo de firma nuevo): los campos de EDUSIG2 con la cabecera EDUSIG4 (el método
+ * de la firma, typed | drawn | image, ya va en signature_method) más, al final y en este orden, siempre presentes
+ * (vacíos si no aplican): el documento de identidad de quien firma, quién lo registró y la huella SHA-256 del PNG de la
+ * firma (signature_image_sha256: escrita o imagen subida; vacía en la dibujada, que se guarda como trazos). EDUSIG1,
+ * EDUSIG2 y EDUSIG3 no cambian: las firmas anteriores verifican igual. No cambiar sin subir la versión.
+ */
+function squuad_cert_signature_canonical_v4(array $row): string
+{
+    $lines = explode("\n", squuad_cert_signature_canonical_v2($row));
+    $lines[0] = 'EDUSIG4';
+    $lines[] = rawurlencode((string) ($row['signer_id_document'] ?? ''));
+    $lines[] = rawurlencode((string) ($row['signer_id_origin'] ?? ''));
+    $lines[] = (string) ($row['signature_image_sha256'] ?? '');
+
+    return implode("\n", $lines);
+}
+
 /** Mensaje sellado de una fila según su formato (evidence_format; sin él, EDUSIG1). */
 function squuad_cert_signature_canonical_for(array $row): string
 {
     switch ($row['evidence_format'] ?? '') {
+        case 'EDUSIG4':
+            return squuad_cert_signature_canonical_v4($row);
         case 'EDUSIG3':
             return squuad_cert_signature_canonical_v3($row);
         case 'EDUSIG2':
@@ -352,6 +372,13 @@ function squuad_cert_signature_insert(array $data, int $subject_id, string $sign
             $row['signer_id_origin'] = $id_document['origin'];
             $row['evidence_format'] = 'EDUSIG3';
         }
+        // Firma del flujo nuevo (formato v2, ADR 0011 de Edusof): EDUSIG4 con la huella de la imagen, si el esquema 15 ya
+        // tiene la columna; si no, EDUSIG2/EDUSIG3 como hasta ahora (el método sigue sellado en signature_method)
+        if (array_key_exists('signature_image_sha256', $request_evidence) && function_exists('squuad_cert_signature_image_evidence_enabled')
+            && squuad_cert_signature_image_evidence_enabled()) {
+            $row['signature_image_sha256'] = (string) $request_evidence['signature_image_sha256'];
+            $row['evidence_format'] = 'EDUSIG4';
+        }
     } elseif ($v5) {
         $row['evidence_format'] = 'EDUSIG1';
     }
@@ -437,6 +464,10 @@ function squuad_cert_revoke_signatures(array $ids, string $reason, int $actor_us
     if (squuad_cert_id_document_evidence_enabled()) {
         $columns .= ', signer_id_document, signer_id_origin';
     }
+    // Huella de la imagen de la firma sellada en EDUSIG4 (esquema 15, ADR 0011 de Edusof)
+    if (function_exists('squuad_cert_signature_image_evidence_enabled') && squuad_cert_signature_image_evidence_enabled()) {
+        $columns .= ', signature_image_sha256';
+    }
 
     // Requisito de la anulación: el indicado o el que ya guarda la propia firma
     $document_expression = "COALESCE(NULLIF(%s, ''), external_ref)";
@@ -510,6 +541,11 @@ function squuad_cert_signature_verify_row(object $row, ?string $previous_fingerp
         // la IP en claro se puede purgar (retención): solo se comprueba mientras exista
         && (null === $row->ip || '' === $row->ip && '' === (string) $row->ip_hmac || hash_equals((string) $row->ip_hmac, hash_hmac('sha256', (string) $row->ip, $key)))
         && (null === $row->user_agent || hash_equals((string) $row->ua_sha256, hash('sha256', (string) $row->user_agent)));
+    // EDUSIG4: la huella sellada de la imagen tiene que ser la del PNG guardado en la firma
+    if ($content_ok && 'EDUSIG4' === ($row->evidence_format ?? '') && '' !== (string) ($row->signature_image_sha256 ?? '')
+        && function_exists('squuad_cert_signature_image_sha256')) {
+        $content_ok = hash_equals((string) $row->signature_image_sha256, squuad_cert_signature_image_sha256((string) $row->signature));
+    }
     if (!hash_equals($expected, (string) $row->fingerprint) || !$content_ok) {
         return 'altered';
     }
@@ -520,8 +556,8 @@ function squuad_cert_signature_verify_row(object $row, ?string $previous_fingerp
         return 'retired_key';
     }
 
-    // EDUSIG2 y EDUSIG3: el contenido que firmó tiene que ser el de su solicitud, y ese contenido tiene que estar íntegro
-    if (in_array($row->evidence_format ?? '', ['EDUSIG2', 'EDUSIG3'], true) && function_exists('squuad_cert_signature_request_get')) {
+    // EDUSIG2, EDUSIG3 y EDUSIG4: el contenido que firmó tiene que ser el de su solicitud, y ese contenido tiene que estar íntegro
+    if (in_array($row->evidence_format ?? '', ['EDUSIG2', 'EDUSIG3', 'EDUSIG4'], true) && function_exists('squuad_cert_signature_request_get')) {
         $request = squuad_cert_signature_request_get((int) $row->request_id);
         if (!$request || !hash_equals((string) $request->content_sha256, (string) $row->content_sha256)
             || null === squuad_cert_signature_request_content((int) $row->request_id)) {
