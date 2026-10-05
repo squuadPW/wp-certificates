@@ -83,7 +83,8 @@ function squuad_cert_render_subject_panel(string $type, int $id, array $ctx = []
                     $signer = get_userdata((int) $row->user_id);
                     $signed_by = $signer ? squuad_cert_account_name((int) $row->user_id) : '#' . (int) $row->user_id;
                     if (!$legacy && !empty($row->signer_role)) {
-                        $signed_by .= ' (' . (squuad_cert_is_holder_slot((string) $row->signer_role) ? squuad_cert_holder_slot_label((string) $row->signer_role) : __('System signer', 'wp-certificates')) . ')';
+                        // Quien recibe el documento (su rol), un firmante por variable (p. ej. «Representante», ADR 0009 de Edusof) o del sistema
+                        $signed_by .= ' (' . (squuad_cert_is_person_slot((string) $row->signer_role) ? squuad_cert_person_slot_label((string) $row->signer_role) : __('System signer', 'wp-certificates')) . ')';
                     }
                     $integrity = $legacy ? 'legacy' : squuad_cert_signature_verify_row($row);
                     $context = squuad_cert_signature_context_labels($row);

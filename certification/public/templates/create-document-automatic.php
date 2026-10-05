@@ -20,11 +20,17 @@
                     <input type="hidden" name="content_sha256" value="<?= esc_attr($request->content_sha256) ?>">
                     <?php // Firmantes exigidos en esta solicitud (el recuadro de quien no firma se oculta)
                     $required_slots = function_exists('squuad_cert_signature_request_required_roles') ? squuad_cert_signature_request_required_roles($request) : [];
-                    // Para el JS, el puesto de quien recibe el documento (cualquier rol) es el recuadro «student»
-                    $required_for_js = array_map(static fn(string $slot): string => squuad_cert_is_holder_slot($slot) ? 'student' : $slot, $required_slots);
+                    // Para el JS, el puesto de quien mira (quien recibe el documento o un firmante por variable, ADR 0009 de
+                    // Edusof) es el recuadro «student»: es el único que se firma en esta página
+                    $own_slot = squuad_cert_signature_request_role($request, get_current_user_id());
+                    $required_for_js = array_map(static fn(string $slot): string => $slot === $own_slot || ('' === $own_slot && squuad_cert_is_holder_slot($slot)) ? 'student' : $slot, $required_slots);
+                    // Faltan otras firmas después de la de quien mira: su navegador no genera el PDF final (lo hará el último)
+                    $others_pending = function_exists('squuad_cert_signature_request_others_pending')
+                        ? squuad_cert_signature_request_others_pending($request, get_current_user_id())
+                        : (function_exists('squuad_cert_signature_request_institutional_pending') && squuad_cert_signature_request_institutional_pending($request));
                     ?>
                     <input type="hidden" name="required_roles" value="<?= esc_attr(implode(',', $required_for_js)) ?>">
-                    <input type="hidden" name="institutional_pending" value="<?= (function_exists('squuad_cert_signature_request_institutional_pending') && squuad_cert_signature_request_institutional_pending($request)) ? '1' : '0' ?>">
+                    <input type="hidden" name="institutional_pending" value="<?= $others_pending ? '1' : '0' ?>">
                 <?php } ?>
                 <?php if (!empty($legacy_partial)) { ?>
                     <div class="edusystem-signature-notice" style="margin:0 0 12px;padding:10px 12px;border-left:4px solid #dba617;background:#fcf9e8;" data-html2canvas-ignore="true">

@@ -39,12 +39,13 @@ function squuad_cert_get_signature_section(?object $request = null): string
  */
 function squuad_cert_signature_pad_box(string $slot_key, ?object $request = null): string
 {
-    if (!squuad_cert_is_holder_slot($slot_key)) {
+    // Quien recibe el documento o un firmante por variable (ADR 0009 de Edusof), que firma el mismo documento
+    if (!squuad_cert_is_person_slot($slot_key)) {
         return '';
     }
     $full_name = $short_name = squuad_cert_signature_holder_name($slot_key, $request);
     /* translators: %s: name of the role */
-    $label = sprintf(__('Signature (%s):', 'wp-certificates'), squuad_cert_holder_slot_label($slot_key));
+    $label = sprintf(__('Signature (%s):', 'wp-certificates'), squuad_cert_person_slot_label($slot_key, $request));
     // El recuadro conserva los ids «student» (signature-pad-student…) que usa create-enrollment.js para cualquier rol
     $role = 'student';
     ob_start();

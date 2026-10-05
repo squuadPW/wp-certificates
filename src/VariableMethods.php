@@ -48,6 +48,11 @@ final class VariableMethods
             'sensitive' => (bool) ($definition['sensitive'] ?? false),
             // Formato: el valor va en mayúsculas (<span class="text-uppercase">), como el 'wrap' de process_template()
             'wrap' => (bool) ($definition['wrap'] ?? false),
+            // ADR 0009 de Edusof: el método devuelve el id de una cuenta de WordPress (texto con solo dígitos) y puede
+            // designar a quien firma un puesto «firmante por variable» ({{signature_var_<clave>}}). signer_label: nombre
+            // del puesto en el recuadro de firma (p. ej. «Representante»); por defecto, la descripción
+            'account' => (bool) ($definition['account'] ?? false),
+            'signer_label' => $definition['signer_label'] ?? '',
             'callback' => $definition['callback'],
         ];
 
@@ -62,7 +67,7 @@ final class VariableMethods
 
     private static function resolve_texts(array $method): array
     {
-        foreach (['label', 'group'] as $field) {
+        foreach (['label', 'group', 'signer_label'] as $field) {
             if (is_callable($method[$field])) {
                 $method[$field] = (string) call_user_func($method[$field]);
             }
@@ -119,6 +124,10 @@ final class VariableMethods
         }
         if (!in_array($definition['offered'] ?? 'all', self::OFFERED, true)) {
             return 'dónde se ofrece no es válido (all, document o email)';
+        }
+        // Un método que designa firmantes devuelve texto (el id de la cuenta), nunca HTML ni una condición
+        if (!empty($definition['account']) && 'text' !== ($definition['type'] ?? '')) {
+            return 'un método de cuenta (account) debe ser de tipo text';
         }
         if (!is_callable($definition['callback'] ?? null)) {
             return 'la función no es invocable';

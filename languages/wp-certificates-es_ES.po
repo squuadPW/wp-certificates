@@ -4818,3 +4818,63 @@ msgstr "Toda persona que firma (titulares, roles y firmantes del sistema) debe r
 #: includes/id-document.php:256
 msgid "The format of a document type that people already use cannot be changed. Create a new type instead."
 msgstr "El formato de un tipo de documento que ya usan personas no se puede cambiar. Cree un tipo nuevo."
+
+# --- Cadenas nuevas (2026-10-04): traducirlas ---
+#: certification/admin/document-preview.php:90
+msgid "Person by variable (example)"
+msgstr "Persona por variable (ejemplo)"
+
+#. translators: %s: variable, for example {{parent_user_id}}
+#: certification/admin/templates/document-signing.php:94
+#, php-format
+msgid ""
+"Variable not available: no active plugin gives {{%s}} as an account. This "
+"signature is skipped and the others sign."
+msgstr "Variable no disponible: ningún plugin activo da {{%s}} como cuenta. Esta firma se omite y firman los demás."
+
+#: certification/admin/templates/document-signing.php:96
+msgid ""
+"Only in automatic documents: in this document this signature is skipped."
+msgstr "Solo en documentos automáticos: en este documento esta firma se omite."
+
+#. translators: %s: variable, for example {{parent_user_id}}
+#: certification/admin/templates/document-signing.php:99
+#, php-format
+msgid ""
+"The person whose account is given by {{%s}} signs this same document, with "
+"the data of whoever receives it, from their own account. If the variable is "
+"empty or not valid, or it is the account of someone who already signs, this "
+"signature is skipped."
+msgstr "La persona cuya cuenta da {{%s}} firma este mismo documento, con los datos de quien lo recibe, desde su propia cuenta. Si la variable está vacía o no es válida, o es la cuenta de alguien que ya firma, esta firma se omite."
+
+#. translators: %s: description of the variable
+#: certification/admin/templates/document-signing.php:102
+#, php-format
+msgid "Signer by variable: %s"
+msgstr "Firmante por variable: %s"
+
+#: certification/admin/templates/document-signing.php:128
+msgid ""
+"Signers by variable sign after the roles, in the order you choose among the "
+"system signers. Each person signs only once: if the variable gives the "
+"account of someone who already signs (for example, an adult student who is "
+"their own parent), that row is skipped."
+msgstr "Los firmantes por variable firman después de los roles, en el orden que usted elija entre los firmantes del sistema. Cada persona firma una sola vez: si la variable da la cuenta de alguien que ya firma (por ejemplo, un estudiante mayor de edad que es su propio representante), esa fila se omite."
+
+#: certification/public/templates/documents-to-sign.php:14
+msgid "Waiting for previous signatures before yours"
+msgstr "Esperando firmas anteriores a la suya"
+
+#. translators: %s: name of the signer's position, for example "Parent"
+#: certification/public/templates/documents-to-sign.php:49
+#, php-format
+msgid "You sign as: %s"
+msgstr "Usted firma como: %s"
+
+#: src/Variables.php:41
+msgid ""
+"Signature, name and role of the person whose account is given by a variable, "
+"for example the parent with {{signature_var_parent_user_id}} (see \"Document "
+"signers\")"
+msgstr "Firma, nombre y puesto de la persona cuya cuenta da una variable, por ejemplo el representante con {{signature_var_parent_user_id}} (vea «Firmantes del documento»)"
+

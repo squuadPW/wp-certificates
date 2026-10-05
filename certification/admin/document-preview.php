@@ -81,6 +81,16 @@ function squuad_cert_document_preview_signers(object $document): array
         } elseif ('role' === $slot['slot_type']) {
             // Cada rol del panel: el recuadro de quien recibe el documento con ese rol (cada uno ve solo el suyo)
             $signers[] = ['slot_key' => 'role:' . $slot['role'], 'signer_id' => 0, 'phase' => 1];
+        } elseif ('var' === $slot['slot_type'] && 'automatic' === ($document->type ?? '') && function_exists('squuad_cert_var_slot_key')) {
+            // Firmante por variable (ADR 0009 de Edusof): una persona de ejemplo con el nombre del puesto
+            $signers[] = [
+                'slot_key' => squuad_cert_var_slot_key((string) $slot['role']),
+                'signer_id' => 0,
+                'variable' => (string) $slot['role'],
+                'name' => __('Person by variable (example)', 'wp-certificates'),
+                'charge' => squuad_cert_signer_variable_label((string) $slot['role']),
+                'phase' => 2,
+            ];
         }
     }
 
@@ -272,6 +282,13 @@ function squuad_cert_document_preview_replacements(object $document, string $mod
     $replacements['student_is_own_parent'] = $html('');
     $n = 0;
     foreach ($signers as $signer) {
+        if (!empty($signer['variable'])) {
+            // Firmante por variable: sus propias variables, no cuenta como firmante del sistema N
+            $replacements['signature_var_' . $signer['variable']] = $html(squuad_cert_signer_slot_marker($signer['slot_key']));
+            $replacements['signer_name_var_' . $signer['variable']] = $text($signer['name']);
+            $replacements['signer_charge_var_' . $signer['variable']] = $text($signer['charge']);
+            continue;
+        }
         if ($signer['phase'] < 2) {
             continue;
         }
@@ -316,6 +333,8 @@ function squuad_cert_document_preview_data(object $document): array
     // Variables escritas en la plantilla que no existen: en el documento real quedan como texto
     preg_match_all('/\{\{[#^\/]?(\w+)\}\}/', implode('', $parts), $found);
     $unknown = array_values(array_unique(array_diff($found[1], array_keys($replacements))));
+    // Las de un firmante por variable que no está en el panel no son desconocidas: quedan vacías (ADR 0009 de Edusof)
+    $unknown = array_values(array_filter($unknown, static fn(string $key): bool => !preg_match('/^(?:signature_var|signer_name_var|signer_charge_var)_/', $key)));
 
     if ('generate' === $mode) {
         foreach ($parts as $key => $part) {

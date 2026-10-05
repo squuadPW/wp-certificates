@@ -82,7 +82,8 @@ function squuad_cert_signature_handle_request_submission(int $request_id): void
     $signature_student = squuad_cert_signature_from_request('signature_student');
     // Por aquí firma solo quien recibe el documento (su recuadro llega como signature_student); los firmantes del sistema firman desde su bandeja y solo envían por aquí el PDF
     // final, sin firma. Una firma de otro recuadro (p. ej. el del representante de una página antigua) se rechaza.
-    if (($signature_student && !squuad_cert_is_holder_slot($role)) || squuad_cert_signature_from_request('signature_parent')) {
+    // También firma por aquí un firmante por variable (ADR 0009 de Edusof: p. ej. el representante), en su propio puesto
+    if (($signature_student && !squuad_cert_is_person_slot($role)) || squuad_cert_signature_from_request('signature_parent')) {
         wp_send_json_error(__('You can only sign your own part of the document.', 'wp-certificates'), 403);
     }
     $signature = $signature_student;

@@ -91,6 +91,10 @@ function squuad_cert_document_fields_reserved_keys()
         }
         // Variables de firma de los roles ({{signature_role_<rol>}}), según los roles activos
         $reserved = array_merge($reserved, array_map('squuad_cert_signing_role_variable', squuad_cert_signing_roles()));
+        // Variables que designan a un firmante (ADR 0009 de Edusof: {{parent_user_id}}…): un campo no puede llamarse así
+        if (function_exists('squuad_cert_signer_variables')) {
+            $reserved = array_merge($reserved, array_keys(squuad_cert_signer_variables()));
+        }
     }
 
     return $reserved;
@@ -178,7 +182,9 @@ function squuad_cert_sanitize_document_fields($rows)
             $errors[] = sprintf(__('The field "%s" has an invalid type.', 'wp-certificates'), $label);
             continue;
         }
-        if (in_array($key, $reserved, true) || in_array($key . '_list', $reserved, true)) {
+        // También las familias de los firmantes por variable ({{signature_var_X}}…, ADR 0009 de Edusof)
+        if (in_array($key, $reserved, true) || in_array($key . '_list', $reserved, true)
+            || preg_match('/^(?:signature_var|signer_name_var|signer_charge_var)_/', $key)) {
             $errors[] = sprintf(__('The key "%s" is already a system variable; choose another one.', 'wp-certificates'), $key);
             continue;
         }

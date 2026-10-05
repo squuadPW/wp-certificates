@@ -146,8 +146,14 @@ function squuad_cert_request_signers_fix(object $request, array $signers, int $d
             if ($signer && !in_array($signer->status, ['suspended', 'retired'], true)) {
                 $slots[] = ['slot_key' => squuad_cert_signer_slot_key((int) $signer->id), 'user_id' => (int) $signer->user_id, 'signer_id' => (int) $signer->id, 'charge' => (string) $signer->charge, 'phase' => 2];
             }
+        } elseif ('var' === $policy_slot['slot_type']) {
+            // Firmante por variable (ADR 0009 de Edusof): la cuenta que da la variable para el titular de esta solicitud
+            $slots[] = squuad_cert_request_var_slot($request, $document, (string) $policy_slot['role']);
         }
     }
+    // Una persona firma una sola vez, fases por el orden del panel y puestos omitidos al registro de actividad. Sin
+    // puestos por variable, el resultado es el de siempre (rol en la fase 1, firmantes del sistema en la 2)
+    [$slots, $omitted] = squuad_cert_request_slots_finalize($request, $slots);
 
     $fixed = [];
     foreach ($slots as $position => $slot) {
@@ -174,6 +180,11 @@ function squuad_cert_request_signers_fix(object $request, array $signers, int $d
         'origin' => in_array($origin, ['opened', 'issued'], true) ? $origin : 'opened',
         'policy_sha256' => $policy['policy_sha256'],
     ], ['id' => (int) $request->id]);
+
+    // Los puestos por variable omitidos (variable vacía o inválida, misma cuenta) quedan sellados en el evento 'created'
+    if ($omitted) {
+        $fixed[] = ['omitted' => $omitted];
+    }
 
     return $fixed;
 }
@@ -646,7 +657,7 @@ function squuad_cert_signing_policy(object $document): array
             $role = (string) ($slot->role_key ?? '');
             if ('student' === $type) {
                 [$type, $role] = ['role', 'student'];
-            } elseif (!in_array($type, ['role', 'signer'], true)) {
+            } elseif (!in_array($type, ['role', 'signer', 'var'], true)) {
                 continue;
             }
             $slots[] = [
@@ -779,9 +790,11 @@ function squuad_cert_signing_policy_save(int $document_certificate_id, bool $req
     foreach ($slots as $slot) {
         $type = (string) ($slot['slot_type'] ?? '');
         $signer_id = 'signer' === $type ? (int) ($slot['signer_id'] ?? 0) : 0;
-        $role = 'role' === $type ? (string) ($slot['role'] ?? '') : '';
-        if (!in_array($type, ['role', 'signer'], true) || ('signer' === $type && !$signer_id)
-            || ('role' === $type && !squuad_cert_signing_role_enabled($role))) {
+        // En un firmante por variable (ADR 0009 de Edusof), role guarda el nombre de la variable
+        $role = in_array($type, ['role', 'var'], true) ? (string) ($slot['role'] ?? '') : '';
+        if (!in_array($type, ['role', 'signer', 'var'], true) || ('signer' === $type && !$signer_id)
+            || ('role' === $type && !squuad_cert_signing_role_enabled($role))
+            || ('var' === $type && !squuad_cert_signer_variable_name_valid($role))) {
             continue;
         }
         if ('signer' === $type) {
@@ -790,15 +803,17 @@ function squuad_cert_signing_policy_save(int $document_certificate_id, bool $req
                 continue;
             }
         }
-        $key = $type . ':' . ('role' === $type ? $role : $signer_id);
+        $key = $type . ':' . ('signer' === $type ? $signer_id : $role);
         if (isset($seen[$key])) {
             continue;
         }
         $seen[$key] = true;
         $clean[] = ['slot_type' => $type, 'signer_id' => $signer_id, 'role' => $role, 'position' => (int) ($slot['position'] ?? 0)];
     }
-    // Los roles firman primero y los firmantes del sistema después; dentro de cada grupo, por el orden elegido
-    usort($clean, static fn(array $a, array $b): int => [$a['slot_type'] === 'signer', $a['position']] <=> [$b['slot_type'] === 'signer', $b['position']]);
+    // Los roles firman primero (quien recibe el documento lo abre y crea la solicitud); después, firmantes por variable y
+    // firmantes del sistema por el orden elegido (sin firmantes por variable: roles y después firmantes, como siempre).
+    // Empate en el orden: el firmante del sistema después, como antes
+    usort($clean, static fn(array $a, array $b): int => [$a['slot_type'] !== 'role', $a['position'], $a['slot_type'] === 'signer'] <=> [$b['slot_type'] !== 'role', $b['position'], $b['slot_type'] === 'signer']);
     foreach ($clean as $i => $slot) {
         $clean[$i]['position'] = $i + 1;
     }
@@ -847,10 +862,10 @@ function squuad_cert_signing_policy_save(int $document_certificate_id, bool $req
         'policy_id' => $policy_id,
         'policy_sha256' => $hash,
         'requires_signatures' => $requires,
-        'slots' => array_map(static fn(array $slot): string => $slot['slot_type'] . ('role' === $slot['slot_type'] ? ':' . $slot['role'] : ($slot['signer_id'] ? ':' . $slot['signer_id'] : '')), $clean),
+        'slots' => array_map(static fn(array $slot): string => $slot['slot_type'] . ('signer' !== $slot['slot_type'] ? ':' . $slot['role'] : ($slot['signer_id'] ? ':' . $slot['signer_id'] : '')), $clean),
     ]);
     squuad_cert_log(sprintf('Firmantes del documento %d cambiados (política %d): %s', $document_certificate_id, $policy_id,
-            $requires ? implode(', ', array_map(static fn(array $slot): string => $slot['slot_type'] . ('role' === $slot['slot_type'] ? ':' . $slot['role'] : ($slot['signer_id'] ? ':' . $slot['signer_id'] : '')), $clean)) : 'no pide firmas'), 'signing_policy');
+            $requires ? implode(', ', array_map(static fn(array $slot): string => $slot['slot_type'] . ('signer' !== $slot['slot_type'] ? ':' . $slot['role'] : ($slot['signer_id'] ? ':' . $slot['signer_id'] : '')), $clean)) : 'no pide firmas'), 'signing_policy');
 
     return ['ok' => true, 'message' => __('Document signers saved. They apply to new signature requests; requests already in progress keep their signers.', 'wp-certificates')];
 }
@@ -888,12 +903,16 @@ function squuad_cert_signature_request_slot_open(object $request, string $slot_k
     return true;
 }
 
-/** ¿Quedan firmas institucionales (fase 2) sin dar en la solicitud? */
+/**
+ * ¿Quedan firmas después de la de quien recibe el documento (firmantes del sistema y, ADR 0009 de Edusof, firmantes por
+ * variable) sin dar en la solicitud? Entonces el PDF final lo genera quien firme el último.
+ */
 function squuad_cert_signature_request_institutional_pending(object $request): bool
 {
     $signed = squuad_cert_signature_request_signed_roles((int) $request->id);
     foreach (squuad_cert_request_signers($request) as $signer) {
-        if ($signer['phase'] >= 2 && $signer['required'] && !in_array($signer['slot_key'], $signed, true)) {
+        $after_holder = squuad_cert_is_signer_slot($signer['slot_key']) || squuad_cert_is_var_slot($signer['slot_key']);
+        if ($after_holder && $signer['required'] && !in_array($signer['slot_key'], $signed, true)) {
             return true;
         }
     }
@@ -918,7 +937,7 @@ function squuad_cert_signer_inbox(int $user_id): array
          FROM {$wpdb->prefix}squuad_cert_request_signers rs
          JOIN {$wpdb->prefix}squuad_cert_requests r ON r.id = rs.request_id
          LEFT JOIN {$wpdb->prefix}documents_certificates d ON d.id = r.document_certificate_id
-         WHERE rs.user_id = %d AND rs.phase >= 2 AND r.status IN ('open', 'partially_signed') AND r.frozen_at_utc IS NOT NULL
+         WHERE rs.user_id = %d AND rs.slot_key LIKE 'signer:%%' AND r.status IN ('open', 'partially_signed') AND r.frozen_at_utc IS NOT NULL
          ORDER BY r.frozen_at_utc ASC, r.id ASC",
         $user_id
     ));
@@ -1001,7 +1020,7 @@ function squuad_cert_signature_institutional_replacements(object $request): arra
     $replacements = [];
     $n = 0;
     foreach (squuad_cert_request_signers($request) as $signer) {
-        if ($signer['phase'] < 2) {
+        if (!squuad_cert_is_signer_slot($signer['slot_key'])) {
             continue;
         }
         $n++;
@@ -1038,7 +1057,7 @@ function squuad_cert_signature_signer_replacements(object $request): array
     $slots = [];
     foreach (squuad_cert_request_signers($request) as $signer) {
         $slots[] = $signer['slot_key'];
-        if ($signer['phase'] >= 2 && $signer['signer_id']) {
+        if (squuad_cert_is_signer_slot($signer['slot_key']) && $signer['signer_id']) {
             $id = (int) $signer['signer_id'];
             $replacements['signature_signer_' . $id] = ['value' => squuad_cert_signer_slot_marker($signer['slot_key']), 'wrap' => false];
             $replacements['signer_name_' . $id] = ['value' => esc_html($signer['name']), 'wrap' => true];
@@ -1059,7 +1078,8 @@ function squuad_cert_signature_signer_replacements(object $request): array
     $replacements['requires_parent_signature'] = ['value' => false, 'wrap' => false];
     $replacements['student_is_own_parent'] = ['value' => false, 'wrap' => false];
 
-    return $replacements;
+    // Firmantes por variable (ADR 0009 de Edusof): {{signature_var_X}}, {{signer_name_var_X}}, {{signer_charge_var_X}}
+    return array_merge($replacements, squuad_cert_signature_var_replacements($request));
 }
 
 /**
@@ -1068,6 +1088,9 @@ function squuad_cert_signature_signer_replacements(object $request): array
  */
 function squuad_cert_signature_strip_unused_signer_tags(string $html): string
 {
+    // También las de un firmante por variable omitido o que no está en el panel (ADR 0009 de Edusof)
+    $html = (string) preg_replace(SQUUAD_CERT_SIGNER_VAR_TAG_PATTERN, '', $html);
+
     return (string) preg_replace('/\{\{(?:signature_signer|signer_name|signer_charge)_\d+\}\}/', '', $html);
 }
 
@@ -1079,7 +1102,9 @@ function squuad_cert_signature_append_institutional_block(string $html, object $
 {
     $missing = [];
     foreach (squuad_cert_request_signers($request) as $signer) {
-        if ($signer['phase'] >= 2 && false === strpos($html, squuad_cert_signer_slot_marker($signer['slot_key']))) {
+        // Firmantes del sistema y firmantes por variable (ADR 0009 de Edusof) que la plantilla no coloca
+        $placed_apart = squuad_cert_is_signer_slot($signer['slot_key']) || squuad_cert_is_var_slot($signer['slot_key']);
+        if ($placed_apart && false === strpos($html, squuad_cert_signer_slot_marker($signer['slot_key']))) {
             $missing[] = $signer;
         }
     }
@@ -1112,7 +1137,8 @@ function squuad_cert_signature_request_render_final(object $request): ?string
     $users_block = '';
     foreach (squuad_cert_request_signers($request) as $signer) {
         $marker = squuad_cert_signer_slot_marker($signer['slot_key']);
-        if ($signer['phase'] >= 2) {
+        // Firmantes del sistema y por variable: su recuadro (nombre y cargo los pone la plantilla o el bloque «Firmas»)
+        if (squuad_cert_is_signer_slot($signer['slot_key']) || squuad_cert_is_var_slot($signer['slot_key'])) {
             $content = str_replace($marker, $box($signer), $content);
         } elseif (false !== strpos($content, $marker)) {
             // Colocado por separado en la plantilla ({{signature_role_<rol>}})
@@ -1225,6 +1251,13 @@ function squuad_cert_signature_sign_as_signer_with(int $request_id, string $show
 
     $all_signed = !array_diff(squuad_cert_signature_request_required_roles($request), squuad_cert_signature_request_signed_roles((int) $request->id));
     squuad_cert_signature_request_transition((int) $request->id, ['open', 'partially_signed'], $all_signed ? 'signed' : 'partially_signed');
+    // Quien firma después: un firmante por variable colocado tras los firmantes del sistema (ADR 0009 de Edusof). Solo
+    // en solicitudes con firmantes por variable: en las demás todos los firmantes del sistema comparten fase y ya
+    // recibieron su aviso, como hasta ahora
+    $has_variable_slots = (bool) array_filter(squuad_cert_request_signers($request), static fn(array $slot): bool => squuad_cert_is_var_slot($slot['slot_key']));
+    if (!$all_signed && $has_variable_slots) {
+        squuad_cert_signer_notify_open_slots((int) $request->id);
+    }
 
     return ['ok' => true, 'message' => $all_signed
         ? __('Signed. All signatures are complete: the final PDF is being generated.', 'wp-certificates')
@@ -1519,7 +1552,7 @@ function squuad_cert_signature_batch_holder_candidates(WP_User $user): array
             continue;
         }
         $role = squuad_cert_signature_request_role($request, (int) $user->ID);
-        if (!squuad_cert_is_holder_slot($role) || !squuad_cert_signature_request_slot_open($request, $role)) {
+        if (!squuad_cert_is_person_slot($role) || !squuad_cert_signature_request_slot_open($request, $role)) {
             continue;
         }
         $row = clone $request;
@@ -1551,7 +1584,8 @@ function squuad_cert_signature_sign_as_holder_with(int $request_id, string $show
         return $fail(__('Documents cannot be signed from a switched session. Each person must sign from their own account.', 'wp-certificates'));
     }
     $role = squuad_cert_signature_request_role($request, $user_id);
-    if (!squuad_cert_is_holder_slot($role)) {
+    // Quien recibe el documento o un firmante por variable (ADR 0009 de Edusof)
+    if (!squuad_cert_is_person_slot($role)) {
         return $fail(__('You are not allowed to sign this document.', 'wp-certificates'));
     }
     // Documento de identidad de quien firma (ADR 0007 de Edusof)
@@ -1733,7 +1767,7 @@ function squuad_cert_signature_issue_document(int $student_id, int $document_cer
     }
     $has_signers = false;
     foreach (squuad_cert_request_signers($request) as $signer) {
-        $has_signers = $has_signers || $signer['phase'] >= 2;
+        $has_signers = $has_signers || squuad_cert_is_signer_slot($signer['slot_key']);
     }
     if (!$has_signers) {
         return $fail(__('This document has no system signers configured. Configure its signers or generate it as before.', 'wp-certificates'));
@@ -2070,7 +2104,8 @@ function squuad_cert_signer_notify_open_slots(int $request_id): int
     $sent = 0;
     foreach (squuad_cert_request_signers($request) as $signer) {
         $slot = (string) $signer['slot_key'];
-        if ($signer['phase'] < 2 || in_array($slot, $signed, true) || in_array($slot, $notified, true)
+        $by_variable = squuad_cert_is_var_slot($slot);
+        if (!(squuad_cert_is_signer_slot($slot) || $by_variable) || in_array($slot, $signed, true) || in_array($slot, $notified, true)
             || !squuad_cert_signature_request_slot_open($request, $slot)) {
             continue;
         }
@@ -2078,6 +2113,10 @@ function squuad_cert_signer_notify_open_slots(int $request_id): int
         if (!$user || !$user->user_email) {
             continue;
         }
+        // Firmante por variable (ADR 0009 de Edusof): firma desde «Documentos por firmar» de Mi Cuenta
+        $link = $by_variable
+            ? (function_exists('wc_get_account_endpoint_url') ? wc_get_account_endpoint_url('dashboard') : home_url('/'))
+            : add_query_arg(['page' => 'squuad-cert-documents-to-sign', 'request_id' => $request_id], admin_url('admin.php'));
         $subject = sprintf(__('[%1$s] Document waiting for your signature: %2$s', 'wp-certificates'), $site, $title);
         $body = sprintf(__('Hello %s,', 'wp-certificates'), $user->display_name) . "\n\n"
             . sprintf(__('The document "%s" is waiting for your signature.', 'wp-certificates'), $title) . "\n\n"

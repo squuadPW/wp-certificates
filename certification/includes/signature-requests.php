@@ -209,7 +209,11 @@ function squuad_cert_signature_request_get_or_create(
             $fixed = function_exists('squuad_cert_request_signers_fix')
                 ? squuad_cert_request_signers_fix($request, $signers, $document_certificate_id, $origin)
                 : [];
-            squuad_cert_signature_request_log_event((int) $request->id, 'created', ['round' => $round] + ($fixed ? ['signers' => $fixed] : []));
+            // Puestos por variable omitidos (ADR 0009 de Edusof): el último elemento de la lista, sellado aparte
+            $last = $fixed ? end($fixed) : null;
+            $omitted = is_array($last) && isset($last['omitted']) ? (array) array_pop($fixed)['omitted'] : [];
+            squuad_cert_signature_request_log_event((int) $request->id, 'created', ['round' => $round]
+                + ($fixed ? ['signers' => $fixed] : []) + ($omitted ? ['omitted_signers' => $omitted] : []));
         }
 
         return $request;
@@ -525,7 +529,7 @@ const SQUUAD_CERT_SIGNATURE_SLOT = '<div data-edusig-slot="signature_section"></
 /** Marcador fijo que sustituye a {{qrcode}} en el contenido. */
 const SQUUAD_CERT_SIGNATURE_QR_SLOT = '<div data-edusig-slot="qrcode"></div>';
 
-/** Puesto del usuario en la solicitud según los firmantes fijados en ella ('role:<rol>', 'signer:<id>') o '' si no firma. */
+/** Puesto del usuario en la solicitud según los firmantes fijados en ella ('role:<rol>', 'var:<variable>', 'signer:<id>') o '' si no firma. */
 function squuad_cert_signature_request_role(object $request, int $user_id): string
 {
     if (!$user_id) {
@@ -686,6 +690,16 @@ function squuad_cert_signature_user_documents(WP_User $user): array
         ];
     }
 
+    // Documentos de otros titulares en los que esta cuenta firma por variable (ADR 0009 de Edusof: p. ej. el
+    // representante en la inscripción de su hijo), con los datos del titular; todos por prioridad
+    if (function_exists('squuad_cert_signature_var_documents')) {
+        $by_variable = squuad_cert_signature_var_documents($user);
+        if ($by_variable) {
+            $items = array_merge($items, $by_variable);
+            usort($items, static fn(array $a, array $b): int => [(int) $a['document']->priority, (int) $a['document']->id] <=> [(int) $b['document']->priority, (int) $b['document']->id]);
+        }
+    }
+
     return $items;
 }
 
@@ -779,33 +793,48 @@ function squuad_cert_signature_inline_images(string $html): string
 /**
  * HTML para mostrar el contenido de una solicitud al firmante: los marcadores se sustituyen por los recuadros de
  * firma y el hueco del QR. El contenido guardado (y su huella) no cambia.
+ *
+ * Según quién mira (la cuenta conectada): su propio puesto sin firmar lleva el recuadro para firmar; los demás puestos,
+ * su firma si ya existe o «pendiente» (firmantes del sistema, firmantes por variable y, para un firmante por variable,
+ * el de quien recibe el documento). Así, quien da la última firma genera el PDF final con todas.
  */
 function squuad_cert_signature_render_content(string $content, ?object $request = null): string
 {
-    // Huecos institucionales (ADR 0003): la firma si ya existe o "pendiente"
-    if ($request && function_exists('squuad_cert_request_signers') && false !== strpos($content, 'data-edusig-slot="signer:')) {
+    // Un hueco del representante de una solicitud antigua queda vacío
+    $content = str_replace('<div data-edusig-slot="parent"></div>', '', $content);
+    $section = '';
+    if ($request && function_exists('squuad_cert_request_signers')) {
+        // Recuadro para firmar: el puesto de quien mira si firma desde aquí (quien recibe el documento o un firmante por
+        // variable); si no (p. ej. un firmante del sistema), el de quien recibe el documento, como siempre
+        $own = squuad_cert_signature_request_role($request, get_current_user_id());
+        $own = squuad_cert_is_person_slot($own) ? $own : squuad_cert_request_holder_slot($request);
         foreach (squuad_cert_request_signers($request) as $signer) {
-            if ($signer['phase'] >= 2) {
-                $content = str_replace(squuad_cert_signer_slot_marker($signer['slot_key']), squuad_cert_signature_render_slot_box($request, $signer), $content);
+            $slot = (string) $signer['slot_key'];
+            $marker = squuad_cert_signer_slot_marker($slot);
+            $placed = false !== strpos($content, $marker);
+            if ($slot === $own) {
+                // El puesto de quien mira: donde la plantilla lo coloca o, si no, en {{signature_section}}
+                $box = squuad_cert_signature_pad_box($slot, $request);
+            } elseif (squuad_cert_is_holder_slot($slot)) {
+                // Quien recibe el documento, visto por otra persona (firmante por variable): su firma con nombre y rol
+                $box = '<div style="min-width:260px;text-align:center">' . squuad_cert_signature_render_slot_box($request, $signer)
+                    . '<div style="border-top:1px solid #333;margin-top:4px;padding-top:4px"><strong>' . esc_html($signer['name']) . '</strong><br>'
+                    . esc_html(squuad_cert_holder_slot_label($slot)) . '</div></div>';
+            } else {
+                // Firmantes del sistema y por variable: su firma o «pendiente» (nombre y cargo, en la plantilla o el bloque)
+                $box = $placed ? squuad_cert_signature_render_slot_box($request, $signer) : '';
+            }
+            if ($placed) {
+                $content = str_replace($marker, $box, $content);
+            } elseif (squuad_cert_is_holder_slot($slot) || $slot === $own) {
+                $section .= $box;
             }
         }
     }
 
-    // Recuadro de quien recibe el documento: donde la plantilla lo coloca ({{signature_role_<rol>}}) o, si no, en
-    // {{signature_section}}. Un hueco del representante de una solicitud antigua queda vacío.
-    $content = str_replace('<div data-edusig-slot="parent"></div>', '', $content);
-    $holder = $request ? squuad_cert_request_holder_slot($request) : '';
-    $marker = '' !== $holder ? squuad_cert_signer_slot_marker($holder) : '';
-    $box = '' !== $holder ? squuad_cert_signature_pad_box($holder, $request) : '';
-    $section = $box;
-    if ('' !== $marker && false !== strpos($content, $marker)) {
-        $content = str_replace($marker, $box, $content);
-        $section = '';
-    }
-
     return str_replace(
         [SQUUAD_CERT_SIGNATURE_SLOT, SQUUAD_CERT_SIGNATURE_QR_SLOT],
-        [$section, '<div id="qrcode"></div>'],
+        ['' !== $section && false !== strpos($section, 'signature_square_field') ? $section : ('' !== $section ? '<div style="display:flex;flex-wrap:wrap;gap:24px;margin-top:16px">' . $section . '</div>' : ''), '<div id="qrcode"></div>'],
         $content
     );
 }

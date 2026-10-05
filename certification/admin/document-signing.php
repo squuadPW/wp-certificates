@@ -45,7 +45,7 @@ function squuad_cert_document_signing_panel(): void
     $policy = squuad_cert_signing_policy($document);
     $positions = [];
     foreach ($policy['slots'] as $slot) {
-        $positions[$slot['slot_type'] . ':' . ('role' === $slot['slot_type'] ? $slot['role'] : $slot['signer_id'])] = $slot['position'];
+        $positions[$slot['slot_type'] . ':' . ('signer' === $slot['slot_type'] ? $slot['signer_id'] : $slot['role'])] = $slot['position'];
     }
     // Roles que pueden firmar (Certificación > Signing roles): una fila por rol, encima de los firmantes del sistema
     $site_roles = squuad_cert_site_roles();
@@ -61,6 +61,21 @@ function squuad_cert_document_signing_panel(): void
     $inbox = squuad_cert_signer_inbox_enabled();
     // Texto de la plantilla para marcar qué variables de firma ya están en uso (el panel lo actualiza en vivo)
     $template_text = (string) $document->header . (string) $document->content . (string) $document->footer;
+    // Firmantes por variable (ADR 0009 de Edusof): una fila por variable que puede designar a un firmante (métodos de
+    // cuenta de plugins propios activos), por cada {{signature_var_…}} de la plantilla y por cada una que la política ya
+    // pide. Las que no tienen método disponible se avisan («variable no disponible») y su puesto se omite
+    $signer_variables = [];
+    $available_variables = function_exists('squuad_cert_signer_variables') ? squuad_cert_signer_variables() : [];
+    $policy_variables = array_column(array_filter($policy['slots'], static fn(array $slot): bool => 'var' === $slot['slot_type']), 'role');
+    $template_variables = function_exists('squuad_cert_template_signer_variables') ? squuad_cert_template_signer_variables($template_text) : [];
+    foreach (array_unique(array_merge($policy_variables, $template_variables, array_keys($available_variables))) as $variable) {
+        $variable = (string) $variable;
+        $signer_variables[$variable] = [
+            'available' => isset($available_variables[$variable]),
+            'label' => isset($available_variables[$variable]) ? $available_variables[$variable]['label'] : $variable,
+            'in_template' => in_array($variable, $template_variables, true),
+        ];
+    }
 
     include SQUUAD_CERT_MODULE_PATH . 'admin/templates/document-signing.php';
 }
@@ -80,11 +95,11 @@ function squuad_cert_document_signing_handle_save(): void
         if (empty($slot['enabled'])) {
             continue;
         }
-        // 'role:<clave del rol>' (la clave puede tener espacios) o 'signer:<id>'
+        // 'role:<clave del rol>' (la clave puede tener espacios), 'var:<variable>' (ADR 0009 de Edusof) o 'signer:<id>'
         $key = sanitize_text_field(wp_unslash((string) $key));
         [$type, $value] = array_pad(explode(':', $key, 2), 2, '');
-        $slots[] = 'role' === $type
-            ? ['slot_type' => 'role', 'role' => $value, 'signer_id' => 0, 'position' => (int) ($slot['position'] ?? 0)]
+        $slots[] = in_array($type, ['role', 'var'], true)
+            ? ['slot_type' => $type, 'role' => $value, 'signer_id' => 0, 'position' => (int) ($slot['position'] ?? 0)]
             : ['slot_type' => $type, 'role' => '', 'signer_id' => (int) $value, 'position' => (int) ($slot['position'] ?? 0)];
     }
 

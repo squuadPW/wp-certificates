@@ -1,8 +1,10 @@
 <?php
 /**
  * Panel "Firmantes del documento" (admin/document-signing.php). Variables: $document, $policy, $positions,
- * $signing_roles (roles activos: clave => nombre), $inactive_roles, $signers, $notice, $inbox, $template_text.
- * Arriba, una fila por rol activo en Certificación > Signing roles; debajo, los firmantes del sistema.
+ * $signing_roles (roles activos: clave => nombre), $inactive_roles, $signers, $notice, $inbox, $template_text y
+ * $signer_variables (variable => available, label, in_template; ADR 0009 de Edusof).
+ * Arriba, una fila por rol activo en Certificación > Signing roles; después, los firmantes por variable y los firmantes
+ * del sistema.
  */
 if (!defined('ABSPATH')) exit;
 
@@ -84,6 +86,23 @@ $requires_checked = $eds
                     if (!$signing_roles) {
                         echo '<tr><td></td><td colspan="3"><em>' . esc_html__('No role can sign yet: mark them in Certification > Signing roles.', 'wp-certificates') . '</em></td></tr>';
                     }
+                    // Firmantes por variable (ADR 0009 de Edusof): la persona cuya cuenta da la variable firma el mismo documento
+                    foreach ($signer_variables as $variable => $info) {
+                        $key = 'var:' . $variable;
+                        if (!$info['available']) {
+                            /* translators: %s: variable, for example {{parent_user_id}} */
+                            $detail = sprintf(__('Variable not available: no active plugin gives {{%s}} as an account. This signature is skipped and the others sign.', 'wp-certificates'), $variable);
+                        } elseif ('automatic' !== $document->type) {
+                            $detail = __('Only in automatic documents: in this document this signature is skipped.', 'wp-certificates');
+                        } else {
+                            /* translators: %s: variable, for example {{parent_user_id}} */
+                            $detail = sprintf(__('The person whose account is given by {{%s}} signs this same document, with the data of whoever receives it, from their own account. If the variable is empty or not valid, or it is the account of someone who already signs, this signature is skipped.', 'wp-certificates'), $variable);
+                        }
+                        /* translators: %s: description of the variable */
+                        $row($key, sprintf(__('Signer by variable: %s', 'wp-certificates'), $info['label']), $detail, isset($positions[$key]), $positions[$key] ?? $next++,
+                            ['signature_var_' . $variable, 'signer_name_var_' . $variable, 'signer_charge_var_' . $variable],
+                            __('Not in the template: it goes in the signatures block at the end.', 'wp-certificates'));
+                    }
                     foreach ($signers as $signer) {
                         $key = 'signer:' . (int) $signer->id;
                         $detail = trim((string) $signer->charge . ' · ' . (string) $signer->user_email, ' ·');
@@ -105,6 +124,9 @@ $requires_checked = $eds
                 <p style="margin-top:0"><strong><?= esc_html__('How to place the signatures in the template', 'wp-certificates') ?></strong></p>
                 <p><?= $chip('signature_section') // phpcs:ignore ?> <?= esc_html__('The signatures of the roles that are not placed separately (as before).', 'wp-certificates') ?></p>
                 <p><?= esc_html__('Each signer separately: use the variables of their row. Signers not placed in the template go in {{signature_section}} (roles) or in a signatures block at the end (system signers).', 'wp-certificates') ?></p>
+                <?php if ($signer_variables) { ?>
+                <p><?= esc_html__('Signers by variable sign after the roles, in the order you choose among the system signers. Each person signs only once: if the variable gives the account of someone who already signs (for example, an adult student who is their own parent), that row is skipped.', 'wp-certificates') ?></p>
+                <?php } ?>
                 <?php if (wpc_edusystem_active()) { // Reglas de los puestos de EduSystem (estudiante y representante) ?>
                 <p style="margin-bottom:4px"><strong><?= esc_html__('Template rules', 'wp-certificates') ?></strong> — <?= esc_html__('the text between the marks is shown only if the rule is met; with ^ , only if it is not:', 'wp-certificates') ?></p>
                 <ul style="list-style:disc;margin:0 0 0 20px">

@@ -38,6 +38,7 @@ final class Variables
             '{{position_user_charge}}' => __('Position of the system signer (old templates)', 'wp-certificates'),
             '{{signature_N}}, {{user_sign_N}}, {{position_user_charge_N}}' => __('Signature, name and position of system signer number N (old templates)', 'wp-certificates'),
             '{{signature_signer_ID}}, {{signer_name_ID}}, {{signer_charge_ID}}' => __('Signature, name and position of a system signer (see "Document signers")', 'wp-certificates'),
+            '{{signature_var_VARIABLE}}, {{signer_name_var_VARIABLE}}, {{signer_charge_var_VARIABLE}}' => __('Signature, name and role of the person whose account is given by a variable, for example the parent with {{signature_var_parent_user_id}} (see "Document signers")', 'wp-certificates'),
             '{{key}}, {{key_list}}' => __('Answers to the additional fields of this document (see "Advanced")', 'wp-certificates'),
         ];
     }

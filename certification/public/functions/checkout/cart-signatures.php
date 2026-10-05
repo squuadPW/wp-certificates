@@ -35,10 +35,12 @@ function squuad_cert_load_signatures_data()
         )) as $row) {
             $by_role[$row->signer_role] = json_decode($row->signature);
         }
+        // Firma del puesto de quien mira (quien recibe el documento, 'role:<rol>', o un firmante por variable,
+        // 'var:<variable>', ADR 0009 de Edusof): el JS la pinta en el recuadro «student», el único que se firma aquí
+        $own = squuad_cert_signature_request_role($request, (int) $current_user->ID);
         wp_send_json(array(
             'grade_selected' => null,
-            // Firma de quien recibe el documento (su puesto 'role:<rol>'): el JS la pinta en el recuadro «student»
-            'student_signature' => $by_role[squuad_cert_request_holder_slot($request)] ?? [],
+            'student_signature' => squuad_cert_is_person_slot($own) ? ($by_role[$own] ?? []) : ($by_role[squuad_cert_request_holder_slot($request)] ?? []),
             'parent_signature' => [],
         ));
     }

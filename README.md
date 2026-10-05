@@ -40,6 +40,11 @@ Se publica junto con **EduSystem 6.0.0** (ADR 0004 de EduSystem). Resumen:
   las firmas anteriores siguen verificando igual). Variable `{{holder_id_document}}`. Esquemas v12 y v13: se sella
   también quién registró el documento (persona, secretaría o administración), máximo 5 intentos fallidos por hora,
   prefijos sin solapes ni reutilización, exportador y borrador de datos personales.
+- **Firmante por variable** (ADR 0009 de Edusof): un documento automático puede pedir la firma de la persona cuya
+  cuenta da una variable de un plugin propio (con EduSystem, `{{signature_var_parent_user_id}}`: el representante firma
+  el MISMO documento del estudiante, con sus datos, desde su cuenta; lo ve en «Documentos por firmar»). Fila «Firmante
+  por variable» en «Firmantes del documento», ordenable entre los firmantes del sistema; variable vacía o inválida, o
+  cuenta que ya firma: ese puesto se omite y queda en el registro de actividad. Solo solicitudes nuevas.
 - **PDF firmados protegidos:** nombre aleatorio, adjunto privado y fuera de la API REST de medios; los existentes se
   marcan privados sin moverlos, también los del sistema de firma anterior (esquema v14). Su ficha solo la ven quien
   tiene el permiso de certificación o quien lo subió (la URL directa del archivo sigue respondiendo: pendiente servirlos

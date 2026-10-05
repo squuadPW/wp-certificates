@@ -10,6 +10,8 @@ $statuses = [
     'to_sign' => __('Waiting for your signature', 'wp-certificates'),
     'waiting' => __('Signed by you; waiting for other signatures', 'wp-certificates'),
     'pdf' => __('Signed by everyone; the final PDF is pending', 'wp-certificates'),
+    // Firmante por variable (ADR 0009 de Edusof): su turno llega después de las firmas anteriores
+    'queued' => __('Waiting for previous signatures before yours', 'wp-certificates'),
 ];
 ?>
 <section class="edusystem-documents-to-sign" id="edusystem-documents-to-sign" style="margin-bottom:24px">
@@ -40,7 +42,12 @@ $statuses = [
                         </td>
                     <?php endif; ?>
                     <td data-title="<?= esc_attr__('Document', 'wp-certificates') ?>"><?= esc_html((string) $item['document']->title) ?></td>
-                    <td data-title="<?= esc_attr__('Name', 'wp-certificates') ?>"><?= esc_html(squuad_cert_account_name((int) $item['subject_id'])) ?></td>
+                    <td data-title="<?= esc_attr__('Name', 'wp-certificates') ?>"><?= esc_html(squuad_cert_account_name((int) $item['subject_id'])) ?><?php
+                        // Documento de otra persona que firma por variable: con qué puesto (p. ej. «Representante»)
+                        if (!empty($item['slot_key']) && function_exists('squuad_cert_person_slot_label')) {
+                            /* translators: %s: name of the signer's position, for example "Parent" */
+                            echo '<br><small>' . esc_html(sprintf(__('You sign as: %s', 'wp-certificates'), squuad_cert_person_slot_label((string) $item['slot_key'], $item['request']))) . '</small>';
+                        } ?></td>
                     <td data-title="<?= esc_attr__('Status', 'wp-certificates') ?>"><?= esc_html($statuses[$item['state']] ?? '') ?></td>
                     <td>
                         <?php if ('to_sign' === $item['state'] && empty($id_document_blocked)) : ?>
