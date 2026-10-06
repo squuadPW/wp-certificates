@@ -263,6 +263,7 @@ $save_url = admin_url('admin.php?page=add_admin_form_documents_content&action=sa
                         </div>
                     <?php } ?>
                     <p class="wpc-eds-help"><?= esc_html__('Code editor: the HTML is saved exactly as written, without automatic changes.', 'wp-certificates') ?></p>
+                    <p class="wpc-eds-help"><?= esc_html__('Fonts: web fonts loaded from the internet (Google Fonts, Adobe Fonts or any other address) are not allowed: the PDF server has no internet access. To use a special font, upload its file (.woff2, .woff or .ttf) to this site and declare it with @font-face pointing to that file; it is embedded in the PDF automatically. Without a declared font, Arial is used.', 'wp-certificates') ?></p>
                 </div>
 
                 <aside class="wpc-eds-data" aria-labelledby="wpc-eds-data-title">

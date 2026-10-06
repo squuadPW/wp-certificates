@@ -33,6 +33,14 @@ $server_engine = function_exists('squuad_cert_pdf_engine_for_document') && 'serv
     <?php if ($preview['signature_blocked']) : ?>
         <div class="notice notice-warning inline"><p><?= esc_html__('This document asks for signature images: it can no longer be generated this way. Configure its signers so that each person signs from their own account.', 'wp-certificates') ?></p></div>
     <?php endif; ?>
+    <?php // Fuentes web de internet (ADR 0013): no se cargan en el servidor de PDF; hay que subirlas al sitio
+    $wpc_web_fonts = function_exists('squuad_cert_pdf_external_fonts') ? squuad_cert_pdf_external_fonts((string) $document->header . (string) $document->content . (string) $document->footer) : [];
+    if ($wpc_web_fonts) : ?>
+        <div class="notice notice-warning inline"><p>
+            <?= esc_html__('This document loads web fonts from the internet, which are not allowed (the PDF server has no internet access and the PDF would use Arial). Upload the font file to this site and declare it with @font-face pointing to that file:', 'wp-certificates') ?>
+            <?= esc_html(implode(', ', array_slice($wpc_web_fonts, 0, 5))) ?>
+        </p></div>
+    <?php endif; ?>
     <?php if ($preview['unknown']) : ?>
         <div class="notice notice-warning inline"><p>
             <?= esc_html__('These variables do not exist and will appear as text in the document:', 'wp-certificates') ?>

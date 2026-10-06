@@ -543,6 +543,35 @@ function squuad_cert_pdf_core_css(string $all_html): string
     return $css;
 }
 
+/**
+ * Fuentes web que una plantilla intenta cargar desde internet (Google Fonts, Adobe Fonts o cualquier dirección que no sea
+ * un archivo de este sitio): no están permitidas (el servidor de PDF no tiene internet y «cero terceros»). Se suben al
+ * sitio y se declaran con @font-face. Devuelve las direcciones encontradas, sin repetir.
+ */
+function squuad_cert_pdf_external_fonts(string $html): array
+{
+    $found = [];
+    // <link rel="stylesheet" href="…"> y @import de hojas externas (las de fuentes web)
+    preg_match_all('#<link\b[^>]*?(?<![\w-])href=(["\'])(https?:)?//([^"\']+)\1#i', $html, $links);
+    preg_match_all('#@import\s+(?:url\(\s*)?(["\']?)(https?:)?//([^"\')\s;]+)#i', $html, $imports);
+    foreach (array_merge($links[3], $imports[3]) as $rest) {
+        $found[] = '//' . $rest;
+    }
+    // url() de @font-face que no sea un archivo de este sitio
+    if (preg_match_all('#@font-face\s*\{[^}]*\}#i', $html, $faces)) {
+        foreach ($faces[0] as $face) {
+            preg_match_all('#url\(\s*([\'"]?)([^\'")]+)\1\s*\)#i', $face, $urls);
+            foreach ($urls[2] as $u) {
+                if (0 !== strpos($u, 'data:') && null === squuad_cert_pdf_local_file($u)) {
+                    $found[] = $u;
+                }
+            }
+        }
+    }
+
+    return array_values(array_unique(array_map(static fn(string $u): string => esc_url_raw(0 === strpos($u, '//') ? 'https:' . $u : $u), $found)));
+}
+
 /** ¿Tiene algo visible un encabezado o pie (texto, imagen, SVG, tabla con bordes, fondo o QR)? */
 function squuad_cert_pdf_part_has_content(string $html): bool
 {

@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-06T23:35:44+00:00\n"
+"POT-Creation-Date: 2026-10-06T23:54:21+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: wp-certificates\n"
@@ -132,7 +132,7 @@ msgstr ""
 #: admin/cards.php:112
 #: admin/documents.php:647
 #: admin/templates/document-detail.php:330
-#: admin/templates/eds-document-detail.php:494
+#: admin/templates/eds-document-detail.php:495
 #: admin/templates/eds-list-documents.php:118
 #: admin/templates/id-document-settings.php:79
 #: admin/templates/variables.php:84
@@ -307,7 +307,7 @@ msgid "%s results"
 msgstr ""
 
 #: admin/documents.php:137
-#: admin/templates/eds-document-detail.php:424
+#: admin/templates/eds-document-detail.php:425
 #: admin/templates/eds-list-documents.php:142
 msgid "Asks for signatures"
 msgstr ""
@@ -315,7 +315,7 @@ msgstr ""
 #: admin/documents.php:137
 #: admin/documents.php:144
 #: admin/templates/eds-document-detail.php:182
-#: admin/templates/eds-document-detail.php:426
+#: admin/templates/eds-document-detail.php:427
 msgid "Does not ask for signatures"
 msgstr ""
 
@@ -385,7 +385,7 @@ msgstr ""
 #: admin/templates/api-keys.php:68
 #: admin/templates/document-detail.php:85
 #: admin/templates/eds-document-detail.php:174
-#: admin/templates/eds-document-detail.php:372
+#: admin/templates/eds-document-detail.php:373
 #: admin/templates/eds-list-documents.php:149
 #: admin/templates/id-document-settings.php:91
 #: admin/templates/id-document-settings.php:141
@@ -440,14 +440,14 @@ msgstr ""
 
 #: admin/documents.php:773
 #: admin/templates/document-detail.php:325
-#: admin/templates/eds-document-detail.php:489
+#: admin/templates/eds-document-detail.php:490
 msgid "Label"
 msgstr ""
 
 #: admin/documents.php:775
 #: admin/templates/api-keys.php:48
 #: admin/templates/document-detail.php:326
-#: admin/templates/eds-document-detail.php:490
+#: admin/templates/eds-document-detail.php:491
 #: admin/templates/signing-roles.php:24
 #: admin/templates/variables.php:219
 #: admin/templates/variables.php:253
@@ -458,19 +458,19 @@ msgstr ""
 #: admin/documents.php:781
 #: admin/templates/document-detail.php:264
 #: admin/templates/document-detail.php:327
-#: admin/templates/eds-document-detail.php:491
+#: admin/templates/eds-document-detail.php:492
 msgid "Type"
 msgstr ""
 
 #: admin/documents.php:787
 #: admin/templates/document-detail.php:328
-#: admin/templates/eds-document-detail.php:492
+#: admin/templates/eds-document-detail.php:493
 msgid "Options (one per line)"
 msgstr ""
 
 #: admin/documents.php:788
 #: admin/templates/document-detail.php:329
-#: admin/templates/eds-document-detail.php:493
+#: admin/templates/eds-document-detail.php:494
 msgid "Required"
 msgstr ""
 
@@ -678,7 +678,7 @@ msgid "no"
 msgstr ""
 
 #: admin/pdf-engine-settings.php:180
-#: admin/templates/eds-document-detail.php:334
+#: admin/templates/eds-document-detail.php:335
 msgid "PDF engine"
 msgstr ""
 
@@ -695,7 +695,7 @@ msgid "Browser of each person (default)"
 msgstr ""
 
 #: admin/pdf-engine-settings.php:191
-#: admin/templates/eds-document-detail.php:332
+#: admin/templates/eds-document-detail.php:333
 msgid "PDF server"
 msgstr ""
 
@@ -929,8 +929,8 @@ msgstr ""
 #: admin/templates/card-detail.php:61
 #: admin/templates/document-detail.php:372
 #: admin/templates/eds-document-detail.php:222
-#: admin/templates/eds-document-detail.php:524
-#: admin/templates/eds-document-detail.php:528
+#: admin/templates/eds-document-detail.php:525
+#: admin/templates/eds-document-detail.php:529
 #: certification/admin/templates/document-preview.php:23
 #: public/templates/certificates.php:37
 msgid "Preview"
@@ -1132,85 +1132,85 @@ msgid "This document will require signatures"
 msgstr ""
 
 #: admin/templates/document-detail.php:190
-#: admin/templates/eds-document-detail.php:409
+#: admin/templates/eds-document-detail.php:410
 msgid "This document requires that the student be a graduate"
 msgstr ""
 
 #: admin/templates/document-detail.php:201
-#: admin/templates/eds-document-detail.php:364
+#: admin/templates/eds-document-detail.php:365
 msgid "This document has margins (on all sides)"
 msgstr ""
 
 #: admin/templates/document-detail.php:206
-#: admin/templates/eds-document-detail.php:442
+#: admin/templates/eds-document-detail.php:443
 msgid "ID Requirement for the admin (ID requisito)"
 msgstr ""
 
 #: admin/templates/document-detail.php:211
-#: admin/templates/eds-document-detail.php:446
+#: admin/templates/eds-document-detail.php:447
 msgid "Type file"
 msgstr ""
 
 #: admin/templates/document-detail.php:220
 #: admin/templates/eds-document-detail.php:219
-#: admin/templates/eds-document-detail.php:457
-#: admin/templates/eds-document-detail.php:459
+#: admin/templates/eds-document-detail.php:458
+#: admin/templates/eds-document-detail.php:460
 msgid "Registry book"
 msgstr ""
 
 #: admin/templates/document-detail.php:222
-#: admin/templates/eds-document-detail.php:461
+#: admin/templates/eds-document-detail.php:462
 msgid "Select a book"
 msgstr ""
 
 #: admin/templates/document-detail.php:238
-#: admin/templates/eds-document-detail.php:473
+#: admin/templates/eds-document-detail.php:474
 msgid "Registry book line description"
 msgstr ""
 
 #: admin/templates/document-detail.php:240
-#: admin/templates/eds-document-detail.php:475
+#: admin/templates/eds-document-detail.php:476
 #, php-format
 msgid "Text of the line registered in the book when the document is issued. It accepts the same variables as the document, except {{tomo}}, {{folio}}, {{tomo_folio}} and {{qrcode}}, and is sent as plain text (maximum %d characters). If a variable has no value, the document is not issued. Empty: the text shown as an example is used."
 msgstr ""
 
 #: admin/templates/document-detail.php:244
-#: admin/templates/eds-document-detail.php:324
+#: admin/templates/eds-document-detail.php:325
 msgid "Orientation"
 msgstr ""
 
 #: admin/templates/document-detail.php:246
-#: admin/templates/eds-document-detail.php:326
+#: admin/templates/eds-document-detail.php:327
 msgid "Portrait"
 msgstr ""
 
 #: admin/templates/document-detail.php:247
-#: admin/templates/eds-document-detail.php:327
+#: admin/templates/eds-document-detail.php:328
 msgid "Landscape"
 msgstr ""
 
 #: admin/templates/document-detail.php:252
-#: admin/templates/eds-document-detail.php:313
+#: admin/templates/eds-document-detail.php:314
 msgid "Paper Format"
 msgstr ""
 
 #: admin/templates/document-detail.php:256
-#: admin/templates/eds-document-detail.php:317
+#: admin/templates/eds-document-detail.php:318
 msgid "Letter"
 msgstr ""
 
 #: admin/templates/document-detail.php:257
-#: admin/templates/eds-document-detail.php:318
+#: admin/templates/eds-document-detail.php:319
 msgid "Legal"
 msgstr ""
 
 #: admin/templates/document-detail.php:258
-#: admin/templates/eds-document-detail.php:319
+#: admin/templates/eds-document-detail.php:320
 msgid "Tabloid"
 msgstr ""
 
 #: admin/templates/document-detail.php:259
-#: admin/templates/eds-document-detail.php:320
+#: admin/templates/eds-document-detail.php:321
 msgid "Custom"
 msgstr ""
 
@@ -1223,83 +1223,83 @@ msgid "Automatic"
 msgstr ""
 
 #: admin/templates/document-detail.php:272
-#: admin/templates/eds-document-detail.php:344
+#: admin/templates/eds-document-detail.php:345
 msgid "Unit"
 msgstr ""
 
 #: admin/templates/document-detail.php:274
-#: admin/templates/eds-document-detail.php:346
+#: admin/templates/eds-document-detail.php:347
 msgid "mm (millimeters)"
 msgstr ""
 
 #: admin/templates/document-detail.php:275
-#: admin/templates/eds-document-detail.php:347
+#: admin/templates/eds-document-detail.php:348
 msgid "pt (points)"
 msgstr ""
 
 #: admin/templates/document-detail.php:276
-#: admin/templates/eds-document-detail.php:348
+#: admin/templates/eds-document-detail.php:349
 msgid "cm (centimeters)"
 msgstr ""
 
 #: admin/templates/document-detail.php:277
-#: admin/templates/eds-document-detail.php:349
+#: admin/templates/eds-document-detail.php:350
 msgid "in (inches)"
 msgstr ""
 
 #: admin/templates/document-detail.php:278
-#: admin/templates/eds-document-detail.php:350
+#: admin/templates/eds-document-detail.php:351
 msgid "px (pixels)"
 msgstr ""
 
 #: admin/templates/document-detail.php:283
-#: admin/templates/eds-document-detail.php:354
+#: admin/templates/eds-document-detail.php:355
 msgid "Width size"
 msgstr ""
 
 #: admin/templates/document-detail.php:288
-#: admin/templates/eds-document-detail.php:358
+#: admin/templates/eds-document-detail.php:359
 msgid "Height size"
 msgstr ""
 
 #: admin/templates/document-detail.php:294
-#: admin/templates/eds-document-detail.php:393
+#: admin/templates/eds-document-detail.php:394
 msgid "Is required"
 msgstr ""
 
 #: admin/templates/document-detail.php:299
-#: admin/templates/eds-document-detail.php:397
+#: admin/templates/eds-document-detail.php:398
 msgid "Is visible in documents page?"
 msgstr ""
 
 #: admin/templates/document-detail.php:303
-#: admin/templates/eds-document-detail.php:400
+#: admin/templates/eds-document-detail.php:401
 msgid "Priority"
 msgstr ""
 
 #: admin/templates/document-detail.php:305
-#: admin/templates/eds-document-detail.php:402
+#: admin/templates/eds-document-detail.php:403
 msgid "Order in My Account when several automatic documents are pending: 0 is the most urgent; with the same priority, the oldest first."
 msgstr ""
 
 #: admin/templates/document-detail.php:315
 #: admin/templates/eds-document-detail.php:220
-#: admin/templates/eds-document-detail.php:480
+#: admin/templates/eds-document-detail.php:481
 msgid "Advanced"
 msgstr ""
 
 #: admin/templates/document-detail.php:317
-#: admin/templates/eds-document-detail.php:483
+#: admin/templates/eds-document-detail.php:484
 msgid "Additional fields"
 msgstr ""
 
 #: admin/templates/document-detail.php:319
-#: admin/templates/eds-document-detail.php:484
+#: admin/templates/eds-document-detail.php:485
 msgid "They are requested before generating the document and the answers are only used to fill it in (they are only stored while the document is partially signed). Use {{key}} in the document to print the answer and, in fields with options, {{key_list}} to print all the options with (✓) on the selected ones. If the key is left empty, it is created from the label."
 msgstr ""
 
 #: admin/templates/document-detail.php:339
-#: admin/templates/eds-document-detail.php:504
+#: admin/templates/eds-document-detail.php:505
 msgid "+ Add field"
 msgstr ""
 
@@ -1347,7 +1347,7 @@ msgstr ""
 
 #: admin/templates/eds-document-detail.php:68
 #: admin/templates/eds-document-detail.php:221
-#: admin/templates/eds-document-detail.php:416
+#: admin/templates/eds-document-detail.php:417
 #: admin/templates/eds-list-documents.php:116
 #: certification/admin/templates/document-issued.php:28
 #: certification/admin/templates/signature-integrity.php:80
@@ -1415,14 +1415,14 @@ msgid "Signed by the person in their account"
 msgstr ""
 
 #: admin/templates/eds-document-detail.php:181
-#: admin/templates/eds-document-detail.php:380
+#: admin/templates/eds-document-detail.php:381
 #: admin/templates/eds-list-documents.php:19
 #: admin/templates/eds-list-documents.php:137
 msgid "Issued by the school office"
 msgstr ""
 
 #: admin/templates/eds-document-detail.php:186
-#: admin/templates/eds-document-detail.php:513
+#: admin/templates/eds-document-detail.php:514
 msgid "Save changes"
 msgstr ""
 
@@ -1437,12 +1437,12 @@ msgid "Sections of the document"
 msgstr ""
 
 #: admin/templates/eds-document-detail.php:217
-#: admin/templates/eds-document-detail.php:310
+#: admin/templates/eds-document-detail.php:311
 msgid "Page and printing"
 msgstr ""
 
 #: admin/templates/eds-document-detail.php:218
-#: admin/templates/eds-document-detail.php:369
+#: admin/templates/eds-document-detail.php:370
 msgid "Delivery"
 msgstr ""
 
@@ -1462,90 +1462,94 @@ msgstr ""
 msgid "Code editor: the HTML is saved exactly as written, without automatic changes."
 msgstr ""
 
-#: admin/templates/eds-document-detail.php:269
-msgid "Data"
+#: admin/templates/eds-document-detail.php:266
+msgid "Fonts: web fonts loaded from the internet (Google Fonts, Adobe Fonts or any other address) are not allowed: the PDF server has no internet access. To use a special font, upload its file (.woff2, .woff or .ttf) to this site and declare it with @font-face pointing to that file; it is embedded in the PDF automatically. Without a declared font, Arial is used."
 msgstr ""
 
 #: admin/templates/eds-document-detail.php:270
+msgid "Data"
+msgstr ""
+
+#: admin/templates/eds-document-detail.php:271
 msgid "Search data"
 msgstr ""
 
-#: admin/templates/eds-document-detail.php:273
+#: admin/templates/eds-document-detail.php:274
 msgid "Click to insert it where the cursor is."
 msgstr ""
 
-#: admin/templates/eds-document-detail.php:302
+#: admin/templates/eds-document-detail.php:303
 msgid "No data matches the search."
 msgstr ""
 
-#: admin/templates/eds-document-detail.php:332
+#: admin/templates/eds-document-detail.php:333
 msgid "browser"
 msgstr ""
 
-#: admin/templates/eds-document-detail.php:336
+#: admin/templates/eds-document-detail.php:337
 #, php-format
 msgid "As the site (now: %s)"
 msgstr ""
 
-#: admin/templates/eds-document-detail.php:337
+#: admin/templates/eds-document-detail.php:338
 msgid "Always the PDF server"
 msgstr ""
 
-#: admin/templates/eds-document-detail.php:338
+#: admin/templates/eds-document-detail.php:339
 msgid "Always the browser"
 msgstr ""
 
-#: admin/templates/eds-document-detail.php:340
+#: admin/templates/eds-document-detail.php:341
 msgid "Who makes the PDF of this document: the PDF server (always the same result) or the browser of the person (as before). Only the WordPress administrator can change it."
 msgstr ""
 
-#: admin/templates/eds-document-detail.php:373
+#: admin/templates/eds-document-detail.php:374
 msgid "An inactive document is not requested or issued."
 msgstr ""
 
-#: admin/templates/eds-document-detail.php:377
+#: admin/templates/eds-document-detail.php:378
 #: admin/templates/eds-list-documents.php:115
 msgid "How it is delivered"
 msgstr ""
 
-#: admin/templates/eds-document-detail.php:381
+#: admin/templates/eds-document-detail.php:382
 msgid "The school office generates it, or issues it for signature, from the student file."
 msgstr ""
 
-#: admin/templates/eds-document-detail.php:381
+#: admin/templates/eds-document-detail.php:382
 msgid "The school office issues it to each person from \"Issue documents\"."
 msgstr ""
 
-#: admin/templates/eds-document-detail.php:385
+#: admin/templates/eds-document-detail.php:386
 msgid "Signed or completed by the person in their account"
 msgstr ""
 
-#: admin/templates/eds-document-detail.php:386
+#: admin/templates/eds-document-detail.php:387
 msgid "It appears in My Account of each student until they sign or complete it. When saved, it is added as a requirement to the students who do not have it yet."
 msgstr ""
 
-#: admin/templates/eds-document-detail.php:386
+#: admin/templates/eds-document-detail.php:387
 msgid "It appears in My Account of each person who must sign or complete it, until they do."
 msgstr ""
 
-#: admin/templates/eds-document-detail.php:429
+#: admin/templates/eds-document-detail.php:430
 msgid "Whether the document asks for signatures and who signs it are chosen in «Document signers», below, with its own save button."
 msgstr ""
 
-#: admin/templates/eds-document-detail.php:430
+#: admin/templates/eds-document-detail.php:431
 msgid "Choose who signs"
 msgstr ""
 
-#: admin/templates/eds-document-detail.php:434
+#: admin/templates/eds-document-detail.php:435
 #: certification/admin/templates/document-signing.php:80
 msgid "This document asks for signatures"
 msgstr ""
 
-#: admin/templates/eds-document-detail.php:508
+#: admin/templates/eds-document-detail.php:509
 msgid "There are no advanced settings on this site."
 msgstr ""
 
-#: admin/templates/eds-document-detail.php:529
+#: admin/templates/eds-document-detail.php:530
 msgid "It shows the saved version: save to see your changes."
 msgstr ""
 
@@ -2632,36 +2636,40 @@ msgstr ""
 msgid "This document asks for signature images: it can no longer be generated this way. Configure its signers so that each person signs from their own account."
 msgstr ""
 
-#: certification/admin/templates/document-preview.php:38
+#: certification/admin/templates/document-preview.php:40
+msgid "This document loads web fonts from the internet, which are not allowed (the PDF server has no internet access and the PDF would use Arial). Upload the font file to this site and declare it with @font-face pointing to that file:"
+msgstr ""
+
+#: certification/admin/templates/document-preview.php:46
 msgid "These variables do not exist and will appear as text in the document:"
 msgstr ""
 
-#: certification/admin/templates/document-preview.php:42
+#: certification/admin/templates/document-preview.php:50
 msgid "Preview of the document in PDF"
 msgstr ""
 
-#: certification/admin/templates/document-preview.php:58
+#: certification/admin/templates/document-preview.php:66
 msgid "Generating the PDF…"
 msgstr ""
 
-#: certification/admin/templates/document-preview.php:59
+#: certification/admin/templates/document-preview.php:67
 msgid "PDF ready."
 msgstr ""
 
-#: certification/admin/templates/document-preview.php:60
+#: certification/admin/templates/document-preview.php:68
 msgid "The preview could not be generated."
 msgstr ""
 
-#: certification/admin/templates/document-preview.php:62
+#: certification/admin/templates/document-preview.php:70
 #, php-format
 msgid "The preview could not be generated (%s)."
 msgstr ""
 
-#: certification/admin/templates/document-preview.php:63
+#: certification/admin/templates/document-preview.php:71
 msgid "PDF ready (made by the PDF server)."
 msgstr ""
 
-#: certification/admin/templates/document-preview.php:64
+#: certification/admin/templates/document-preview.php:72
 msgid "The PDF server did not answer: this is an approximate preview made by your browser."
 msgstr ""
 
