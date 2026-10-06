@@ -302,7 +302,16 @@ function initSigningWindow(root, closeModal) {
         state.done = true;
         showAlert("");
         const payload = result.data || {};
-        showSuccess(payload.signers || [], !!payload.final);
+        // Servidor de PDF (ADR 0013): pdf_pending llega vacío si el servidor ya hizo el PDF, o con el aviso si está en cola
+        const serverPdf = typeof payload.pdf_pending === "string";
+        showSuccess(payload.signers || [], !!payload.final || serverPdf);
+        if (serverPdf) {
+            const status = $("[data-wpc-pdf-status]");
+            if (status) {
+                status.hidden = false;
+                status.textContent = payload.pdf_pending || signaturesText("pdfOk");
+            }
+        }
         if (payload.final) {
             const ok = await generateFinalPdf(payload.final);
             const status = $("[data-wpc-pdf-status]");

@@ -149,7 +149,7 @@ function squuad_cert_qrcode_script_url(): string
 /** Versión de caché de los JS y CSS de la firma: la del plugin más la del flujo de firma. */
 function squuad_cert_signing_assets_version(): string
 {
-    return (defined('WP_C_VERSION') ? WP_C_VERSION : '0') . '-firma-3';
+    return (defined('WP_C_VERSION') ? WP_C_VERSION : '0') . '-firma-4'; // 4: aviso del PDF final por el servidor (ADR 0013)
 }
 
 /* ---------------------------------------------------------------------------------------------------------------

@@ -87,6 +87,12 @@ function squuad_cert_signature_account_pdf_requests(WP_User $user, array $only =
         if (!$request || 'signed' !== $request->status || ($only && !in_array((int) $request->id, $only, true))) {
             continue;
         }
+        // Servidor de PDF (ADR 0013): no lo genera el navegador; queda en la cola del servidor (no se llama desde aquí:
+        // un GET que se recarga no puede forzar llamadas al servicio)
+        if (!squuad_cert_final_pdf_browser_allowed($request)) {
+            squuad_cert_final_pdf_enqueue((int) $request->id);
+            continue;
+        }
         // Con la línea de la solicitud y la página «Certificado de firmas» (ADR 0011 de Edusof)
         $html = squuad_cert_signature_final_pdf_html($request);
         if (null === $html) {

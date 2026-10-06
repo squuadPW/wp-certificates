@@ -43,7 +43,9 @@ define('WP_C_REMOTE_INFO_URL', 'https://versions.squuad.com/plugins/wp-certifica
 //     y nueva comprobación de la columna (squuad_cert_signature_image_evidence_enabled). Idempotente.
 // 17: documents_certificates.pdf_engine, motor de PDF del documento (ADR 0013 de Edusof): 'site' (según el sitio, por
 //     defecto), 'servicio' o 'navegador'. Solo añade una columna con el valor por defecto: nada cambia.
-define('WP_C_DB_VERSION', '17');
+// 18: cola del PDF final por el servidor (ADR 0013, fase 2): squuad_cert_requests.pdf_attempts, pdf_next_at_utc y
+//     pdf_last_error con el índice pdf_queue. Solo añade columnas vacías: las solicitudes existentes no cambian.
+define('WP_C_DB_VERSION', '18');
 
 // get_plugin_data() vive en wp-admin/includes/plugin.php, que en el front no está cargado (antes solo funcionaba
 // porque EduSystem lo cargaba primero)

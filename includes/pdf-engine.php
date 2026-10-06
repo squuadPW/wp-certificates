@@ -87,6 +87,27 @@ function squuad_cert_pdf_contract_confirmed(): bool
     return is_array($c) && !empty($c['user']) && !empty($c['at']);
 }
 
+/**
+ * Claves públicas del servicio (base64) por huella SHA-256: la actual (SQUUAD_CERT_PDF_SERVICE_PUBKEY) y las anteriores
+ * (SQUUAD_CERT_PDF_SERVICE_PUBKEYS, lista), para seguir verificando los PDF ya sellados tras rotar la clave del servicio.
+ */
+function squuad_cert_pdf_service_pubkeys(): array
+{
+    $keys = [];
+    $list = defined('SQUUAD_CERT_PDF_SERVICE_PUBKEYS') && is_array(SQUUAD_CERT_PDF_SERVICE_PUBKEYS) ? SQUUAD_CERT_PDF_SERVICE_PUBKEYS : [];
+    if (defined('SQUUAD_CERT_PDF_SERVICE_PUBKEY')) {
+        $list[] = SQUUAD_CERT_PDF_SERVICE_PUBKEY;
+    }
+    foreach ($list as $b64) {
+        $raw = base64_decode((string) $b64, true);
+        if (false !== $raw && 32 === strlen($raw)) {
+            $keys[hash('sha256', $raw)] = $raw;
+        }
+    }
+
+    return $keys;
+}
+
 /** Motor del sitio: 'navegador' (por defecto) o 'servicio'. */
 function squuad_cert_pdf_engine_site(): string
 {
@@ -141,7 +162,7 @@ function squuad_cert_pdf_engine_for_document(?object $document): string
  * Llama al servicio con la autenticación del sitio (HMAC de método, ruta, sitio, clave, hora, nonce y huella del
  * cuerpo). Devuelve la respuesta de wp_remote_request o WP_Error.
  */
-function squuad_cert_pdf_service_request(string $method, string $path, string $body = '', array $extra_headers = [])
+function squuad_cert_pdf_service_request(string $method, string $path, string $body = '', array $extra_headers = [], int $timeout = 45)
 {
     $url = squuad_cert_pdf_service_url();
     $site = (string) get_option(SQUUAD_CERT_PDF_SITE_ID_OPTION, '');
@@ -163,7 +184,7 @@ function squuad_cert_pdf_service_request(string $method, string $path, string $b
         'method' => $method,
         'body' => 'POST' === $method ? $body : null,
         'headers' => $headers + $extra_headers,
-        'timeout' => 'POST' === $method ? 45 : 8,
+        'timeout' => 'POST' === $method ? max(5, $timeout) : 8,
         'redirection' => 0,
         'sslverify' => true,
         // Modo local: la propia máquina; en remoto, nunca direcciones internas
@@ -203,7 +224,7 @@ function squuad_cert_pdf_service_health()
  * @return array{pdf: string, pages: int, chrome: string, rules: string, signed_at: int, service_signature: string,
  *               render_input_sha256: string, pdf_sha256: string, ms: int}|WP_Error
  */
-function squuad_cert_pdf_render(array $payload, string $context)
+function squuad_cert_pdf_render(array $payload, string $context, int $timeout = 45)
 {
     $missing = squuad_cert_pdf_service_missing();
     if ($missing) {
@@ -215,7 +236,7 @@ function squuad_cert_pdf_render(array $payload, string $context)
         return new WP_Error('pdf_grande', __('The document is too large for the PDF service (reduce the size of its images).', 'wp-certificates'));
     }
     $t0 = microtime(true);
-    $r = squuad_cert_pdf_service_request('POST', '/v1/render', $body, ['X-Squuad-Cert-Request-Id' => wp_generate_uuid4()]);
+    $r = squuad_cert_pdf_service_request('POST', '/v1/render', $body, ['X-Squuad-Cert-Request-Id' => wp_generate_uuid4()], $timeout);
     $ms = (int) round((microtime(true) - $t0) * 1000);
     $fail = static function (string $code, string $why) use ($context, $ms): WP_Error {
         squuad_cert_log(sprintf('Motor de PDF (%s): %s (%d ms)', $context, $why, $ms), 'pdf_engine');
@@ -261,6 +282,10 @@ function squuad_cert_pdf_render(array $payload, string $context)
         'signed_at' => (int) $h('x-squuad-cert-signed-at'),
         'service_signature' => $h('x-squuad-cert-signature'),
         'render_input_sha256' => hash('sha256', $body),
+        // Para volver a comprobar la firma del servicio más tarde (ADR 0013, fase 2): sitio, nonce y qué clave firmó
+        'site' => (string) $r['_sq_site'],
+        'nonce' => (string) $r['_sq_nonce'],
+        'service_pubkey_sha256' => hash('sha256', (string) base64_decode((string) SQUUAD_CERT_PDF_SERVICE_PUBKEY, true)),
         'pdf_sha256' => hash('sha256', $pdf),
         'ms' => $ms,
     ];

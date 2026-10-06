@@ -55,6 +55,12 @@ function squuad_cert_pdf_engine_settings_save(): void
     }
     $old = [squuad_cert_pdf_engine_site(), (string) get_option(SQUUAD_CERT_PDF_SERVICE_URL_OPTION, ''), (string) get_option(SQUUAD_CERT_PDF_SITE_ID_OPTION, '')];
     update_option(SQUUAD_CERT_PDF_SERVICE_URL_OPTION, untrailingslashit($url), false);
+    // Respaldo en el navegador tras 5 fallos del servidor (ADR 0013, fase 2): apagado por defecto
+    $fallback = !empty($_POST['allow_fallback']) ? '1' : '0';
+    if ($fallback !== (string) get_option(SQUUAD_CERT_PDF_FALLBACK_OPTION, '0')) {
+        update_option(SQUUAD_CERT_PDF_FALLBACK_OPTION, $fallback, false);
+        squuad_cert_log(sprintf('Motor de PDF: respaldo en el navegador %s, por el usuario %d', '1' === $fallback ? 'permitido' : 'no permitido', get_current_user_id()), 'pdf_engine');
+    }
     update_option(SQUUAD_CERT_PDF_SITE_ID_OPTION, $site, false);
 
     // Contrato de encargado: quién lo confirmó y cuándo; sin la casilla se retira (y ningún documento va al servicio)
@@ -94,6 +100,24 @@ function squuad_cert_pdf_engine_settings_save(): void
         squuad_cert_log(sprintf('Motor de PDF: %s → %s, dirección «%s», sitio «%s», por el usuario %d', $old[0], $engine, $new[1], $site, get_current_user_id()), 'pdf_engine');
     }
     squuad_cert_pdf_settings_notice(['ok' => $ok, 'message' => $message]);
+    wp_safe_redirect(squuad_cert_pdf_settings_back());
+    exit;
+}
+
+add_action('admin_post_squuad_cert_pdf_queue_run', 'squuad_cert_pdf_engine_settings_queue_run');
+function squuad_cert_pdf_engine_settings_queue_run(): void
+{
+    if (!squuad_cert_pdf_engine_can_manage()) {
+        wp_die(esc_html__('Sorry, you are not allowed to access this page.', 'wp-certificates'), 403);
+    }
+    check_admin_referer('squuad_cert_pdf_queue_run');
+    $added = squuad_cert_final_pdf_enqueue_pending();
+    $stats = squuad_cert_final_pdf_queue_process(20, 'manual');
+    squuad_cert_pdf_settings_notice(['ok' => 0 === $stats['fallidos'], 'message' => sprintf(
+        /* translators: 1: generated, 2: failed, 3: still pending, 4: added to the queue */
+        __('Final PDFs: %1$d generated, %2$d failed, %3$d still pending (%4$d added to the queue).', 'wp-certificates'),
+        $stats['hechos'], $stats['fallidos'], $stats['pendientes'], $added
+    )]);
     wp_safe_redirect(squuad_cert_pdf_settings_back());
     exit;
 }
@@ -186,13 +210,35 @@ function squuad_cert_pdf_engine_settings_section(): void
                     <li><strong><?= esc_html__('This server does not have the sodium extension of PHP: the signature of the PDF server cannot be checked.', 'wp-certificates') ?></strong></li>
                 <?php endif; ?>
             </ul>
+            <label style="display: block; margin: 0 0 12px"><input type="checkbox" name="allow_fallback" value="1" <?php checked('1' === get_option(SQUUAD_CERT_PDF_FALLBACK_OPTION, '0')); ?> <?php disabled(!$can); ?>> <?= esc_html(sprintf(__('Allow the browser as a backup: if the PDF server fails %d times with the same document, the person who signed last can generate its final PDF once (marked as a backup in the evidence).', 'wp-certificates'), SQUUAD_CERT_PDF_MAX_ATTEMPTS)) ?></label>
             <?php if ($can) : ?>
                 <p><button type="submit" class="eds-btn eds-btn--primary"><?= esc_html__('Save', 'wp-certificates') ?></button></p>
             <?php else : ?>
                 <p style="color: var(--eds-muted, #50575e)"><?= esc_html__('Only the WordPress administrator can change the PDF engine.', 'wp-certificates') ?></p>
             <?php endif; ?>
         </form>
+        <?php
+        global $wpdb;
+        $queue = function_exists('squuad_cert_final_pdf_queue_count') ? squuad_cert_final_pdf_queue_count() : 0;
+        $failing = $wpdb->get_results("SELECT id, pdf_attempts, pdf_next_at_utc, pdf_last_error FROM {$wpdb->prefix}squuad_cert_requests WHERE status = 'signed' AND (final_attachment_id IS NULL OR final_attachment_id = 0) AND pdf_attempts > 0 ORDER BY pdf_attempts DESC LIMIT 10");
+        $browser_waiting = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}squuad_cert_requests WHERE status = 'signed' AND (final_attachment_id IS NULL OR final_attachment_id = 0) AND pdf_next_at_utc IS NULL");
+        ?>
+        <h3 style="margin: 20px 0 6px"><?= esc_html__('Final PDFs', 'wp-certificates') ?></h3>
+        <p style="margin: 0 0 6px"><?= esc_html(sprintf(__('In the queue of the PDF server: %1$d. Signed documents waiting for the browser of the person who signed last: %2$d.', 'wp-certificates'), $queue, $browser_waiting)) ?></p>
+        <?php if ($failing) : ?>
+            <ul style="margin: 0 0 8px">
+                <?php foreach ($failing as $row) : ?>
+                    <li><?= esc_html(sprintf(__('Request #%1$d: %2$d failed attempts; next one %3$s UTC (%4$s)', 'wp-certificates'), (int) $row->id, (int) $row->pdf_attempts, (string) $row->pdf_next_at_utc, (string) $row->pdf_last_error)) ?></li>
+                <?php endforeach; ?>
+            </ul>
+        <?php endif; ?>
         <?php if ($can) : ?>
+            <form method="post" action="<?= esc_url(admin_url('admin-post.php')) ?>">
+                <input type="hidden" name="action" value="squuad_cert_pdf_queue_run">
+                <?php wp_nonce_field('squuad_cert_pdf_queue_run'); ?>
+                <p><button type="submit" class="eds-btn"><?= esc_html__('Process now', 'wp-certificates') ?></button>
+                    <span style="color: var(--eds-muted, #50575e)"><?= esc_html__('Generates now the pending final PDFs of the documents that use the PDF server (the site also does it every 5 minutes).', 'wp-certificates') ?></span></p>
+            </form>
             <form method="post" action="<?= esc_url(admin_url('admin-post.php')) ?>">
                 <input type="hidden" name="action" value="squuad_cert_pdf_engine_test">
                 <?php wp_nonce_field('squuad_cert_pdf_engine_test'); ?>

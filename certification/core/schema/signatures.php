@@ -52,9 +52,13 @@ function squuad_cert_schema_signatures()
         origin VARCHAR(10) NOT NULL DEFAULT 'opened',
         policy_sha256 CHAR(64) NULL,
         book_entry_id INT(11) NULL,
+        pdf_attempts SMALLINT(5) UNSIGNED NOT NULL DEFAULT 0,
+        pdf_next_at_utc DATETIME NULL,
+        pdf_last_error VARCHAR(190) NULL,
         PRIMARY KEY (id),
         UNIQUE KEY subject_document_round (subject_type,subject_id,document_id,round),
         KEY status (status),
+        KEY pdf_queue (status,pdf_next_at_utc),
         KEY external_ref (external_ref))$charset_collate;"
     );
 

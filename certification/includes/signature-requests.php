@@ -403,6 +403,10 @@ function squuad_cert_signature_request_transition(int $request_id, array $from, 
     ));
     if ($updated) {
         squuad_cert_signature_request_log_event($request_id, 'status_' . $to, array_intersect_key($fields, array_flip(['final_pdf_sha256', 'closed_upload_sha256', 'decline_reason'])) + $event_data);
+        if ('signed' === $to) {
+            // Todas las firmas hechas: con el servidor de PDF, el PDF final va a su cola (certification/includes/final-pdf.php)
+            do_action('squuad_cert_request_signed', $request_id);
+        }
     }
 
     return (bool) $updated;
