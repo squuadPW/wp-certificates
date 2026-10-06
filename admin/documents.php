@@ -422,6 +422,16 @@ function add_admin_form_documents_content()
                 'book_line_description' => '' !== $book_line_description ? $book_line_description : null,
                 'priority' => $priority,
             );
+            // Motor de PDF del documento (ADR 0013 de Edusof): solo lo cambia el administrador de WordPress; si el
+            // formulario no lo trae (otro diseño o sin permiso), se conserva el guardado
+            if (isset($_POST['pdf_engine']) && function_exists('squuad_cert_pdf_engine_can_manage') && squuad_cert_pdf_engine_can_manage()
+                && squuad_cert_pdf_engine_column_ready() && in_array($_POST['pdf_engine'], ['site', 'servicio', 'navegador'], true)) {
+                $document_data['pdf_engine'] = sanitize_key($_POST['pdf_engine']);
+                $previous_engine = $document_id > 0 ? squuad_cert_pdf_engine_document_setting(get_document_detail($document_id)) : 'site';
+                if ($previous_engine !== $document_data['pdf_engine']) {
+                    squuad_cert_log(sprintf('Motor de PDF del documento %d: %s → %s, por el usuario %d', $document_id, $previous_engine, $document_data['pdf_engine'], get_current_user_id()), 'pdf_engine');
+                }
+            }
 
             // Campos adicionales: se piden antes de generar el documento y sus respuestas no se guardan
             // (ver edusystem/includes/document-fields.php). Las filas inválidas se descartan con un aviso.

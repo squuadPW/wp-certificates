@@ -41,7 +41,9 @@ define('WP_C_REMOTE_INFO_URL', 'https://versions.squuad.com/plugins/wp-certifica
 //     PNG de la firma escrita o subida, sellada en EDUSIG4). Solo añade una columna vacía: las firmas existentes no cambian.
 // 16: índice signature_image_sha256 en las firmas vivas y anuladas (rechazar que otra cuenta reutilice una imagen de firma)
 //     y nueva comprobación de la columna (squuad_cert_signature_image_evidence_enabled). Idempotente.
-define('WP_C_DB_VERSION', '16');
+// 17: documents_certificates.pdf_engine, motor de PDF del documento (ADR 0013 de Edusof): 'site' (según el sitio, por
+//     defecto), 'servicio' o 'navegador'. Solo añade una columna con el valor por defecto: nada cambia.
+define('WP_C_DB_VERSION', '17');
 
 // get_plugin_data() vive en wp-admin/includes/plugin.php, que en el front no está cargado (antes solo funcionaba
 // porque EduSystem lo cargaba primero)
@@ -78,6 +80,10 @@ require_once WP_C_PATH . 'includes/id-document.php';
 require_once WP_C_PATH . 'includes/id-document-privacy.php';
 // PDF firmados privados y fuera de la API de medios (decisión D3 del dueño, ADR 0007 de Edusof)
 require_once WP_C_PATH . 'includes/signed-pdf.php';
+// Motor de PDF (ADR 0013 de Edusof): QR propio y servicio de PDF con Chrome en el servidor
+require_once WP_C_PATH . 'includes/qr-code.php';
+require_once WP_C_PATH . 'includes/pdf-engine.php';
+require_once WP_C_PATH . 'admin/pdf-engine-settings.php';
 require_once WP_C_PATH . 'includes/api-keys.php';
 require_once WP_C_PATH . 'includes/rest-v1.php';
 
@@ -295,6 +301,7 @@ function create_tables_certificates() {
         `book` TEXT NULL,
         `book_line_description` TEXT NULL,
         `fields` LONGTEXT NULL,
+        `pdf_engine` VARCHAR(20) NOT NULL DEFAULT 'site',
         `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
         PRIMARY KEY (id)
     )" . $charset_collate . ";");

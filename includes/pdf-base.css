@@ -1,0 +1,38 @@
+/*
+ * CSS base de los PDF generados por el motor del servidor (ADR 0013 de Edusof).
+ *
+ * Hasta ahora los documentos se convertían dentro de la página del admin y heredaban sin querer sus estilos (letra,
+ * párrafos, tablas «widefat»). Aquí van, fijos, solo esos valores del núcleo de WordPress (wp-admin/css/common.css),
+ * para que el PDF del servidor se vea como hoy sin depender de la pantalla ni del tema. Cambiarlo es cambiar el aspecto
+ * de todos los documentos: exige la regresión de las plantillas (Antigravity/servicios/pdf/herramientas).
+ */
+html, body { background: #fff; }
+body { color: #3c434a; font-family: Arial, Helvetica, sans-serif; font-size: 13px; line-height: 1.4em; }
+p { font-size: 13px; line-height: 1.5; margin: 1em 0; }
+h1, h2, h3, h4, h5, h6 { display: block; font-weight: 600; color: #1d2327; }
+h1 { font-size: 2em; margin: .67em 0; }
+h2, h3 { font-size: 1.3em; margin: 1em 0; }
+h4 { font-size: 1em; margin: 1.33em 0; }
+h5 { font-size: .83em; margin: 1.67em 0; }
+h6 { font-size: .67em; margin: 2.33em 0; }
+img { max-width: 100%; }
+
+/* Tablas de notas (html-notes.php y vista previa): clases de las tablas de WordPress */
+.widefat { border: 1px solid #c3c4c7; background: #fff; border-spacing: 0; width: 100%; clear: both; margin: 0; }
+.widefat * { word-wrap: break-word; }
+.widefat td, .widefat th { padding: 8px 10px; }
+.widefat td { vertical-align: top; }
+.widefat td, .widefat td p, .widefat td ol, .widefat td ul { font-size: 13px; line-height: 1.5em; }
+.widefat th, .widefat thead td, .widefat tfoot td { text-align: left; line-height: 1.3em; }
+.widefat th:not(tbody th), .widefat thead td, .widefat tfoot td { font-size: 14px; }
+.widefat thead th, .widefat thead td { border-bottom: 1px solid #c3c4c7; }
+.widefat tfoot th, .widefat tfoot td { border-top: 1px solid #c3c4c7; border-bottom: none; }
+table.fixed { table-layout: fixed; }
+.striped > tbody > :nth-child(odd), ul.striped > :nth-child(odd), .alternate { background-color: #f6f7f7; }
+
+/* Valores de las variables: WP Certificates los envuelve en <span class="text-uppercase"> (Template.php, process_template) */
+.text-uppercase { text-transform: uppercase !important; }
+/* Clases de alineación del núcleo que usan las plantillas */
+.alignright { float: right; }
+.alignleft { float: left; }
+.aligncenter { display: block; margin-left: auto; margin-right: auto; }

@@ -14,7 +14,9 @@ $modes = [
         : __('This is how the issued document will look, with its page format.', 'wp-certificates'),
 ];
 // Pie del PDF de las solicitudes de firma, con valores de ejemplo (el real lleva el número, la ronda y la huella)
-$fingerprint = sprintf(__('Signature request #%1$d, round %2$d · Content fingerprint (SHA-256): %3$s', 'wp-certificates'), 123, 1, hash('sha256', 'example'));
+$fingerprint = squuad_cert_document_preview_fingerprint();
+// Motor de PDF de este documento (ADR 0013 de Edusof): el servidor, o el navegador como hasta ahora
+$server_engine = function_exists('squuad_cert_pdf_engine_for_document') && 'servicio' === squuad_cert_pdf_engine_for_document($document);
 ?>
 <div id="edusystem-document-preview" style="max-width:1100px;margin:24px auto 0">
     <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
@@ -57,8 +59,36 @@ $fingerprint = sprintf(__('Signature request #%1$d, round %2$d · Content finger
             done: <?= wp_json_encode(__('PDF ready.', 'wp-certificates')) ?>,
             fail: <?= wp_json_encode(__('The preview could not be generated.', 'wp-certificates')) ?>,
             /* translators: %s: technical reason of the error (from the PDF library) */
-            failReason: <?= wp_json_encode(__('The preview could not be generated (%s).', 'wp-certificates')) ?>
+            failReason: <?= wp_json_encode(__('The preview could not be generated (%s).', 'wp-certificates')) ?>,
+            serverDone: <?= wp_json_encode(__('PDF ready (made by the PDF server).', 'wp-certificates')) ?>,
+            approximate: <?= wp_json_encode(__('The PDF server did not answer: this is an approximate preview made by your browser.', 'wp-certificates')) ?>
         };
+        // Motor del servidor (ADR 0013 de Edusof): el PDF lo hace el servicio; si falla, el navegador (vista aproximada)
+        const server = <?= wp_json_encode($server_engine ? ['url' => admin_url('admin-ajax.php'), 'nonce' => wp_create_nonce('squuad_cert_preview_server_pdf'), 'id' => (int) $document->id] : null) ?>;
+        // Devuelve el PDF, o null si el motor del documento ya no es el servidor (409): entonces el navegador, sin aviso
+        async function serverPdf() {
+            const body = new URLSearchParams({ action: "squuad_cert_preview_server_pdf", _ajax_nonce: server.nonce, document_id: String(server.id) });
+            const abort = new AbortController();
+            const timer = setTimeout(function () { abort.abort(); }, 20000);
+            try {
+                const response = await fetch(server.url, { method: "POST", body: body, credentials: "same-origin", signal: abort.signal });
+                if (409 === response.status) {
+                    return null;
+                }
+                const type = response.headers.get("Content-Type") || "";
+                if (!response.ok || type.indexOf("application/pdf") !== 0) {
+                    throw new Error("server");
+                }
+                const blob = await response.blob();
+                const head = await blob.slice(0, 5).text();
+                if ("%PDF-" !== head) {
+                    throw new Error("server");
+                }
+                return blob;
+            } finally {
+                clearTimeout(timer);
+            }
+        }
         const frame = document.getElementById("edusystem-preview-frame");
         const holder = document.getElementById("edusystem-preview-holder");
         const status = document.getElementById("edusystem-preview-status");
@@ -157,11 +187,23 @@ $fingerprint = sprintf(__('Signature request #%1$d, round %2$d · Content finger
             status.textContent = texts.generating;
             holder.innerHTML = "";
             try {
-                const blob = "generate" === data.mode ? await generatePdf() : await signedPdf();
+                let blob = null;
+                let done = texts.done;
+                if (server) {
+                    try {
+                        blob = await serverPdf();
+                        done = blob ? texts.serverDone : texts.done;
+                    } catch (e) {
+                        done = texts.approximate;
+                    }
+                }
+                if (!blob) {
+                    blob = "generate" === data.mode ? await generatePdf() : await signedPdf();
+                }
                 if (url) URL.revokeObjectURL(url);
                 url = URL.createObjectURL(blob);
                 frame.src = url;
-                status.textContent = texts.done;
+                status.textContent = done;
             } catch (error) {
                 console.error("Vista previa del documento:", error);
                 // Motivo técnico (mensaje de la biblioteca del PDF, sin datos del documento), recortado

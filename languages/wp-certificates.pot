@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-06T00:12:51+00:00\n"
+"POT-Creation-Date: 2026-10-06T23:02:04+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: wp-certificates\n"
@@ -47,6 +47,8 @@ msgstr ""
 #: admin/assignment-users.php:45
 #: admin/assignment-users.php:105
 #: admin/id-document.php:38
+#: admin/pdf-engine-settings.php:42
+#: admin/pdf-engine-settings.php:105
 #: admin/permissions.php:32
 #: admin/permissions.php:48
 #: admin/signing-roles.php:48
@@ -58,6 +60,7 @@ msgstr ""
 #: admin/variables.php:319
 #: admin/variables.php:336
 #: admin/variables.php:352
+#: certification/admin/document-preview.php:78
 #: certification/admin/signing-settings.php:23
 #: includes/signed-pdf.php:217
 msgid "Sorry, you are not allowed to access this page."
@@ -109,7 +112,7 @@ msgid "Certification deleted successfully."
 msgstr ""
 
 #: admin/cards.php:89
-#: admin/documents.php:611
+#: admin/documents.php:621
 msgid "View Details"
 msgstr ""
 
@@ -126,9 +129,9 @@ msgid "User"
 msgstr ""
 
 #: admin/cards.php:112
-#: admin/documents.php:637
+#: admin/documents.php:647
 #: admin/templates/document-detail.php:330
-#: admin/templates/eds-document-detail.php:481
+#: admin/templates/eds-document-detail.php:494
 #: admin/templates/eds-list-documents.php:118
 #: admin/templates/id-document-settings.php:79
 #: admin/templates/variables.php:84
@@ -303,7 +306,7 @@ msgid "%s results"
 msgstr ""
 
 #: admin/documents.php:137
-#: admin/templates/eds-document-detail.php:411
+#: admin/templates/eds-document-detail.php:424
 #: admin/templates/eds-list-documents.php:142
 msgid "Asks for signatures"
 msgstr ""
@@ -311,7 +314,7 @@ msgstr ""
 #: admin/documents.php:137
 #: admin/documents.php:144
 #: admin/templates/eds-document-detail.php:182
-#: admin/templates/eds-document-detail.php:413
+#: admin/templates/eds-document-detail.php:426
 msgid "Does not ask for signatures"
 msgstr ""
 
@@ -328,7 +331,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: admin/documents.php:288
-#: admin/documents.php:538
+#: admin/documents.php:548
 msgid "You are not allowed to do this."
 msgstr ""
 
@@ -342,7 +345,7 @@ msgid "There is already a document with the code %s."
 msgstr ""
 
 #: admin/documents.php:334
-#: admin/documents.php:454
+#: admin/documents.php:464
 msgid "Error saving document."
 msgstr ""
 
@@ -354,34 +357,34 @@ msgstr ""
 msgid "The document was not saved: confirm that it is added as a requirement to the students who do not have it yet."
 msgstr ""
 
-#: admin/documents.php:518
+#: admin/documents.php:528
 msgid "Document adjusted successfully."
 msgstr ""
 
-#: admin/documents.php:519
+#: admin/documents.php:529
 msgid "Some additional fields were not saved:"
 msgstr ""
 
-#: admin/documents.php:522
+#: admin/documents.php:532
 #, php-format
 msgid "The registry book line cannot use %s: they are assigned when the line is reserved. Remove them, or the document will not be issued."
 msgstr ""
 
 #. translators: 1: name of the document, 2: number of issued certificates, 3: number of signature requests
-#: admin/documents.php:550
+#: admin/documents.php:560
 #, php-format
 msgid "«%1$s» was not deleted: it has %2$d issued certificates and %3$d signature requests, which would be left without their template. Deactivate it instead."
 msgstr ""
 
-#: admin/documents.php:560
+#: admin/documents.php:570
 msgid "Document deleted successfully."
 msgstr ""
 
-#: admin/documents.php:609
+#: admin/documents.php:619
 #: admin/templates/api-keys.php:68
 #: admin/templates/document-detail.php:85
 #: admin/templates/eds-document-detail.php:174
-#: admin/templates/eds-document-detail.php:359
+#: admin/templates/eds-document-detail.php:372
 #: admin/templates/eds-list-documents.php:149
 #: admin/templates/id-document-settings.php:91
 #: admin/templates/id-document-settings.php:141
@@ -389,7 +392,7 @@ msgstr ""
 msgid "Active"
 msgstr ""
 
-#: admin/documents.php:609
+#: admin/documents.php:619
 #: admin/templates/eds-document-detail.php:176
 #: admin/templates/eds-list-documents.php:20
 #: admin/templates/eds-list-documents.php:151
@@ -397,11 +400,11 @@ msgstr ""
 msgid "Inactive"
 msgstr ""
 
-#: admin/documents.php:612
+#: admin/documents.php:622
 msgid "Are you sure?"
 msgstr ""
 
-#: admin/documents.php:634
+#: admin/documents.php:644
 #: admin/templates/api-keys.php:47
 #: admin/templates/card-detail.php:41
 #: admin/templates/certificate-assignment-users.php:57
@@ -418,7 +421,7 @@ msgstr ""
 msgid "Name"
 msgstr ""
 
-#: admin/documents.php:635
+#: admin/documents.php:645
 #: admin/templates/api-keys.php:52
 #: admin/templates/eds-list-documents.php:117
 #: admin/templates/id-document-settings.php:77
@@ -430,20 +433,20 @@ msgstr ""
 msgid "Status"
 msgstr ""
 
-#: admin/documents.php:636
+#: admin/documents.php:646
 msgid "Created at"
 msgstr ""
 
-#: admin/documents.php:763
+#: admin/documents.php:773
 #: admin/templates/document-detail.php:325
-#: admin/templates/eds-document-detail.php:476
+#: admin/templates/eds-document-detail.php:489
 msgid "Label"
 msgstr ""
 
-#: admin/documents.php:765
+#: admin/documents.php:775
 #: admin/templates/api-keys.php:48
 #: admin/templates/document-detail.php:326
-#: admin/templates/eds-document-detail.php:477
+#: admin/templates/eds-document-detail.php:490
 #: admin/templates/signing-roles.php:24
 #: admin/templates/variables.php:219
 #: admin/templates/variables.php:253
@@ -451,26 +454,26 @@ msgstr ""
 msgid "Key"
 msgstr ""
 
-#: admin/documents.php:771
+#: admin/documents.php:781
 #: admin/templates/document-detail.php:264
 #: admin/templates/document-detail.php:327
-#: admin/templates/eds-document-detail.php:478
+#: admin/templates/eds-document-detail.php:491
 msgid "Type"
 msgstr ""
 
-#: admin/documents.php:777
+#: admin/documents.php:787
 #: admin/templates/document-detail.php:328
-#: admin/templates/eds-document-detail.php:479
+#: admin/templates/eds-document-detail.php:492
 msgid "Options (one per line)"
 msgstr ""
 
-#: admin/documents.php:778
+#: admin/documents.php:788
 #: admin/templates/document-detail.php:329
-#: admin/templates/eds-document-detail.php:480
+#: admin/templates/eds-document-detail.php:493
 msgid "Required"
 msgstr ""
 
-#: admin/documents.php:779
+#: admin/documents.php:789
 msgid "Remove"
 msgstr ""
 
@@ -611,6 +614,143 @@ msgstr ""
 #: admin/id-document.php:211
 #: includes/id-document.php:742
 msgid "The identity document could not be saved. Please try again."
+msgstr ""
+
+#: admin/pdf-engine-settings.php:52
+msgid "The address must start with https:// (or http://127.0.0.1 if the service is installed on this same server)."
+msgstr ""
+
+#: admin/pdf-engine-settings.php:72
+#: certification/admin/signing-settings.php:68
+msgid "Settings saved."
+msgstr ""
+
+#: admin/pdf-engine-settings.php:79
+msgid "The PDF server was not activated: confirm that the data processing agreement with the institution exists."
+msgstr ""
+
+#: admin/pdf-engine-settings.php:83
+msgid "The PDF server was not activated: complete the address, the site identifier and the keys in wp-config.php."
+msgstr ""
+
+#: admin/pdf-engine-settings.php:88
+msgid "The PDF server was not activated: the server runs Chrome without isolation (sandbox), which is only acceptable for tests with example data."
+msgstr ""
+
+#: admin/pdf-engine-settings.php:111
+#, php-format
+msgid "The PDF server does not answer: %s"
+msgstr ""
+
+#: admin/pdf-engine-settings.php:113
+#, php-format
+msgid "The PDF server answers (Chrome %1$s), but this site is missing: %2$s."
+msgstr ""
+
+#: admin/pdf-engine-settings.php:116
+msgid "PDF server test"
+msgstr ""
+
+#: admin/pdf-engine-settings.php:117
+#, php-format
+msgid "Site: %s"
+msgstr ""
+
+#. translators: 1: milliseconds, 2: Chrome version, 3: version of the printing rules, 4: yes/no sandbox
+#: admin/pdf-engine-settings.php:125
+#, php-format
+msgid "Connection correct: test PDF in %1$d ms, Chrome %2$s, printing rules %3$s, signature of the service valid. Chrome isolation (sandbox): %4$s."
+msgstr ""
+
+#: admin/pdf-engine-settings.php:126
+msgid "yes"
+msgstr ""
+
+#: admin/pdf-engine-settings.php:126
+msgid "no"
+msgstr ""
+
+#: admin/pdf-engine-settings.php:156
+#: admin/templates/eds-document-detail.php:334
+msgid "PDF engine"
+msgstr ""
+
+#: admin/pdf-engine-settings.php:160
+msgid "Who makes the PDF of the documents. The browser of each person (as before: the result may change with the browser, the zoom or the window) or the PDF server of Squuad (Chrome on the server: always the same result, the same fonts and real text). If the server does not answer, the preview uses the browser and says so. Each document can follow the site or choose its own engine."
+msgstr ""
+
+#: admin/pdf-engine-settings.php:165
+msgid "Engine of the site"
+msgstr ""
+
+#: admin/pdf-engine-settings.php:166
+msgid "Browser of each person (default)"
+msgstr ""
+
+#: admin/pdf-engine-settings.php:167
+#: admin/templates/eds-document-detail.php:332
+msgid "PDF server"
+msgstr ""
+
+#: admin/pdf-engine-settings.php:168
+msgid "I confirm that the data processing agreement with the institution exists: with the PDF server, the content of the documents (also of minors) travels encrypted to the server of Squuad, which does not keep it."
+msgstr ""
+
+#: admin/pdf-engine-settings.php:171
+msgid "Address of the PDF server"
+msgstr ""
+
+#: admin/pdf-engine-settings.php:173
+msgid "Fixed in wp-config.php (SQUUAD_CERT_PDF_SERVICE_URL)."
+msgstr ""
+
+#: admin/pdf-engine-settings.php:176
+msgid "Site identifier"
+msgstr ""
+
+#: admin/pdf-engine-settings.php:178
+msgid "The name under which the PDF server registered this site (lowercase letters, numbers, dot and hyphens)."
+msgstr ""
+
+#: admin/pdf-engine-settings.php:180
+msgid "Keys in wp-config.php"
+msgstr ""
+
+#: admin/pdf-engine-settings.php:183
+msgid "present"
+msgstr ""
+
+#: admin/pdf-engine-settings.php:183
+msgid "missing"
+msgstr ""
+
+#: admin/pdf-engine-settings.php:186
+msgid "This server does not have the sodium extension of PHP: the signature of the PDF server cannot be checked."
+msgstr ""
+
+#: admin/pdf-engine-settings.php:190
+#: admin/templates/id-document-settings.php:49
+#: admin/templates/permissions.php:44
+#: admin/templates/signing-roles.php:42
+#: certification/admin/signing-settings.php:95
+#: certification/public/functions/assets.php:97
+#: certification/public/templates/create-document-automatic.php:147
+#: edusof-ui/includes/i18n-strings.php:76
+#: public/functions.php:19
+#: public/templates/select-nacionality.php:20
+msgid "Save"
+msgstr ""
+
+#: admin/pdf-engine-settings.php:192
+msgid "Only the WordPress administrator can change the PDF engine."
+msgstr ""
+
+#: admin/pdf-engine-settings.php:199
+msgid "Check connection"
+msgstr ""
+
+#: admin/pdf-engine-settings.php:200
+msgid "Asks the server for its status and a test PDF without personal data, and checks its signature."
 msgstr ""
 
 #: admin/permissions.php:21
@@ -755,9 +895,9 @@ msgstr ""
 #: admin/templates/card-detail.php:61
 #: admin/templates/document-detail.php:372
 #: admin/templates/eds-document-detail.php:222
-#: admin/templates/eds-document-detail.php:511
-#: admin/templates/eds-document-detail.php:515
-#: certification/admin/templates/document-preview.php:21
+#: admin/templates/eds-document-detail.php:524
+#: admin/templates/eds-document-detail.php:528
+#: certification/admin/templates/document-preview.php:23
 #: public/templates/certificates.php:37
 msgid "Preview"
 msgstr ""
@@ -958,44 +1098,44 @@ msgid "This document will require signatures"
 msgstr ""
 
 #: admin/templates/document-detail.php:190
-#: admin/templates/eds-document-detail.php:396
+#: admin/templates/eds-document-detail.php:409
 msgid "This document requires that the student be a graduate"
 msgstr ""
 
 #: admin/templates/document-detail.php:201
-#: admin/templates/eds-document-detail.php:351
+#: admin/templates/eds-document-detail.php:364
 msgid "This document has margins (on all sides)"
 msgstr ""
 
 #: admin/templates/document-detail.php:206
-#: admin/templates/eds-document-detail.php:429
+#: admin/templates/eds-document-detail.php:442
 msgid "ID Requirement for the admin (ID requisito)"
 msgstr ""
 
 #: admin/templates/document-detail.php:211
-#: admin/templates/eds-document-detail.php:433
+#: admin/templates/eds-document-detail.php:446
 msgid "Type file"
 msgstr ""
 
 #: admin/templates/document-detail.php:220
 #: admin/templates/eds-document-detail.php:219
-#: admin/templates/eds-document-detail.php:444
-#: admin/templates/eds-document-detail.php:446
+#: admin/templates/eds-document-detail.php:457
+#: admin/templates/eds-document-detail.php:459
 msgid "Registry book"
 msgstr ""
 
 #: admin/templates/document-detail.php:222
-#: admin/templates/eds-document-detail.php:448
+#: admin/templates/eds-document-detail.php:461
 msgid "Select a book"
 msgstr ""
 
 #: admin/templates/document-detail.php:238
-#: admin/templates/eds-document-detail.php:460
+#: admin/templates/eds-document-detail.php:473
 msgid "Registry book line description"
 msgstr ""
 
 #: admin/templates/document-detail.php:240
-#: admin/templates/eds-document-detail.php:462
+#: admin/templates/eds-document-detail.php:475
 #, php-format
 msgid "Text of the line registered in the book when the document is issued. It accepts the same variables as the document, except {{tomo}}, {{folio}}, {{tomo_folio}} and {{qrcode}}, and is sent as plain text (maximum %d characters). If a variable has no value, the document is not issued. Empty: the text shown as an example is used."
 msgstr ""
@@ -1049,83 +1189,83 @@ msgid "Automatic"
 msgstr ""
 
 #: admin/templates/document-detail.php:272
-#: admin/templates/eds-document-detail.php:331
+#: admin/templates/eds-document-detail.php:344
 msgid "Unit"
 msgstr ""
 
 #: admin/templates/document-detail.php:274
-#: admin/templates/eds-document-detail.php:333
+#: admin/templates/eds-document-detail.php:346
 msgid "mm (millimeters)"
 msgstr ""
 
 #: admin/templates/document-detail.php:275
-#: admin/templates/eds-document-detail.php:334
+#: admin/templates/eds-document-detail.php:347
 msgid "pt (points)"
 msgstr ""
 
 #: admin/templates/document-detail.php:276
-#: admin/templates/eds-document-detail.php:335
+#: admin/templates/eds-document-detail.php:348
 msgid "cm (centimeters)"
 msgstr ""
 
 #: admin/templates/document-detail.php:277
-#: admin/templates/eds-document-detail.php:336
+#: admin/templates/eds-document-detail.php:349
 msgid "in (inches)"
 msgstr ""
 
 #: admin/templates/document-detail.php:278
-#: admin/templates/eds-document-detail.php:337
+#: admin/templates/eds-document-detail.php:350
 msgid "px (pixels)"
 msgstr ""
 
 #: admin/templates/document-detail.php:283
-#: admin/templates/eds-document-detail.php:341
+#: admin/templates/eds-document-detail.php:354
 msgid "Width size"
 msgstr ""
 
 #: admin/templates/document-detail.php:288
-#: admin/templates/eds-document-detail.php:345
+#: admin/templates/eds-document-detail.php:358
 msgid "Height size"
 msgstr ""
 
 #: admin/templates/document-detail.php:294
-#: admin/templates/eds-document-detail.php:380
+#: admin/templates/eds-document-detail.php:393
 msgid "Is required"
 msgstr ""
 
 #: admin/templates/document-detail.php:299
-#: admin/templates/eds-document-detail.php:384
+#: admin/templates/eds-document-detail.php:397
 msgid "Is visible in documents page?"
 msgstr ""
 
 #: admin/templates/document-detail.php:303
-#: admin/templates/eds-document-detail.php:387
+#: admin/templates/eds-document-detail.php:400
 msgid "Priority"
 msgstr ""
 
 #: admin/templates/document-detail.php:305
-#: admin/templates/eds-document-detail.php:389
+#: admin/templates/eds-document-detail.php:402
 msgid "Order in My Account when several automatic documents are pending: 0 is the most urgent; with the same priority, the oldest first."
 msgstr ""
 
 #: admin/templates/document-detail.php:315
 #: admin/templates/eds-document-detail.php:220
-#: admin/templates/eds-document-detail.php:467
+#: admin/templates/eds-document-detail.php:480
 msgid "Advanced"
 msgstr ""
 
 #: admin/templates/document-detail.php:317
-#: admin/templates/eds-document-detail.php:470
+#: admin/templates/eds-document-detail.php:483
 msgid "Additional fields"
 msgstr ""
 
 #: admin/templates/document-detail.php:319
-#: admin/templates/eds-document-detail.php:471
+#: admin/templates/eds-document-detail.php:484
 msgid "They are requested before generating the document and the answers are only used to fill it in (they are only stored while the document is partially signed). Use {{key}} in the document to print the answer and, in fields with options, {{key_list}} to print all the options with (✓) on the selected ones. If the key is left empty, it is created from the label."
 msgstr ""
 
 #: admin/templates/document-detail.php:339
-#: admin/templates/eds-document-detail.php:491
+#: admin/templates/eds-document-detail.php:504
 msgid "+ Add field"
 msgstr ""
 
@@ -1173,7 +1313,7 @@ msgstr ""
 
 #: admin/templates/eds-document-detail.php:68
 #: admin/templates/eds-document-detail.php:221
-#: admin/templates/eds-document-detail.php:403
+#: admin/templates/eds-document-detail.php:416
 #: admin/templates/eds-list-documents.php:116
 #: certification/admin/templates/document-issued.php:28
 #: certification/admin/templates/signature-integrity.php:80
@@ -1241,14 +1381,14 @@ msgid "Signed by the person in their account"
 msgstr ""
 
 #: admin/templates/eds-document-detail.php:181
-#: admin/templates/eds-document-detail.php:367
+#: admin/templates/eds-document-detail.php:380
 #: admin/templates/eds-list-documents.php:19
 #: admin/templates/eds-list-documents.php:137
 msgid "Issued by the school office"
 msgstr ""
 
 #: admin/templates/eds-document-detail.php:186
-#: admin/templates/eds-document-detail.php:500
+#: admin/templates/eds-document-detail.php:513
 msgid "Save changes"
 msgstr ""
 
@@ -1268,7 +1408,7 @@ msgid "Page and printing"
 msgstr ""
 
 #: admin/templates/eds-document-detail.php:218
-#: admin/templates/eds-document-detail.php:356
+#: admin/templates/eds-document-detail.php:369
 msgid "Delivery"
 msgstr ""
 
@@ -1304,53 +1444,74 @@ msgstr ""
 msgid "No data matches the search."
 msgstr ""
 
-#: admin/templates/eds-document-detail.php:360
+#: admin/templates/eds-document-detail.php:332
+msgid "browser"
+msgstr ""
+
+#: admin/templates/eds-document-detail.php:336
+#, php-format
+msgid "As the site (now: %s)"
+msgstr ""
+
+#: admin/templates/eds-document-detail.php:337
+msgid "Always the PDF server"
+msgstr ""
+
+#: admin/templates/eds-document-detail.php:338
+msgid "Always the browser"
+msgstr ""
+
+#: admin/templates/eds-document-detail.php:340
+msgid "Who makes the PDF of this document: the PDF server (always the same result) or the browser of the person (as before). Only the WordPress administrator can change it."
+msgstr ""
+
+#: admin/templates/eds-document-detail.php:373
 msgid "An inactive document is not requested or issued."
 msgstr ""
 
-#: admin/templates/eds-document-detail.php:364
+#: admin/templates/eds-document-detail.php:377
 #: admin/templates/eds-list-documents.php:115
 msgid "How it is delivered"
 msgstr ""
 
-#: admin/templates/eds-document-detail.php:368
+#: admin/templates/eds-document-detail.php:381
 msgid "The school office generates it, or issues it for signature, from the student file."
 msgstr ""
 
-#: admin/templates/eds-document-detail.php:368
+#: admin/templates/eds-document-detail.php:381
 msgid "The school office issues it to each person from \"Issue documents\"."
 msgstr ""
 
-#: admin/templates/eds-document-detail.php:372
+#: admin/templates/eds-document-detail.php:385
 msgid "Signed or completed by the person in their account"
 msgstr ""
 
-#: admin/templates/eds-document-detail.php:373
+#: admin/templates/eds-document-detail.php:386
 msgid "It appears in My Account of each student until they sign or complete it. When saved, it is added as a requirement to the students who do not have it yet."
 msgstr ""
 
-#: admin/templates/eds-document-detail.php:373
+#: admin/templates/eds-document-detail.php:386
 msgid "It appears in My Account of each person who must sign or complete it, until they do."
 msgstr ""
 
-#: admin/templates/eds-document-detail.php:416
+#: admin/templates/eds-document-detail.php:429
 msgid "Whether the document asks for signatures and who signs it are chosen in «Document signers», below, with its own save button."
 msgstr ""
 
-#: admin/templates/eds-document-detail.php:417
+#: admin/templates/eds-document-detail.php:430
 msgid "Choose who signs"
 msgstr ""
 
-#: admin/templates/eds-document-detail.php:421
+#: admin/templates/eds-document-detail.php:434
 #: certification/admin/templates/document-signing.php:80
 msgid "This document asks for signatures"
 msgstr ""
 
-#: admin/templates/eds-document-detail.php:495
+#: admin/templates/eds-document-detail.php:508
 msgid "There are no advanced settings on this site."
 msgstr ""
 
-#: admin/templates/eds-document-detail.php:516
+#: admin/templates/eds-document-detail.php:529
 msgid "It shows the saved version: save to see your changes."
 msgstr ""
 
@@ -1490,18 +1651,6 @@ msgstr ""
 
 #: admin/templates/id-document-settings.php:42
 msgid "Every person who signs (holders, roles and system signers) must register their identity document before signing; whoever only fills in the fields of a document without signature is not asked. It is recorded with each new signature. When it is off, nothing is asked."
-msgstr ""
-
-#: admin/templates/id-document-settings.php:49
-#: admin/templates/permissions.php:44
-#: admin/templates/signing-roles.php:42
-#: certification/admin/signing-settings.php:95
-#: certification/public/functions/assets.php:97
-#: certification/public/templates/create-document-automatic.php:147
-#: edusof-ui/includes/i18n-strings.php:76
-#: public/functions.php:19
-#: public/templates/select-nacionality.php:20
-msgid "Save"
 msgstr ""
 
 #: admin/templates/id-document-settings.php:50
@@ -1940,63 +2089,80 @@ msgstr ""
 msgid "Method %s enabled again."
 msgstr ""
 
+#: certification/admin/document-preview.php:39
+#: certification/admin/templates/signer-inbox.php:38
+#: certification/includes/signature-format.php:1012
+#: certification/public/templates/create-document-automatic.php:121
+#, php-format
+msgid "Signature request #%1$d, round %2$d · Content fingerprint (SHA-256): %3$s"
+msgstr ""
+
+#: certification/admin/document-preview.php:84
+msgid "Too many previews in a short time. Wait a minute."
+msgstr ""
+
+#: certification/admin/document-preview.php:90
+#: includes/provider-wp-user.php:192
+msgid "The document does not exist."
+msgstr ""
+
 #. translators: %d: number of the signer in the document
-#: certification/admin/document-preview.php:77
+#: certification/admin/document-preview.php:157
 #, php-format
 msgid "Signer %d (example)"
 msgstr ""
 
-#: certification/admin/document-preview.php:78
-#: certification/admin/document-preview.php:271
+#: certification/admin/document-preview.php:158
+#: certification/admin/document-preview.php:351
 msgid "Position (example)"
 msgstr ""
 
-#: certification/admin/document-preview.php:90
+#: certification/admin/document-preview.php:170
 msgid "Person by variable (example)"
 msgstr ""
 
-#: certification/admin/document-preview.php:163
+#: certification/admin/document-preview.php:243
 msgid "Example program"
 msgstr ""
 
-#: certification/admin/document-preview.php:164
+#: certification/admin/document-preview.php:244
 msgid "Example career - Example mention"
 msgstr ""
 
-#: certification/admin/document-preview.php:191
+#: certification/admin/document-preview.php:271
 msgid "Example document 1"
 msgstr ""
 
-#: certification/admin/document-preview.php:191
+#: certification/admin/document-preview.php:271
 msgid "Example document 2"
 msgstr ""
 
-#: certification/admin/document-preview.php:225
+#: certification/admin/document-preview.php:305
 msgid "Example requirement 1"
 msgstr ""
 
-#: certification/admin/document-preview.php:225
+#: certification/admin/document-preview.php:305
 msgid "Example requirement 2"
 msgstr ""
 
 #. translators: %s: label of the additional field
-#: certification/admin/document-preview.php:243
+#: certification/admin/document-preview.php:323
 #, php-format
 msgid "%s (example)"
 msgstr ""
 
-#: certification/admin/document-preview.php:270
-#: certification/admin/document-preview.php:272
+#: certification/admin/document-preview.php:350
+#: certification/admin/document-preview.php:352
 msgid "Signer (example)"
 msgstr ""
 
 #. translators: %d: number of the signer, e.g. 2 for F2
-#: certification/admin/document-preview.php:337
+#: certification/admin/document-preview.php:417
 #, php-format
 msgid "Signer %d"
 msgstr ""
 
-#: certification/admin/document-preview.php:338
+#: certification/admin/document-preview.php:418
 msgid "Example"
 msgstr ""
 
@@ -2219,10 +2385,6 @@ msgstr ""
 msgid "Signing documents"
 msgstr ""
 
-#: certification/admin/signing-settings.php:68
-msgid "Settings saved."
-msgstr ""
-
 #: certification/admin/signing-settings.php:75
 msgid "Allow uploading an image of the signature"
 msgstr ""
@@ -2420,49 +2582,49 @@ msgstr ""
 msgid "This is how the issued document will look, with its page format."
 msgstr ""
 
-#: certification/admin/templates/document-preview.php:17
-#: certification/admin/templates/signer-inbox.php:38
-#: certification/includes/signature-format.php:1012
-#: certification/public/templates/create-document-automatic.php:121
-#, php-format
-msgid "Signature request #%1$d, round %2$d · Content fingerprint (SHA-256): %3$s"
-msgstr ""
-
-#: certification/admin/templates/document-preview.php:24
+#: certification/admin/templates/document-preview.php:26
 msgid "Update preview"
 msgstr ""
 
-#: certification/admin/templates/document-preview.php:29
+#: certification/admin/templates/document-preview.php:31
 msgid "All the variables show example data, never real data. It shows the saved version: save your changes to see them."
 msgstr ""
 
-#: certification/admin/templates/document-preview.php:32
+#: certification/admin/templates/document-preview.php:34
 msgid "This document asks for signature images: it can no longer be generated this way. Configure its signers so that each person signs from their own account."
 msgstr ""
 
-#: certification/admin/templates/document-preview.php:36
+#: certification/admin/templates/document-preview.php:38
 msgid "These variables do not exist and will appear as text in the document:"
 msgstr ""
 
-#: certification/admin/templates/document-preview.php:40
+#: certification/admin/templates/document-preview.php:42
 msgid "Preview of the document in PDF"
 msgstr ""
 
-#: certification/admin/templates/document-preview.php:56
+#: certification/admin/templates/document-preview.php:58
 msgid "Generating the PDF…"
 msgstr ""
 
-#: certification/admin/templates/document-preview.php:57
+#: certification/admin/templates/document-preview.php:59
 msgid "PDF ready."
 msgstr ""
 
-#: certification/admin/templates/document-preview.php:58
+#: certification/admin/templates/document-preview.php:60
 msgid "The preview could not be generated."
 msgstr ""
 
-#: certification/admin/templates/document-preview.php:60
+#: certification/admin/templates/document-preview.php:62
 #, php-format
 msgid "The preview could not be generated (%s)."
+msgstr ""
+
+#: certification/admin/templates/document-preview.php:63
+msgid "PDF ready (made by the PDF server)."
+msgstr ""
+
+#: certification/admin/templates/document-preview.php:64
+msgid "The PDF server did not answer: this is an approximate preview made by your browser."
 msgstr ""
 
 #: certification/admin/templates/document-signing.php:16
@@ -4717,6 +4879,27 @@ msgstr ""
 msgid "This site does not ask for the identity document."
 msgstr ""
 
+#: includes/pdf-engine.php:185
+msgid "The address of the PDF service is not configured."
+msgstr ""
+
+#: includes/pdf-engine.php:193
+#, php-format
+msgid "The PDF service answered with code %d."
+msgstr ""
+
+#: includes/pdf-engine.php:210
+msgid "The PDF service is not configured on this site."
+msgstr ""
+
+#: includes/pdf-engine.php:215
+msgid "The document is too large for the PDF service (reduce the size of its images)."
+msgstr ""
+
+#: includes/pdf-engine.php:222
+msgid "The PDF service could not generate the document."
+msgstr ""
+
 #: includes/permissions.php:23
 msgid "See the list of issued documents."
 msgstr ""
@@ -4795,10 +4978,6 @@ msgstr ""
 
 #: includes/provider-wp-user.php:188
 msgid "The user has no email: the document cannot be identified or validated."
-msgstr ""
-
-#: includes/provider-wp-user.php:192
-msgid "The document does not exist."
 msgstr ""
 
 #: includes/provider-wp-user.php:196

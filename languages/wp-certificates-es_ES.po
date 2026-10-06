@@ -5751,3 +5751,214 @@ msgstr "Abra este documento y fírmelo por separado: tiene su propio texto de co
 msgid "Read only. You already did your part. Waiting for the signature of: %s."
 msgstr "Solo lectura. Usted ya hizo su parte. Falta la firma de: %s."
 
+
+# --- Cadenas nuevas (2026-10-06): traducirlas ---
+#: admin/pdf-engine-settings.php:51
+msgid ""
+"The address must start with https:// (or http://127.0.0.1 if the service is "
+"installed on this same server)."
+msgstr "La dirección debe empezar por https:// (o http://127.0.0.1 si el servicio está instalado en este mismo servidor)."
+
+#: admin/pdf-engine-settings.php:65
+msgid ""
+"The PDF server was not activated: confirm that the data processing agreement "
+"with the institution exists."
+msgstr "No se activó el servidor de PDF: confirme que existe el contrato de encargado del tratamiento con la institución."
+
+#: admin/pdf-engine-settings.php:69
+msgid ""
+"The PDF server was not activated: complete the address, the site identifier "
+"and the keys in wp-config.php."
+msgstr "No se activó el servidor de PDF: complete la dirección, el identificador del sitio y las claves en wp-config.php."
+
+#: admin/pdf-engine-settings.php:92
+#, php-format
+msgid "The PDF server does not answer: %s"
+msgstr "El servidor de PDF no responde: %s"
+
+#: admin/pdf-engine-settings.php:94
+#, php-format
+msgid "The PDF server answers (Chrome %1$s), but this site is missing: %2$s."
+msgstr "El servidor de PDF responde (Chrome %1$s), pero a este sitio le falta: %2$s."
+
+#: admin/pdf-engine-settings.php:97
+msgid "PDF server test"
+msgstr "Prueba del servidor de PDF"
+
+#: admin/pdf-engine-settings.php:98
+#, php-format
+msgid "Site: %s"
+msgstr "Sitio: %s"
+
+#. translators: 1: milliseconds, 2: Chrome version, 3: version of the printing rules, 4: yes/no sandbox
+#: admin/pdf-engine-settings.php:106
+#, php-format
+msgid ""
+"Connection correct: test PDF in %1$d ms, Chrome %2$s, printing rules %3$s, "
+"signature of the service valid. Chrome isolation (sandbox): %4$s."
+msgstr "Conexión correcta: PDF de prueba en %1$d ms, Chrome %2$s, reglas de impresión %3$s, firma del servicio válida. Aislamiento de Chrome (sandbox): %4$s."
+
+#: admin/pdf-engine-settings.php:107
+msgid "yes"
+msgstr "sí"
+
+#: admin/pdf-engine-settings.php:107
+msgid "no"
+msgstr "no"
+
+#: admin/pdf-engine-settings.php:137
+#: admin/templates/eds-document-detail.php:334
+msgid "PDF engine"
+msgstr "Motor de PDF"
+
+#: admin/pdf-engine-settings.php:141
+msgid ""
+"Who makes the PDF of the documents. The browser of each person (as before: "
+"the result may change with the browser, the zoom or the window) or the PDF "
+"server of Squuad (Chrome on the server: always the same result, the same "
+"fonts and real text). If the server does not answer, the preview uses the "
+"browser and says so. Each document can follow the site or choose its own "
+"engine."
+msgstr "Quién hace el PDF de los documentos: el navegador de cada persona (como hasta ahora; el resultado puede cambiar según el navegador, el zoom o la ventana) o el servidor de PDF de Squuad (Chrome en el servidor: siempre el mismo resultado, las mismas fuentes y texto real). Si el servidor no responde, la vista previa usa el navegador y lo indica. Cada documento puede seguir al sitio o elegir su propio motor."
+
+#: admin/pdf-engine-settings.php:146
+msgid "Engine of the site"
+msgstr "Motor del sitio"
+
+#: admin/pdf-engine-settings.php:147
+msgid "Browser of each person (default)"
+msgstr "Navegador de cada persona (por defecto)"
+
+#: admin/pdf-engine-settings.php:148
+#: admin/templates/eds-document-detail.php:332
+msgid "PDF server"
+msgstr "Servidor de PDF"
+
+#: admin/pdf-engine-settings.php:149
+msgid ""
+"I confirm that the data processing agreement with the institution exists: "
+"with the PDF server, the content of the documents (also of minors) travels "
+"encrypted to the server of Squuad, which does not keep it."
+msgstr "Confirmo que existe el contrato de encargado del tratamiento con la institución: con el servidor de PDF, el contenido de los documentos (también de menores) viaja cifrado al servidor de Squuad, que no lo guarda."
+
+#: admin/pdf-engine-settings.php:152
+msgid "Address of the PDF server"
+msgstr "Dirección del servidor de PDF"
+
+#: admin/pdf-engine-settings.php:154
+msgid "Fixed in wp-config.php (SQUUAD_CERT_PDF_SERVICE_URL)."
+msgstr "Fijada en wp-config.php (SQUUAD_CERT_PDF_SERVICE_URL)."
+
+#: admin/pdf-engine-settings.php:157
+msgid "Site identifier"
+msgstr "Identificador del sitio"
+
+#: admin/pdf-engine-settings.php:159
+msgid ""
+"The name under which the PDF server registered this site (lowercase letters, "
+"numbers, dot and hyphens)."
+msgstr "El nombre con el que el servidor de PDF registró este sitio (minúsculas, números, punto y guiones)."
+
+#: admin/pdf-engine-settings.php:161
+msgid "Keys in wp-config.php"
+msgstr "Claves en wp-config.php"
+
+#: admin/pdf-engine-settings.php:164
+msgid "present"
+msgstr "presente"
+
+#: admin/pdf-engine-settings.php:164
+msgid "missing"
+msgstr "falta"
+
+#: admin/pdf-engine-settings.php:167
+msgid ""
+"This server does not have the sodium extension of PHP: the signature of the "
+"PDF server cannot be checked."
+msgstr "Este servidor no tiene la extensión sodium de PHP: no se puede comprobar la firma del servidor de PDF."
+
+#: admin/pdf-engine-settings.php:173
+msgid "Only the WordPress administrator can change the PDF engine."
+msgstr "Solo el administrador de WordPress puede cambiar el motor de PDF."
+
+#: admin/pdf-engine-settings.php:180
+msgid "Check connection"
+msgstr "Comprobar conexión"
+
+#: admin/pdf-engine-settings.php:181
+msgid ""
+"Asks the server for its status and a test PDF without personal data, and "
+"checks its signature."
+msgstr "Pide al servidor su estado y un PDF de prueba sin datos personales, y comprueba su firma."
+
+#: admin/templates/eds-document-detail.php:332
+msgid "browser"
+msgstr "navegador"
+
+#: admin/templates/eds-document-detail.php:336
+#, php-format
+msgid "As the site (now: %s)"
+msgstr "Según el sitio (ahora: %s)"
+
+#: admin/templates/eds-document-detail.php:337
+msgid "Always the PDF server"
+msgstr "Siempre el servidor de PDF"
+
+#: admin/templates/eds-document-detail.php:338
+msgid "Always the browser"
+msgstr "Siempre el navegador"
+
+#: admin/templates/eds-document-detail.php:340
+msgid ""
+"Who makes the PDF of this document: the PDF server (always the same result) "
+"or the browser of the person (as before). Only the WordPress administrator "
+"can change it."
+msgstr "Quién hace el PDF de este documento: el servidor de PDF (siempre el mismo resultado) o el navegador de la persona (como hasta ahora). Solo el administrador de WordPress puede cambiarlo."
+
+#: certification/admin/document-preview.php:84
+msgid "Too many previews in a short time. Wait a minute."
+msgstr "Demasiadas vistas previas en poco tiempo. Espere un minuto."
+
+#: certification/admin/templates/document-preview.php:63
+msgid "PDF ready (made by the PDF server)."
+msgstr "PDF listo (hecho por el servidor de PDF)."
+
+#: certification/admin/templates/document-preview.php:64
+msgid ""
+"The PDF server did not answer: this is an approximate preview made by your "
+"browser."
+msgstr "El servidor de PDF no respondió: esta es una vista aproximada hecha por su navegador."
+
+#: includes/pdf-engine.php:164
+msgid "The address of the PDF service is not configured."
+msgstr "La dirección del servidor de PDF no está configurada."
+
+#: includes/pdf-engine.php:172
+#, php-format
+msgid "The PDF service answered with code %d."
+msgstr "El servidor de PDF respondió con el código %d."
+
+#: includes/pdf-engine.php:189
+msgid "The PDF service is not configured on this site."
+msgstr "El servidor de PDF no está configurado en este sitio."
+
+#: includes/pdf-engine.php:194
+msgid ""
+"The document is too large for the PDF service (reduce the size of its "
+"images)."
+msgstr "El documento es demasiado grande para el servidor de PDF (reduzca el tamaño de sus imágenes)."
+
+#: includes/pdf-engine.php:201
+msgid "The PDF service could not generate the document."
+msgstr "El servidor de PDF no pudo generar el documento."
+
+
+# --- Cadenas nuevas (2026-10-06): traducirlas ---
+#: admin/pdf-engine-settings.php:88
+msgid ""
+"The PDF server was not activated: the server runs Chrome without isolation "
+"(sandbox), which is only acceptable for tests with example data."
+msgstr ""
+"No se activó el servidor de PDF: el servidor ejecuta Chrome sin aislamiento "
+"(sandbox), lo que solo es aceptable para pruebas con datos de ejemplo."
+

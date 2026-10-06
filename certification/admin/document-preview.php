@@ -33,6 +33,86 @@ function squuad_cert_document_preview_markup($markup, $document)
     return (string) ob_get_clean();
 }
 
+/** Pie del PDF de las solicitudes de firma, con valores de ejemplo (el real lleva el número, la ronda y la huella). */
+function squuad_cert_document_preview_fingerprint(): string
+{
+    return sprintf(__('Signature request #%1$d, round %2$d · Content fingerprint (SHA-256): %3$s', 'wp-certificates'), 123, 1, hash('sha256', 'example'));
+}
+
+/**
+ * Petición para el motor de PDF del servidor (ADR 0013 de Edusof) con el mismo contenido y formato que la vista previa
+ * del navegador: HTML construido aquí (nunca el que mande el navegador), QR como imagen y la página del documento.
+ */
+function squuad_cert_document_preview_server_payload(object $document): array
+{
+    $data = squuad_cert_document_preview_data($document);
+    if ('generate' === $data['mode']) {
+        $g = $data['generate'];
+        $page = squuad_cert_pdf_page(['unit' => $g['unit'], 'format' => $g['paper_format'], 'orientation' => $g['orientation']], 0);
+        // Como «Generar»: el contenido ocupa al menos la página; encabezado y pie en cada página solo en vertical
+        $content = '<div style="padding:0;margin:0;background:#fff;min-width:' . esc_attr($g['width']) . ';min-height:' . esc_attr($g['height']) . '">' . $data['content'] . '</div>';
+        $portrait = 'portrait' === $g['orientation'];
+
+        return squuad_cert_pdf_payload($content, $page, $portrait ? $data['header'] : '', $portrait ? $data['footer'] : '', 'https://example.com/verify/EXAMPLE');
+    }
+    // Automático y emitido: como signature-final-pdf.php y signer-inbox.php (contenido de la solicitud + pie)
+    $html = '<div style="box-sizing:border-box;width:100%;background:#fff;padding:16px;font-family:Arial,sans-serif;color:#111">'
+        . $data['html'] . '<p style="margin-top:16px;font-size:9px;color:#666;word-break:break-all">' . esc_html(squuad_cert_document_preview_fingerprint()) . '</p></div>';
+    $page = 'automatic' === $data['mode']
+        ? squuad_cert_pdf_page(['unit' => 'mm', 'format' => 'a4', 'orientation' => 'portrait'], 7.62)
+        : squuad_cert_pdf_page($data['page']['jspdf'], (float) $data['page']['margin'], true);
+
+    return squuad_cert_pdf_payload($html, $page, '', '', 'https://example.com/verify/EXAMPLE');
+}
+
+/**
+ * Vista previa hecha por el servidor: devuelve el PDF (o JSON con el error, y la página vuelve al navegador). Con el
+ * permiso de la pantalla de documentos, nonce y como mucho 30 peticiones por minuto y usuario.
+ */
+add_action('wp_ajax_squuad_cert_preview_server_pdf', 'squuad_cert_document_preview_server_ajax');
+function squuad_cert_document_preview_server_ajax(): void
+{
+    global $wpdb;
+
+    if (!current_user_can('manager_documents_certificates')) {
+        wp_send_json_error(['message' => __('Sorry, you are not allowed to access this page.', 'wp-certificates')], 403);
+    }
+    check_ajax_referer('squuad_cert_preview_server_pdf');
+    $key = 'squuad_cert_preview_rate_' . get_current_user_id();
+    $count = (int) get_transient($key);
+    if ($count >= 30) {
+        wp_send_json_error(['message' => __('Too many previews in a short time. Wait a minute.', 'wp-certificates')], 429);
+    }
+    set_transient($key, $count + 1, MINUTE_IN_SECONDS);
+    $id = isset($_POST['document_id']) ? absint($_POST['document_id']) : 0;
+    $document = $id ? $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}documents_certificates WHERE id = %d", $id)) : null;
+    if (!$document) {
+        wp_send_json_error(['message' => __('The document does not exist.', 'wp-certificates')], 404);
+    }
+    if ('servicio' !== squuad_cert_pdf_engine_for_document($document)) {
+        wp_send_json_error(['message' => 'navegador'], 409);
+    }
+    $result = squuad_cert_pdf_render(squuad_cert_document_preview_server_payload($document), 'vista previa del documento ' . $id);
+    if (is_wp_error($result)) {
+        wp_send_json_error(['message' => $result->get_error_message()], 502);
+    }
+    // Nada antes del PDF (avisos, BOM, compresión): si no, el visor recibiría un PDF roto
+    while (ob_get_level()) {
+        ob_end_clean();
+    }
+    if (function_exists('ini_get') && ini_get('zlib.output_compression')) {
+        @ini_set('zlib.output_compression', '0'); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+    }
+    nocache_headers();
+    header('Content-Type: application/pdf');
+    header('Content-Disposition: inline; filename="vista-previa.pdf"');
+    header('Content-Length: ' . strlen($result['pdf']));
+    header('X-Content-Type-Options: nosniff');
+    header('X-Squuad-Cert-Engine: servicio; ' . (int) $result['ms'] . ' ms; Chrome ' . preg_replace('/[^0-9.]/', '', $result['chrome']));
+    echo $result['pdf']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- PDF binario
+    exit;
+}
+
 /** Camino por el que sale el documento real: 'automatic', 'issued' o 'generate'. */
 function squuad_cert_document_preview_mode(object $document): string
 {

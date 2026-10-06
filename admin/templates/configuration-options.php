@@ -60,4 +60,9 @@
   if (function_exists('squuad_cert_signing_settings_section')) {
     squuad_cert_signing_settings_section();
   } ?>
+
+  <?php // Motor de PDF (ADR 0013 de Edusof): navegador o servidor de PDF; solo el administrador de WordPress lo cambia
+  if (function_exists('squuad_cert_pdf_engine_settings_section')) {
+    squuad_cert_pdf_engine_settings_section();
+  } ?>
 </div>

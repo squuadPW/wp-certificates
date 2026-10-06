@@ -327,6 +327,19 @@ $save_url = admin_url('admin.php?page=add_admin_form_documents_content&action=sa
                         <option value="landscape" <?php selected($document->orientation, 'landscape'); ?>><?= esc_html__('Landscape', 'wp-certificates') ?></option>
                     </select>
                 </div>
+                <?php if (function_exists('squuad_cert_pdf_engine_column_ready') && squuad_cert_pdf_engine_column_ready()) :
+                    $wpc_pdf_setting = squuad_cert_pdf_engine_document_setting($document);
+                    $wpc_pdf_site = 'servicio' === squuad_cert_pdf_engine_site() ? __('PDF server', 'wp-certificates') : __('browser', 'wp-certificates'); ?>
+                <div class="wpc-eds-field">
+                    <label for="pdf_engine"><?= esc_html__('PDF engine', 'wp-certificates') ?></label>
+                    <select name="pdf_engine" id="pdf_engine" aria-describedby="pdf_engine-help" <?php disabled(!squuad_cert_pdf_engine_can_manage()); ?>>
+                        <option value="site" <?php selected($wpc_pdf_setting, 'site'); ?>><?= esc_html(sprintf(__('As the site (now: %s)', 'wp-certificates'), $wpc_pdf_site)) ?></option>
+                        <option value="servicio" <?php selected($wpc_pdf_setting, 'servicio'); ?>><?= esc_html__('Always the PDF server', 'wp-certificates') ?></option>
+                        <option value="navegador" <?php selected($wpc_pdf_setting, 'navegador'); ?>><?= esc_html__('Always the browser', 'wp-certificates') ?></option>
+                    </select>
+                    <p class="wpc-eds-help" id="pdf_engine-help"><?= esc_html__('Who makes the PDF of this document: the PDF server (always the same result) or the browser of the person (as before). Only the WordPress administrator can change it.', 'wp-certificates') ?></p>
+                </div>
+                <?php endif; ?>
                 <div class="wpc-eds-field" data-show-if="custom">
                     <label for="unit"><?= esc_html__('Unit', 'wp-certificates') ?></label>
                     <select name="unit" id="unit" required>
