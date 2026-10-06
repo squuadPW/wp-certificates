@@ -48,9 +48,27 @@ function squuad_cert_modal_document_automatic()
     $variables_subject = (int) $pending['student_id'];
     $document = $pending['document'];
 
+    // Turno de firma (ADR 0012 de Edusof): si quien recibe el documento no firma primero (p. ej. el representante va
+    // antes), la solicitud se crea ya, sin campos ni borrador: los rellena quien tiene el primer turno. Si su turno no
+    // está abierto, no se abre la ventana (en Mi Cuenta lo ve en solo lectura)
+    $request = $pending['request'];
+    if (!$request && !squuad_cert_signing_policy_holder_first($document, $current_user)) {
+        $request = squuad_cert_request_issue_for_holder($subject_id, (int) $document->id, null, 'opened');
+        if (!$request) {
+            return;
+        }
+    }
+    if ($request && null === $request->frozen_at_utc) {
+        $own_slot = squuad_cert_signature_request_role($request, (int) $current_user->ID);
+        if ('' !== $own_slot && !squuad_cert_signature_request_slot_open($request, $own_slot)) {
+            return;
+        }
+        if (!squuad_cert_request_var_slot_valid($request, $own_slot, (int) $current_user->ID)) {
+            return;
+        }
+    }
     // Con solicitud: si el contenido ya está congelado (alguien firmó), se muestra tal cual, sin volver a pedir los
     // campos adicionales ni regenerar nada (ADR 0002, puntos 2 y 11)
-    $request = $pending['request'];
     if ($request && null !== $request->frozen_at_utc) {
         $content = squuad_cert_signature_request_content((int) $request->id);
         if (null === $content) {
@@ -139,6 +157,14 @@ function squuad_cert_modal_document_automatic()
         }
     }
     $request = squuad_cert_signature_request_get((int) $request->id);
+    // Quién rellenó los campos adicionales (ADR 0012 de Edusof): la persona con el primer turno, una vez por respuesta
+    if ($field_values && $request && null === $request->frozen_at_utc) {
+        squuad_cert_signature_request_log_event((int) $request->id, 'fields_filled', [
+            'role' => squuad_cert_signature_request_role($request, (int) $current_user->ID) ?: 'holder',
+            'fields_sha256' => hash('sha256', (string) wp_json_encode($field_values)),
+            'content_sha256' => (string) $request->content_sha256,
+        ]);
+    }
     $legacy_partial = !empty($pending['legacy_partial']) && 1 === (int) $request->round;
     if ($legacy_partial) {
         squuad_cert_signature_request_log_event_once((int) $request->id, 'legacy_partial_superseded');
@@ -197,6 +223,26 @@ function squuad_cert_signature_account_documents_to_sign()
     $items = squuad_cert_signature_user_documents($user);
     if (!$items) {
         return;
+    }
+    // Solo lectura (ADR 0012 de Edusof): el documento de una fila suya que espera otras firmas (p. ej. el estudiante
+    // mientras firma su representante). Solo solicitudes de su propia lista; no se crea ni se regenera nada
+    if (!empty($_GET['squuad_cert_view'])) {
+        $view_id = absint($_GET['squuad_cert_view']);
+        foreach ($items as $item) {
+            if ($item['request'] && (int) $item['request']->id === $view_id && in_array($item['state'], ['queued', 'waiting'], true)) {
+                $view_request = $item['request'];
+                $view_document = $item['document'];
+                $view_state = $item['state']; // queued: aún no le toca; waiting: ya firmó
+                $view_content = squuad_cert_signature_request_content($view_id);
+                $view_html = null !== $view_content ? squuad_cert_signature_render_content($view_content, $view_request, true) : '';
+                $view_waiting = array_values(array_filter(
+                    squuad_cert_signature_signers_overview($view_request, (int) $user->ID),
+                    static fn(array $signer): bool => 'turn' === $signer['state'] && !$signer['own']
+                ));
+                include SQUUAD_CERT_MODULE_PATH . 'public/templates/document-read-only.php';
+                break;
+            }
+        }
     }
     // El formulario del documento de identidad solo si hay algo que firmar
     $id_document_blocked = $id_document_blocked && (bool) array_filter($items, static fn(array $item): bool => squuad_cert_id_document_item_signs($item, $user));

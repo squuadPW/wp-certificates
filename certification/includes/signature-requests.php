@@ -213,7 +213,8 @@ function squuad_cert_signature_request_get_or_create(
             $omitted = function_exists('squuad_cert_request_signers_omitted') ? squuad_cert_request_signers_omitted((int) $request->id) : [];
             // Variables por firmante numeradas (ADR 0010 de Edusof): a qué puesto apunta cada Fn de la plantilla
             $fn_map = function_exists('squuad_cert_request_signers_fn_map') ? squuad_cert_request_signers_fn_map((int) $request->id) : [];
-            squuad_cert_signature_request_log_event((int) $request->id, 'created', ['round' => $round]
+            // Origen y quién la creó (ADR 0012 de Edusof: también el sistema o Admisión al volver a pedirla)
+            squuad_cert_signature_request_log_event((int) $request->id, 'created', ['round' => $round, 'origin' => $origin, 'created_by' => get_current_user_id()]
                 + ($fixed ? ['signers' => $fixed] : []) + ($omitted ? ['omitted_signers' => $omitted] : [])
                 + ($fn_map ? ['fn_map' => array_combine(array_map(static fn($n): string => 'F' . $n, array_keys($fn_map)), array_values($fn_map))] : []));
         }
@@ -671,6 +672,8 @@ function squuad_cert_signature_user_documents(WP_User $user): array
                 $state = 'pdf'; // todas las firmas; falta generar el PDF final
             } elseif ($holder ? null !== $request->frozen_at_utc : in_array($role_here, squuad_cert_signature_request_signed_roles((int) $request->id), true)) {
                 $state = 'waiting'; // ya hizo su parte (firmó o guardó sus respuestas); faltan otros firmantes
+            } elseif ('' !== $role_here && function_exists('squuad_cert_signature_request_slot_open') && !squuad_cert_signature_request_slot_open($request, $role_here)) {
+                $state = 'queued'; // turno de firma (ADR 0012 de Edusof): otra persona firma antes; lo ve en solo lectura
             }
         } elseif (!$request && $provider && !empty($provider['external_state'])) {
             // Sin solicitudes: requisito de EduSystem ya resuelto por otra vía (subido o aprobado)
@@ -800,15 +803,15 @@ function squuad_cert_signature_inline_images(string $html): string
  * la plantilla coloca su variable (numeradas: ADR 0011 de Edusof); los demás puestos, su bloque de firma si ya firmaron
  * o «Pendiente de firma: <puesto>» con el color de su número de firmante (solo en la ventana de firma, nunca en el PDF).
  */
-function squuad_cert_signature_render_content(string $content, ?object $request = null): string
+function squuad_cert_signature_render_content(string $content, ?object $request = null, bool $read_only = false): string
 {
     // Un hueco del representante de una solicitud antigua queda vacío
     $content = str_replace('<div data-edusig-slot="parent"></div>', '', $content);
     $section = '';
     if ($request && function_exists('squuad_cert_request_signers')) {
         // Etiquetas para firmar: solo en el puesto de quien mira, si firma desde aquí (quien recibe el documento o un
-        // firmante por variable) y aún no firmó
-        $viewer = squuad_cert_signature_request_role($request, get_current_user_id());
+        // firmante por variable) y aún no firmó. En solo lectura (ADR 0012 de Edusof), ninguna: su puesto, pendiente
+        $viewer = $read_only ? '' : squuad_cert_signature_request_role($request, get_current_user_id());
         $viewer = squuad_cert_is_person_slot($viewer) ? $viewer : '';
         $rows = squuad_cert_signature_request_rows((int) $request->id);
         $tag_index = 0;
@@ -869,32 +872,58 @@ function squuad_cert_signature_request_log_event_once(int $request_id, string $e
 /** Versión vigente del texto de consentimiento. Si el texto cambia, se añade una versión nueva y esta pasa a ella. */
 const SQUUAD_CERT_SIGNATURE_CONSENT_CURRENT = 'v1';
 
+/** Versión del consentimiento de quien firma en representación del titular (ADR 0012 de Edusof). */
+const SQUUAD_CERT_SIGNATURE_CONSENT_ON_BEHALF = 'r1';
+
 /**
  * Texto de consentimiento de una versión, traducido al idioma actual, o null si la versión no existe. El cliente
- * solo envía la versión; el texto que se sella es el que el servidor mostró.
+ * solo envía la versión; el texto que se sella es el que el servidor mostró. $holder_name: nombre del titular, solo
+ * para la versión «en representación» (r1).
  */
-function squuad_cert_signature_consent_text(string $version): ?string
+function squuad_cert_signature_consent_text(string $version, string $holder_name = ''): ?string
 {
     $texts = [
         'v1' => __('I agree to sign this document electronically. I understand that my electronic signature has the same validity as my handwritten signature, that it is recorded with the date, the time and the details of my connection, and that the signed document cannot be modified.', 'wp-certificates'),
+        /* translators: %s: name of the person who receives the document (for example, the student) */
+        'r1' => sprintf(__('I agree to sign this document electronically on my own behalf and on behalf of %s. I understand that my electronic signature has the same validity as my handwritten signature, that it is recorded with the date, the time and the details of my connection, and that the signed document cannot be modified.', 'wp-certificates'), $holder_name),
     ];
 
     return $texts[$version] ?? null;
 }
 
 /**
- * Evidencia del consentimiento que aceptó el firmante: ['consent_version' => 'v1:es_ES', 'consent_sha256' => ...].
- * Sella la versión, el idioma y el sha256 del texto exacto mostrado. Devuelve null si la versión no es la vigente.
+ * Consentimiento que se muestra a quien firma un puesto de una solicitud: ['version', 'text']. Un firmante por variable
+ * que su plugin declara «en representación del titular» (signs_on_behalf, p. ej. el representante del estudiante)
+ * acepta el texto r1 con el nombre del titular; los demás, el de siempre (ADR 0012 de Edusof).
  */
-function squuad_cert_signature_consent_evidence(string $version): ?array
+function squuad_cert_signature_consent_for(?object $request, string $role): array
 {
-    if (SQUUAD_CERT_SIGNATURE_CONSENT_CURRENT !== $version) {
+    if ($request && function_exists('squuad_cert_is_var_slot') && squuad_cert_is_var_slot($role)) {
+        $method = squuad_cert_signer_variable_method(squuad_cert_var_slot_variable($role));
+        $holder_name = squuad_cert_request_subject_label($request);
+        if ($method && !empty($method['signs_on_behalf']) && '' !== $holder_name) {
+            return [
+                'version' => SQUUAD_CERT_SIGNATURE_CONSENT_ON_BEHALF,
+                'text' => (string) squuad_cert_signature_consent_text(SQUUAD_CERT_SIGNATURE_CONSENT_ON_BEHALF, $holder_name),
+            ];
+        }
+    }
+
+    return ['version' => SQUUAD_CERT_SIGNATURE_CONSENT_CURRENT, 'text' => (string) squuad_cert_signature_consent_text(SQUUAD_CERT_SIGNATURE_CONSENT_CURRENT)];
+}
+
+/**
+ * Evidencia del consentimiento que aceptó el firmante: ['consent_version' => 'v1:es_ES', 'consent_sha256' => ...].
+ * Sella la versión, el idioma y el sha256 del texto exacto mostrado. Devuelve null si la versión no es la que
+ * corresponde a ese puesto (con $request y $role: squuad_cert_signature_consent_for(); sin ellos, la vigente).
+ */
+function squuad_cert_signature_consent_evidence(string $version, ?object $request = null, string $role = ''): ?array
+{
+    $expected = squuad_cert_signature_consent_for($request, $role);
+    if ($expected['version'] !== $version || '' === $expected['text']) {
         return null;
     }
-    $text = squuad_cert_signature_consent_text($version);
-    if (null === $text) {
-        return null;
-    }
+    $text = $expected['text'];
 
     return [
         'consent_version' => substr($version . ':' . determine_locale(), 0, 20),

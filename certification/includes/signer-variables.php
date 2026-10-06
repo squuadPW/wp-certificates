@@ -214,24 +214,20 @@ function squuad_cert_template_signer_variables(string $template): array
 }
 
 /**
- * Fases de los puestos de una solicitud por el orden del panel: quien recibe el documento (rol) firma siempre primero
- * (fase 1: es quien lo abre, rellena sus campos y crea la solicitud); después cada firmante por variable tiene su fase y
- * los firmantes del sistema seguidos comparten la suya (como hasta ahora: rol en la fase 1 y firmantes en la 2).
+ * Fases (turnos de firma) de los puestos de una solicitud por el orden del panel (ADR 0012 de Edusof): cada persona
+ * (quien recibe el documento o un firmante por variable) tiene su turno y los firmantes del sistema seguidos comparten
+ * el suyo. Con quien recibe el documento delante (todas las políticas anteriores), el resultado es el de siempre: rol
+ * en la fase 1 y firmantes del sistema en la 2. Los puestos omitidos ya no están: los turnos se corren solos.
  *
  * @param array $slots Puestos en orden, con slot_key.
  */
 function squuad_cert_signing_slots_phases(array $slots): array
 {
-    $phase = 1;
+    $phase = 0;
     $previous = '';
     foreach ($slots as $i => $slot) {
         $key = (string) $slot['slot_key'];
-        if (squuad_cert_is_holder_slot($key)) {
-            $slots[$i]['phase'] = 1;
-            $previous = 'role';
-            continue;
-        }
-        $kind = squuad_cert_is_signer_slot($key) ? 'signer' : 'var';
+        $kind = squuad_cert_is_signer_slot($key) ? 'signer' : (squuad_cert_is_holder_slot($key) ? 'role' : 'var');
         if (!('signer' === $kind && 'signer' === $previous)) {
             $phase++;
         }
@@ -262,6 +258,63 @@ function squuad_cert_request_var_slot(object $request, ?object $document, string
     }
 
     return ['slot_key' => $slot_key, 'user_id' => $resolved['user_id'], 'signer_id' => 0, 'charge' => $resolved['label'], 'phase' => 0, 'method' => $resolved['method']];
+}
+
+/**
+ * ¿Sigue siendo $user_id quien firma este puesto? (ADR 0012 de Edusof). En un puesto por variable se vuelve a resolver
+ * la variable para el titular de la solicitud: si ya no da esta cuenta (p. ej. cambió el representante en la ficha) o no
+ * se puede comprobar, no firma ni abre el documento; queda un evento 'signer_revoked' y la solicitud espera a que la
+ * reinicien (nunca se cambia de firmante en silencio). Los demás puestos no dependen de una variable: true.
+ */
+function squuad_cert_request_var_slot_valid(object $request, string $slot_key, int $user_id): bool
+{
+    global $wpdb;
+    static $checked = [];
+
+    if (!squuad_cert_is_var_slot($slot_key)) {
+        return true;
+    }
+    $cache_key = (int) $request->id . '|' . $slot_key . '|' . $user_id;
+    if (isset($checked[$cache_key])) {
+        return $checked[$cache_key];
+    }
+    $document = (int) ($request->document_certificate_id ?? 0) ? $wpdb->get_row($wpdb->prepare(
+        "SELECT * FROM {$wpdb->prefix}documents_certificates WHERE id = %d",
+        (int) $request->document_certificate_id
+    )) : null;
+    $variable = squuad_cert_var_slot_variable($slot_key);
+    $resolved = squuad_cert_signer_variable_resolve($variable, squuad_cert_request_student_id($request), $document, [
+        'holder_type' => (string) $request->subject_type,
+        'holder_id' => (int) $request->subject_id,
+    ]);
+    $valid = $user_id > 0 && (int) $resolved['user_id'] === $user_id;
+    // Solo un cambio definitivo queda sellado (la variable da otra cuenta o quedó vacía); un fallo pasajero (plugin
+    // desactivado, método en cuarentena) solo deniega
+    if (!$valid && ((int) $resolved['user_id'] > 0 || 'empty' === $resolved['reason'])) {
+        $logged = $wpdb->get_var($wpdb->prepare(
+            "SELECT id FROM {$wpdb->prefix}squuad_cert_events WHERE request_id = %d AND event_type = 'signer_revoked' AND actor_user_id = %d LIMIT 1",
+            (int) $request->id,
+            $user_id
+        ));
+        if (!$logged) {
+            squuad_cert_signature_request_log_event((int) $request->id, 'signer_revoked', [
+                'slot' => $slot_key,
+                'user_id' => $user_id,
+                'now_resolves_to' => (int) $resolved['user_id'],
+                'reason' => '' !== $resolved['reason'] ? $resolved['reason'] : 'other_account',
+            ], $user_id);
+            squuad_cert_log(sprintf(
+                'Solicitud %d: la cuenta %d ya no firma el puesto %s (la variable da %s); espera a que la reinicien',
+                (int) $request->id,
+                $user_id,
+                $slot_key,
+                $resolved['user_id'] ? (string) $resolved['user_id'] : ($resolved['reason'] ?: 'nada')
+            ), 'signature_blocked');
+            do_action('squuad_cert_request_signer_revoked', squuad_cert_request_event_payload($request) + ['slot' => $slot_key, 'user_id' => $user_id]);
+        }
+    }
+
+    return $checked[$cache_key] = $valid;
 }
 
 /**
@@ -411,11 +464,18 @@ function squuad_cert_signature_var_documents(WP_User $user): array
             continue;
         }
         $request = $row;
+        // Si la variable ya no da esta cuenta (p. ej. cambió el representante), no ve el documento ni sus datos
+        if (!squuad_cert_request_var_slot_valid($request, $slot_key, (int) $user->ID)) {
+            continue;
+        }
         if ('signed' === $request->status) {
             $state = 'pdf';
         } elseif (in_array($slot_key, squuad_cert_signature_request_signed_roles((int) $request->id), true)) {
             $state = 'waiting';
-        } elseif (null === $request->frozen_at_utc || !squuad_cert_signature_request_slot_open($request, $slot_key)) {
+        } elseif (!squuad_cert_signature_request_slot_open($request, $slot_key)
+            || (null === $request->frozen_at_utc && squuad_cert_signature_request_is_holder($request, (int) $request->subject_id))) {
+            // Turno de firma (ADR 0012 de Edusof): con su turno abierto firma aunque nadie haya firmado antes; salvo si
+            // quien recibe el documento solo rellena sus campos (sin firmar): los fija él primero, como siempre
             $state = 'queued';
         } else {
             $state = 'to_sign';

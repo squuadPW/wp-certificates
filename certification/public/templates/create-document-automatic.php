@@ -81,8 +81,10 @@ $icon_close = '<svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true
                 <div class="wpc-sign-consent-txt">
                     <h3><?= esc_html__('Review the document and sign it', 'wp-certificates') ?></h3>
                     <label class="wpc-sign-consent-label">
-                        <input type="checkbox" name="consent_version" value="<?= esc_attr(SQUUAD_CERT_SIGNATURE_CONSENT_CURRENT) ?>" data-wpc-consent-box aria-describedby="wpc-sign-consent-err">
-                        <span><?= esc_html(squuad_cert_signature_consent_text(SQUUAD_CERT_SIGNATURE_CONSENT_CURRENT)) ?></span>
+                        <?php // Quien firma en representación del titular ve su propio texto (ADR 0012 de Edusof)
+                        $consent_shown = squuad_cert_signature_consent_for($request, squuad_cert_signature_request_role($request, get_current_user_id())); ?>
+                        <input type="checkbox" name="consent_version" value="<?= esc_attr($consent_shown['version']) ?>" data-wpc-consent-box aria-describedby="wpc-sign-consent-err">
+                        <span><?= esc_html($consent_shown['text']) ?></span>
                     </label>
                     <p class="wpc-sign-err" id="wpc-sign-consent-err" data-wpc-consent-err hidden><?= esc_html__('Tick the box to be able to sign.', 'wp-certificates') ?></p>
                 </div>

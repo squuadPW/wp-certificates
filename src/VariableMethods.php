@@ -53,6 +53,9 @@ final class VariableMethods
             // del puesto en el recuadro de firma (p. ej. «Representante»); por defecto, la descripción
             'account' => (bool) ($definition['account'] ?? false),
             'signer_label' => $definition['signer_label'] ?? '',
+            // ADR 0012 de Edusof: quien firma por esta variable lo hace también en representación del titular (p. ej. el
+            // representante de un estudiante): acepta su propio texto de consentimiento
+            'signs_on_behalf' => !empty($definition['account']) && !empty($definition['signs_on_behalf']),
             'callback' => $definition['callback'],
         ];
 

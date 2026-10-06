@@ -5635,3 +5635,119 @@ msgstr "El PDF final no es válido o pasa de 15 MB."
 msgid "The background of the paper is not cleaned: use a white background."
 msgstr "El fondo del papel no se limpia: use un fondo blanco."
 
+# --- Cadenas nuevas (2026-10-05): traducirlas ---
+#: certification/admin/templates/document-signing.php:38
+#: certification/admin/templates/document-signing.php:86
+msgid "Signing turn"
+msgstr "Turno de firma"
+
+#: certification/admin/templates/document-signing.php:54
+msgid ""
+"Who signs this document and in which turn. Every user with a marked role "
+"receives their own document (its data are theirs, F1) and signs it from "
+"their own account. The other signers sign that same document. «Signing turn» "
+"decides who signs first: for example, a signer by variable (such as the "
+"parent) can sign before whoever receives the document; that person sees it "
+"read-only until it is their turn. The document is valid when all the "
+"signatures are done. Changes apply to new signature requests; requests "
+"already in progress keep their signers and turns."
+msgstr "Quién firma este documento y en qué turno. Cada usuario con un rol marcado recibe su propio documento (los datos son los suyos, F1) y lo firma desde su propia cuenta. Los demás firmantes firman ese mismo documento. «Turno de firma» decide quién firma primero: por ejemplo, un firmante por variable (como el representante) puede firmar antes que quien recibe el documento; esa persona lo ve en solo lectura hasta que le toque. El documento es válido cuando están todas las firmas. Los cambios se aplican a las solicitudes de firma nuevas; las solicitudes en curso conservan sus firmantes y sus turnos."
+
+#: certification/admin/templates/document-signing.php:86
+msgid ""
+"Who signs first: the lowest number. Consecutive system signers sign at the "
+"same time."
+msgstr "Firma primero el número más bajo. Los firmantes del sistema seguidos firman a la vez."
+
+#: certification/admin/templates/document-signing.php:148
+msgid ""
+"Signers by variable sign in the turn you choose, also before whoever "
+"receives the document: whoever has the first turn opens the document, fills "
+"in its additional fields and signs first. Each person signs only once: if "
+"the variable gives the account of someone who already signs (for example, an "
+"adult student who is their own parent), that row is skipped and the turns "
+"move up."
+msgstr "Los firmantes por variable firman en el turno que usted elija, también antes de quien recibe el documento: quien tiene el primer turno abre el documento, rellena sus campos adicionales y firma primero. Cada persona firma una sola vez: si la variable da la cuenta de alguien que ya firma (por ejemplo, un estudiante mayor de edad que es su propio representante), esa fila se omite y los turnos se corren."
+
+#. translators: %s: name of the person who receives the document (for example, the student)
+#: certification/includes/signature-requests.php:888
+#, php-format
+msgid ""
+"I agree to sign this document electronically on my own behalf and on behalf "
+"of %s. I understand that my electronic signature has the same validity as my "
+"handwritten signature, that it is recorded with the date, the time and the "
+"details of my connection, and that the signed document cannot be modified."
+msgstr "Acepto firmar electrónicamente este documento en nombre propio y en representación de %s. Entiendo que mi firma electrónica tiene la misma validez que mi firma manuscrita, que queda registrada con la fecha, la hora y los datos de mi conexión, y que el documento firmado no se puede modificar."
+
+#: certification/includes/signing-turns.php:115
+msgid "The signature request does not exist."
+msgstr "La solicitud de firma no existe."
+
+#: certification/includes/signing-turns.php:118
+msgid "Only documents with signatures in progress can be requested again."
+msgstr "Solo se pueden volver a solicitar las firmas de un documento con firmas en curso."
+
+#: certification/includes/signing-turns.php:121
+msgid "Write the reason for requesting the signatures again."
+msgstr "Escriba el motivo para volver a solicitar las firmas."
+
+#: certification/includes/signing-turns.php:136
+msgid ""
+"The signature request changed while you were working. Please reload the page."
+msgstr "La solicitud de firma cambió mientras usted trabajaba. Vuelva a cargar la página."
+
+#: certification/includes/signing-turns.php:162
+msgid ""
+"The signatures were cancelled, but the new request could not be created: the "
+"document is not active or the account no longer receives it."
+msgstr "Las firmas se anularon, pero no se pudo crear la solicitud nueva: el documento no está activo o la cuenta ya no lo recibe."
+
+#: certification/includes/signing-turns.php:165
+msgid ""
+"The signatures were requested again. Whoever has the first turn will see the "
+"document in their account."
+msgstr "Se volvieron a solicitar las firmas. Quien tiene el primer turno verá el documento en su cuenta."
+
+#. translators: %s: names of the people who have to sign now
+#: certification/public/templates/document-read-only.php:21
+#, php-format
+msgid ""
+"Read only. Waiting for the signature of: %s. When it is your turn, the "
+"document will open in your account so you can sign it."
+msgstr "Solo lectura. Falta la firma de: %s. Cuando le toque, el documento se abrirá en su cuenta para que lo firme."
+
+#: certification/public/templates/document-read-only.php:25
+msgid "Read only. This document is waiting for other signatures."
+msgstr "Solo lectura. Este documento espera otras firmas."
+
+#: certification/public/templates/document-read-only.php:35
+msgid ""
+"The document is not ready yet: the person who signs first has to open it."
+msgstr "El documento aún no está preparado: primero tiene que abrirlo la persona que firma en el primer turno."
+
+# --- Cadenas nuevas (2026-10-05): traducirlas ---
+#: certification/includes/signers.php:1667
+#: certification/public/functions/documents-signature.php:129
+msgid ""
+"You can no longer sign this document. Ask the school office to request the "
+"signatures again."
+msgstr "Ya no puede firmar este documento. Pida a la secretaría que vuelva a solicitar las firmas."
+
+# --- Cadenas nuevas (2026-10-05): traducirlas ---
+#: certification/includes/signers.php:864
+msgid ""
+"A system signer cannot have the first turn: the first turn belongs to a "
+"person who receives the document or signs by variable. Change the signing "
+"turns."
+msgstr "Un firmante del sistema no puede tener el primer turno: el primer turno es de una persona que recibe el documento o que firma por variable. Cambie los turnos de firma."
+
+#: certification/includes/signers.php:1673
+msgid "Open this document and sign it on its own: it has its own consent text."
+msgstr "Abra este documento y fírmelo por separado: tiene su propio texto de consentimiento."
+
+#. translators: %s: names of the people who have to sign now
+#: certification/public/templates/document-read-only.php:22
+#, php-format
+msgid "Read only. You already did your part. Waiting for the signature of: %s."
+msgstr "Solo lectura. Usted ya hizo su parte. Falta la firma de: %s."
+

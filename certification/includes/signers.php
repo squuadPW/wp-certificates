@@ -217,7 +217,9 @@ function squuad_cert_request_signers_fix(object $request, array $signers, int $d
 
     $wpdb->update($wpdb->prefix . 'squuad_cert_requests', [
         'document_certificate_id' => $document_certificate_id ?: null,
-        'origin' => in_array($origin, ['opened', 'issued'], true) ? $origin : 'opened',
+        // system: la creó otro plugin con squuad_cert_request_issue_for_holder() (p. ej. EduSystem al vincular la cuenta
+        // del estudiante); restarted: la volvió a pedir Admisión (ADR 0012 de Edusof)
+        'origin' => in_array($origin, ['opened', 'issued', 'system', 'restarted'], true) ? $origin : 'opened',
         'policy_sha256' => $policy['policy_sha256'],
     ], ['id' => (int) $request->id]);
 
@@ -848,12 +850,18 @@ function squuad_cert_signing_policy_save(int $document_certificate_id, bool $req
         $seen[$key] = true;
         $clean[] = ['slot_type' => $type, 'signer_id' => $signer_id, 'role' => $role, 'position' => (int) ($slot['position'] ?? 0)];
     }
-    // Los roles firman primero (quien recibe el documento lo abre y crea la solicitud); después, firmantes por variable y
-    // firmantes del sistema por el orden elegido (sin firmantes por variable: roles y después firmantes, como siempre).
-    // Empate en el orden: el firmante del sistema después, como antes
-    usort($clean, static fn(array $a, array $b): int => [$a['slot_type'] !== 'role', $a['position'], $a['slot_type'] === 'signer'] <=> [$b['slot_type'] !== 'role', $b['position'], $b['slot_type'] === 'signer']);
+    // Turno de firma (ADR 0012 de Edusof): el orden elegido en el panel, también para quien recibe el documento (p. ej.
+    // el representante firma antes que el estudiante). Empate: quien recibe el documento primero y el firmante del
+    // sistema después, como antes (las políticas guardadas antes tenían los roles delante y dan el mismo orden)
+    usort($clean, static fn(array $a, array $b): int => [$a['position'], $a['slot_type'] !== 'role', $a['slot_type'] === 'signer'] <=> [$b['position'], $b['slot_type'] !== 'role', $b['slot_type'] === 'signer']);
     foreach ($clean as $i => $slot) {
         $clean[$i]['position'] = $i + 1;
+    }
+    // Un firmante del sistema firma lo que ya fijó una persona (su bandeja exige el contenido congelado): si firman
+    // personas, el primer turno es de una de ellas (ADR 0012 de Edusof)
+    if ($requires && $clean && 'signer' === $clean[0]['slot_type']
+        && array_filter($clean, static fn(array $slot): bool => 'signer' !== $slot['slot_type'])) {
+        return ['ok' => false, 'message' => __('A system signer cannot have the first turn: the first turn belongs to a person who receives the document or signs by variable. Change the signing turns.', 'wp-certificates')];
     }
     if ($requires && !$clean) {
         return ['ok' => false, 'message' => __('Choose at least one signer, or mark that the document does not require signatures.', 'wp-certificates')];
@@ -1608,6 +1616,11 @@ function squuad_cert_signature_batch_holder_candidates(WP_User $user): array
         if (!squuad_cert_is_person_slot($role) || !squuad_cert_signature_request_slot_open($request, $role)) {
             continue;
         }
+        // Quien firma en representación del titular acepta su propio consentimiento, uno por documento: no va en lote
+        // (ADR 0012 de Edusof)
+        if (SQUUAD_CERT_SIGNATURE_CONSENT_CURRENT !== squuad_cert_signature_consent_for($request, $role)['version']) {
+            continue;
+        }
         $row = clone $request;
         $row->document_title = (string) $item['document']->title;
         $row->student_name = squuad_cert_request_subject_label($request);
@@ -1654,6 +1667,14 @@ function squuad_cert_signature_sign_as_holder_with(int $request_id, string $show
     }
     if (!squuad_cert_signature_request_slot_open($request, $role)) {
         return $fail(__('This document is still waiting for previous signatures.', 'wp-certificates'));
+    }
+    // Quien firma en representación del titular acepta su propio consentimiento: no firma con el del lote
+    if (SQUUAD_CERT_SIGNATURE_CONSENT_CURRENT !== squuad_cert_signature_consent_for($request, $role)['version']) {
+        return $fail(__('Open this document and sign it on its own: it has its own consent text.', 'wp-certificates'));
+    }
+    // Firmante por variable: la variable tiene que seguir dando esta cuenta (ADR 0012 de Edusof)
+    if (!squuad_cert_request_var_slot_valid($request, $role, $user_id)) {
+        return $fail(__('You can no longer sign this document. Ask the school office to request the signatures again.', 'wp-certificates'));
     }
     if (!hash_equals((string) $request->content_sha256, strtolower($shown_sha256))) {
         return $fail(__('The document was updated while you had it open. Please reload the page and review it again before signing.', 'wp-certificates'));
@@ -2136,9 +2157,13 @@ function squuad_cert_signer_notify_open_slots(int $request_id): int
     global $wpdb;
 
     $request = squuad_cert_signature_request_get($request_id);
-    if (!$request || !in_array($request->status, ['open', 'partially_signed'], true) || null === $request->frozen_at_utc) {
+    if (!$request || !in_array($request->status, ['open', 'partially_signed'], true)) {
         return 0;
     }
+    // Turno de firma (ADR 0012 de Edusof): una solicitud que creó el sistema (o que Admisión volvió a pedir) avisa ya a
+    // quien tiene el primer turno; las demás, desde que alguien firmó (como siempre)
+    $frozen = null !== $request->frozen_at_utc;
+    $issued = in_array((string) ($request->origin ?? ''), ['system', 'restarted'], true);
     $signed = squuad_cert_signature_request_signed_roles($request_id);
     $notified = [];
     foreach ($wpdb->get_col($wpdb->prepare(
@@ -2156,9 +2181,15 @@ function squuad_cert_signer_notify_open_slots(int $request_id): int
     $sent = 0;
     foreach (squuad_cert_request_signers($request) as $signer) {
         $slot = (string) $signer['slot_key'];
-        $by_variable = squuad_cert_is_var_slot($slot);
+        // Quien recibe el documento y los firmantes por variable firman desde «Documentos por firmar» de Mi Cuenta; a
+        // quien recibe el documento solo se le avisa si otra persona firmó antes o si la solicitud la creó el sistema
+        $by_variable = squuad_cert_is_var_slot($slot) || squuad_cert_is_holder_slot($slot);
         if (!(squuad_cert_is_signer_slot($slot) || $by_variable) || in_array($slot, $signed, true) || in_array($slot, $notified, true)
-            || !squuad_cert_signature_request_slot_open($request, $slot)) {
+            || !squuad_cert_signature_request_slot_open($request, $slot) || (!$frozen && squuad_cert_is_signer_slot($slot))) {
+            continue;
+        }
+        // Quien recibe el documento, sin nadie que haya firmado antes, solo si no la abrió él (la creó el sistema)
+        if (squuad_cert_is_holder_slot($slot) && !$issued && !$signed) {
             continue;
         }
         $user = get_userdata((int) $signer['user_id']);

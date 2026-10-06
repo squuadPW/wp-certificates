@@ -54,6 +54,8 @@ $statuses = [
                             <a class="woocommerce-button button" href="<?= esc_url(add_query_arg('squuad_cert_sign', (int) $item['subject_id'] . '-' . (int) $item['document']->id, $dashboard)) ?>"><?= esc_html__('Sign', 'wp-certificates') ?></a>
                         <?php elseif ('pdf' === $item['state']) : ?>
                             <a class="woocommerce-button button" href="<?= esc_url(add_query_arg('squuad_cert_pdf', $request_id, $dashboard)) ?>"><?= esc_html__('Generate PDF', 'wp-certificates') ?></a>
+                        <?php elseif ($request_id && in_array($item['state'], ['queued', 'waiting'], true)) : // solo lectura (ADR 0012 de Edusof) ?>
+                            <a class="woocommerce-button button" href="<?= esc_url(add_query_arg('squuad_cert_view', $request_id, $dashboard) . '#edusystem-documents-to-sign') ?>"><?= esc_html__('View document', 'wp-certificates') ?></a>
                         <?php endif; ?>
                     </td>
                 </tr>

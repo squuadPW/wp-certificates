@@ -35,7 +35,7 @@ $row = static function (string $key, string $label, string $detail, bool $checke
             <code class="edusig-var edusig-fn-chip" data-var="<?= esc_attr($fn ? '{{signature_F' . $fn . '}}' : '') ?>" title="<?= esc_attr__('Click to copy', 'wp-certificates') ?>"<?= $fn ? '' : ' hidden' ?>><?= esc_html($fn ? '{{signature_F' . $fn . '}}' : '') ?></code>
             <br><span class="edusig-var-status description"></span>
         </td>
-        <td style="width:110px"><input type="number" min="1" max="99" name="slots[<?= esc_attr($key) ?>][position]" value="<?= (int) $position ?>" style="width:70px" aria-label="<?= esc_attr__('Order', 'wp-certificates') ?>"></td>
+        <td style="width:110px"><input type="number" min="1" max="99" name="slots[<?= esc_attr($key) ?>][position]" value="<?= (int) $position ?>" style="width:70px" aria-label="<?= esc_attr__('Signing turn', 'wp-certificates') ?>"></td>
     </tr>
     <?php
 };
@@ -51,7 +51,7 @@ $requires_checked = $eds
     data-fn-map="<?= esc_attr((string) wp_json_encode((object) $fn_map)) ?>" data-fn-labels="<?= esc_attr((string) wp_json_encode((object) $fn_labels)) ?>">
     <div class="inside">
         <h2 style="padding-left:0"><?= esc_html__('Document signers', 'wp-certificates') ?></h2>
-        <p class="description" style="max-width:820px"><?= esc_html__('Who signs this document and in which order. First the roles: every user with a marked role receives their own document and signs it from their own account. Then the registered signers of the system sign every one of those documents. The document is valid when all the signatures are done. Changes apply to new signature requests; requests already in progress keep their signers.', 'wp-certificates') ?></p>
+        <p class="description" style="max-width:820px"><?= esc_html__('Who signs this document and in which turn. Every user with a marked role receives their own document (its data are theirs, F1) and signs it from their own account. The other signers sign that same document. «Signing turn» decides who signs first: for example, a signer by variable (such as the parent) can sign before whoever receives the document; that person sees it read-only until it is their turn. The document is valid when all the signatures are done. Changes apply to new signature requests; requests already in progress keep their signers and turns.', 'wp-certificates') ?></p>
 
         <?php if ('automatic' !== $document->type) : ?>
             <p class="description" style="max-width:820px"><?php if (wpc_edusystem_active()) { ?><strong><?= esc_html__('Issued document:', 'wp-certificates') ?></strong> <?= esc_html__('only the system signers sign it (the roles do not). With at least one signer, "Generate" in the student file becomes "Issue for signature".', 'wp-certificates') ?><?php } else { ?><?= esc_html__('If the school office issues it: only the system signers sign it (the roles do not).', 'wp-certificates') ?><?php } ?></p>
@@ -83,7 +83,7 @@ $requires_checked = $eds
             <?php endif; ?>
 
             <table class="widefat striped" style="max-width:820px">
-                <thead><tr><th><abbr title="<?= esc_attr__('Signer number in the template variables (F1, F2…)', 'wp-certificates') ?>"><?= esc_html__('No.', 'wp-certificates') ?></abbr></th><th></th><th><?= esc_html__('Signer', 'wp-certificates') ?></th><th><?= esc_html__('Variables for the template', 'wp-certificates') ?></th><th><?= esc_html__('Order', 'wp-certificates') ?></th></tr></thead>
+                <thead><tr><th><abbr title="<?= esc_attr__('Signer number in the template variables (F1, F2…)', 'wp-certificates') ?>"><?= esc_html__('No.', 'wp-certificates') ?></abbr></th><th></th><th><?= esc_html__('Signer', 'wp-certificates') ?></th><th><?= esc_html__('Variables for the template', 'wp-certificates') ?></th><th><abbr title="<?= esc_attr__('Who signs first: the lowest number. Consecutive system signers sign at the same time.', 'wp-certificates') ?>"><?= esc_html__('Signing turn', 'wp-certificates') ?></abbr></th></tr></thead>
                 <tbody>
                     <?php
                     $in_section = __('Not in the template: it goes in {{signature_section}}.', 'wp-certificates');
@@ -145,7 +145,7 @@ $requires_checked = $eds
                     <?= esc_html__('and {{#F2}} … {{/F2}} (shown only if that signer is in the request). {{full_name_F1}} is the same as {{full_name}}. If you change the order, the template is renumbered so that each number keeps pointing to the same person.', 'wp-certificates') ?></p>
                 <p><?= esc_html__('Each signer separately: use the variables of their row. Signers not placed in the template go in {{signature_section}} (roles) or in a signatures block at the end (system signers).', 'wp-certificates') ?></p>
                 <?php if ($signer_variables) { ?>
-                <p><?= esc_html__('Signers by variable sign after the roles, in the order you choose among the system signers. Each person signs only once: if the variable gives the account of someone who already signs (for example, an adult student who is their own parent), that row is skipped.', 'wp-certificates') ?></p>
+                <p><?= esc_html__('Signers by variable sign in the turn you choose, also before whoever receives the document: whoever has the first turn opens the document, fills in its additional fields and signs first. Each person signs only once: if the variable gives the account of someone who already signs (for example, an adult student who is their own parent), that row is skipped and the turns move up.', 'wp-certificates') ?></p>
                 <?php } ?>
                 <?php if (wpc_edusystem_active()) { // Reglas de los puestos de EduSystem (estudiante y representante) ?>
                 <p style="margin-bottom:4px"><strong><?= esc_html__('Template rules', 'wp-certificates') ?></strong> — <?= esc_html__('the text between the marks is shown only if the rule is met; with ^ , only if it is not:', 'wp-certificates') ?></p>

@@ -123,6 +123,11 @@ function squuad_cert_signature_handle_request_submission(int $request_id): void
     if ('' !== $role && function_exists('squuad_cert_signature_request_slot_open') && !squuad_cert_signature_request_slot_open($request, $role)) {
         wp_send_json_error(__('This document is still waiting for previous signatures.', 'wp-certificates'), 409);
     }
+    // Firmante por variable (ADR 0012 de Edusof): la variable tiene que seguir dando esta cuenta para el titular (p. ej.
+    // el representante no cambió en la ficha); si no, no firma y la solicitud espera a que la reinicien
+    if (function_exists('squuad_cert_request_var_slot_valid') && !squuad_cert_request_var_slot_valid($request, $role, $user_id)) {
+        wp_send_json_error(__('You can no longer sign this document. Ask the school office to request the signatures again.', 'wp-certificates'), 403);
+    }
 
     $shown_sha256 = is_string($_POST['content_sha256'] ?? null) ? strtolower(sanitize_text_field(wp_unslash($_POST['content_sha256']))) : '';
     $signature_student = squuad_cert_signature_from_request('signature_student');
@@ -158,15 +163,14 @@ function squuad_cert_signature_handle_request_submission(int $request_id): void
         if (in_array($role, $signed_roles, true)) {
             wp_send_json_error(__('You already signed this document.', 'wp-certificates'), 409);
         }
-        // Un firmante por variable (ADR 0009 de Edusof) nunca congela el documento: firma lo que quien lo recibe ya dejó
-        // fijado con su firma o sus respuestas
-        if (function_exists('squuad_cert_is_var_slot') && squuad_cert_is_var_slot($role) && null === $request->frozen_at_utc) {
-            squuad_cert_log(sprintf('Firma rechazada: el usuario %d firma por variable la solicitud %d, que aún no está congelada', $user_id, $request_id), 'signature_blocked');
-            wp_send_json_error(__('This document is still waiting for previous signatures.', 'wp-certificates'), 409);
-        }
-        // Consentimiento explícito (ADR 0002, punto 7): sin la casilla no hay firma, también con la firma automática
+        // La primera firma congela el contenido, sea de quien recibe el documento o de un firmante por variable: la da
+        // quien tiene el primer turno (ADR 0012 de Edusof; el turno ya se comprobó arriba)
+        // Consentimiento explícito (ADR 0002, punto 7): sin la casilla no hay firma, también con la firma automática. Quien
+        // firma en representación del titular acepta su propio texto (ADR 0012 de Edusof)
         $consent = squuad_cert_signature_consent_evidence(
-            is_string($_POST['consent_version'] ?? null) ? sanitize_text_field(wp_unslash($_POST['consent_version'])) : ''
+            is_string($_POST['consent_version'] ?? null) ? sanitize_text_field(wp_unslash($_POST['consent_version'])) : '',
+            $request,
+            $role
         );
         if (null === $consent) {
             wp_send_json_error(__('To sign, you must accept signing the document electronically.', 'wp-certificates'), 400);
@@ -223,9 +227,10 @@ function squuad_cert_signature_handle_request_submission(int $request_id): void
 
     // 2) PDF final: una sola vez, con todas las firmas y sobre el contenido congelado
     $attach_id = null;
-    // Faltan firmas institucionales (fase 2): el PDF lo generará el último firmante; la firma de este usuario ya quedó
-    if ($file && 'signed' !== $request->status && function_exists('squuad_cert_signature_request_institutional_pending')
-        && squuad_cert_signature_request_institutional_pending($request)) {
+    // Faltan firmas (de cualquier turno, ADR 0012 de Edusof): el PDF lo generará el último firmante; la firma de este
+    // usuario ya quedó
+    if ($file && 'signed' !== $request->status && function_exists('squuad_cert_signature_request_others_pending')
+        && squuad_cert_signature_request_others_pending($request, $user_id)) {
         $file = null;
     }
     if ($file) {
