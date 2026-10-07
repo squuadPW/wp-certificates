@@ -897,7 +897,7 @@ function squuad_cert_signature_consent_label(string $consent_version): string
  * consentimiento y documento de identidad o «No aplica»), huella SHA-256 del contenido, QR y dirección de verificación y
  * la nota legal. Sin IP ni datos de la conexión (siguen en la evidencia). En gris, para el PDF.
  */
-function squuad_cert_signature_certificate_html(object $request): string
+function squuad_cert_signature_certificate_html(object $request, bool $page_break = true): string
 {
     global $wpdb;
 
@@ -929,7 +929,7 @@ function squuad_cert_signature_certificate_html(object $request): string
     $h2 = 'font-size:12px;letter-spacing:.04em;text-transform:uppercase;margin:16px 0 6px;color:#111';
     $timestamp = strtotime(('' !== $completed_at ? $completed_at : gmdate('Y-m-d H:i:s')) . ' UTC') ?: time();
 
-    $html = '<div class="pagebreak"></div><div class="wpc-signature-certificate" style="font-family:Arial,Helvetica,sans-serif;color:#111;font-size:12.5px;line-height:1.45;padding:4px">';
+    $html = ($page_break ? '<div class="pagebreak"></div>' : '') . '<div class="wpc-signature-certificate" style="font-family:Arial,Helvetica,sans-serif;color:#111;font-size:12.5px;line-height:1.45;padding:4px">';
     $html .= '<div style="padding-bottom:12px;border-bottom:2px solid #111"><div style="font-weight:800;letter-spacing:.04em;font-size:15px">' . esc_html(mb_strtoupper($site)) . '</div>'
         . '<div style="font-size:11.5px;color:#444">' . esc_html($host) . '</div></div>';
     $html .= '<h1 style="margin:14px 0 2px;font-size:20px;text-align:left">' . esc_html__('Certificate of signatures', 'wp-certificates') . '</h1>'
@@ -999,21 +999,41 @@ function squuad_cert_signature_certificate_html(object $request): string
  */
 function squuad_cert_signature_final_pdf_html(object $request): ?string
 {
-    $html = squuad_cert_signature_request_render_final($request);
-    if (null === $html) {
+    $parts = squuad_cert_signature_final_pdf_parts($request);
+    if (null === $parts) {
         return null;
     }
 
-    // Sin firmantes exigidos ni firmas (solo se rellenó), no hay certificado de firmas («0 de 0»)
-    $certificate = squuad_cert_signature_request_required_roles($request) || squuad_cert_signature_request_rows((int) $request->id)
-        ? squuad_cert_signature_certificate_html($request) : '';
+    return $parts['content'] . '<p style="margin-top:16px;font-size:9px;color:#666;word-break:break-all">' . esc_html($parts['line'])
+        . '</p>' . ('' !== $parts['certificate'] ? '<div class="pagebreak"></div>' . $parts['certificate'] : '');
+}
 
-    return $html . '<p style="margin-top:16px;font-size:9px;color:#666;word-break:break-all">' . esc_html(sprintf(
-        __('Signature request #%1$d, round %2$d · Content fingerprint (SHA-256): %3$s', 'wp-certificates'),
-        (int) $request->id,
-        (int) $request->round,
-        $request->content_sha256
-    )) . '</p>' . $certificate;
+/**
+ * Piezas del PDF final (una sola fuente para el navegador y el servidor de PDF, ADR 0013): contenido con las firmas,
+ * texto de la línea de la solicitud y certificado de firmas sin salto de página (vacío si no hay firmantes exigidos ni
+ * firmas: solo se rellenó). Quien llama decide la máscara del documento de identidad y cómo las coloca.
+ *
+ * @return array{content: string, line: string, certificate: string}|null
+ */
+function squuad_cert_signature_final_pdf_parts(object $request): ?array
+{
+    $content = squuad_cert_signature_request_render_final($request);
+    if (null === $content) {
+        return null;
+    }
+    $certificate = squuad_cert_signature_request_required_roles($request) || squuad_cert_signature_request_rows((int) $request->id)
+        ? squuad_cert_signature_certificate_html($request, false) : '';
+
+    return [
+        'content' => (string) $content,
+        'line' => sprintf(
+            __('Signature request #%1$d, round %2$d · Content fingerprint (SHA-256): %3$s', 'wp-certificates'),
+            (int) $request->id,
+            (int) $request->round,
+            $request->content_sha256
+        ),
+        'certificate' => $certificate,
+    ];
 }
 
 /** Datos para que el navegador genere el PDF final (html, nombre del archivo, página). */

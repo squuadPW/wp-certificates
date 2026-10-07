@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-06T23:54:21+00:00\n"
+"POT-Creation-Date: 2026-10-07T00:52:40+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: wp-certificates\n"
@@ -61,7 +61,7 @@ msgstr ""
 #: admin/variables.php:319
 #: admin/variables.php:336
 #: admin/variables.php:352
-#: certification/admin/document-preview.php:78
+#: certification/admin/document-preview.php:90
 #: certification/admin/signing-settings.php:23
 #: includes/signed-pdf.php:217
 msgid "Sorry, you are not allowed to access this page."
@@ -171,10 +171,10 @@ msgstr ""
 #: certification/admin/templates/document-issued.php:26
 #: certification/admin/templates/signature-integrity.php:116
 #: certification/admin/templates/signer-inbox.php:14
-#: certification/admin/templates/signer-inbox.php:146
-#: certification/admin/templates/signer-inbox.php:194
-#: certification/admin/templates/signer-inbox.php:219
-#: certification/admin/templates/signer-inbox.php:258
+#: certification/admin/templates/signer-inbox.php:136
+#: certification/admin/templates/signer-inbox.php:184
+#: certification/admin/templates/signer-inbox.php:209
+#: certification/admin/templates/signer-inbox.php:248
 #: certification/includes/signature-format.php:938
 #: certification/public/templates/create-document-automatic.php:102
 #: certification/public/templates/document-read-only.php:37
@@ -197,10 +197,10 @@ msgid "Code"
 msgstr ""
 
 #: admin/certificates.php:164
-#: certification/admin/templates/signer-inbox.php:147
-#: certification/admin/templates/signer-inbox.php:194
-#: certification/admin/templates/signer-inbox.php:220
-#: certification/admin/templates/signer-inbox.php:258
+#: certification/admin/templates/signer-inbox.php:137
+#: certification/admin/templates/signer-inbox.php:184
+#: certification/admin/templates/signer-inbox.php:210
+#: certification/admin/templates/signer-inbox.php:248
 #: certification/public/templates/documents-to-sign-batch.php:22
 #: certification/public/templates/documents-to-sign-batch.php:30
 #: certification/public/templates/documents-to-sign-batch.php:89
@@ -537,27 +537,37 @@ msgstr ""
 msgid "Downloadable document"
 msgstr ""
 
-#: admin/generate.php:35
+#: admin/generate.php:39
+#: admin/generate.php:155
+#: public/functions.php:141
 msgid "The document could not be generated."
 msgstr ""
 
-#: admin/generate.php:50
+#: admin/generate.php:51
+#: admin/generate.php:164
+#: certification/admin/document-preview.php:96
+#: public/functions.php:145
+msgid "Too many previews in a short time. Wait a minute."
+msgstr ""
+
+#: admin/generate.php:61
 msgid "This action requires EduSystem."
 msgstr ""
 
-#: admin/generate.php:54
+#: admin/generate.php:65
+#: admin/generate.php:160
 #: certification/admin/document-signing.php:192
 #: certification/admin/document-signing.php:299
 #: certification/admin/document-signing.php:331
 msgid "You do not have permission to manage admissions."
 msgstr ""
 
-#: admin/generate.php:60
+#: admin/generate.php:71
 #: certification/includes/signers.php:1801
 msgid "The person or the document does not exist."
 msgstr ""
 
-#: admin/generate.php:68
+#: admin/generate.php:79
 msgid "This document requires signatures: it can no longer be generated with signature images. Configure its signers (Certification > Documents > Document signers) and issue it for signature; each responsible person signs from their own account."
 msgstr ""
 
@@ -932,7 +942,7 @@ msgstr ""
 #: admin/templates/eds-document-detail.php:525
 #: admin/templates/eds-document-detail.php:529
 #: certification/admin/templates/document-preview.php:23
-#: public/templates/certificates.php:37
+#: public/templates/certificates.php:41
 msgid "Preview"
 msgstr ""
 
@@ -1857,7 +1867,7 @@ msgstr ""
 
 #: admin/templates/variables.php:59
 #: certification/admin/templates/signer-inbox.php:36
-#: certification/admin/templates/signer-inbox.php:138
+#: certification/admin/templates/signer-inbox.php:128
 #: certification/public/templates/documents-to-sign-batch.php:13
 msgid "Back to the list"
 msgstr ""
@@ -2127,80 +2137,76 @@ msgstr ""
 msgid "Method %s enabled again."
 msgstr ""
 
-#: certification/admin/document-preview.php:39
+#: certification/admin/document-preview.php:45
 #: certification/admin/templates/signer-inbox.php:38
-#: certification/includes/signature-format.php:1012
+#: certification/includes/signature-format.php:1030
 #: certification/public/templates/create-document-automatic.php:121
 #, php-format
 msgid "Signature request #%1$d, round %2$d · Content fingerprint (SHA-256): %3$s"
 msgstr ""
 
-#: certification/admin/document-preview.php:84
-msgid "Too many previews in a short time. Wait a minute."
-msgstr ""
-
-#: certification/admin/document-preview.php:90
+#: certification/admin/document-preview.php:102
 #: includes/provider-wp-user.php:192
 msgid "The document does not exist."
 msgstr ""
 
 #. translators: %d: number of the signer in the document
-#: certification/admin/document-preview.php:157
+#: certification/admin/document-preview.php:169
 #, php-format
 msgid "Signer %d (example)"
 msgstr ""
 
-#: certification/admin/document-preview.php:158
-#: certification/admin/document-preview.php:351
+#: certification/admin/document-preview.php:170
+#: certification/admin/document-preview.php:363
 msgid "Position (example)"
 msgstr ""
 
-#: certification/admin/document-preview.php:170
+#: certification/admin/document-preview.php:182
 msgid "Person by variable (example)"
 msgstr ""
 
-#: certification/admin/document-preview.php:243
+#: certification/admin/document-preview.php:255
 msgid "Example program"
 msgstr ""
 
-#: certification/admin/document-preview.php:244
+#: certification/admin/document-preview.php:256
 msgid "Example career - Example mention"
 msgstr ""
 
-#: certification/admin/document-preview.php:271
+#: certification/admin/document-preview.php:283
 msgid "Example document 1"
 msgstr ""
 
-#: certification/admin/document-preview.php:271
+#: certification/admin/document-preview.php:283
 msgid "Example document 2"
 msgstr ""
 
-#: certification/admin/document-preview.php:305
+#: certification/admin/document-preview.php:317
 msgid "Example requirement 1"
 msgstr ""
 
-#: certification/admin/document-preview.php:305
+#: certification/admin/document-preview.php:317
 msgid "Example requirement 2"
 msgstr ""
 
 #. translators: %s: label of the additional field
-#: certification/admin/document-preview.php:323
+#: certification/admin/document-preview.php:335
 #, php-format
 msgid "%s (example)"
 msgstr ""
 
-#: certification/admin/document-preview.php:350
-#: certification/admin/document-preview.php:352
+#: certification/admin/document-preview.php:362
+#: certification/admin/document-preview.php:364
 msgid "Signer (example)"
 msgstr ""
 
 #. translators: %d: number of the signer, e.g. 2 for F2
-#: certification/admin/document-preview.php:417
+#: certification/admin/document-preview.php:429
 #, php-format
 msgid "Signer %d"
 msgstr ""
 
-#: certification/admin/document-preview.php:418
+#: certification/admin/document-preview.php:430
 msgid "Example"
 msgstr ""
 
@@ -2325,7 +2331,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: certification/admin/signer-inbox.php:50
-#: certification/admin/templates/signer-inbox.php:233
+#: certification/admin/templates/signer-inbox.php:223
 msgid "Review and sign"
 msgstr ""
 
@@ -2549,8 +2555,8 @@ msgid "Voided in the book"
 msgstr ""
 
 #: certification/admin/templates/document-issued.php:48
-#: certification/admin/templates/signer-inbox.php:160
-#: certification/admin/templates/signer-inbox.php:233
+#: certification/admin/templates/signer-inbox.php:150
+#: certification/admin/templates/signer-inbox.php:223
 #: certification/public/templates/documents-to-sign.php:58
 msgid "View document"
 msgstr ""
@@ -3115,56 +3121,56 @@ msgstr ""
 msgid "Generating the final PDF…"
 msgstr ""
 
-#: certification/admin/templates/signer-inbox.php:127
+#: certification/admin/templates/signer-inbox.php:117
 #: certification/public/functions/assets.php:84
 #: certification/public/templates/signature-final-pdf.php:36
 msgid "The final PDF was generated and saved."
 msgstr ""
 
-#: certification/admin/templates/signer-inbox.php:128
-#: certification/admin/templates/signer-inbox.php:130
+#: certification/admin/templates/signer-inbox.php:118
+#: certification/admin/templates/signer-inbox.php:120
 #: certification/public/templates/signature-final-pdf.php:37
 msgid "The final PDF could not be saved."
 msgstr ""
 
-#: certification/admin/templates/signer-inbox.php:135
+#: certification/admin/templates/signer-inbox.php:125
 msgid "Status:"
 msgstr ""
 
-#: certification/admin/templates/signer-inbox.php:141
-#: certification/admin/templates/signer-inbox.php:239
+#: certification/admin/templates/signer-inbox.php:131
+#: certification/admin/templates/signer-inbox.php:229
 #: certification/public/templates/documents-to-sign-batch.php:16
 #: certification/public/templates/documents-to-sign.php:66
 msgid "Sign selected documents"
 msgstr ""
 
-#: certification/admin/templates/signer-inbox.php:142
+#: certification/admin/templates/signer-inbox.php:132
 #: certification/public/templates/documents-to-sign-batch.php:17
 msgid "Review the list. Each document keeps its own signature and its own record; any document that changed or no longer waits for your signature is skipped."
 msgstr ""
 
-#: certification/admin/templates/signer-inbox.php:148
-#: certification/admin/templates/signer-inbox.php:221
+#: certification/admin/templates/signer-inbox.php:138
+#: certification/admin/templates/signer-inbox.php:211
 msgid "Round"
 msgstr ""
 
-#: certification/admin/templates/signer-inbox.php:149
+#: certification/admin/templates/signer-inbox.php:139
 #: certification/public/templates/documents-to-sign-batch.php:23
 #: certification/public/templates/documents-to-sign-batch.php:31
 msgid "Content fingerprint"
 msgstr ""
 
-#: certification/admin/templates/signer-inbox.php:171
+#: certification/admin/templates/signer-inbox.php:161
 msgid "Your registered signature will be applied to each document:"
 msgstr ""
 
-#: certification/admin/templates/signer-inbox.php:176
+#: certification/admin/templates/signer-inbox.php:166
 #: certification/public/templates/documents-to-sign-batch.php:49
 msgid "Confirm with your password"
 msgstr ""
 
 #. translators: %d: number of documents
-#: certification/admin/templates/signer-inbox.php:180
+#: certification/admin/templates/signer-inbox.php:170
 #: certification/public/templates/documents-to-sign-batch.php:54
 #, php-format
 msgid "Sign %d document"
@@ -3173,75 +3179,75 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: expiry date and time
-#: certification/admin/templates/signer-inbox.php:185
+#: certification/admin/templates/signer-inbox.php:175
 #: certification/public/templates/documents-to-sign-batch.php:59
 #, php-format
 msgid "This selection expires on %s."
 msgstr ""
 
-#: certification/admin/templates/signer-inbox.php:191
+#: certification/admin/templates/signer-inbox.php:181
 #: certification/public/templates/documents-to-sign-batch.php:86
 msgid "Batch result"
 msgstr ""
 
-#: certification/admin/templates/signer-inbox.php:194
+#: certification/admin/templates/signer-inbox.php:184
 #: certification/public/templates/documents-to-sign-batch.php:89
 msgid "Result"
 msgstr ""
 
-#: certification/admin/templates/signer-inbox.php:198
+#: certification/admin/templates/signer-inbox.php:188
 #: certification/includes/signers.php:1713
 #: certification/public/templates/documents-to-sign-batch.php:93
 msgid "Signed. All signatures are complete."
 msgstr ""
 
-#: certification/admin/templates/signer-inbox.php:198
+#: certification/admin/templates/signer-inbox.php:188
 #: certification/includes/signers.php:1714
 #: certification/public/templates/documents-to-sign-batch.php:93
 msgid "Signed. Waiting for the remaining signatures."
 msgstr ""
 
-#: certification/admin/templates/signer-inbox.php:202
+#: certification/admin/templates/signer-inbox.php:192
 #: certification/public/templates/documents-to-sign-batch.php:97
 msgid "Skipped:"
 msgstr ""
 
-#: certification/admin/templates/signer-inbox.php:207
+#: certification/admin/templates/signer-inbox.php:197
 #: certification/includes/signers.php:1490
 #: certification/public/templates/documents-to-sign-batch.php:107
 msgid "This batch expired. Select the documents again."
 msgstr ""
 
-#: certification/admin/templates/signer-inbox.php:207
+#: certification/admin/templates/signer-inbox.php:197
 #: certification/includes/signers.php:1486
 #: certification/includes/signers.php:1520
 #: certification/public/templates/documents-to-sign-batch.php:107
 msgid "This batch was already processed."
 msgstr ""
 
-#: certification/admin/templates/signer-inbox.php:211
+#: certification/admin/templates/signer-inbox.php:201
 msgid "There are no documents waiting for your signature."
 msgstr ""
 
-#: certification/admin/templates/signer-inbox.php:218
+#: certification/admin/templates/signer-inbox.php:208
 msgid "Select all"
 msgstr ""
 
-#: certification/admin/templates/signer-inbox.php:222
+#: certification/admin/templates/signer-inbox.php:212
 msgid "Waiting since"
 msgstr ""
 
 #. translators: %d: maximum number of documents per batch
-#: certification/admin/templates/signer-inbox.php:242
+#: certification/admin/templates/signer-inbox.php:232
 #, php-format
 msgid "Up to %d documents at once. You will review the list and confirm with your password."
 msgstr ""
 
-#: certification/admin/templates/signer-inbox.php:256
+#: certification/admin/templates/signer-inbox.php:246
 msgid "Signed documents waiting for the final PDF"
 msgstr ""
 
-#: certification/admin/templates/signer-inbox.php:264
+#: certification/admin/templates/signer-inbox.php:254
 #: certification/public/templates/documents-to-sign.php:56
 msgid "Generate PDF"
 msgstr ""
@@ -3450,7 +3456,7 @@ msgstr ""
 msgid "This document was already completed. Please reload the page."
 msgstr ""
 
-#: certification/includes/final-pdf.php:414
+#: certification/includes/final-pdf.php:465
 msgid "Every 5 minutes (final PDFs)"
 msgstr ""
 
@@ -5055,12 +5061,12 @@ msgid "Some variables of the document have no value: it was not issued."
 msgstr ""
 
 #: includes/provider-wp-user.php:234
-#: public/functions.php:575
+#: public/functions.php:617
 msgid "Tome: "
 msgstr ""
 
 #: includes/provider-wp-user.php:234
-#: public/functions.php:577
+#: public/functions.php:619
 msgid "Folio: "
 msgstr ""
 
@@ -5136,32 +5142,32 @@ msgstr ""
 msgid "Certificates"
 msgstr ""
 
-#: public/templates/certificates.php:46
+#: public/templates/certificates.php:50
 msgid "Issued:"
 msgstr ""
 
-#: public/templates/certificates.php:47
+#: public/templates/certificates.php:51
 msgid "Expires:"
 msgstr ""
 
-#: public/templates/certificates.php:51
+#: public/templates/certificates.php:55
 msgid "Does not expire"
 msgstr ""
 
-#: public/templates/certificates.php:60
+#: public/templates/certificates.php:64
 msgid "View Fullscreen"
 msgstr ""
 
-#: public/templates/certificates.php:140
+#: public/templates/certificates.php:123
 msgid "Download HTML (PDF View)"
 msgstr ""
 
-#: public/templates/certificates.php:157
+#: public/templates/certificates.php:149
 #: public/templates/my-card.php:141
 msgid "Download PDF"
 msgstr ""
 
-#: public/templates/certificates.php:165
+#: public/templates/certificates.php:157
 msgid "You don't have certificates"
 msgstr ""
 

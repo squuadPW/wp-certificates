@@ -211,6 +211,10 @@ function squuad_cert_signer_inbox_page(): void
             squuad_cert_id_document_mask_in_boxes(!$generate_pdf);
             // El PDF final lleva además la línea de la solicitud y el certificado de firmas (ADR 0011 de Edusof)
             $final_html = $generate_pdf ? squuad_cert_signature_final_pdf_html($candidate) : squuad_cert_signature_request_render_final($candidate);
+            // QR como imagen (generador propio, ADR 0013): sin qr-code-styling de internet
+            if (null !== $final_html && function_exists('squuad_cert_pdf_qr_inline')) {
+                $final_html = squuad_cert_pdf_qr_inline((string) $final_html);
+            }
             squuad_cert_id_document_mask_in_boxes(false);
         }
     }

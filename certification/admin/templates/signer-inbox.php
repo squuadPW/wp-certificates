@@ -87,10 +87,7 @@ $frame = static function (string $html): string {
             <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
                 integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg=="
                 crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-            <?php if (false !== strpos((string) $final_html, 'data-edusig-qr="http')) : ?>
-                <?php // QR del documento emitido: misma librería heredada que "Generar" (admin/templates/document-export.php) ?>
-                <script src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
-            <?php endif; ?>
+            <?php // Los QR llegan ya dibujados por el servidor (generador propio, ADR 0013): sin qr-code-styling de internet ?>
             <script>
                 // Último firmante: el PDF se genera desde el documento firmado (contenido congelado + firmas) y se sube
                 // una sola vez; el servidor comprueba que todos firmaron y guarda su huella
@@ -104,14 +101,7 @@ $frame = static function (string $html): string {
                             if (box.dataset.wpcQr && !box.childElementCount) new QRCode(box, { text: box.dataset.wpcQr, width: 120, height: 120, correctLevel: QRCode.CorrectLevel.M });
                         });
                     }
-                    // QR sellado en el contenido del documento emitido (su URL): se dibuja antes de generar el PDF
-                    if (window.QRCodeStyling) {
-                        source.querySelectorAll("[data-edusig-qr]").forEach(function (box) {
-                            if (box.dataset.edusigQr) {
-                                new QRCodeStyling({ width: 100, height: 100, type: "canvas", data: box.dataset.edusigQr }).append(box);
-                            }
-                        });
-                    }
+                    // El QR sellado en el documento emitido ya llega dibujado por el servidor (generador propio, ADR 0013)
                     html2pdf().set({ margin: <?= wp_json_encode($pdf_page['margin']) ?>, filename: filename, image: { type: "jpeg", quality: 0.98 },
                         jsPDF: <?= wp_json_encode($pdf_page['jspdf']) ?>, html2canvas: { scrollX: 0, scrollY: 0, scale: 2 }, pagebreak: <?= wp_json_encode($pdf_pagebreak) ?> })
                         .from(source).outputPdf("blob").then(function (blob) {

@@ -120,6 +120,48 @@ add_action('woocommerce_account_certificates_endpoint', function () {
 
 });
 
+/**
+ * Descarga de un certificado de Mi Cuenta hecha por el servidor de PDF (ADR 0013, fase 3): solo el certificado de quien
+ * lo pide (mismo criterio que la lista: tipo download_certificate y su correo) y si el documento usa el servidor.
+ */
+add_action('wp_ajax_squuad_cert_account_certificate_pdf', 'squuad_cert_account_certificate_pdf');
+function squuad_cert_account_certificate_pdf(): void
+{
+    global $wpdb;
+
+    check_ajax_referer('squuad_cert_account_certificate_pdf');
+    $uuid = preg_replace('/[^A-Za-z0-9-]/', '', (string) ($_POST['uuid'] ?? ''));
+    $cert = '' !== $uuid ? $wpdb->get_row($wpdb->prepare(
+        "SELECT * FROM `{$wpdb->prefix}certificates` WHERE simple_uuid = %s AND type = 'download_certificate' AND email = %s",
+        $uuid,
+        wp_get_current_user()->user_email
+    )) : null;
+    $template = $cert && !empty($cert->template_id) ? get_document_detail((int) $cert->template_id) : null;
+    if (!$cert || !$template || 'servicio' !== squuad_cert_pdf_engine_for_document($template)) {
+        wp_send_json_error(['message' => __('The document could not be generated.', 'wp-certificates')], 404);
+    }
+    $count = (int) get_transient('squuad_cert_gen_rate_' . get_current_user_id());
+    if ($count >= 30) {
+        wp_send_json_error(['message' => __('Too many previews in a short time. Wait a minute.', 'wp-certificates')], 429);
+    }
+    set_transient('squuad_cert_gen_rate_' . get_current_user_id(), $count + 1, MINUTE_IN_SECONDS);
+    $option = json_decode((string) $cert->option_document, true) ?: [];
+    $unit = in_array($option['unit'] ?? 'mm', ['mm', 'cm', 'in', 'px', 'pt'], true) ? $option['unit'] : 'mm';
+    $format = ('custom' === ($option['paper_format'] ?? '') || '' === ($option['paper_format'] ?? ''))
+        ? [(float) ($option['width_size'] ?? 0), (float) ($option['height_size'] ?? 0)]
+        : (string) $option['paper_format'];
+    // Mi Cuenta descarga con px_scaling cuando la unidad es px: 1 px = 0,75 pt (px de CSS)
+    $page = squuad_cert_pdf_page(['unit' => $unit, 'format' => $format, 'orientation' => (string) ($option['orientation'] ?? 'portrait')], 0);
+    $qr = (array) ($option['qr'] ?? []);
+    // Como el visor de Mi Cuenta (iframe): cuerpo centrado
+    $payload = squuad_cert_pdf_payload((string) $cert->html, $page, '', '', (string) ($qr['url'] ?? ''), 'html{box-sizing:border-box}body{display:flex;justify-content:center}', (string) ($qr['image_url'] ?? ''));
+    $result = squuad_cert_pdf_render($payload, 'certificado de Mi Cuenta ' . $uuid);
+    if (is_wp_error($result)) {
+        wp_send_json_error(['message' => $result->get_error_message()], 502);
+    }
+    squuad_cert_pdf_send_inline($result['pdf'], sanitize_file_name((string) $cert->name_document) . '.pdf', 'attachment');
+}
+
 add_action('woocommerce_account_my-card_endpoint', 'my_card_endpoint');
 function my_card_endpoint()
 {

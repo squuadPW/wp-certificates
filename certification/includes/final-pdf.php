@@ -88,12 +88,21 @@ function squuad_cert_final_pdf_server_payload(object $request): ?array
     if (!$final) {
         return null;
     }
-    $html = '<div style="width:100%;box-sizing:border-box;background:#fff;padding:16px;font-family:Arial,sans-serif;color:#111">' . $final['html'] . '</div>';
     $margin = is_array($final['margin']) ? (float) ($final['margin'][0] ?? 0) : (float) $final['margin'];
+    $extra_css = '';
+    if (squuad_cert_final_pdf_is_issued($request)) {
+        // Documento emitido (diseño de página completa, a menudo apaisado): el diseño ocupa su página sin márgenes ni
+        // relleno y la línea de la solicitud y el «Certificado de firmas» van en hojas A4 verticales propias (páginas con
+        // nombre de CSS), en lugar de colgar del diseño y partirse en hojas de su tamaño
+        [$html, $extra_css] = squuad_cert_final_pdf_issued_layout(squuad_cert_final_pdf_parts($request));
+    } else {
+        $html = '<div style="width:100%;box-sizing:border-box;background:#fff;padding:16px;font-family:Arial,sans-serif;color:#111">' . $final['html'] . '</div>';
+    }
 
     return [
-        // jsPDF de create-enrollment.js sin px_scaling: 1 px = 1,333 pt
-        'payload' => squuad_cert_pdf_payload($html, squuad_cert_pdf_page($final['jspdf'], $margin, true)),
+        // Página en px de CSS (no la de jsPDF sin px_scaling): html2pdf estiraba el contenido hasta llenar una página 1,333
+        // veces mayor; Chrome no estira, así que la página es la del diseño (1056 × 817 px = Carta) y el contenido la llena
+        'payload' => squuad_cert_pdf_payload($html, squuad_cert_pdf_page($final['jspdf'], $margin), '', '', '', $extra_css),
         'title' => (string) $final['filename'],
     ];
 }
@@ -185,6 +194,48 @@ function squuad_cert_final_pdf_browser_seal(object $request): array
     }
 
     return $seal;
+}
+
+/** ¿Es un documento emitido para firma (gestionado), no uno automático de Mi Cuenta? */
+function squuad_cert_final_pdf_is_issued(object $request): bool
+{
+    global $wpdb;
+
+    return 'managed' === (string) $wpdb->get_var($wpdb->prepare("SELECT type FROM {$wpdb->prefix}documents_certificates WHERE id = %d", (int) ($request->document_certificate_id ?? 0)));
+}
+
+/** Piezas del PDF final con los documentos de identidad completos (sin máscara, B3 del ADR 0007). */
+function squuad_cert_final_pdf_parts(object $request): array
+{
+    $mask = function_exists('squuad_cert_id_document_mask_in_boxes') ? squuad_cert_id_document_mask_in_boxes() : false;
+    if (function_exists('squuad_cert_id_document_mask_in_boxes')) {
+        squuad_cert_id_document_mask_in_boxes(false);
+    }
+    $parts = squuad_cert_signature_final_pdf_parts($request) ?? ['content' => '', 'line' => '', 'certificate' => ''];
+    if (function_exists('squuad_cert_id_document_mask_in_boxes')) {
+        squuad_cert_id_document_mask_in_boxes($mask);
+    }
+
+    return $parts;
+}
+
+/**
+ * Maqueta de un documento emitido (diseño de página completa): el diseño ocupa su página sin relleno y la línea de la
+ * solicitud y el «Certificado de firmas» van en hojas A4 verticales propias (páginas con nombre de CSS). La usan el PDF
+ * final y la vista previa, para que coincidan. Devuelve [html, css extra].
+ */
+function squuad_cert_final_pdf_issued_layout(array $parts): array
+{
+    $html = '<div style="width:100%;box-sizing:border-box;background:#fff;color:#111">' . $parts['content'] . '</div>';
+    if ('' !== (string) $parts['line'] || '' !== (string) $parts['certificate']) {
+        $html .= '<div class="sq-cert-pages" style="font-family:Arial,sans-serif;color:#111">'
+            . ('' !== (string) $parts['line'] ? '<p style="margin:0 0 8px;font-size:9px;color:#666;word-break:break-all">' . esc_html($parts['line']) . '</p>' : '')
+            . $parts['certificate'] . '</div>';
+    }
+
+    // min-height: la regla R3 del servicio mide en pantalla, donde la hoja A4 queda justo bajo el diseño; si solo lleva la
+    // línea (vista previa), creía que era un sobrante y recortaba la hoja. Cabe en una A4 (277 mm útiles)
+    return [$html, '@page sqcert { size: A4 portrait; margin: 10mm; } .sq-cert-pages { page: sqcert; break-before: page; min-height: 200mm; }'];
 }
 
 /**

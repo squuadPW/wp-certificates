@@ -57,7 +57,7 @@ $server_engine = function_exists('squuad_cert_pdf_engine_for_document') && 'serv
     integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg=="
     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
+<?php // Los QR llegan ya dibujados por el servidor (generador propio, ADR 0013): sin qr-code-styling de internet ?>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const data = <?= wp_json_encode($preview, JSON_HEX_TAG | JSON_HEX_AMP) ?>;
@@ -103,13 +103,6 @@ $server_engine = function_exists('squuad_cert_pdf_engine_for_document') && 'serv
         const refresh = document.getElementById("edusystem-preview-refresh");
         let url = null;
 
-        const drawQr = function (root, selector, dataOf) {
-            if (!window.QRCodeStyling) return;
-            root.querySelectorAll(selector).forEach(function (box) {
-                new QRCodeStyling({ width: 100, height: 100, type: "canvas", data: dataOf(box) }).append(box);
-            });
-        };
-
         // Automático y emitido: como signature-final-pdf.php y signer-inbox.php (contenido de la solicitud + pie)
         async function signedPdf() {
             const source = document.createElement("div");
@@ -118,9 +111,6 @@ $server_engine = function_exists('squuad_cert_pdf_engine_for_document') && 'serv
             source.lastElementChild.textContent = fingerprint;
             holder.appendChild(source);
             const automatic = "automatic" === data.mode;
-            if (!automatic) {
-                drawQr(source, "[data-edusig-qr]", function (box) { return box.dataset.edusigQr; });
-            }
             return html2pdf().set({
                 margin: automatic ? [0.3, 0.3, 0.3, 0.3] : data.page.margin,
                 filename: "preview.pdf",
@@ -146,10 +136,7 @@ $server_engine = function_exists('squuad_cert_pdf_engine_for_document') && 'serv
             content.style.minWidth = g.width;
             content.style.minHeight = g.height;
             holder.append(header, content, footer);
-            // El QR de ejemplo, también si la plantilla lo pone en el encabezado o en el pie
-            [header, content, footer].forEach(function (part) {
-                drawQr(part, "#qrcode", function () { return "https://example.com/verify/EXAMPLE"; });
-            });
+            // El QR de ejemplo ya llega dibujado por el servidor (generador propio, ADR 0013)
 
             let margin = [0, 0];
             if (1 === g.margin_required) {

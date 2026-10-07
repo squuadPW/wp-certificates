@@ -26,6 +26,12 @@ function squuad_cert_document_preview_markup($markup, $document)
         return $markup;
     }
     $preview = squuad_cert_document_preview_data($document);
+    // QR como imagen también en la vista del navegador (generador propio, ADR 0013): sin qr-code-styling de internet
+    foreach (['html', 'header', 'content', 'footer'] as $part) {
+        if (!empty($preview[$part])) {
+            $preview[$part] = squuad_cert_pdf_qr_inline((string) $preview[$part], 'https://example.com/verify/EXAMPLE');
+        }
+    }
 
     ob_start();
     include SQUUAD_CERT_MODULE_PATH . 'admin/templates/document-preview.php';
@@ -55,12 +61,18 @@ function squuad_cert_document_preview_server_payload(object $document): array
 
         return squuad_cert_pdf_payload($content, $page, $portrait ? $data['header'] : '', $portrait ? $data['footer'] : '', 'https://example.com/verify/EXAMPLE');
     }
-    // Automático y emitido: como signature-final-pdf.php y signer-inbox.php (contenido de la solicitud + pie)
+    if ('issued' === $data['mode'] && function_exists('squuad_cert_final_pdf_issued_layout')) {
+        // Emitido: la misma maqueta que el PDF final (diseño sin relleno; la línea de la solicitud en su hoja A4)
+        [$html, $css] = squuad_cert_final_pdf_issued_layout(['content' => (string) $data['html'], 'line' => squuad_cert_document_preview_fingerprint(), 'certificate' => '']);
+
+        return squuad_cert_pdf_payload($html, squuad_cert_pdf_page($data['page']['jspdf'], (float) $data['page']['margin']), '', '', 'https://example.com/verify/EXAMPLE', $css);
+    }
+    // Automático: como signature-final-pdf.php (contenido de la solicitud + pie)
     $html = '<div style="box-sizing:border-box;width:100%;background:#fff;padding:16px;font-family:Arial,sans-serif;color:#111">'
         . $data['html'] . '<p style="margin-top:16px;font-size:9px;color:#666;word-break:break-all">' . esc_html(squuad_cert_document_preview_fingerprint()) . '</p></div>';
     $page = 'automatic' === $data['mode']
         ? squuad_cert_pdf_page(['unit' => 'mm', 'format' => 'a4', 'orientation' => 'portrait'], 7.62)
-        : squuad_cert_pdf_page($data['page']['jspdf'], (float) $data['page']['margin'], true);
+        : squuad_cert_pdf_page($data['page']['jspdf'], (float) $data['page']['margin']);
 
     return squuad_cert_pdf_payload($html, $page, '', '', 'https://example.com/verify/EXAMPLE');
 }

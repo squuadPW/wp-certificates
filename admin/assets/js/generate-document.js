@@ -154,7 +154,7 @@ document.addEventListener("DOMContentLoaded", function () {
             widthDocument = `${this.response.document.width_size}${this.response.document.unit}`;
             heightDocument = `${this.response.document.height_size}${this.response.document.unit}`;
 
-            const imgElement = tempDiv.querySelector("img");
+            const imgElement = tempDiv.querySelector("img:not([src^='data:'])");
             if (imgElement) {
               try {
                 imgElement.src = await convertToBase64(imgElement.src);
@@ -193,21 +193,10 @@ document.addEventListener("DOMContentLoaded", function () {
                   : margin;
             }, 1500);
 
-            if (document.getElementById("qrcode") && this.response.url) {
-              const qrCode = new QRCodeStyling({
-                width: 100,
-                height: 100,
-                data: this.response.url,
-                image: this.response.image_url,
-                dotsOptions: { color: "#000000" },
-                backgroundOptions: { color: "#ffffff" },
-                imageOptions: {
-                  crossOrigin: "anonymous",
-                },
-              });
-
-              qrCode.append(document.getElementById("qrcode"));
-            }
+            // El QR (con el logo) llega ya dibujado en el HTML (generador propio del servidor, ADR 0013)
+            // Servidor de PDF (ADR 0013, fase 3): la descarga la hace el servidor si el documento lo usa
+            serverToken = this.response.server && this.response.server.token ? this.response.server.token : "";
+            serverFilename = (String(this.response.document.title || "document").toLowerCase().replace(/[^a-z0-9._-]+/g, "-") || "document") + ".pdf";
 
             document.querySelector(".modal-document-export").style.minWidth =
               widthDocument;
@@ -235,10 +224,44 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  // PDF hecho por el servidor de PDF (ADR 0013, fase 3); null si no responde (entonces lo hace el navegador, como antes)
+  let serverToken = "";
+  let serverFilename = "document.pdf";
+  async function serverDownload() {
+    if (!serverToken) return null;
+    const body = new URLSearchParams({ action: squuadCertGenerate.serverAction, _ajax_nonce: squuadCertGenerate.serverNonce, token: serverToken });
+    const abort = new AbortController();
+    const timer = setTimeout(() => abort.abort(), 25000);
+    try {
+      const response = await fetch(squuadCertGenerate.url, { method: "POST", body: body, credentials: "same-origin", signal: abort.signal });
+      const type = response.headers.get("Content-Type") || "";
+      if (!response.ok || type.indexOf("application/pdf") !== 0) return null;
+      const blob = await response.blob();
+      if ((await blob.slice(0, 5).text()) !== "%PDF-") return null;
+      return blob;
+    } catch (error) {
+      return null;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
   let download_grades = document.getElementById("download-grades");
   if (download_grades) {
     download_grades.addEventListener("click", async (e) => {
       download_grades.disabled = true;
+      const serverBlob = await serverDownload();
+      if (serverBlob) {
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(serverBlob);
+        link.download = serverFilename;
+        serverToken = ""; // de un solo uso en el servidor
+        document.body.appendChild(link);
+        link.click();
+        setTimeout(() => { URL.revokeObjectURL(link.href); link.remove(); }, 1000);
+        download_grades.disabled = false;
+        return;
+      }
       var element = document.getElementById("content-pdf");
       var opt = {
         margin: margin,

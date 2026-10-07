@@ -291,6 +291,24 @@ function squuad_cert_pdf_render(array $payload, string $context, int $timeout = 
     ];
 }
 
+/** Envía un PDF como respuesta (sin nada antes: avisos, BOM o compresión lo romperían) y termina. */
+function squuad_cert_pdf_send_inline(string $pdf, string $filename, string $disposition = 'inline'): void
+{
+    while (ob_get_level()) {
+        ob_end_clean();
+    }
+    if (function_exists('ini_get') && ini_get('zlib.output_compression')) {
+        @ini_set('zlib.output_compression', '0'); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+    }
+    nocache_headers();
+    header('Content-Type: application/pdf');
+    header('Content-Disposition: ' . ('attachment' === $disposition ? 'attachment' : 'inline') . '; filename="' . preg_replace('/[^A-Za-z0-9._-]/', '-', $filename) . '"');
+    header('Content-Length: ' . strlen($pdf));
+    header('X-Content-Type-Options: nosniff');
+    echo $pdf; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- PDF binario
+    exit;
+}
+
 /* ------------------------------------------------------------------------------------------------ HTML del motor */
 
 /** CSS base fijo de los PDF del servidor (los valores del admin que los documentos heredaban hasta ahora). */
@@ -446,27 +464,44 @@ function squuad_cert_pdf_data_uri(string $url): ?string
 }
 
 /**
+ * QR como imagen (sin JavaScript ni generadores de terceros): el hueco `<div id="qrcode">` ({{qrcode}}) con $qr_default
+ * (y el logo de Configuración en el centro, como hasta ahora) y los QR de verificación `data-edusig-qr` / `data-wpc-qr`.
+ * Sirve para el PDF del servidor y para lo que se muestra en pantalla.
+ */
+function squuad_cert_pdf_qr_inline(string $html, string $qr_default = '', string $qr_logo = ''): string
+{
+    static $logos = [];
+    if ('' !== $qr_logo && !isset($logos[$qr_logo])) {
+        $budget = squuad_cert_pdf_inline_budget();
+        $logos[$qr_logo] = (string) squuad_cert_pdf_data_uri($qr_logo);
+        squuad_cert_pdf_inline_budget($budget); // el logo se cuenta una vez, no por cada QR
+    }
+    $logo = '' !== $qr_logo ? $logos[$qr_logo] : '';
+    $qr = static function (string $text, string $with_logo = '') : string {
+        if ('' === $text) {
+            return '';
+        }
+        try {
+            return '<img alt="" src="' . esc_attr(squuad_cert_qr_data_uri($text, $with_logo)) . '" style="width:100px;height:100px;display:block">';
+        } catch (Throwable $e) {
+            return '';
+        }
+    };
+    $html = (string) preg_replace_callback('#<div\b([^>]*?)(?<![\w-])id=(["\'])qrcode\2([^>]*)>\s*</div>#i', static fn($m) => '<div' . $m[1] . 'id="qrcode"' . $m[3] . '>' . $qr($qr_default, $logo) . '</div>', $html);
+
+    return (string) preg_replace_callback('#(<[a-z]+\b[^>]*?(?<![\w-])data-(?:edusig|wpc)-qr=(["\'])([^"\']*)\2[^>]*>)\s*(</[a-z]+>)#i', static fn($m) => $m[1] . $qr(html_entity_decode($m[3], ENT_QUOTES | ENT_HTML5)) . $m[4], $html);
+}
+
+/**
  * Prepara el HTML para el motor: imágenes y url() de este sitio incrustadas, QR como imagen (sin JavaScript) y fuera
  * los <script>. Lo que no sea de este sitio se queda tal cual (el servicio lo bloquea).
  *
  * @param string $qr_default dirección del QR para los huecos `<div id="qrcode">` (vacío: el hueco queda vacío)
  */
-function squuad_cert_pdf_prepare_html(string $html, string $qr_default = ''): string
+function squuad_cert_pdf_prepare_html(string $html, string $qr_default = '', string $qr_logo = ''): string
 {
     $html = (string) preg_replace('#<script\b[^>]*>.*?</script>#is', '', $html);
-    // QR: hueco {{qrcode}} y QR de la verificación de la firma (data-edusig-qr / data-wpc-qr)
-    $qr = static function (string $text): string {
-        if ('' === $text) {
-            return '';
-        }
-        try {
-            return '<img alt="" src="' . esc_attr(squuad_cert_qr_data_uri($text)) . '" style="width:100px;height:100px;display:block">';
-        } catch (Throwable $e) {
-            return '';
-        }
-    };
-    $html = (string) preg_replace_callback('#<div\b([^>]*?)(?<![\w-])id=(["\'])qrcode\2([^>]*)>\s*</div>#i', static fn($m) => '<div' . $m[1] . 'id="qrcode"' . $m[3] . '>' . $qr($qr_default) . '</div>', $html);
-    $html = (string) preg_replace_callback('#(<[a-z]+\b[^>]*?(?<![\w-])data-(?:edusig|wpc)-qr=(["\'])([^"\']*)\2[^>]*>)\s*(</[a-z]+>)#i', static fn($m) => $m[1] . $qr(html_entity_decode($m[3], ENT_QUOTES | ENT_HTML5)) . $m[4], $html);
+    $html = squuad_cert_pdf_qr_inline($html, $qr_default, $qr_logo);
     // srcset/sizes: el motor usaría otra imagen (no incrustada); se queda solo src
     $html = (string) preg_replace('#\s(?<![\w-])(?:srcset|sizes)=(["\'])[^"\']*\1#i', '', $html);
     // Imágenes y url() de este sitio
@@ -499,17 +534,15 @@ function squuad_cert_pdf_inline_css_urls(string $css): string
  * Página del contrato /v1 a partir de las opciones de página de jsPDF que usa hoy el navegador
  * (squuad_cert_signature_pdf_page_from_options()): ['width', 'height', 'unit', 'margin' => [arriba, der., abajo, izq.]].
  */
-function squuad_cert_pdf_page(array $jspdf, float $margin, bool $jspdf_px_unscaled = false): array
+function squuad_cert_pdf_page(array $jspdf, float $margin): array
 {
     $unit = in_array($jspdf['unit'] ?? 'mm', ['mm', 'cm', 'in', 'px', 'pt'], true) ? $jspdf['unit'] : 'mm';
     $landscape = 'landscape' === ($jspdf['orientation'] ?? 'portrait');
     $format = $jspdf['format'] ?? 'a4';
     if (is_array($format) && (float) ($format[0] ?? 0) > 0 && (float) ($format[1] ?? 0) > 0) {
         [$w, $h] = [(float) $format[0], (float) $format[1]];
-        // jsPDF sin el arreglo px_scaling (vista previa «emitido» y bandeja) toma 1 px = 1,333 pt, no 0,75 pt (px de CSS)
-        if ('px' === $unit && $jspdf_px_unscaled) {
-            [$w, $h, $margin, $unit] = [$w * 96 / 72, $h * 96 / 72, $margin * 96 / 72, 'pt'];
-        }
+        // px de CSS siempre: html2pdf sin px_scaling estiraba el contenido hasta una página 1,333 veces mayor; Chrome no
+        // estira, así que la página es la del diseño
     } else {
         $format = is_array($format) ? 'a4' : $format;
         $unit = is_array($jspdf['format'] ?? null) ? 'mm' : $unit;
@@ -580,15 +613,15 @@ function squuad_cert_pdf_part_has_content(string $html): bool
 }
 
 /** Petición completa para el servicio. */
-function squuad_cert_pdf_payload(string $html, array $page, string $header = '', string $footer = '', string $qr_default = '', string $extra_css = ''): array
+function squuad_cert_pdf_payload(string $html, array $page, string $header = '', string $footer = '', string $qr_default = '', string $extra_css = '', string $qr_logo = ''): array
 {
     squuad_cert_pdf_inline_budget(0);
 
     return [
-        'html' => squuad_cert_pdf_prepare_html($html, $qr_default),
+        'html' => squuad_cert_pdf_prepare_html($html, $qr_default, $qr_logo),
         'head' => '<style>' . squuad_cert_pdf_base_css() . squuad_cert_pdf_core_css($html . $header . $footer) . squuad_cert_pdf_inline_css_urls($extra_css) . '</style>',
-        'header' => squuad_cert_pdf_part_has_content($h = squuad_cert_pdf_prepare_html($header, $qr_default)) ? $h : '',
-        'footer' => squuad_cert_pdf_part_has_content($f = squuad_cert_pdf_prepare_html($footer, $qr_default)) ? $f : '',
+        'header' => squuad_cert_pdf_part_has_content($h = squuad_cert_pdf_prepare_html($header, $qr_default, $qr_logo)) ? $h : '',
+        'footer' => squuad_cert_pdf_part_has_content($f = squuad_cert_pdf_prepare_html($footer, $qr_default, $qr_logo)) ? $f : '',
         'page' => $page,
         'rules' => SQUUAD_CERT_PDF_RULES,
     ];

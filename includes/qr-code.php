@@ -20,6 +20,15 @@ const SQUUAD_CERT_QR_M_BLOCKS = [
     15 => [655, 24, [[5, 41], [5, 42]]],
 ];
 
+/** Lo mismo con corrección H (~30 %): para QR con un logo en el centro. */
+const SQUUAD_CERT_QR_H_BLOCKS = [
+    1 => [26, 17, [[1, 9]]], 2 => [44, 28, [[1, 16]]], 3 => [70, 22, [[2, 13]]], 4 => [100, 16, [[4, 9]]],
+    5 => [134, 22, [[2, 11], [2, 12]]], 6 => [172, 28, [[4, 15]]], 7 => [196, 26, [[4, 13], [1, 14]]],
+    8 => [242, 26, [[4, 14], [2, 15]]], 9 => [292, 24, [[4, 12], [4, 13]]], 10 => [346, 28, [[6, 15], [2, 16]]],
+    11 => [404, 24, [[3, 12], [8, 13]]], 12 => [466, 28, [[7, 14], [4, 15]]], 13 => [532, 22, [[12, 11], [4, 12]]],
+    14 => [581, 24, [[11, 12], [5, 13]]], 15 => [655, 24, [[11, 12], [7, 13]]],
+];
+
 /** Centros de los patrones de alineación por versión. */
 const SQUUAD_CERT_QR_ALIGN = [
     1 => [], 2 => [6, 18], 3 => [6, 22], 4 => [6, 26], 5 => [6, 30], 6 => [6, 34], 7 => [6, 22, 38], 8 => [6, 24, 42],
@@ -32,12 +41,13 @@ const SQUUAD_CERT_QR_ALIGN = [
  *
  * @throws InvalidArgumentException si el texto no cabe en la versión 15.
  */
-function squuad_cert_qr_matrix(string $text): array
+function squuad_cert_qr_matrix(string $text, string $level = 'M'): array
 {
+    $table = 'H' === $level ? SQUUAD_CERT_QR_H_BLOCKS : SQUUAD_CERT_QR_M_BLOCKS;
     $data = array_values(unpack('C*', $text) ?: []);
     $len = count($data);
     $version = 0;
-    foreach (SQUUAD_CERT_QR_M_BLOCKS as $v => [$total, $ec, $groups]) {
+    foreach ($table as $v => [$total, $ec, $groups]) {
         $capacity_bits = ($total - $ec * array_sum(array_column($groups, 0))) * 8;
         if (4 + ($v < 10 ? 8 : 16) + 8 * $len <= $capacity_bits) {
             $version = $v;
@@ -47,7 +57,7 @@ function squuad_cert_qr_matrix(string $text): array
     if (!$version) {
         throw new InvalidArgumentException('qr_demasiado_largo');
     }
-    [$total, $ec_len, $groups] = SQUUAD_CERT_QR_M_BLOCKS[$version];
+    [$total, $ec_len, $groups] = $table[$version];
     $data_cw = $total - $ec_len * array_sum(array_column($groups, 0));
 
     // Cadena de bits: modo byte (0100), longitud, datos, terminador y relleno
@@ -190,7 +200,7 @@ function squuad_cert_qr_matrix(string $text): array
     $best_score = PHP_INT_MAX;
     for ($mask = 0; $mask < 8; $mask++) {
         $candidate = squuad_cert_qr_apply_mask($m, $fixed, $mask);
-        squuad_cert_qr_write_info($candidate, $version, $mask);
+        squuad_cert_qr_write_info($candidate, $version, $mask, $level);
         $score = squuad_cert_qr_penalty($candidate);
         if ($score < $best_score) {
             $best_score = $score;
@@ -272,10 +282,10 @@ function squuad_cert_qr_apply_mask(array $m, array $fixed, int $mask): array
 }
 
 /** Información de formato (corrección M + máscara, BCH 15,5) y de versión (BCH 18,6, versiones 7+). */
-function squuad_cert_qr_write_info(array &$m, int $version, int $mask): void
+function squuad_cert_qr_write_info(array &$m, int $version, int $mask, string $level = 'M'): void
 {
     $size = count($m);
-    $data = (0b00 << 3) | $mask; // M = 00
+    $data = (('H' === $level ? 0b10 : 0b00) << 3) | $mask; // nivel M = 00, H = 10
     $rem = $data;
     for ($i = 0; $i < 10; $i++) {
         $rem = ($rem << 1) ^ ((($rem >> 9) & 1) * 0x537);
@@ -356,10 +366,13 @@ function squuad_cert_qr_penalty(array $m): int
     return $score;
 }
 
-/** QR como SVG (zona de silencio de 4 módulos), escalable sin perder nitidez en el PDF. */
-function squuad_cert_qr_svg(string $text, string $dark = '#000'): string
+/**
+ * QR como SVG (zona de silencio de 4 módulos), escalable sin perder nitidez en el PDF. Con $logo (imagen data:), el logo
+ * va en el centro sobre un recuadro blanco y el QR usa corrección H (como el QR con logo que se usaba hasta ahora).
+ */
+function squuad_cert_qr_svg(string $text, string $dark = '#000', string $logo = ''): string
 {
-    $m = squuad_cert_qr_matrix($text);
+    $m = squuad_cert_qr_matrix($text, '' !== $logo ? 'H' : 'M');
     $size = count($m);
     $q = 4;
     $path = '';
@@ -372,12 +385,23 @@ function squuad_cert_qr_svg(string $text, string $dark = '#000'): string
     }
     $full = $size + 2 * $q;
 
-    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' . $full . ' ' . $full . '" shape-rendering="crispEdges">'
-        . '<rect width="100%" height="100%" fill="#fff"/><path fill="' . esc_attr($dark) . '" d="' . $path . '"/></svg>';
+    $center = '';
+    if ('' !== $logo && 0 === strpos($logo, 'data:image/')) {
+        // ~22 % del lado: dentro de lo que la corrección H recupera
+        $side = round($size * 0.22, 2);
+        $pos = round(($full - $side) / 2, 2);
+        $pad = round($side * 0.08, 2);
+        $center = '<rect x="' . ($pos - $pad) . '" y="' . ($pos - $pad) . '" width="' . ($side + 2 * $pad) . '" height="' . ($side + 2 * $pad) . '" fill="#fff"/>'
+            . '<image href="' . esc_attr($logo) . '" x="' . $pos . '" y="' . $pos . '" width="' . $side . '" height="' . $side . '" preserveAspectRatio="xMidYMid meet"/>';
+    }
+
+    // Con tamaño propio (si no, un navegador lo pinta a 150 px y html2canvas lo rasteriza borroso)
+    return '<svg xmlns="http://www.w3.org/2000/svg" width="' . ($full * 8) . '" height="' . ($full * 8) . '" viewBox="0 0 ' . $full . ' ' . $full . '" shape-rendering="crispEdges">'
+        . '<rect width="100%" height="100%" fill="#fff"/><path fill="' . esc_attr($dark) . '" d="' . $path . '"/>' . $center . '</svg>';
 }
 
 /** QR como imagen `data:` para incrustar en el HTML que se manda al motor de PDF. */
-function squuad_cert_qr_data_uri(string $text): string
+function squuad_cert_qr_data_uri(string $text, string $logo = ''): string
 {
-    return 'data:image/svg+xml;base64,' . base64_encode(squuad_cert_qr_svg($text));
+    return 'data:image/svg+xml;base64,' . base64_encode(squuad_cert_qr_svg($text, '#000', $logo));
 }

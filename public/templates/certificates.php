@@ -21,6 +21,10 @@
 
                     //demas opciones de configuracion del docuemnto
                     $option_document = json_decode($cert->option_document);
+                    // QR como imagen con el logo (generador propio, ADR 0013): sin qr-code-styling de internet
+                    $cert_html = !empty($option_document->qr->url) && function_exists('squuad_cert_pdf_qr_inline')
+                        ? squuad_cert_pdf_qr_inline((string) $cert->html, (string) $option_document->qr->url, (string) ($option_document->qr->image_url ?? ''))
+                        : (string) $cert->html;
                 ?>
 
                 <div class="cert-card">
@@ -72,7 +76,7 @@
                     <div class="cert-modal-content">
                         <!-- El contenedor se comporta transparente para respetar los z-index y posiciones fijas -->
                         <div class="cert-raw-wrapper">
-                            <iframe id="cert-doc-<?= $cert->simple_uuid ?>"  srcdoc='
+                            <iframe id="cert-doc-<?= esc_attr($cert->simple_uuid) ?>" sandbox="allow-same-origin" srcdoc='
                                 <!DOCTYPE html>
                                 <html>
                                     <head>
@@ -106,28 +110,7 @@
                                         </style>
                                     </head>
                                     <body>
-                                        <?= htmlspecialchars( $cert->html, ENT_QUOTES, 'UTF-8') ?>
-
-                                        <script type="text/javascript" src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
-                                        <?php if( $option_document->qr ): ?>
-                                            <script>
-                                                if ( document.getElementById("qrcode") ) {
-                                                    const qrCode = new QRCodeStyling({
-                                                        width: 100,
-                                                        height: 100,
-                                                        data: "<?= $option_document->qr->url ?>",
-                                                        image: "<?= $option_document->qr->image_url ?>",
-                                                        dotsOptions: { color: "#000000" },
-                                                        backgroundOptions: { color: "#ffffff" },
-                                                        imageOptions: {
-                                                            crossOrigin: "anonymous",
-                                                        },
-                                                    });
-
-                                                    qrCode.append(document.getElementById("qrcode"));
-                                                }
-                                            </script>
-                                        <?php endif ?>
+                                        <?= htmlspecialchars( $cert_html, ENT_QUOTES, 'UTF-8') ?>
 
                                     </body>
                                 </html>'>
@@ -151,6 +134,15 @@
                                 'paper_format' => $option_document->paper_format,
                                 'orientation'  => $option_document->orientation,
                             ];
+                            // Servidor de PDF (ADR 0013, fase 3): si el documento lo usa, la descarga la hace el servidor
+                            $cert_template = !empty($cert->template_id) && function_exists('get_document_detail') ? get_document_detail((int) $cert->template_id) : null;
+                            if ($cert_template && function_exists('squuad_cert_pdf_engine_for_document') && 'servicio' === squuad_cert_pdf_engine_for_document($cert_template)) {
+                                $js_config['server'] = [
+                                    'url' => admin_url('admin-ajax.php'),
+                                    'nonce' => wp_create_nonce('squuad_cert_account_certificate_pdf'),
+                                    'uuid' => (string) $cert->simple_uuid,
+                                ];
+                            }
                         ?>
 
                         <button type="button" class="button button-primary cert-btn-download" onclick='download_document(<?= json_encode($js_config, JSON_HEX_APOS | JSON_HEX_QUOT) ?>)'>
@@ -252,6 +244,30 @@ async function download_document( document_config ) {
 
     const parches = [];
     if (config.unit === 'px') parches.push('px_scaling');
+
+    // Servidor de PDF (ADR 0013, fase 3): si responde, su PDF; si no, el navegador como antes
+    if (config.server) {
+        try {
+            const abort = new AbortController();
+            const timer = setTimeout(() => abort.abort(), 25000);
+            const body = new URLSearchParams({ action: 'squuad_cert_account_certificate_pdf', _ajax_nonce: config.server.nonce, uuid: config.server.uuid });
+            const response = await fetch(config.server.url, { method: 'POST', body: body, credentials: 'same-origin', signal: abort.signal });
+            clearTimeout(timer);
+            const type = response.headers.get('Content-Type') || '';
+            if (response.ok && type.indexOf('application/pdf') === 0) {
+                const blob = await response.blob();
+                if ((await blob.slice(0, 5).text()) === '%PDF-') {
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = (config.filename || 'documento').replace(/\.pdf$/i, '') + '.pdf';
+                    document.body.appendChild(link);
+                    link.click();
+                    setTimeout(() => { URL.revokeObjectURL(link.href); link.remove(); }, 1000);
+                    return;
+                }
+            }
+        } catch (e) {}
+    }
 
     const iframe = document.getElementById(config.document_id);
     if (!iframe) {
