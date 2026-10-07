@@ -1212,9 +1212,13 @@ function squuad_cert_signature_request_render_final(object $request): ?string
             $users_block .= $full;
         }
     }
+    // {{qrcode}} de los automáticos (fuera de la huella del contenido): lleva a la página de verificación (ADR 0014)
     $content = str_replace(
         [SQUUAD_CERT_SIGNATURE_SLOT, SQUUAD_CERT_SIGNATURE_QR_SLOT],
-        ['' !== $users_block ? '<div style="display:flex;flex-wrap:wrap;gap:4px 0;margin-top:16px">' . $users_block . '</div>' : '', ''],
+        [
+            '' !== $users_block ? '<div style="display:flex;flex-wrap:wrap;gap:4px 0;margin-top:16px">' . $users_block . '</div>' : '',
+            '<div data-edusig-qr="' . esc_url(squuad_cert_signature_verify_url($request)) . '"></div>',
+        ],
         $content
     );
 
@@ -1855,12 +1859,15 @@ function squuad_cert_signature_issue_document(int $student_id, int $document_cer
         }
     }
 
-    // QR: como al generar, el certificado se registra en wp-certificates y su URL queda sellada en el contenido
-    $qr = ['url' => '', 'image_url' => ''];
+    // QR: lleva a la página de verificación del propio sitio (ADR 0014) y su dirección queda sellada en el contenido. El
+    // certificado se sigue registrando como al generar: su fila sirve a la API pública, al contador de uso del documento
+    // y a la deduplicación al reemitir
+    $qr_url = '';
     if (false !== strpos(implode('', $parts), '{{qrcode}}')) {
+        $qr_url = squuad_cert_signature_verify_url($request, 'design');
         $emission_date = gmdate('Y-m-d');
         $program = (string) ($subject['program'] ?? '');
-        $qr = (array) apply_filters('create_certificate_edusystem', 'certificate', $document->title, $program, 1, $student, $emission_date);
+        apply_filters('create_certificate_edusystem', 'certificate', $document->title, $program, 1, $student, $emission_date);
     }
 
     // Valores de las variables: los resuelve wp-certificates (ADR 0005). Un documento que se emite para firma no puede
@@ -1882,7 +1889,7 @@ function squuad_cert_signature_issue_document(int $student_id, int $document_cer
     if (function_exists('squuad_cert_document_replacements')) {
         $replacements = array_merge($replacements, squuad_cert_document_replacements($document));
     }
-    $replacements['qrcode'] = ['value' => '<div data-edusig-qr="' . esc_url((string) ($qr['url'] ?? '')) . '"></div>', 'wrap' => false];
+    $replacements['qrcode'] = ['value' => '<div data-edusig-qr="' . esc_url($qr_url) . '"></div>', 'wrap' => false];
     $replacements = array_merge($replacements, squuad_cert_signature_signer_replacements($request));
     if ($entry) {
         $replacements['tomo'] = ['value' => (string) (int) $entry->tomo, 'wrap' => true];
@@ -1917,7 +1924,7 @@ function squuad_cert_signature_issue_document(int $student_id, int $document_cer
         'title' => (string) $document->title,
         'content_sha256' => $sha256,
         'template_sha256' => $template_sha256,
-        'qr_url' => (string) ($qr['url'] ?? ''),
+        'qr_url' => $qr_url,
         'page' => [
             'orientation' => strtolower((string) ($document->orientation ?: 'portrait')),
             'unit' => strtolower((string) ($document->unit ?: 'mm')),

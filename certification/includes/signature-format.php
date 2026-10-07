@@ -840,14 +840,31 @@ function squuad_cert_signature_request_code(object $request): string
  * (certification/public/functions/verify-page.php, ADR 0014 de Edusof). Filtro para cambiarla; la página acepta esta
  * dirección siempre, porque los PDF ya entregados la llevan.
  */
-function squuad_cert_signature_verify_url(object $request): string
+function squuad_cert_signature_verify_url(object $request, string $kind = 'sheet'): string
 {
     $url = add_query_arg([
         'squuad_cert_verify' => rawurlencode(squuad_cert_signature_request_code($request)),
-        't' => squuad_cert_signature_verify_token($request),
+        't' => 'design' === $kind ? squuad_cert_signature_verify_doc_token($request) : squuad_cert_signature_verify_token($request),
     ], home_url('/'));
 
-    return (string) apply_filters('squuad_cert_signature_verify_url', $url, $request);
+    // $kind: 'sheet' (hoja A4 y ranura del QR de los automáticos: token ligado al contenido) o 'design' (QR del diseño
+    // de los emitidos, puesto antes de que exista el contenido). Quien use el filtro debe conservar el parámetro «t» que
+    // recibe: rehacerlo con otro token dejaría inservible el QR del diseño
+    return (string) apply_filters('squuad_cert_signature_verify_url', $url, $request, $kind);
+}
+
+/**
+ * Token del QR del diseño de un documento emitido (ADR 0014): 16 hex del HMAC de «verify-doc|id» con una subclave de la
+ * clave vigente. No depende del contenido, que aún no existe cuando se pone el QR. Vacío si no hay clave.
+ */
+function squuad_cert_signature_verify_doc_token(object $request): string
+{
+    $key = function_exists('squuad_cert_signature_current_key') ? squuad_cert_signature_current_key() : null;
+    if (!$key || !function_exists('squuad_cert_signature_verify_doc_subkey')) {
+        return '';
+    }
+
+    return substr(hash_hmac('sha256', 'verify-doc|' . (int) $request->id, squuad_cert_signature_verify_doc_subkey($key[1])), 0, 16);
 }
 
 /**
@@ -858,7 +875,8 @@ function squuad_cert_signature_verify_url(object $request): string
 function squuad_cert_signature_verify_token(object $request): string
 {
     $key = function_exists('squuad_cert_signature_current_key') ? squuad_cert_signature_current_key() : null;
-    if (!$key) {
+    // Sin contenido todavía (borrador): no hay token de la hoja
+    if (!$key || '' === (string) ($request->content_sha256 ?? '')) {
         return '';
     }
 
@@ -1052,6 +1070,10 @@ function squuad_cert_signature_final_pdf_payload(object $request): ?array
     }
     if (null === $html) {
         return null;
+    }
+    // QR ya dibujados como imagen (diseño, ranura de los automáticos y hoja): el navegador no tiene que generarlos
+    if (function_exists('squuad_cert_pdf_qr_inline')) {
+        $html = squuad_cert_pdf_qr_inline($html);
     }
     $title = (string) $wpdb->get_var($wpdb->prepare("SELECT title FROM {$wpdb->prefix}documents_certificates WHERE id = %d", (int) ($request->document_certificate_id ?? 0)));
     $page = function_exists('squuad_cert_signature_pdf_page') ? squuad_cert_signature_pdf_page($request) : ['width_px' => 794, 'margin' => [0.3, 0.3, 0.3, 0.3], 'jspdf' => ['unit' => 'in', 'format' => 'a4', 'orientation' => 'portrait']];

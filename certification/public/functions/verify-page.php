@@ -65,7 +65,9 @@ function squuad_cert_signature_verify_token_matches(object $request, string $tok
     }
     $ok = false;
     foreach (squuad_cert_signature_all_keys() as $key) {
-        $sheet = substr(hash_hmac('sha256', 'verify|' . (int) $request->id . '|' . (string) $request->content_sha256, $key), 0, 16);
+        // Sin contenido (borrador) no hay token de la hoja: «verify|id|» nunca vale
+        $sheet = '' !== (string) ($request->content_sha256 ?? '')
+            ? substr(hash_hmac('sha256', 'verify|' . (int) $request->id . '|' . (string) $request->content_sha256, $key), 0, 16) : '';
         $design = substr(hash_hmac('sha256', 'verify-doc|' . (int) $request->id, squuad_cert_signature_verify_doc_subkey($key)), 0, 16);
         // Sin cortar el bucle: el tiempo no depende de qué clave coincide
         $ok = hash_equals($sheet, $token) | hash_equals($design, $token) | $ok;

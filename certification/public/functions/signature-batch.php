@@ -98,6 +98,10 @@ function squuad_cert_signature_account_pdf_requests(WP_User $user, array $only =
         if (null === $html) {
             continue;
         }
+        // QR ya dibujados como imagen (diseño, ranura de los automáticos y hoja)
+        if (function_exists('squuad_cert_pdf_qr_inline')) {
+            $html = squuad_cert_pdf_qr_inline($html);
+        }
         $requests[] = ['request' => $request, 'title' => (string) $item['document']->title, 'html' => $html];
     }
 

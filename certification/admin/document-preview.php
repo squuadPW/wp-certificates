@@ -439,8 +439,9 @@ function squuad_cert_document_preview_replacements(object $document, string $mod
         }
     }
 
-    // QR: el PDF final del documento automático no lo lleva; el emitido lo dibuja con una URL (aquí de ejemplo)
-    $replacements['qrcode'] = $html('automatic' === $mode ? '' : '<div data-edusig-qr="https://example.com/verify/EXAMPLE"></div>');
+    // QR de verificación (aquí con una dirección de ejemplo): en el emitido va en el contenido; en el automático, en la
+    // ranura que se rellena al generar el PDF final (ADR 0014)
+    $replacements['qrcode'] = $html('<div data-edusig-qr="https://example.com/verify/EXAMPLE"></div>');
 
     return $replacements;
 }
