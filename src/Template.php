@@ -44,9 +44,17 @@ final class Template
             $template = $processed;
         }
 
-        foreach ($replacements as $placeholder => $config) {
-            $tag = '{{' . $placeholder . '}}';
-            if (strpos($template, $tag) !== false) {
+        // Variables {{clave}} en UNA sola pasada sobre la plantilla: lo que se inserta (p. ej. lo que escribió una persona en
+        // un campo, «Viaje {{signature_signer_2}}») nunca se vuelve a leer, así que no puede expandir otras variables. Una
+        // clave que no existe se deja como texto; cada valor se calcula una vez aunque la variable aparezca varias veces
+        $cache = [];
+        $processed = preg_replace_callback('/\{\{([^{}#^\/][^{}]*)\}\}/', function ($match) use ($replacements, &$cache, $span_open, $span_close) {
+            $placeholder = $match[1];
+            if (!isset($replacements[$placeholder])) {
+                return $match[0];
+            }
+            if (!array_key_exists($placeholder, $cache)) {
+                $config = $replacements[$placeholder];
                 $value = $config['value'];
                 // Solo funciones anónimas: con is_callable() un valor de texto como «Link» o «Max» (p. ej. el
                 // nombre de un estudiante) se ejecutaba como función de PHP
@@ -56,9 +64,11 @@ final class Template
                 if ($config['wrap']) {
                     $value = $span_open . $value . $span_close;
                 }
-                $template = str_replace($tag, $value, $template);
+                $cache[$placeholder] = (string) $value;
             }
-        }
-        return $template;
+            return $cache[$placeholder];
+        }, $template);
+
+        return is_string($processed) ? $processed : $template;
     }
 }
