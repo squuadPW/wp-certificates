@@ -46,6 +46,9 @@ $statuses = [
                         <td>
                             <?php if ('completed' === $row->status && (int) $row->final_attachment_id) : ?>
                                 <a class="button" target="_blank" rel="noopener" href="<?= esc_url(wp_get_attachment_url((int) $row->final_attachment_id)) ?>"><?= esc_html__('View document', 'wp-certificates') ?></a>
+                                <?php if (function_exists('squuad_cert_signature_certificate_access') && '' !== squuad_cert_signature_certificate_access($row, get_current_user_id())) : ?>
+                                    <a class="button" href="<?= esc_url(squuad_cert_signature_certificate_url((int) $row->id)) ?>"><?= esc_html__('Certificate of signatures', 'wp-certificates') ?></a>
+                                <?php endif; ?>
                             <?php endif; ?>
                             <?php // Retirar o restablecer la verificación pública por el QR (ADR 0014)
                             if (function_exists('squuad_cert_verify_can_withdraw') && squuad_cert_verify_can_withdraw() && squuad_cert_signature_sheet_ready() && null !== $row->frozen_at_utc) :

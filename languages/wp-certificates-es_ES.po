@@ -6350,3 +6350,55 @@ msgid ""
 "document is issued: changing it only affects new issues."
 msgstr "Lo que ve quien escanea el código QR en lugar del título, para títulos que revelan algo de la persona (por ejemplo «Constancia de inclusión» → «Constancia»). Vacío: el título del documento. Se fija al emitir cada documento: cambiarlo solo afecta a las emisiones nuevas."
 
+
+# --- Cadenas nuevas (2026-10-07): traducirlas ---
+#. translators: 1: date and time, 2: SHA-256 fingerprint of the signed PDF
+#: certification/includes/signature-certificate-copy.php:78
+#, php-format
+msgid ""
+"Copy generated on %1$s from the sealed evidence. It is not the signed "
+"document; the fingerprint of the signed PDF is %2$s."
+msgstr "Copia generada el %1$s a partir de la evidencia sellada. No es el documento firmado; la huella del PDF firmado es %2$s."
+
+#: certification/includes/signature-certificate-copy.php:104
+msgid "The link has expired. Reload the page and try again."
+msgstr "El enlace ha caducado. Vuelva a cargar la página e inténtelo de nuevo."
+
+#: certification/includes/signature-certificate-copy.php:115
+msgid "Too many downloads in a short time. Try again later."
+msgstr "Demasiadas descargas en poco tiempo. Inténtelo más tarde."
+
+#: certification/includes/signature-certificate-copy.php:161
+msgid "Print or save as PDF"
+msgstr "Imprimir o guardar como PDF"
+
+#: certification/includes/signature-certificate-copy.php:225
+msgid ""
+"Documents you took part in that are completed. The certificate of signatures "
+"shows who signed, when and how."
+msgstr "Documentos completados en los que usted participó. El certificado de firmas muestra quién firmó, cuándo y cómo."
+
+#: certification/public/functions/verify-page.php:447
+msgid "Download the certificate of signatures"
+msgstr "Descargar el certificado de firmas"
+
+
+# --- Cadenas nuevas (2026-10-07): traducirlas ---
+#: certification/includes/signature-certificate-copy.php:73
+msgid "Its public verification was withdrawn by the institution."
+msgstr "La institución retiró su verificación pública."
+
+#: certification/includes/signature-certificate-copy.php:78
+msgid "Replaced by a later issue: it is not the current document."
+msgstr "Reemplazado por una emisión posterior: no es el documento vigente."
+
+#: certification/includes/signature-certificate-copy.php:81
+msgid "The evidence of this document could not be verified."
+msgstr "No se pudo comprobar la evidencia de este documento."
+
+#. translators: %s: code of the document
+#: certification/includes/signature-certificate-copy.php:271
+#, php-format
+msgid "Certificate of signatures of %s"
+msgstr "Certificado de firmas de %s"
+

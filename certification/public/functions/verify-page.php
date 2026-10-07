@@ -366,6 +366,10 @@ function squuad_cert_verify_page_render(?object $request, int $status): void
             'signers' => 'unverifiable' === $state ? [] : squuad_cert_verify_page_signers($request, $integrity),
             'content_sha256' => (string) $request->content_sha256,
             'pdf_sha256' => 'valid' === $state && 'ok' === $integrity['pdf'] ? (string) $request->final_pdf_sha256 : '',
+            // Con sesión y relación con el documento (personal, titular o firmante): el certificado de firmas aparte (F5)
+            'certificate_url' => 'valid' === $state && function_exists('squuad_cert_signature_certificate_access')
+                && '' !== squuad_cert_signature_certificate_access($request, get_current_user_id())
+                ? squuad_cert_signature_certificate_url((int) $request->id) : '',
         ];
     }
     $states = [
@@ -406,6 +410,7 @@ function squuad_cert_verify_page_render(?object $request, int $status): void
         code{font:13px/1.5 Menlo,Consolas,monospace;background:var(--mono);padding:6px 8px;border-radius:6px;display:block;overflow-wrap:anywhere}
         .note{color:var(--muted);font-size:13px}
         .gap{margin-top:16px}
+        .cert-link{display:inline-block;font-weight:600;padding:8px 14px;border:1px solid var(--line);border-radius:6px;color:var(--text);text-decoration:none}
         .compare{margin-top:16px;border:2px dashed var(--line);border-radius:8px;padding:16px;text-align:center}
         .compare.over{border-color:var(--ok);background:var(--ok-bg)}
         .compare label{display:inline-block;cursor:pointer;font-weight:600;padding:8px 14px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--text)}
@@ -438,6 +443,9 @@ function squuad_cert_verify_page_render(?object $request, int $status): void
                 <dt><?= esc_html__('Sent for signature', 'wp-certificates') ?></dt><dd><?= esc_html($data['issued']) ?></dd>
                 <?php if ('' !== $data['completed']) : ?><dt><?= esc_html__('Completed', 'wp-certificates') ?></dt><dd><?= esc_html($data['completed']) ?></dd><?php endif; ?>
             </dl>
+            <?php if ('' !== $data['certificate_url']) : ?>
+                <p class="gap"><a class="cert-link" href="<?= esc_url($data['certificate_url']) ?>"><?= esc_html__('Download the certificate of signatures', 'wp-certificates') ?></a></p>
+            <?php endif; ?>
         </div>
         <?php if ($data['signers']) : ?>
             <div class="card">

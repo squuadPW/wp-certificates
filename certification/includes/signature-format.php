@@ -915,8 +915,10 @@ function squuad_cert_signature_consent_label(string $consent_version): string
  * consentimiento y documento de identidad o «No aplica»), huella SHA-256 del contenido, QR y dirección de verificación y
  * la nota legal. Sin IP ni datos de la conexión (siguen en la evidencia). En gris, para el PDF.
  */
-function squuad_cert_signature_certificate_html(object $request, bool $page_break = true): string
+function squuad_cert_signature_certificate_html(object $request, bool $page_break = true, ?int $mask_except_user = null, string $copy_note = ''): string
 {
+    // $mask_except_user (copia descargada aparte, ADR 0014): documentos de identidad enmascarados salvo los de esa cuenta.
+    // $copy_note: marca de copia (no es el documento firmado) bajo el título
     global $wpdb;
 
     $rows = squuad_cert_signature_request_rows((int) $request->id);
@@ -925,7 +927,15 @@ function squuad_cert_signature_certificate_html(object $request, bool $page_brea
         $signers[$signer['slot_key']] = $signer;
     }
     $required = squuad_cert_signature_request_required_roles($request);
-    $title = (string) $wpdb->get_var($wpdb->prepare("SELECT title FROM {$wpdb->prefix}documents_certificates WHERE id = %d", (int) ($request->document_certificate_id ?? 0)));
+    // Título sellado al emitir (evento «issued»); si no lo hay, el actual del documento
+    $issued = json_decode((string) $wpdb->get_var($wpdb->prepare(
+        "SELECT data FROM {$wpdb->prefix}squuad_cert_events WHERE request_id = %d AND event_type = 'issued' ORDER BY id ASC LIMIT 1",
+        (int) $request->id
+    )), true);
+    $title = is_array($issued) ? (string) ($issued['title'] ?? '') : '';
+    if ('' === $title) {
+        $title = (string) $wpdb->get_var($wpdb->prepare("SELECT title FROM {$wpdb->prefix}documents_certificates WHERE id = %d", (int) ($request->document_certificate_id ?? 0)));
+    }
     $title = '' !== $title ? $title : (string) $request->document_id;
     $code = squuad_cert_signature_request_code($request);
     $last_signed = '';
@@ -951,7 +961,8 @@ function squuad_cert_signature_certificate_html(object $request, bool $page_brea
     $html .= '<div style="padding-bottom:12px;border-bottom:2px solid #111"><div style="font-weight:800;letter-spacing:.04em;font-size:15px">' . esc_html(mb_strtoupper($site)) . '</div>'
         . '<div style="font-size:11.5px;color:#444">' . esc_html($host) . '</div></div>';
     $html .= '<h1 style="margin:14px 0 2px;font-size:20px;text-align:left">' . esc_html__('Certificate of signatures', 'wp-certificates') . '</h1>'
-        . '<p style="margin:0 0 12px;color:#444">' . esc_html__('Summary of who signed this document, when and how.', 'wp-certificates') . '</p>';
+        . '<p style="margin:0 0 12px;color:#444">' . esc_html__('Summary of who signed this document, when and how.', 'wp-certificates') . '</p>'
+        . ('' !== $copy_note ? '<p style="margin:0 0 12px;padding:6px 10px;border:1px solid #c9a227;background:#fdf6e3;color:#5c4700;font-size:11.5px;overflow-wrap:anywhere">' . esc_html($copy_note) . '</p>' : '');
     $html .= '<table style="border-collapse:collapse;font-size:12.5px;margin:0 0 8px"><tbody>'
         . '<tr><td style="' . $dt . '">' . esc_html__('Document', 'wp-certificates') . '</td><td style="' . $dd . '">' . esc_html($title) . '</td></tr>'
         . '<tr><td style="' . $dt . '">' . esc_html__('Code', 'wp-certificates') . '</td><td style="' . $dd . '">' . esc_html($code) . '</td></tr>'
@@ -979,6 +990,9 @@ function squuad_cert_signature_certificate_html(object $request, bool $page_brea
         $i++;
         $time = squuad_cert_signature_local_time((string) $row->signed_at_utc, true);
         $id_document = (string) ($row->signer_id_document ?? '');
+        if (null !== $mask_except_user && '' !== $id_document && (int) $row->user_id !== $mask_except_user && function_exists('squuad_cert_id_document_mask')) {
+            $id_document = squuad_cert_id_document_mask($id_document);
+        }
         $html .= '<tr><td style="' . $cell . '">' . $i . '</td>'
             . '<td style="' . $cell . '"><div style="height:40px;display:flex;align-items:flex-end;margin-bottom:4px">' . squuad_cert_signature_svg((string) $row->signature, (string) $signer['name'], 180, 44) . '</div>'
             . '<strong>' . esc_html((string) $signer['name']) . '</strong><br>' . esc_html(squuad_cert_signature_signer_label($signer, $request)) . '</td>'

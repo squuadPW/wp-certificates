@@ -236,4 +236,10 @@ function squuad_cert_signer_inbox_page(): void
     // «Declinar» siguen accesibles)
 
     include SQUUAD_CERT_MODULE_PATH . 'admin/templates/signer-inbox.php';
+    // Documentos ya completados en los que firmó, con su certificado de firmas (ADR 0014)
+    if (function_exists('squuad_cert_signature_certificates_list')) {
+        echo '<div class="wrap">';
+        squuad_cert_signature_certificates_list(get_current_user_id(), true);
+        echo '</div>';
+    }
 }
