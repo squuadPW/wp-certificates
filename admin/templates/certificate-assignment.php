@@ -33,15 +33,16 @@
                     <div class="inside">
 
                         <form method="POST" action="<?= esc_url(admin_url('admin.php?page=admin_certificate_assignment_content&action=generate_certificates')); ?>">
+                            <?php wp_nonce_field('wpc_issue_certificates'); ?>
 
                             <div class="space-offer" >
                                 <label for="certificate_id" >
-                                    <b><?= __('Select Certificate','wp-certificates') ?></b>
+                                    <b><?= esc_html__('Select Certificate','wp-certificates') ?></b>
                                     <br>
                                     <select name="certificate_id" required >
-                                        <option value=""><?= __('Select a document', 'wp-certificates'); ?></option>
+                                        <option value=""><?= esc_html__('Select a document', 'wp-certificates'); ?></option>
                                         <?php foreach ( $documents_certificates as $document_certificates ): ?>
-                                            <option value="<?= $document_certificates->id ?>"> <?= $document_certificates->title ?> </option>
+                                            <option value="<?= (int) $document_certificates->id ?>"><?= esc_html((string) $document_certificates->title) ?></option>
                                         <?php endforeach; ?>
                                     </select>
                                 </label>
@@ -49,13 +50,12 @@
 
                             <div class="space-offer" >
                                 <label for="student_ids" >
-                                    <b><?= __('Select Students','wp-certificates') ?></b>
+                                    <b><?= esc_html__('Select Students','wp-certificates') ?></b>
                                     <br>
                                     <select name="student_ids[]" class="WPCselect2" multiple="multiple" required >
                                         <?php foreach ( $students as $student) : ?>
-                                            <option value="<?= $student->id ?>">
-                                                <?= "($student->id) $student->name $student->middle_name $student->last_name $student->middle_last_name" ?>
-                                            </option>
+                                            <?php // Nombres escapados: vienen del registro público y podían llevar HTML o JavaScript (XSS) ?>
+                                            <option value="<?= (int) $student->id ?>"><?= esc_html(trim(preg_replace('/\s+/', ' ', "($student->id) $student->name $student->middle_name $student->last_name $student->middle_last_name"))) ?></option>
                                         <?php endforeach; ?>
                                     </select>
 
@@ -63,7 +63,7 @@
                             </div>
 
                             <div style="display:flex;width:100%;justify-content:end;">
-                                <button class="button button-primary" type="submit"><?= __('Save Changes','wp-certificates'); ?></button>
+                                <button class="button button-primary" type="submit"><?= esc_html__('Save Changes','wp-certificates'); ?></button>
                             </div>
 
                         </form>

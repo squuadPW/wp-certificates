@@ -196,7 +196,7 @@ add_action('document_view', function ($document) {
                     <option value='' <?php selected( $document_template,'' ) ?> ><?= __('Select option','wp-certificates');?></option>
                     
                     <?php foreach( $documents_certificates as $document_certificate ): ?>
-                        <option value='<?= $document_certificate->id ?>' <?php selected( $document_template, $document_certificate->id ) ?> ><?= $document_certificate->title ?></option>
+                        <option value='<?= (int) $document_certificate->id ?>' <?php selected( $document_template, $document_certificate->id ) ?> ><?= esc_html((string) $document_certificate->title) ?></option>
                     <?php endforeach; ?>
                 </select>
             </label>

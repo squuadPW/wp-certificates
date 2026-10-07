@@ -81,7 +81,7 @@
                                 <html>
                                     <head>
                                         <meta charset="utf-8">
-                                        <title><?= $cert->name_document ?></title>
+                                        <title><?= esc_html((string) $cert->name_document) ?></title>
                                         
                                         
 

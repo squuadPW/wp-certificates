@@ -757,7 +757,8 @@ function get_documents_certificates(string $type = null): array
         $where_formats[] = '%s'; // %s para string
     }
 
-    $query = $wpdb->prepare($sql, ...$where_args);
+    // prepare() solo con marcadores (sin filtro no hay ninguno y WordPress avisaba de un uso incorrecto)
+    $query = $where_args ? $wpdb->prepare($sql, ...$where_args) : $sql;
     $documents = $wpdb->get_results($query);
     return $documents ?: [];
 }

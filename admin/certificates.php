@@ -35,9 +35,19 @@ function admin_certificate_assignment_content () {
     }
 
     if( isset($_GET['action']) && $_GET['action'] == 'generate_certificates' ) {
-        
-        $student_ids = isset($_POST['student_ids']) ? array_map('intval', $_POST['student_ids']) : [];
-        $certificate_id = isset($_POST['certificate_id']) ? intval($_POST['certificate_id']) : 0;
+
+        // Solo por POST, con el permiso de la pantalla y su nonce (antes se podía provocar desde otra web: CSRF)
+        if ( 'POST' !== ($_SERVER['REQUEST_METHOD'] ?? '') || !current_user_can('manager_certificate_assignment') ) {
+            wp_die(esc_html__('Sorry, you are not allowed to access this page.', 'wp-certificates'), 403);
+        }
+        check_admin_referer('wpc_issue_certificates');
+
+        $student_ids = isset($_POST['student_ids']) && is_array($_POST['student_ids']) ? array_values(array_unique(array_filter(array_map('absint', $_POST['student_ids'])))) : [];
+        $certificate_id = isset($_POST['certificate_id']) && is_scalar($_POST['certificate_id']) ? absint($_POST['certificate_id']) : 0;
+        // El documento tiene que ser uno de los que ofrece la pantalla (activos)
+        if ( $certificate_id && !in_array($certificate_id, array_map(static fn($document) => (int) $document->id, get_documents_certificates()), true) ) {
+            $certificate_id = 0;
+        }
         
         // Fecha de hoy con formato de base de datos usando la hora local de WP
         $emission_date = current_time('mysql'); 
@@ -53,7 +63,7 @@ function admin_certificate_assignment_content () {
 
         // Validación rápida de datos requeridos
         if ( empty($student_ids) || empty($certificate_id) ) {
-            $error_message = __('An error occurred while trying to issue the certificate', 'wp-certificates') . $student_failed;
+            $error_message = __('An error occurred while trying to issue the certificate', 'wp-certificates');
             setcookie('message-error', $error_message, time() + 10, '/');
             wp_redirect(admin_url('admin.php?page=admin_certificate_assignment_content'));
             exit;
@@ -77,13 +87,13 @@ function admin_certificate_assignment_content () {
 
         if( $failed ) {
 
-            $student_failed = '';
+            // Texto plano (el aviso se muestra escapado): «(id) nombre» separados por punto y coma
+            $student_failed = [];
             foreach( $failed as $student_id ) {
                 $student = WPC_get_student( $student_id );
-
-                $student_failed .= "<br>( $student_id ) {$student->name} {$student->middle_name} {$student->last_name} {$student->middle_last_name}";
+                $student_failed[] = trim("($student_id) " . ($student ? trim(preg_replace('/\s+/', ' ', "{$student->name} {$student->middle_name} {$student->last_name} {$student->middle_last_name}")) : ''));
             }
-            $error_message = __('There have been problems issuing certificates to the following students:', 'wp-certificates') . $student_failed;
+            $error_message = __('There have been problems issuing certificates to the following students:', 'wp-certificates') . ' ' . implode('; ', $student_failed);
             setcookie('message-error', $error_message, time() + 10, '/');
 
         } else {

@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-07T11:42:30+00:00\n"
+"POT-Creation-Date: 2026-10-07T12:12:19+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: wp-certificates\n"
@@ -46,6 +46,7 @@ msgstr ""
 #: admin/api-keys.php:81
 #: admin/assignment-users.php:45
 #: admin/assignment-users.php:105
+#: admin/certificates.php:41
 #: admin/id-document.php:38
 #: admin/pdf-engine-settings.php:42
 #: admin/pdf-engine-settings.php:111
@@ -146,27 +147,27 @@ msgstr ""
 msgid "Certification adjusted successfully."
 msgstr ""
 
-#: admin/certificates.php:49
+#: admin/certificates.php:59
 msgid "This document requires signatures: it cannot be issued here. Configure its signers and issue it for signature from the student file; each responsible person signs from their own account."
 msgstr ""
 
-#: admin/certificates.php:56
+#: admin/certificates.php:66
 msgid "An error occurred while trying to issue the certificate"
 msgstr ""
 
-#: admin/certificates.php:86
+#: admin/certificates.php:96
 msgid "There have been problems issuing certificates to the following students:"
 msgstr ""
 
-#: admin/certificates.php:90
+#: admin/certificates.php:100
 msgid "The certificates have been successfully issued"
 msgstr ""
 
-#: admin/certificates.php:131
+#: admin/certificates.php:141
 msgid "No expiry"
 msgstr ""
 
-#: admin/certificates.php:162
+#: admin/certificates.php:172
 #: admin/templates/certificate-assignment-users.php:41
 #: admin/templates/document-detail.php:10
 #: certification/admin/subject-panel.php:76
@@ -194,7 +195,7 @@ msgstr ""
 msgid "Document"
 msgstr ""
 
-#: admin/certificates.php:163
+#: admin/certificates.php:173
 #: admin/templates/document-detail.php:51
 #: admin/templates/eds-document-detail.php:39
 #: admin/templates/eds-document-detail.php:180
@@ -206,7 +207,7 @@ msgstr ""
 msgid "Code"
 msgstr ""
 
-#: admin/certificates.php:164
+#: admin/certificates.php:174
 #: certification/admin/templates/signer-inbox.php:137
 #: certification/admin/templates/signer-inbox.php:184
 #: certification/admin/templates/signer-inbox.php:210
@@ -217,11 +218,11 @@ msgstr ""
 msgid "Holder"
 msgstr ""
 
-#: admin/certificates.php:166
+#: admin/certificates.php:176
 msgid "Emission date"
 msgstr ""
 
-#: admin/certificates.php:167
+#: admin/certificates.php:177
 msgid "Expiration date"
 msgstr ""
 
@@ -448,13 +449,13 @@ msgstr ""
 msgid "Created at"
 msgstr ""
 
-#: admin/documents.php:777
+#: admin/documents.php:778
 #: admin/templates/document-detail.php:329
 #: admin/templates/eds-document-detail.php:493
 msgid "Label"
 msgstr ""
 
-#: admin/documents.php:779
+#: admin/documents.php:780
 #: admin/templates/api-keys.php:48
 #: admin/templates/document-detail.php:330
 #: admin/templates/eds-document-detail.php:494
@@ -465,26 +466,26 @@ msgstr ""
 msgid "Key"
 msgstr ""
 
-#: admin/documents.php:785
+#: admin/documents.php:786
 #: admin/templates/document-detail.php:268
 #: admin/templates/document-detail.php:331
 #: admin/templates/eds-document-detail.php:495
 msgid "Type"
 msgstr ""
 
-#: admin/documents.php:791
+#: admin/documents.php:792
 #: admin/templates/document-detail.php:332
 #: admin/templates/eds-document-detail.php:496
 msgid "Options (one per line)"
 msgstr ""
 
-#: admin/documents.php:792
+#: admin/documents.php:793
 #: admin/templates/document-detail.php:333
 #: admin/templates/eds-document-detail.php:497
 msgid "Required"
 msgstr ""
 
-#: admin/documents.php:793
+#: admin/documents.php:794
 msgid "Remove"
 msgstr ""
 
@@ -988,7 +989,7 @@ msgid "Clear"
 msgstr ""
 
 #: admin/templates/certificate-assignment-users.php:43
-#: admin/templates/certificate-assignment.php:42
+#: admin/templates/certificate-assignment.php:43
 msgid "Select a document"
 msgstr ""
 
@@ -1042,11 +1043,11 @@ msgstr ""
 msgid "Issue to the selected people"
 msgstr ""
 
-#: admin/templates/certificate-assignment.php:39
+#: admin/templates/certificate-assignment.php:40
 msgid "Select Certificate"
 msgstr ""
 
-#: admin/templates/certificate-assignment.php:52
+#: admin/templates/certificate-assignment.php:53
 msgid "Select Students"
 msgstr ""
 
