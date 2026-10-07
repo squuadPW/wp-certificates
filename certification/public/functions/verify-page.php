@@ -384,6 +384,13 @@ function squuad_cert_verify_page_render(?object $request, int $status): void
         code{font:13px/1.5 Menlo,Consolas,monospace;background:var(--mono);padding:6px 8px;border-radius:6px;display:block;overflow-wrap:anywhere}
         .note{color:var(--muted);font-size:13px}
         .gap{margin-top:16px}
+        .compare{margin-top:16px;border:2px dashed var(--line);border-radius:8px;padding:16px;text-align:center}
+        .compare.over{border-color:var(--ok);background:var(--ok-bg)}
+        .compare label{display:inline-block;cursor:pointer;font-weight:600;padding:8px 14px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--text)}
+        .compare label:focus-within{outline:2px solid var(--ok);outline-offset:2px}
+        .compare input{position:absolute;opacity:0;width:1px;height:1px}
+        .result{margin:12px 0 0;border-radius:8px;padding:10px 12px;text-align:left}
+        .result:empty{display:none}
         @media (max-width:480px){dl{grid-template-columns:1fr}dt{margin-top:6px}}
     </style>
 </head>
@@ -434,6 +441,12 @@ function squuad_cert_verify_page_render(?object $request, int $status): void
                     <?php if ('' !== $data['pdf_sha256']) : ?>
                         <code><?= esc_html($data['pdf_sha256']) ?></code>
                         <p class="note"><?= esc_html__('Only the PDF file delivered by the institution has this fingerprint. A scan, a printout or a copy saved again will have a different one.', 'wp-certificates') ?></p>
+                        <div class="compare" id="wpc-compare" data-sha256="<?= esc_attr($data['pdf_sha256']) ?>">
+                            <h2><?= esc_html__('Compare your PDF', 'wp-certificates') ?></h2>
+                            <p class="note"><?= esc_html__('Drop the PDF here or choose it. The check is done in your browser: the file is not sent anywhere.', 'wp-certificates') ?></p>
+                            <label><input type="file" id="wpc-compare-file" accept="application/pdf,.pdf"><?= esc_html__('Choose PDF', 'wp-certificates') ?></label>
+                            <div class="result" id="wpc-compare-result" role="status" aria-live="polite"></div>
+                        </div>
                     <?php else : ?>
                         <p class="note"><?= esc_html__('Not available for this document.', 'wp-certificates') ?></p>
                     <?php endif; ?>
@@ -443,6 +456,41 @@ function squuad_cert_verify_page_render(?object $request, int $status): void
     <?php endif; ?>
     <p class="note"><?= esc_html__('This page only shows the data needed to check the document. The personal data of the holder is not shown.', 'wp-certificates') ?></p>
 </main>
+<?php if ($data && '' !== $data['pdf_sha256']) : ?>
+<script nonce="<?= esc_attr($nonce) ?>">
+(function () {
+    // Comparar el PDF (ADR 0014, fase 2): la huella se calcula aquí; la CSP no deja enviar nada (sin connect-src)
+    var box = document.getElementById("wpc-compare"), input = document.getElementById("wpc-compare-file"), out = document.getElementById("wpc-compare-result");
+    var text = <?= wp_json_encode([
+        'insecure' => __('Your browser can only compare files on a secure (https) page. Open the verification link with https.', 'wp-certificates'),
+        'big' => __('The file is too large to be the signed PDF.', 'wp-certificates'),
+        'reading' => __('Checking…', 'wp-certificates'),
+        'same' => __('It matches: this file is exactly the signed PDF.', 'wp-certificates'),
+        'different' => __('It does not match. This file is not the signed PDF delivered by the institution. It may be a copy saved again, a scan or a different version; it does not necessarily mean it was forged. If in doubt, contact the institution.', 'wp-certificates'),
+        'error' => __('The file could not be read.', 'wp-certificates'),
+    ]) ?>;
+    var max = 15 * 1024 * 1024;
+    function show(kind, message) { out.className = "result " + kind; out.textContent = message; }
+    function check(file) {
+        if (!file) return;
+        if (!window.crypto || !window.crypto.subtle) { show("wait", text.insecure); return; }
+        if (file.size > max) { show("bad", text.big); return; }
+        show("wait", text.reading);
+        file.arrayBuffer().then(function (buffer) { return crypto.subtle.digest("SHA-256", buffer); }).then(function (digest) {
+            var hex = Array.prototype.map.call(new Uint8Array(digest), function (b) { return ("0" + b.toString(16)).slice(-2); }).join("");
+            show(hex === box.dataset.sha256 ? "ok" : "bad", hex === box.dataset.sha256 ? text.same : text.different);
+        }).catch(function () { show("bad", text.error); });
+    }
+    input.addEventListener("change", function () { check(input.files[0]); input.value = ""; });
+    ["dragenter", "dragover"].forEach(function (type) { box.addEventListener(type, function (e) { e.preventDefault(); box.classList.add("over"); }); });
+    ["dragleave", "drop"].forEach(function (type) { box.addEventListener(type, function (e) { e.preventDefault(); box.classList.remove("over"); }); });
+    box.addEventListener("drop", function (e) { check(e.dataTransfer.files[0]); });
+    // Soltar el archivo fuera de la caja no debe abrirlo en la pestaña (se perdería la página)
+    window.addEventListener("dragover", function (e) { e.preventDefault(); });
+    window.addEventListener("drop", function (e) { e.preventDefault(); });
+})();
+</script>
+<?php endif; ?>
 </body>
 </html><?php
     exit;

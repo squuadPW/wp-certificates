@@ -6182,3 +6182,49 @@ msgid ""
 "until it is completed."
 msgstr "Ya firmaron todos. Se está preparando el documento final; no es válido hasta que se complete."
 
+
+# --- Cadenas nuevas (2026-10-06): traducirlas ---
+#: certification/public/functions/verify-page.php:445
+msgid "Compare your PDF"
+msgstr "Compare su PDF"
+
+#: certification/public/functions/verify-page.php:446
+msgid ""
+"Drop the PDF here or choose it. The check is done in your browser: the file "
+"is not sent anywhere."
+msgstr "Suelte aquí el PDF o elíjalo. La comprobación se hace en su navegador: el archivo no se envía a ningún sitio."
+
+#: certification/public/functions/verify-page.php:447
+msgid "Choose PDF"
+msgstr "Elegir PDF"
+
+#: certification/public/functions/verify-page.php:465
+msgid ""
+"Your browser can only compare files on a secure (https) page. Open the "
+"verification link with https."
+msgstr "Su navegador solo puede comparar archivos en una página segura (https). Abra el enlace de verificación con https."
+
+#: certification/public/functions/verify-page.php:466
+msgid "The file is too large to be the signed PDF."
+msgstr "El archivo es demasiado grande para ser el PDF firmado."
+
+#: certification/public/functions/verify-page.php:467
+msgid "Checking…"
+msgstr "Comprobando…"
+
+#: certification/public/functions/verify-page.php:468
+msgid "It matches: this file is exactly the signed PDF."
+msgstr "Coincide: este archivo es exactamente el PDF firmado."
+
+#: certification/public/functions/verify-page.php:469
+msgid ""
+"It does not match. This file is not the signed PDF delivered by the "
+"institution. It may be a copy saved again, a scan or a different version; it "
+"does not necessarily mean it was forged. If in doubt, contact the "
+"institution."
+msgstr "No coincide. Este archivo no es el PDF firmado que entregó la institución. Puede ser una copia vuelta a guardar, un escaneo u otra versión; no significa necesariamente que esté falsificado. Si tiene dudas, consulte con la institución."
+
+#: certification/public/functions/verify-page.php:470
+msgid "The file could not be read."
+msgstr "No se pudo leer el archivo."
+

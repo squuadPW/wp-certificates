@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-07T03:25:03+00:00\n"
+"POT-Creation-Date: 2026-10-07T03:33:54+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: wp-certificates\n"
@@ -177,7 +177,7 @@ msgstr ""
 #: certification/admin/templates/signer-inbox.php:248
 #: certification/includes/signature-format.php:938
 #: certification/public/functions/verify-page.php:228
-#: certification/public/functions/verify-page.php:407
+#: certification/public/functions/verify-page.php:414
 #: certification/public/templates/create-document-automatic.php:102
 #: certification/public/templates/document-read-only.php:37
 #: certification/public/templates/documents-to-sign-batch.php:21
@@ -195,7 +195,7 @@ msgstr ""
 #: admin/templates/eds-document-detail.php:180
 #: admin/templates/eds-document-detail.php:244
 #: certification/includes/signature-format.php:939
-#: certification/public/functions/verify-page.php:408
+#: certification/public/functions/verify-page.php:415
 msgid "Code"
 msgstr ""
 
@@ -2523,7 +2523,7 @@ msgstr ""
 
 #: certification/admin/templates/document-issued.php:14
 #: certification/includes/signature-format.php:948
-#: certification/public/functions/verify-page.php:410
+#: certification/public/functions/verify-page.php:417
 msgid "Completed"
 msgstr ""
 
@@ -3656,12 +3656,12 @@ msgid "In progress: %1$d of %2$d signatures"
 msgstr ""
 
 #: certification/includes/signature-format.php:947
-#: certification/public/functions/verify-page.php:409
+#: certification/public/functions/verify-page.php:416
 msgid "Sent for signature"
 msgstr ""
 
 #: certification/includes/signature-format.php:951
-#: certification/public/functions/verify-page.php:415
+#: certification/public/functions/verify-page.php:422
 msgid "Signers, in the order in which they signed"
 msgstr ""
 
@@ -3678,7 +3678,7 @@ msgid "Not applicable"
 msgstr ""
 
 #: certification/includes/signature-format.php:975
-#: certification/public/functions/verify-page.php:426
+#: certification/public/functions/verify-page.php:433
 msgid "Content fingerprint (SHA-256)"
 msgstr ""
 
@@ -4399,7 +4399,7 @@ msgid "This document was replaced by a later issue. It is not valid."
 msgstr ""
 
 #: certification/public/functions/verify-page.php:357
-#: certification/public/functions/verify-page.php:396
+#: certification/public/functions/verify-page.php:403
 msgid "Could not be verified"
 msgstr ""
 
@@ -4413,45 +4413,81 @@ msgstr ""
 msgid "Document verification — %s"
 msgstr ""
 
-#: certification/public/functions/verify-page.php:395
-#: certification/public/functions/verify-page.php:404
+#: certification/public/functions/verify-page.php:402
+#: certification/public/functions/verify-page.php:411
 msgid "Document verification"
 msgstr ""
 
-#: certification/public/functions/verify-page.php:396
+#: certification/public/functions/verify-page.php:403
 msgid "Too many attempts"
 msgstr ""
 
-#: certification/public/functions/verify-page.php:398
+#: certification/public/functions/verify-page.php:405
 #: public/endpoint.php:114
 msgid "Too many attempts. Please try again later."
 msgstr ""
 
-#: certification/public/functions/verify-page.php:399
+#: certification/public/functions/verify-page.php:406
 msgid "The verification link is not valid. Scan the QR code of the document again or contact the institution."
 msgstr ""
 
 #. translators: %s: date and time
-#: certification/public/functions/verify-page.php:419
+#: certification/public/functions/verify-page.php:426
 #, php-format
 msgid "Signed on %s"
 msgstr ""
 
-#: certification/public/functions/verify-page.php:430
-#: certification/public/functions/verify-page.php:438
+#: certification/public/functions/verify-page.php:437
+#: certification/public/functions/verify-page.php:451
 msgid "Not available for this document."
 msgstr ""
 
-#: certification/public/functions/verify-page.php:433
+#: certification/public/functions/verify-page.php:440
 msgid "Fingerprint of the signed PDF (SHA-256)"
 msgstr ""
 
-#: certification/public/functions/verify-page.php:436
+#: certification/public/functions/verify-page.php:443
 msgid "Only the PDF file delivered by the institution has this fingerprint. A scan, a printout or a copy saved again will have a different one."
 msgstr ""
 
-#: certification/public/functions/verify-page.php:444
+#: certification/public/functions/verify-page.php:445
+msgid "Compare your PDF"
+msgstr ""
+
+#: certification/public/functions/verify-page.php:446
+msgid "Drop the PDF here or choose it. The check is done in your browser: the file is not sent anywhere."
+msgstr ""
+
+#: certification/public/functions/verify-page.php:447
+msgid "Choose PDF"
+msgstr ""
+
+#: certification/public/functions/verify-page.php:457
 msgid "This page only shows the data needed to check the document. The personal data of the holder is not shown."
+msgstr ""
+
+#: certification/public/functions/verify-page.php:465
+msgid "Your browser can only compare files on a secure (https) page. Open the verification link with https."
+msgstr ""
+
+#: certification/public/functions/verify-page.php:466
+msgid "The file is too large to be the signed PDF."
+msgstr ""
+
+#: certification/public/functions/verify-page.php:467
+msgid "Checking…"
+msgstr ""
+
+#: certification/public/functions/verify-page.php:468
+msgid "It matches: this file is exactly the signed PDF."
+msgstr ""
+
+#: certification/public/functions/verify-page.php:469
+msgid "It does not match. This file is not the signed PDF delivered by the institution. It may be a copy saved again, a scan or a different version; it does not necessarily mean it was forged. If in doubt, contact the institution."
+msgstr ""
+
+#: certification/public/functions/verify-page.php:470
+msgid "The file could not be read."
 msgstr ""
 
 #. translators: %s: code of the document
