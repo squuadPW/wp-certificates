@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-07T00:52:40+00:00\n"
+"POT-Creation-Date: 2026-10-07T03:25:03+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: wp-certificates\n"
@@ -176,6 +176,8 @@ msgstr ""
 #: certification/admin/templates/signer-inbox.php:209
 #: certification/admin/templates/signer-inbox.php:248
 #: certification/includes/signature-format.php:938
+#: certification/public/functions/verify-page.php:228
+#: certification/public/functions/verify-page.php:407
 #: certification/public/templates/create-document-automatic.php:102
 #: certification/public/templates/document-read-only.php:37
 #: certification/public/templates/documents-to-sign-batch.php:21
@@ -193,6 +195,7 @@ msgstr ""
 #: admin/templates/eds-document-detail.php:180
 #: admin/templates/eds-document-detail.php:244
 #: certification/includes/signature-format.php:939
+#: certification/public/functions/verify-page.php:408
 msgid "Code"
 msgstr ""
 
@@ -2520,10 +2523,12 @@ msgstr ""
 
 #: certification/admin/templates/document-issued.php:14
 #: certification/includes/signature-format.php:948
+#: certification/public/functions/verify-page.php:410
 msgid "Completed"
 msgstr ""
 
 #: certification/admin/templates/document-issued.php:15
+#: certification/public/functions/verify-page.php:353
 msgid "Declined"
 msgstr ""
 
@@ -2738,6 +2743,7 @@ msgstr ""
 #: certification/admin/templates/document-signing.php:86
 #: certification/includes/signature-format.php:954
 #: certification/includes/signers.php:251
+#: certification/public/functions/verify-page.php:250
 msgid "Signer"
 msgstr ""
 
@@ -3650,10 +3656,12 @@ msgid "In progress: %1$d of %2$d signatures"
 msgstr ""
 
 #: certification/includes/signature-format.php:947
+#: certification/public/functions/verify-page.php:409
 msgid "Sent for signature"
 msgstr ""
 
 #: certification/includes/signature-format.php:951
+#: certification/public/functions/verify-page.php:415
 msgid "Signers, in the order in which they signed"
 msgstr ""
 
@@ -3670,6 +3678,7 @@ msgid "Not applicable"
 msgstr ""
 
 #: certification/includes/signature-format.php:975
+#: certification/public/functions/verify-page.php:426
 msgid "Content fingerprint (SHA-256)"
 msgstr ""
 
@@ -4331,6 +4340,118 @@ msgstr ""
 
 #: certification/public/functions/signer-registration.php:97
 msgid "Create password and continue"
+msgstr ""
+
+#: certification/public/functions/verify-page.php:247
+msgid "Institution signer"
+msgstr ""
+
+#: certification/public/functions/verify-page.php:350
+msgid "Valid document"
+msgstr ""
+
+#: certification/public/functions/verify-page.php:350
+msgid "The signatures and the content are intact and match what was sealed when it was signed."
+msgstr ""
+
+#: certification/public/functions/verify-page.php:351
+msgid "Final document in preparation"
+msgstr ""
+
+#: certification/public/functions/verify-page.php:351
+msgid "Everyone has signed. The final document is being prepared; it is not valid until it is completed."
+msgstr ""
+
+#: certification/public/functions/verify-page.php:352
+msgid "Signature in progress"
+msgstr ""
+
+#: certification/public/functions/verify-page.php:352
+msgid "This document has not been signed by everyone yet. It is not valid until it is completed."
+msgstr ""
+
+#: certification/public/functions/verify-page.php:353
+msgid "This document was declined and is not valid."
+msgstr ""
+
+#: certification/public/functions/verify-page.php:354
+msgid "Closed"
+msgstr ""
+
+#: certification/public/functions/verify-page.php:354
+msgid "This signature request was closed by the institution with a document delivered by other means. Contact the institution."
+msgstr ""
+
+#: certification/public/functions/verify-page.php:355
+msgid "Voided"
+msgstr ""
+
+#: certification/public/functions/verify-page.php:355
+msgid "One or more signatures of this document were voided. It is not valid."
+msgstr ""
+
+#: certification/public/functions/verify-page.php:356
+msgid "Replaced"
+msgstr ""
+
+#: certification/public/functions/verify-page.php:356
+msgid "This document was replaced by a later issue. It is not valid."
+msgstr ""
+
+#: certification/public/functions/verify-page.php:357
+#: certification/public/functions/verify-page.php:396
+msgid "Could not be verified"
+msgstr ""
+
+#: certification/public/functions/verify-page.php:357
+msgid "This document could not be verified. Contact the institution."
+msgstr ""
+
+#. translators: %s: site name
+#: certification/public/functions/verify-page.php:366
+#, php-format
+msgid "Document verification — %s"
+msgstr ""
+
+#: certification/public/functions/verify-page.php:395
+#: certification/public/functions/verify-page.php:404
+msgid "Document verification"
+msgstr ""
+
+#: certification/public/functions/verify-page.php:396
+msgid "Too many attempts"
+msgstr ""
+
+#: certification/public/functions/verify-page.php:398
+#: public/endpoint.php:114
+msgid "Too many attempts. Please try again later."
+msgstr ""
+
+#: certification/public/functions/verify-page.php:399
+msgid "The verification link is not valid. Scan the QR code of the document again or contact the institution."
+msgstr ""
+
+#. translators: %s: date and time
+#: certification/public/functions/verify-page.php:419
+#, php-format
+msgid "Signed on %s"
+msgstr ""
+
+#: certification/public/functions/verify-page.php:430
+#: certification/public/functions/verify-page.php:438
+msgid "Not available for this document."
+msgstr ""
+
+#: certification/public/functions/verify-page.php:433
+msgid "Fingerprint of the signed PDF (SHA-256)"
+msgstr ""
+
+#: certification/public/functions/verify-page.php:436
+msgid "Only the PDF file delivered by the institution has this fingerprint. A scan, a printout or a copy saved again will have a different one."
+msgstr ""
+
+#: certification/public/functions/verify-page.php:444
+msgid "This page only shows the data needed to check the document. The personal data of the holder is not shown."
 msgstr ""
 
 #. translators: %s: code of the document
@@ -5103,20 +5224,16 @@ msgstr ""
 msgid "Email of the person"
 msgstr ""
 
-#: public/endpoint.php:105
-msgid "Too many attempts. Please try again later."
-msgstr ""
-
-#: public/endpoint.php:114
+#: public/endpoint.php:123
 msgid "The certificate_id parameter is missing."
 msgstr ""
 
-#: public/endpoint.php:117
 #: public/endpoint.php:126
+#: public/endpoint.php:135
 msgid "Certificate not found"
 msgstr ""
 
-#: public/endpoint.php:131
+#: public/endpoint.php:140
 msgid "Certificate found"
 msgstr ""
 

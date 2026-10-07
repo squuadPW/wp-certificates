@@ -39,6 +39,15 @@ function squuad_cert_new_certificate_code(): string
 function squuad_cert_api_failures_key(): string
 {
     $ip = (string) apply_filters('squuad_cert_api_client_ip', (string) ($_SERVER['REMOTE_ADDR'] ?? ''));
+    // IPv6: se cuenta por prefijo /64 (cada conexión doméstica tiene uno entero y podía rotar dentro para saltarse el
+    // límite). Lo comparten esta API y la página de verificación de firmas (ADR 0014 de Edusof)
+    $packed = false !== strpos($ip, ':') ? @inet_pton($ip) : false; // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+    if (false !== $packed && 16 === strlen($packed)) {
+        // IPv4 escrita como IPv6 (::ffff:a.b.c.d): se cuenta como su IPv4, no todas juntas en el mismo /64
+        $ip = str_repeat("\0", 10) . "\xff\xff" === substr($packed, 0, 12)
+            ? (string) inet_ntop(substr($packed, 12))
+            : bin2hex(substr($packed, 0, 8)) . '::/64';
+    }
 
     return 'squuad_cert_api_fail_' . md5($ip);
 }

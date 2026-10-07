@@ -43,6 +43,7 @@ require_once SQUUAD_CERT_MODULE_PATH . 'admin/signing-settings.php'; // Configur
 // Público (antes public/functions.php de EduSystem)
 require_once SQUUAD_CERT_MODULE_PATH . 'public/functions/documents-signature.php';
 require_once SQUUAD_CERT_MODULE_PATH . 'public/functions/signer-registration.php';
+require_once SQUUAD_CERT_MODULE_PATH . 'public/functions/verify-page.php'; // página pública de verificación (ADR 0014 de Edusof)
 require_once SQUUAD_CERT_MODULE_PATH . 'public/functions/signature-batch.php';
 require_once SQUUAD_CERT_MODULE_PATH . 'public/functions/checkout/cart-signatures.php';
 require_once SQUUAD_CERT_MODULE_PATH . 'public/functions/account/dashboard-signatures.php';

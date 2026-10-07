@@ -6058,3 +6058,127 @@ msgid ""
 "font file to this site and declare it with @font-face pointing to that file:"
 msgstr "Este documento carga fuentes web desde internet, que no están permitidas (el servidor de PDF no tiene acceso a internet y el PDF usaría Arial). Suba el archivo de la fuente a este sitio y declárela con @font-face apuntando a ese archivo:"
 
+
+# --- Cadenas nuevas (2026-10-06): traducirlas ---
+#: certification/public/functions/verify-page.php:199
+msgid "Institution signer"
+msgstr "Firmante de la institución"
+
+#: certification/public/functions/verify-page.php:283
+msgid "Valid document"
+msgstr "Documento válido"
+
+#: certification/public/functions/verify-page.php:283
+msgid ""
+"The signatures and the content are intact and match what was sealed when it "
+"was signed."
+msgstr "Las firmas y el contenido están íntegros y coinciden con lo que se selló al firmarlo."
+
+#: certification/public/functions/verify-page.php:284
+msgid "Signature in progress"
+msgstr "Firma en curso"
+
+#: certification/public/functions/verify-page.php:284
+msgid ""
+"This document has not been signed by everyone yet. It is not valid until it "
+"is completed."
+msgstr "Este documento aún no lo han firmado todos. No es válido hasta que se complete."
+
+#: certification/public/functions/verify-page.php:285
+msgid "This document was declined and is not valid."
+msgstr "Este documento fue rechazado y no es válido."
+
+#: certification/public/functions/verify-page.php:286
+msgid "Closed"
+msgstr "Cerrado"
+
+#: certification/public/functions/verify-page.php:286
+msgid ""
+"This signature request was closed by the institution with a document "
+"delivered by other means. Contact the institution."
+msgstr "La institución cerró esta solicitud de firma con un documento entregado por otra vía. Consulte con la institución."
+
+#: certification/public/functions/verify-page.php:287
+msgid "Voided"
+msgstr "Anulado"
+
+#: certification/public/functions/verify-page.php:287
+msgid "One or more signatures of this document were voided. It is not valid."
+msgstr "Una o más firmas de este documento fueron anuladas. No es válido."
+
+#: certification/public/functions/verify-page.php:288
+msgid "Replaced"
+msgstr "Reemplazado"
+
+#: certification/public/functions/verify-page.php:288
+msgid "This document was replaced by a later issue. It is not valid."
+msgstr "Este documento fue reemplazado por una emisión posterior. No es válido."
+
+#: certification/public/functions/verify-page.php:289
+#: certification/public/functions/verify-page.php:328
+msgid "Could not be verified"
+msgstr "No se pudo verificar"
+
+#: certification/public/functions/verify-page.php:289
+msgid "This document could not be verified. Contact the institution."
+msgstr "No se pudo verificar este documento. Consulte con la institución."
+
+#. translators: %s: site name
+#: certification/public/functions/verify-page.php:298
+#, php-format
+msgid "Document verification — %s"
+msgstr "Verificación de documentos — %s"
+
+#: certification/public/functions/verify-page.php:327
+#: certification/public/functions/verify-page.php:336
+msgid "Document verification"
+msgstr "Verificación de documentos"
+
+#: certification/public/functions/verify-page.php:328
+msgid "Too many attempts"
+msgstr "Demasiados intentos"
+
+#: certification/public/functions/verify-page.php:331
+msgid ""
+"The verification link is not valid. Scan the QR code of the document again "
+"or contact the institution."
+msgstr "El enlace de verificación no es válido. Vuelva a escanear el código QR del documento o consulte con la institución."
+
+#. translators: %s: date and time
+#: certification/public/functions/verify-page.php:351
+#, php-format
+msgid "Signed on %s"
+msgstr "Firmó el %s"
+
+#: certification/public/functions/verify-page.php:361
+msgid "Fingerprint of the signed PDF (SHA-256)"
+msgstr "Huella del PDF firmado (SHA-256)"
+
+#: certification/public/functions/verify-page.php:364
+msgid ""
+"Only the PDF file delivered by the institution has this fingerprint. A scan, "
+"a printout or a copy saved again will have a different one."
+msgstr "Solo el archivo PDF entregado por la institución tiene esta huella. Un escaneo, una impresión o una copia vuelta a guardar tendrán otra."
+
+#: certification/public/functions/verify-page.php:366
+msgid "Not available for this document."
+msgstr "No disponible para este documento."
+
+#: certification/public/functions/verify-page.php:372
+msgid ""
+"This page only shows the data needed to check the document. The personal "
+"data of the holder is not shown."
+msgstr "Esta página solo muestra los datos necesarios para comprobar el documento. No se muestran los datos personales del titular."
+
+
+# --- Cadenas nuevas (2026-10-06): traducirlas ---
+#: certification/public/functions/verify-page.php:351
+msgid "Final document in preparation"
+msgstr "Documento final en preparación"
+
+#: certification/public/functions/verify-page.php:351
+msgid ""
+"Everyone has signed. The final document is being prepared; it is not valid "
+"until it is completed."
+msgstr "Ya firmaron todos. Se está preparando el documento final; no es válido hasta que se complete."
+

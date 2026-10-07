@@ -836,8 +836,9 @@ function squuad_cert_signature_request_code(object $request): string
 }
 
 /**
- * Dirección de verificación del QR. La página pública de verificación aún no existe (pendiente con arquitecto-seguridad,
- * ADR 0011): la dirección queda fijada para que los PDF de hoy sirvan cuando exista. Filtro para cambiarla.
+ * Dirección de verificación del QR: la atiende la página pública de verificación
+ * (certification/public/functions/verify-page.php, ADR 0014 de Edusof). Filtro para cambiarla; la página acepta esta
+ * dirección siempre, porque los PDF ya entregados la llevan.
  */
 function squuad_cert_signature_verify_url(object $request): string
 {
@@ -851,9 +852,8 @@ function squuad_cert_signature_verify_url(object $request): string
 
 /**
  * Parte no adivinable de la dirección de verificación: 16 hex del HMAC (clave de firma vigente) sobre
- * «id de la solicitud|huella del contenido». El código WPC-AAAA-NNNNNN se puede adivinar; el token no. La futura página
- * exigirá código + token (comprobando con todas las claves del sitio, por si se rotó) y, sin sesión, solo mostrará
- * estado, fechas y huella (ADR 0011).
+ * «id de la solicitud|huella del contenido». El código WPC-AAAA-NNNNNN se puede adivinar; el token no. La página de
+ * verificación exige código + token y lo comprueba con todas las claves del sitio, por si se rotó (ADR 0014).
  */
 function squuad_cert_signature_verify_token(object $request): string
 {
