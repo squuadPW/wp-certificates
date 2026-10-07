@@ -1945,7 +1945,13 @@ function squuad_cert_signature_issue_document(int $student_id, int $document_cer
 
     squuad_cert_signer_notify_open_slots((int) $request->id);
 
-    return ['ok' => true, 'message' => __('Document issued for signature. Each signer will find it in "Documents to sign".', 'wp-certificates'), 'request_id' => (int) $request->id];
+    $message = __('Document issued for signature. Each signer will find it in "Documents to sign".', 'wp-certificates');
+    // Sin hoja del certificado de firmas ni QR: el impreso no se podría verificar (ADR 0014)
+    if (function_exists('squuad_cert_signature_sheet_without_qr') && squuad_cert_signature_sheet_without_qr($document)) {
+        $message .= ' ' . squuad_cert_signature_sheet_without_qr_message();
+    }
+
+    return ['ok' => true, 'message' => $message, 'request_id' => (int) $request->id];
 }
 
 /** Documentos emitidos para firma de un estudiante (todas las rondas), con título y firmas dadas / exigidas. */

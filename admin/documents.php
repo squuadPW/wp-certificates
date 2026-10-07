@@ -432,6 +432,10 @@ function add_admin_form_documents_content()
                     squuad_cert_log(sprintf('Motor de PDF del documento %d: %s → %s, por el usuario %d', $document_id, $previous_engine, $document_data['pdf_engine'], get_current_user_id()), 'pdf_engine');
                 }
             }
+            // Certificado de firmas en el PDF y nombre en la verificación (ADR 0014 de Edusof)
+            if (function_exists('squuad_cert_signature_sheet_document_data')) {
+                $document_data = squuad_cert_signature_sheet_document_data($document_data, (int) $document_id);
+            }
 
             // Campos adicionales: se piden antes de generar el documento y sus respuestas no se guardan
             // (ver edusystem/includes/document-fields.php). Las filas inválidas se descartan con un aviso.

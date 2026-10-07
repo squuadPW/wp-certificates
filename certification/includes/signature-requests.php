@@ -343,16 +343,23 @@ function squuad_cert_signature_request_freeze_unlocked(int $request_id, string $
         return false;
     }
 
+    // Hoja del certificado de firmas y «Nombre en la verificación» (ADR 0014): se fijan en el mismo UPDATE que congela y
+    // se sellan en el evento; ya no cambian para esta solicitud aunque cambie el documento
+    $fixed = function_exists('squuad_cert_signature_sheet_freeze_values') ? squuad_cert_signature_sheet_freeze_values($request) : [];
+    $set = '';
+    $args = [$user_id];
+    foreach ($fixed as $column => $value) {
+        $set .= ", {$column} = %s";
+        $args[] = $value;
+    }
     $updated = $wpdb->query($wpdb->prepare(
         "UPDATE {$wpdb->prefix}squuad_cert_requests
-         SET frozen_at_utc = UTC_TIMESTAMP(), frozen_by = %d
+         SET frozen_at_utc = UTC_TIMESTAMP(), frozen_by = %d{$set}
          WHERE id = %d AND frozen_at_utc IS NULL AND content_sha256 = %s",
-        $user_id,
-        $request_id,
-        $shown_sha256
+        array_merge($args, [$request_id, $shown_sha256])
     ));
     if ($updated) {
-        squuad_cert_signature_request_log_event($request_id, 'frozen', ['content_sha256' => $shown_sha256], $user_id);
+        squuad_cert_signature_request_log_event($request_id, 'frozen', ['content_sha256' => $shown_sha256] + $fixed, $user_id);
         return true;
     }
 

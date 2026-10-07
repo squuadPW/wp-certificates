@@ -6228,3 +6228,125 @@ msgstr "No coincide. Este archivo no es el PDF firmado que entregó la instituci
 msgid "The file could not be read."
 msgstr "No se pudo leer el archivo."
 
+
+# --- Cadenas nuevas (2026-10-06): traducirlas ---
+#: certification/admin/document-signing.php:307
+msgid ""
+"Public verification withdrawn. The QR code of this document now shows that "
+"it could not be verified."
+msgstr "Verificación pública retirada. El código QR de este documento ahora indica que no se pudo verificar."
+
+#: certification/admin/document-signing.php:307
+msgid "Public verification restored."
+msgstr "Verificación pública restablecida."
+
+#: certification/admin/document-signing.php:308
+msgid "The change could not be saved. Please try again."
+msgstr "No se pudo guardar el cambio. Inténtelo de nuevo."
+
+#: certification/admin/signing-settings.php:102
+msgid "Attach the certificate of signatures to the PDF"
+msgstr "Adjuntar el certificado de firmas al PDF"
+
+#: certification/admin/signing-settings.php:103
+msgid ""
+"Extra A4 page at the end of each signed PDF with who signed, when and how. "
+"If you turn it off, the document is checked with its QR code on the "
+"verification page and the certificate can be downloaded separately; make "
+"sure the templates use {{qrcode}}. Each document can follow this value or "
+"change it. Documents already signed do not change."
+msgstr "Página A4 adicional al final de cada PDF firmado con quién firmó, cuándo y cómo. Si la desactiva, el documento se comprueba con su código QR en la página de verificación y el certificado se puede descargar aparte; compruebe que las plantillas usan {{qrcode}}. Cada documento puede seguir este valor o cambiarlo. Los documentos ya firmados no cambian."
+
+#: certification/admin/templates/document-issued.php:59
+msgid ""
+"Public verification withdrawn: the QR code shows that it could not be "
+"verified."
+msgstr "Verificación pública retirada: el código QR indica que no se pudo verificar."
+
+#: certification/admin/templates/document-issued.php:61
+msgid "Restore verification"
+msgstr "Restablecer la verificación"
+
+#: certification/admin/templates/document-issued.php:61
+msgid "Withdraw verification"
+msgstr "Retirar la verificación"
+
+#: certification/includes/signature-sheet.php:115
+msgid ""
+"This document is set without the certificate of signatures and its template "
+"has no {{qrcode}}: a printed copy could not be verified. Add {{qrcode}} to "
+"the template or turn the certificate of signatures on."
+msgstr "Este documento está configurado sin el certificado de firmas y su plantilla no tiene {{qrcode}}: una copia impresa no se podría verificar. Añada {{qrcode}} a la plantilla o active el certificado de firmas."
+
+#: certification/includes/signature-sheet.php:168
+msgid "attached"
+msgstr "se adjunta"
+
+#: certification/includes/signature-sheet.php:168
+msgid "not attached"
+msgstr "no se adjunta"
+
+#: certification/includes/signature-sheet.php:175
+msgid "Certificate of signatures in the PDF"
+msgstr "Certificado de firmas en el PDF"
+
+#: certification/includes/signature-sheet.php:179
+msgid "Attach it"
+msgstr "Adjuntarlo"
+
+#: certification/includes/signature-sheet.php:180
+msgid "Do not attach it"
+msgstr "No adjuntarlo"
+
+#: certification/includes/signature-sheet.php:182
+msgid ""
+"Extra A4 page at the end of the signed PDF with who signed, when and how. "
+"Without it, the document is checked with its QR code on the verification "
+"page, and the certificate can be downloaded separately. Documents already "
+"signed do not change."
+msgstr "Página A4 adicional al final del PDF firmado con quién firmó, cuándo y cómo. Sin ella, el documento se comprueba con su código QR en la página de verificación y el certificado se puede descargar aparte. Los documentos ya firmados no cambian."
+
+#: certification/includes/signature-sheet.php:188
+msgid "Name on the verification page"
+msgstr "Nombre en la página de verificación"
+
+#: certification/includes/signature-sheet.php:190
+msgid ""
+"What anyone who scans the QR code sees instead of the title, for titles that "
+"reveal something about the person (for example \"Certificate of inclusion\" "
+"→ \"Certificate\"). Empty: the title of the document."
+msgstr "Lo que ve quien escanea el código QR en lugar del título, para títulos que revelan algo de la persona (por ejemplo «Constancia de inclusión» → «Constancia»). Vacío: el título del documento."
+
+
+# --- Cadenas nuevas (2026-10-07): traducirlas ---
+#: certification/admin/document-signing.php:311
+msgid "The change was not saved: write the reason and confirm it."
+msgstr "No se guardó el cambio: escriba el motivo y confírmelo."
+
+#: certification/admin/templates/document-issued.php:64
+msgid ""
+"Anyone who scans the QR code of this document will see that it could not be "
+"verified, as with a false document. Use it, for example, if a photo of the "
+"QR code was published. It is recorded in the evidence of the document."
+msgstr "Quien escanee el código QR de este documento verá que no se pudo verificar, como con un documento falso. Úselo, por ejemplo, si se publicó una foto del código QR. Queda registrado en la evidencia del documento."
+
+#: certification/admin/templates/document-issued.php:66
+msgid "Reason (required)"
+msgstr "Motivo (obligatorio)"
+
+#: certification/admin/templates/document-issued.php:67
+msgid "I confirm that the verification is shown again."
+msgstr "Confirmo que la verificación se vuelve a mostrar."
+
+#: certification/admin/templates/document-issued.php:67
+msgid "I confirm that the public verification of this document is withdrawn."
+msgstr "Confirmo que se retira la verificación pública de este documento."
+
+#: certification/includes/signature-sheet.php:207
+msgid ""
+"What anyone who scans the QR code sees instead of the title, for titles that "
+"reveal something about the person (for example \"Certificate of inclusion\" "
+"→ \"Certificate\"). Empty: the title of the document. It is fixed when each "
+"document is issued: changing it only affects new issues."
+msgstr "Lo que ve quien escanea el código QR en lugar del título, para títulos que revelan algo de la persona (por ejemplo «Constancia de inclusión» → «Constancia»). Vacío: el título del documento. Se fija al emitir cada documento: cambiarlo solo afecta a las emisiones nuevas."
+

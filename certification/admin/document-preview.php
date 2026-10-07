@@ -40,8 +40,13 @@ function squuad_cert_document_preview_markup($markup, $document)
 }
 
 /** Pie del PDF de las solicitudes de firma, con valores de ejemplo (el real lleva el número, la ronda y la huella). */
-function squuad_cert_document_preview_fingerprint(): string
+function squuad_cert_document_preview_fingerprint(?object $document = null): string
 {
+    // Sin la hoja del certificado de firmas (ADR 0014), el PDF final no lleva la línea
+    if ($document && function_exists('squuad_cert_signature_sheet_for_document') && 'no' === squuad_cert_signature_sheet_for_document($document)) {
+        return '';
+    }
+
     return sprintf(__('Signature request #%1$d, round %2$d · Content fingerprint (SHA-256): %3$s', 'wp-certificates'), 123, 1, hash('sha256', 'example'));
 }
 
@@ -63,13 +68,13 @@ function squuad_cert_document_preview_server_payload(object $document): array
     }
     if ('issued' === $data['mode'] && function_exists('squuad_cert_final_pdf_issued_layout')) {
         // Emitido: la misma maqueta que el PDF final (diseño sin relleno; la línea de la solicitud en su hoja A4)
-        [$html, $css] = squuad_cert_final_pdf_issued_layout(['content' => (string) $data['html'], 'line' => squuad_cert_document_preview_fingerprint(), 'certificate' => '']);
+        [$html, $css] = squuad_cert_final_pdf_issued_layout(['content' => (string) $data['html'], 'line' => squuad_cert_document_preview_fingerprint($document), 'certificate' => '']);
 
         return squuad_cert_pdf_payload($html, squuad_cert_pdf_page($data['page']['jspdf'], (float) $data['page']['margin']), '', '', 'https://example.com/verify/EXAMPLE', $css);
     }
     // Automático: como signature-final-pdf.php (contenido de la solicitud + pie)
     $html = '<div style="box-sizing:border-box;width:100%;background:#fff;padding:16px;font-family:Arial,sans-serif;color:#111">'
-        . $data['html'] . '<p style="margin-top:16px;font-size:9px;color:#666;word-break:break-all">' . esc_html(squuad_cert_document_preview_fingerprint()) . '</p></div>';
+        . $data['html'] . ('' !== ($line = squuad_cert_document_preview_fingerprint($document)) ? '<p style="margin-top:16px;font-size:9px;color:#666;word-break:break-all">' . esc_html($line) . '</p>' : '') . '</div>';
     $page = 'automatic' === $data['mode']
         ? squuad_cert_pdf_page(['unit' => 'mm', 'format' => 'a4', 'orientation' => 'portrait'], 7.62)
         : squuad_cert_pdf_page($data['page']['jspdf'], (float) $data['page']['margin']);

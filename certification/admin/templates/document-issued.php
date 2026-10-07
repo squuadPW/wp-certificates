@@ -47,6 +47,28 @@ $statuses = [
                             <?php if ('completed' === $row->status && (int) $row->final_attachment_id) : ?>
                                 <a class="button" target="_blank" rel="noopener" href="<?= esc_url(wp_get_attachment_url((int) $row->final_attachment_id)) ?>"><?= esc_html__('View document', 'wp-certificates') ?></a>
                             <?php endif; ?>
+                            <?php // Retirar o restablecer la verificación pública por el QR (ADR 0014)
+                            if (function_exists('squuad_cert_verify_can_withdraw') && squuad_cert_verify_can_withdraw() && squuad_cert_signature_sheet_ready() && null !== $row->frozen_at_utc) :
+                                $withdrawn = squuad_cert_verify_withdrawn($row); ?>
+                                <?php if ($withdrawn) : ?>
+                                    <p style="margin:6px 0 0;color:#b32d2e"><?= esc_html__('Public verification withdrawn: the QR code shows that it could not be verified.', 'wp-certificates') ?></p>
+                                <?php endif; ?>
+                                <details style="margin-top:6px">
+                                    <summary style="cursor:pointer"><?= esc_html($withdrawn ? __('Restore verification', 'wp-certificates') : __('Withdraw verification', 'wp-certificates')) ?></summary>
+                                    <form method="post" action="<?= esc_url(admin_url('admin-post.php')) ?>" style="margin-top:6px">
+                                        <input type="hidden" name="action" value="squuad_cert_verify_withdraw">
+                                        <input type="hidden" name="request_id" value="<?= (int) $row->id ?>">
+                                        <input type="hidden" name="withdraw" value="<?= $withdrawn ? '0' : '1' ?>">
+                                        <?php wp_nonce_field('squuad_cert_verify_withdraw_' . (int) $row->id); ?>
+                                        <?php if (!$withdrawn) : ?>
+                                            <p><?= esc_html__('Anyone who scans the QR code of this document will see that it could not be verified, as with a false document. Use it, for example, if a photo of the QR code was published. It is recorded in the evidence of the document.', 'wp-certificates') ?></p>
+                                        <?php endif; ?>
+                                        <p><textarea name="reason" required maxlength="500" rows="2" style="width:100%" placeholder="<?= esc_attr__('Reason (required)', 'wp-certificates') ?>"></textarea></p>
+                                        <p><label><input type="checkbox" name="confirm" value="1" required> <?= esc_html($withdrawn ? __('I confirm that the verification is shown again.', 'wp-certificates') : __('I confirm that the public verification of this document is withdrawn.', 'wp-certificates')) ?></label></p>
+                                        <p><button type="submit" class="button"><?= esc_html($withdrawn ? __('Restore verification', 'wp-certificates') : __('Withdraw verification', 'wp-certificates')) ?></button></p>
+                                    </form>
+                                </details>
+                            <?php endif; ?>
                             <?php $has_line = $row->book_entry && 'active' === $row->book_entry->status; ?>
                             <?php if ($can_manage && $row->is_latest && in_array($row->status, ['open', 'partially_signed', 'signed', 'completed'], true)) : ?>
                                 <details style="margin-top:6px">

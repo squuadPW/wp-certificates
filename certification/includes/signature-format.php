@@ -1022,8 +1022,8 @@ function squuad_cert_signature_final_pdf_html(object $request): ?string
         return null;
     }
 
-    return $parts['content'] . '<p style="margin-top:16px;font-size:9px;color:#666;word-break:break-all">' . esc_html($parts['line'])
-        . '</p>' . ('' !== $parts['certificate'] ? '<div class="pagebreak"></div>' . $parts['certificate'] : '');
+    return $parts['content'] . ('' !== $parts['line'] ? '<p style="margin-top:16px;font-size:9px;color:#666;word-break:break-all">' . esc_html($parts['line']) . '</p>' : '')
+        . ('' !== $parts['certificate'] ? '<div class="pagebreak"></div>' . $parts['certificate'] : '');
 }
 
 /**
@@ -1038,6 +1038,10 @@ function squuad_cert_signature_final_pdf_parts(object $request): ?array
     $content = squuad_cert_signature_request_render_final($request);
     if (null === $content) {
         return null;
+    }
+    // Sin la hoja del certificado de firmas (ADR 0014): solo el diseño, sin la línea de la solicitud ni el certificado
+    if (function_exists('squuad_cert_signature_sheet_for_request') && 'no' === squuad_cert_signature_sheet_for_request($request)) {
+        return ['content' => (string) $content, 'line' => '', 'certificate' => ''];
     }
     $certificate = squuad_cert_signature_request_required_roles($request) || squuad_cert_signature_request_rows((int) $request->id)
         ? squuad_cert_signature_certificate_html($request, false) : '';

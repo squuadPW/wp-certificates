@@ -96,7 +96,7 @@ function squuad_cert_verify_page_integrity(object $request): array
     ));
     $cache_key = 'squuad_cert_verify_' . md5((int) $request->id . '|' . (string) $request->status . '|' . (string) $request->final_pdf_sha256 . '|' . $last_seq);
     $cached = get_transient($cache_key);
-    if (is_array($cached) && isset($cached['ok'], $cached['pdf'], $cached['title']) && array_key_exists('signers', $cached)) {
+    if (is_array($cached) && isset($cached['ok'], $cached['pdf'], $cached['title'], $cached['public_name']) && array_key_exists('signers', $cached)) {
         return $cached;
     }
 
@@ -140,6 +140,15 @@ function squuad_cert_verify_page_integrity(object $request): array
         }
     }
 
+    // Nombre en la verificación fijado al congelar (ADR 0014), solo si su evento está íntegro
+    $public_name = '';
+    $frozen = $event('frozen');
+    if ($frozen) {
+        $ok = $ok && 'verified' === squuad_cert_signature_request_verify_event($frozen);
+        $data = json_decode((string) $frozen->data, true);
+        $public_name = is_array($data) ? trim((string) ($data['verify_public_name'] ?? '')) : '';
+    }
+
     // Título sellado al emitir (solo si su evento está íntegro)
     $title = '';
     $issued = $event('issued');
@@ -164,7 +173,7 @@ function squuad_cert_verify_page_integrity(object $request): array
         }
     }
 
-    $result = ['ok' => $ok, 'pdf' => $pdf, 'signers' => $signers, 'title' => $title];
+    $result = ['ok' => $ok, 'pdf' => $pdf, 'signers' => $signers, 'title' => $title, 'public_name' => $public_name];
     set_transient($cache_key, $result, SQUUAD_CERT_VERIFY_CACHE_MINUTES * MINUTE_IN_SECONDS);
 
     return $result;
@@ -214,10 +223,17 @@ function squuad_cert_verify_page_state(object $request, array $integrity): strin
     return in_array($request->status, ['open', 'partially_signed'], true) ? 'in_progress' : 'unverifiable';
 }
 
-/** Título del documento: el sellado al emitir; si no lo hay, el actual del documento o «Documento». */
+/**
+ * Título del documento: el «Nombre en la verificación» fijado y sellado al congelar (ADR 0014); si no, el sellado al
+ * emitir, el actual del documento o «Documento».
+ */
 function squuad_cert_verify_page_title(object $request, array $integrity): string
 {
     global $wpdb;
+
+    if ('' !== (string) ($integrity['public_name'] ?? '')) {
+        return (string) $integrity['public_name'];
+    }
 
     if ('' !== $integrity['title']) {
         return $integrity['title'];
@@ -285,6 +301,10 @@ function squuad_cert_verify_page_handle(): void
         if (!$request || squuad_cert_signature_request_code($request) !== $code || !squuad_cert_signature_verify_token_matches($request, $token)) {
             $request = null;
         }
+    }
+    // Verificación retirada por la institución: la misma respuesta que un enlace no válido, sin contar como fallo
+    if ($request && function_exists('squuad_cert_verify_withdrawn') && squuad_cert_verify_withdrawn($request)) {
+        squuad_cert_verify_page_render(null, 404);
     }
     if (!$request) {
         if (function_exists('squuad_cert_api_failures_key')) {

@@ -288,6 +288,31 @@ function squuad_cert_document_issue_resolve_book(object $request, object $entry,
     )];
 }
 
+/**
+ * Retirar o restablecer la verificación pública por el QR de un documento emitido (ADR 0014 de Edusof): p. ej. si se
+ * difundió la foto del QR. Solo con el permiso de configuración (decisión del dueño, 2026-10-07), nonce, motivo y
+ * confirmación; queda sellado en la evidencia de la solicitud.
+ */
+add_action('admin_post_squuad_cert_verify_withdraw', 'squuad_cert_document_verify_withdraw_handle');
+function squuad_cert_document_verify_withdraw_handle(): void
+{
+    $request_id = absint($_POST['request_id'] ?? 0);
+    check_admin_referer('squuad_cert_verify_withdraw_' . $request_id);
+    $request = squuad_cert_signature_request_get($request_id);
+    if (!$request || 'issued' !== $request->origin || SQUUAD_CERT_SUBJECT_STUDENT !== $request->subject_type
+        || !function_exists('squuad_cert_verify_can_withdraw') || !squuad_cert_verify_can_withdraw()) {
+        wp_die(esc_html__('Sorry, you are not allowed to access this page.', 'wp-certificates'), 403);
+    }
+    $withdraw = !empty($_POST['withdraw']);
+    $reason = is_string($_POST['reason'] ?? null) ? sanitize_textarea_field(wp_unslash($_POST['reason'])) : '';
+    $ok = !empty($_POST['confirm']) && '' !== trim($reason) && squuad_cert_verify_set_withdrawn($request_id, $withdraw, $reason);
+    squuad_cert_signers_notice($ok
+        ? ($withdraw ? __('Public verification withdrawn. The QR code of this document now shows that it could not be verified.', 'wp-certificates') : __('Public verification restored.', 'wp-certificates'))
+        : __('The change was not saved: write the reason and confirm it.', 'wp-certificates'), $ok);
+    wp_safe_redirect((wp_get_referer() ?: admin_url('admin.php?page=add_admin_form_admission_content')) . '#edusystem-issued-documents');
+    exit;
+}
+
 /** Declinar un documento emitido desde la ficha del estudiante, con la decisión sobre el tomo/folio si lo tiene. */
 add_action('admin_post_squuad_cert_issued_decline', 'squuad_cert_document_issued_decline_handle');
 function squuad_cert_document_issued_decline_handle(): void

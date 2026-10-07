@@ -240,6 +240,10 @@ if (wpc_eds_documents_enabled()) {
                                         <p class="description"><?= esc_html(sprintf(__('Text of the line registered in the book when the document is issued. It accepts the same variables as the document, except {{tomo}}, {{folio}}, {{tomo_folio}} and {{qrcode}}, and is sent as plain text (maximum %d characters). If a variable has no value, the document is not issued. Empty: the text shown as an example is used.', 'wp-certificates'), SQUUAD_CERT_BOOK_LINE_MAX)); ?></p>
                                     </div>
 
+                                    <?php if (function_exists('squuad_cert_signature_sheet_document_fields')) {
+                                        squuad_cert_signature_sheet_document_fields($document ?: null, true);
+                                    } ?>
+
                                     <div style="font-weight:400; text-align: center" class="space-offer">
                                         <label for="orientation"><b><?= esc_html__('Orientation', 'wp-certificates'); ?></b></label><br>
                                         <select name="orientation" id="orientation" required>

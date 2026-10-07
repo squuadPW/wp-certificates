@@ -39,6 +39,10 @@ function squuad_cert_final_pdf_store(object $request, string $pdf, string $title
     wp_update_attachment_metadata($attach_id, wp_generate_attachment_metadata($attach_id, $upload['file']));
 
     $sha = hash('sha256', $pdf);
+    // Con o sin la hoja del certificado de firmas: la fijada en la solicitud al congelarla, con la que se hizo el PDF
+    if (function_exists('squuad_cert_signature_sheet_for_request')) {
+        $seal += ['signature_sheet' => squuad_cert_signature_sheet_for_request($request)];
+    }
     $completed = squuad_cert_signature_request_transition($request_id, ['signed'], 'completed', [
         'completed_at_utc' => gmdate('Y-m-d H:i:s'),
         'final_attachment_id' => $attach_id,
@@ -516,8 +520,10 @@ function squuad_cert_final_pdf_verify(object $request): array
         return ['ok' => false, 'motor' => '?', 'detalle' => 'el archivo no coincide con la huella sellada en el evento'];
     }
     $engine = is_array($data) && isset($data['pdf_engine']) ? (string) $data['pdf_engine'] : 'navegador (anterior)';
+    // Hoja del certificado de firmas sellada (ADR 0014); sin el campo, con hoja (todo lo anterior la llevaba)
+    $sheet = 'no' === (is_array($data) ? ($data['signature_sheet'] ?? 'yes') : 'yes') ? ' · sin hoja de firmas' : '';
     if ('servicio' !== $engine) {
-        return ['ok' => true, 'motor' => $engine, 'detalle' => 'huella del archivo correcta'];
+        return ['ok' => true, 'motor' => $engine, 'detalle' => 'huella del archivo correcta' . $sheet];
     }
     if (!function_exists('sodium_crypto_sign_verify_detached')) {
         return ['ok' => false, 'motor' => $engine, 'detalle' => 'sin la extensión sodium: no se puede comprobar la firma del servidor'];
@@ -532,7 +538,7 @@ function squuad_cert_final_pdf_verify(object $request): array
     $sig = base64_decode((string) ($data['service_signature'] ?? ''), true);
     $ok = false !== $sig && SODIUM_CRYPTO_SIGN_BYTES === strlen($sig) && sodium_crypto_sign_verify_detached($sig, $signed, $key);
 
-    return ['ok' => $ok, 'motor' => $engine, 'detalle' => $ok ? 'huella y firma del servidor de PDF correctas' : 'la firma del servidor de PDF no es válida'];
+    return ['ok' => $ok, 'motor' => $engine, 'detalle' => ($ok ? 'huella y firma del servidor de PDF correctas' : 'la firma del servidor de PDF no es válida') . $sheet];
 }
 
 if (defined('WP_CLI') && WP_CLI) {

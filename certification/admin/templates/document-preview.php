@@ -14,7 +14,7 @@ $modes = [
         : __('This is how the issued document will look, with its page format.', 'wp-certificates'),
 ];
 // Pie del PDF de las solicitudes de firma, con valores de ejemplo (el real lleva el número, la ronda y la huella)
-$fingerprint = squuad_cert_document_preview_fingerprint();
+$fingerprint = squuad_cert_document_preview_fingerprint($document ?? null);
 // Motor de PDF de este documento (ADR 0013 de Edusof): el servidor, o el navegador como hasta ahora
 $server_engine = function_exists('squuad_cert_pdf_engine_for_document') && 'servicio' === squuad_cert_pdf_engine_for_document($document);
 ?>
@@ -109,6 +109,8 @@ $server_engine = function_exists('squuad_cert_pdf_engine_for_document') && 'serv
             source.style.cssText = "box-sizing:border-box;width:100%;background:#fff;padding:16px;font-family:Arial,sans-serif;color:#111";
             source.innerHTML = data.html + '<p style="margin-top:16px;font-size:9px;color:#666;word-break:break-all"></p>';
             source.lastElementChild.textContent = fingerprint;
+            // Sin la hoja del certificado de firmas no hay línea: sin el párrafo vacío (podía sumar una hoja en blanco)
+            if (!fingerprint) source.lastElementChild.remove();
             holder.appendChild(source);
             const automatic = "automatic" === data.mode;
             return html2pdf().set({

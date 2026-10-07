@@ -341,6 +341,9 @@ $save_url = admin_url('admin.php?page=add_admin_form_documents_content&action=sa
                     <p class="wpc-eds-help" id="pdf_engine-help"><?= esc_html__('Who makes the PDF of this document: the PDF server (always the same result) or the browser of the person (as before). Only the WordPress administrator can change it.', 'wp-certificates') ?></p>
                 </div>
                 <?php endif; ?>
+                <?php if (function_exists('squuad_cert_signature_sheet_document_fields')) {
+                    squuad_cert_signature_sheet_document_fields($document ?: null);
+                } ?>
                 <div class="wpc-eds-field" data-show-if="custom">
                     <label for="unit"><?= esc_html__('Unit', 'wp-certificates') ?></label>
                     <select name="unit" id="unit" required>

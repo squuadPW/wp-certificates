@@ -7,6 +7,8 @@ declare(strict_types=1);
  *   apagada, el servidor también rechaza el método imagen.
  * - Nota legal del «Certificado de firmas» (última página del PDF final): vacía, el texto neutro por defecto. La debería
  *   revisar el asesor legal de cada institución.
+ * - «Adjuntar el certificado de firmas al PDF» (ADR 0014 de Edusof): valor del sitio, activado por defecto; cada
+ *   documento puede seguirlo o cambiarlo en su ficha.
  *
  * Con el permiso de la pantalla (manager_configuration_certificates), nonce y registro en el log.
  */
@@ -27,11 +29,19 @@ function squuad_cert_signing_settings_handle(): void
     $upload = !empty($_POST['allow_upload']) ? '1' : '0';
     $note = is_string($_POST['legal_note'] ?? null) ? sanitize_textarea_field(wp_unslash($_POST['legal_note'])) : '';
     $note = mb_substr(trim($note), 0, SQUUAD_CERT_SIGNING_LEGAL_NOTE_MAX);
+    $sheet = !empty($_POST['signature_sheet']) ? 'yes' : 'no';
+    $old_sheet = function_exists('squuad_cert_signature_sheet_site') ? squuad_cert_signature_sheet_site() : 'yes';
     $old_upload = (string) get_option(SQUUAD_CERT_SIGNING_UPLOAD_OPTION, '1');
     $old_note = (string) get_option(SQUUAD_CERT_SIGNING_LEGAL_NOTE_OPTION, '');
 
     update_option(SQUUAD_CERT_SIGNING_UPLOAD_OPTION, $upload, false);
     update_option(SQUUAD_CERT_SIGNING_LEGAL_NOTE_OPTION, $note, false);
+    if (function_exists('squuad_cert_signature_sheet_site')) {
+        update_option(SQUUAD_CERT_SIGNATURE_SHEET_OPTION, $sheet, false);
+        if ($old_sheet !== $sheet) {
+            squuad_cert_log(sprintf('Firma de documentos: certificado de firmas en el PDF %s en el sitio, por el usuario %d', 'yes' === $sheet ? 'activado' : 'desactivado', get_current_user_id()), 'signature_sheet');
+        }
+    }
     if ($old_upload !== $upload || $old_note !== $note) {
         squuad_cert_log(sprintf(
             'Firma de documentos: «Subir imagen» %s y nota legal %s, por el usuario %d',
@@ -86,6 +96,18 @@ function squuad_cert_signing_settings_section(): void
                     <span class="eds-switch__track" aria-hidden="true"><span class="eds-switch__thumb"></span></span>
                 </label>
             </div>
+            <?php if (function_exists('squuad_cert_signature_sheet_site')) : ?>
+            <div style="display: flex; gap: 16px; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; margin-top: 20px">
+                <div style="flex: 1 1 420px">
+                    <p style="margin: 0 0 4px"><strong id="squuad-cert-signing-sheet-label"><?= esc_html__('Attach the certificate of signatures to the PDF', 'wp-certificates') ?></strong></p>
+                    <p id="squuad-cert-signing-sheet-help" style="margin: 0; color: var(--eds-muted, #50575e)"><?= esc_html__('Extra A4 page at the end of each signed PDF with who signed, when and how. If you turn it off, the document is checked with its QR code on the verification page and the certificate can be downloaded separately; make sure the templates use {{qrcode}}. Each document can follow this value or change it. Documents already signed do not change.', 'wp-certificates') ?></p>
+                </div>
+                <label class="eds-switch">
+                    <input type="checkbox" role="switch" name="signature_sheet" value="1" aria-labelledby="squuad-cert-signing-sheet-label" aria-describedby="squuad-cert-signing-sheet-help" <?php checked('yes' === squuad_cert_signature_sheet_site()); ?>>
+                    <span class="eds-switch__track" aria-hidden="true"><span class="eds-switch__thumb"></span></span>
+                </label>
+            </div>
+            <?php endif; ?>
             <div class="eds-field" style="margin-top: 20px">
                 <label for="squuad-cert-signing-legal-note"><strong><?= esc_html__('Legal note of the certificate of signatures', 'wp-certificates') ?></strong></label>
                 <textarea id="squuad-cert-signing-legal-note" name="legal_note" rows="4" maxlength="<?= (int) SQUUAD_CERT_SIGNING_LEGAL_NOTE_MAX ?>" aria-describedby="squuad-cert-signing-legal-help" style="height: auto; min-height: 96px; padding: 8px 12px"><?= esc_textarea($note) ?></textarea>

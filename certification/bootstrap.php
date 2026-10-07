@@ -25,6 +25,7 @@ require_once SQUUAD_CERT_MODULE_PATH . 'includes/signer-numbers.php';
 require_once SQUUAD_CERT_MODULE_PATH . 'includes/signing-turns.php'; // turno de firma y solicitudes del sistema (ADR 0012 de Edusof)
 require_once SQUUAD_CERT_MODULE_PATH . 'includes/signature-format.php'; // flujo de firma nuevo (ADR 0011 de Edusof)
 require_once SQUUAD_CERT_MODULE_PATH . 'includes/final-pdf.php'; // PDF final por el servidor de PDF (ADR 0013 de Edusof)
+require_once SQUUAD_CERT_MODULE_PATH . 'includes/signature-sheet.php'; // hoja del certificado de firmas opcional (ADR 0014 de Edusof)
 require_once SQUUAD_CERT_MODULE_PATH . 'includes/certification-orders.php';
 require_once SQUUAD_CERT_MODULE_PATH . 'includes/html-signatures.php';
 

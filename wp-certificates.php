@@ -45,7 +45,12 @@ define('WP_C_REMOTE_INFO_URL', 'https://versions.squuad.com/plugins/wp-certifica
 //     defecto), 'servicio' o 'navegador'. Solo añade una columna con el valor por defecto: nada cambia.
 // 18: cola del PDF final por el servidor (ADR 0013, fase 2): squuad_cert_requests.pdf_attempts, pdf_next_at_utc y
 //     pdf_last_error con el índice pdf_queue. Solo añade columnas vacías: las solicitudes existentes no cambian.
-define('WP_C_DB_VERSION', '18');
+// 19: hoja del certificado de firmas opcional y verificación pública (ADR 0014 de Edusof): documents_certificates.
+//     signature_sheet ('site', 'yes' o 'no') y verify_public_name; squuad_cert_requests.signature_sheet y
+//     verify_public_name (fijados y sellados al congelar; hoja vacía = con hoja, como todo lo anterior),
+//     verify_withdrawn_at_utc y verify_withdrawn_by. Solo añade
+//     columnas con su valor por defecto: nada cambia hasta que alguien apague la hoja.
+define('WP_C_DB_VERSION', '19');
 
 // get_plugin_data() vive en wp-admin/includes/plugin.php, que en el front no está cargado (antes solo funcionaba
 // porque EduSystem lo cargaba primero)
@@ -304,6 +309,8 @@ function create_tables_certificates() {
         `book_line_description` TEXT NULL,
         `fields` LONGTEXT NULL,
         `pdf_engine` VARCHAR(20) NOT NULL DEFAULT 'site',
+        `signature_sheet` VARCHAR(10) NOT NULL DEFAULT 'site',
+        `verify_public_name` VARCHAR(190) NULL,
         `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
         PRIMARY KEY (id)
     )" . $charset_collate . ";");
