@@ -47,10 +47,10 @@
                         <h3 class="cert-title"><?= esc_html($cert->name_document) ?></h3>
                         
                         <div class="cert-meta">
-                            <p><strong><?= __('Issued:', 'wp-certificates') ?></strong> <?= date(get_option('date_format'), strtotime($cert->emission_date)) ?></p>
+                            <p><strong><?= __('Issued:', 'wp-certificates') ?></strong> <?= esc_html(squuad_cert_format_date($cert->emission_date)) ?></p>
                             <p><strong><?= __('Expires:', 'wp-certificates') ?></strong> 
                                 <?php if ( !empty($cert->expiration_date) ): ?>
-                                    <span class="cert-status expires"><?= date(get_option('date_format'), strtotime($cert->expiration_date)) ?></span>
+                                    <span class="cert-status expires"><?= esc_html(squuad_cert_format_date($cert->expiration_date)) ?></span>
                                 <?php else: ?>
                                     <span class="cert-status no-expiry"><?= __('Does not expire', 'wp-certificates') ?></span>
                                 <?php endif; ?>

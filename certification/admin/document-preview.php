@@ -279,9 +279,9 @@ function squuad_cert_document_preview_replacements(object $document, string $mod
         'institution_city_country_form_filled' => $text('Caracas / Venezuela'),
         'institution_title_obtained_form_filled' => $text('High School Diploma'),
         'institution_graduation_year_form_filled' => $text('2024'),
-        'created_at' => $text(gmdate('m/d/Y')),
+        'created_at' => $text(squuad_cert_format_date(time())),
         'email' => $text('juan.perez@example.com'),
-        'today' => $text(date_i18n('M d, Y')),
+        'today' => $text(squuad_cert_format_date_long(time())),
         'ethinicity_selected' => $html('HISPANIC'), // valor de ejemplo fijo (no se llama a EduSystem)
         'language_selected' => $html('ENGLISH'),
         'page_break' => $html('<div class="pagebreak"></div>'),

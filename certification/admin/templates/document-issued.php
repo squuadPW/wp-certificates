@@ -34,7 +34,7 @@ $statuses = [
                 <?php foreach ($issued as $row) : ?>
                     <tr>
                         <td><?= esc_html((string) ($row->document_title ?: $row->document_id)) ?><?= (int) $row->round > 1 ? ' <span class="description">(' . esc_html(sprintf(__('round %d', 'wp-certificates'), (int) $row->round)) . ')</span>' : '' ?></td>
-                        <td><?= esc_html(get_date_from_gmt((string) ($row->frozen_at_utc ?: $row->created_at_utc), get_option('date_format') . ' ' . get_option('time_format'))) ?></td>
+                        <td><?= esc_html(squuad_cert_format_date((string) ($row->frozen_at_utc ?: $row->created_at_utc), true, true)) ?></td>
                         <td><?= (int) $row->signed_count ?> / <?= (int) $row->required_count ?></td>
                         <td>
                             <?php if ($row->book_entry) : ?>

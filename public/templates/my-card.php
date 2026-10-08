@@ -106,7 +106,7 @@
                                 <?= esc_html__('Date of birth', 'wp-certificates') ?>:</div>
                         </div>
                         <div style="height: 15px; font-size: 8px !important; text-shadow: 0 0 1px white;">
-                            <?= $birth_date->format('m/d/Y') ?>
+                            <?= $birth_date ? esc_html(squuad_cert_format_date($birth_date->format('Y-m-d'))) : 'N/A' ?>
                         </div>
                     </div>
                 </div>
@@ -118,7 +118,7 @@
                                 <?= esc_html__('Emission', 'wp-certificates') ?>:</div>
                         </div>
                         <div style="height: 15px; font-size: 8px !important; text-shadow: 0 0 1px white;">
-                            <?= $emission_date ? $emission_date->format('M, Y') : 'N/A' ?>
+                            <?= $emission_date ? esc_html(wp_date('M Y', squuad_cert_date_timestamp($emission_date->format('Y-m-d')))) : 'N/A' /* fecha-ok: mes y año del carnet, traducido por wp_date */ ?>
                         </div>
                     </div>
                     <div style="width: 35%; box-sizing: border-box;">
@@ -128,7 +128,7 @@
                                 <?= esc_html__('Expiration', 'wp-certificates') ?>:</div>
                         </div>
                         <div style="height: 15px; font-size: 8px !important; text-shadow: 0 0 1px white;">
-                            <?= $expiration_date ? $expiration_date->format('M, Y') : 'N/A' ?>
+                            <?= $expiration_date ? esc_html(wp_date('M Y', squuad_cert_date_timestamp($expiration_date->format('Y-m-d')))) : 'N/A' /* fecha-ok: mes y año del carnet, traducido por wp_date */ ?>
                         </div>
                     </div>
                 </div>

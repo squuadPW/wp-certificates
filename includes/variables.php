@@ -34,7 +34,7 @@ function squuad_cert_general_replacements(array $ctx = []): array
     // La plantilla de certificados antigua (certificates_templates) no tenía tomo ni folio: siempre salían vacíos
     $certificate = (object) ['folio' => '', 'tomo' => ''];
     $replacements = [
-        'today' => ['value' => date('M d, Y'), 'wrap' => false],
+        'today' => ['value' => squuad_cert_format_date_long(time()), 'wrap' => false],
         'qrcode' => ['value' => '<div id="qrcode"></div>', 'wrap' => false],
         'page_break' => ['value' => '<div class="pagebreak"></div>', 'wrap' => false],
         // Recuadros de firma: vacío al generar sin firma; al firmar se sustituye por el hueco de las firmas

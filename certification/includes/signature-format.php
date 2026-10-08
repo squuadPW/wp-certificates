@@ -512,7 +512,8 @@ function squuad_cert_signature_local_time(string $utc, bool $seconds = false): s
         return '';
     }
 
-    return wp_date($seconds ? 'd/m/Y, H:i:s' : 'd/m/Y, H:i', $timestamp) . ' (' . squuad_cert_signature_utc_offset_label($timestamp) . ')';
+    // Formato de fecha y hora de la institución (ADR 0017 de Edusof); la zona se indica siempre (UTC−4)
+    return squuad_cert_format_date($timestamp, true, false, $seconds) . ' (' . squuad_cert_signature_utc_offset_label($timestamp) . ')';
 }
 
 /**

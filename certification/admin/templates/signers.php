@@ -108,7 +108,7 @@ $status_labels = [
                         <td><?= $signer->has_signature ? esc_html__('Registered by the user', 'wp-certificates') : '—' ?></td>
                         <td>
                             <?php if ($signer->pending_invitation_id) : ?>
-                                <?= esc_html(sprintf(__('Pending until %s', 'wp-certificates'), get_date_from_gmt((string) $signer->invitation_expires, get_option('date_format') . ' ' . get_option('time_format')))) ?>
+                                <?= esc_html(sprintf(__('Pending until %s', 'wp-certificates'), squuad_cert_format_date((string) $signer->invitation_expires, true, true))) ?>
                             <?php elseif ('invited' === $signer->status) : ?>
                                 <?= esc_html__('Expired or revoked', 'wp-certificates') ?>
                             <?php else : ?>—<?php endif; ?>

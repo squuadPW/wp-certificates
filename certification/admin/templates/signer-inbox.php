@@ -173,7 +173,7 @@ $frame = static function (string $html): string {
                 <p class="description"><?= esc_html(sprintf(
                     /* translators: %s: expiry date and time */
                     __('This selection expires on %s.', 'wp-certificates'),
-                    get_date_from_gmt((string) $batch->expires_at_utc, get_option('date_format') . ' ' . get_option('time_format'))
+                    squuad_cert_format_date((string) $batch->expires_at_utc, true, true)
                 )) ?></p>
             </form>
             <?php endif; ?>
@@ -219,7 +219,7 @@ $frame = static function (string $html): string {
                             <td><?= esc_html((string) ($item->document_title ?: $item->document_id)) ?><br><span class="description"><?= esc_html(substr((string) $item->content_sha256, 0, 12)) ?>…</span></td>
                             <td><?= esc_html(trim((string) $item->student_name . ' ' . (string) $item->student_last_name)) ?></td>
                             <td><?= (int) $item->round ?></td>
-                            <td><?= esc_html(get_date_from_gmt((string) $item->frozen_at_utc, get_option('date_format') . ' ' . get_option('time_format'))) ?></td>
+                            <td><?= esc_html(squuad_cert_format_date((string) $item->frozen_at_utc, true, true)) ?></td>
                             <td><a class="button button-primary" href="<?= esc_url(add_query_arg('request_id', (int) $item->id, $page_url)) ?>"><?= esc_html(empty($id_document_blocked) ? __('Review and sign', 'wp-certificates') : __('View document', 'wp-certificates')) ?></a></td>
                         </tr>
                     <?php endforeach; ?>

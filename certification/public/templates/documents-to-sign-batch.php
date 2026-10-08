@@ -57,7 +57,7 @@ wp_enqueue_script('edusystem-signature-pad', SQUUAD_CERT_MODULE_URL . 'admin/ass
             <p><small><?= esc_html(sprintf(
                 /* translators: %s: expiry date and time */
                 __('This selection expires on %s.', 'wp-certificates'),
-                get_date_from_gmt((string) $batch->expires_at_utc, get_option('date_format') . ' ' . get_option('time_format'))
+                squuad_cert_format_date((string) $batch->expires_at_utc, true, true)
             )) ?></small></p>
         </form>
         <script>

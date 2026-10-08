@@ -26,7 +26,7 @@ if (!defined('ABSPATH')) exit;
     <?php if ($active) : ?>
         <h2><?= esc_html__('Your registered signature', 'wp-certificates') ?></h2>
         <canvas id="edusystem-signature-current" width="600" height="180" style="border:1px solid #c3c4c7;background:#fff;max-width:100%" data-strokes="<?= esc_attr((string) $active->strokes) ?>"></canvas>
-        <p class="description"><?= esc_html(sprintf(__('Registered on %s. Changing it does not modify documents you already signed.', 'wp-certificates'), get_date_from_gmt((string) $active->created_at_utc, get_option('date_format') . ' ' . get_option('time_format')))) ?></p>
+        <p class="description"><?= esc_html(sprintf(__('Registered on %s. Changing it does not modify documents you already signed.', 'wp-certificates'), squuad_cert_format_date((string) $active->created_at_utc, true, true))) ?></p>
     <?php endif; ?>
 
     <?php if ($can_register) : ?>

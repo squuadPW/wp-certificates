@@ -115,7 +115,7 @@ function squuad_cert_signature_integrity_page(): void
 
     $count = static fn(string $flag): int => count(array_filter($legacy, static fn(array $row): bool => (bool) $row[$flag]));
     $date = static function (?string $utc): string {
-        return $utc ? get_date_from_gmt($utc, get_option('date_format') . ' ' . get_option('time_format')) : '—';
+        return $utc ? squuad_cert_format_date($utc, true, true) : '—';
     };
     $user_name = static function (int $user_id): string {
         $user = $user_id ? get_userdata($user_id) : null;

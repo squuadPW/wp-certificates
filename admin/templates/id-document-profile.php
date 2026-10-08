@@ -24,7 +24,7 @@ $squuad_cert_number = null !== $posted_number ? $posted_number : ($document ? (s
         <?php if ($is_self || $is_admin) :
             $origin = squuad_cert_id_document_origin_parts($document['origin']); ?>
             <p class="description" style="color: var(--eds-muted, #50575e)"><?= esc_html(squuad_cert_id_document_origin_label($document['origin'])) ?>
-                <?php if ('' !== $origin['at']) : ?> · <?= esc_html(get_date_from_gmt($origin['at'], get_option('date_format') . ' ' . get_option('time_format'))) ?><?php endif; ?></p>
+                <?php if ('' !== $origin['at']) : ?> · <?= esc_html(squuad_cert_format_date($origin['at'], true, true)) ?><?php endif; ?></p>
         <?php endif; ?>
     <?php else : ?>
         <p><?= esc_html($is_self ? __('You have not registered your identity document yet. It is needed to sign documents.', 'wp-certificates') : __('This person has not registered an identity document yet. It is needed to sign documents.', 'wp-certificates')) ?></p>
