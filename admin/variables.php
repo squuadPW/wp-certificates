@@ -303,7 +303,7 @@ function squuad_cert_variable_create_handle(): void
         'identificator' => $key,
         'type' => $type,
         'method' => $method,
-        'created_at' => current_time('mysql'),
+        'created_at' => current_time('mysql', true), // UTC (ADR 0017 de Edusof)
     ], ['%s', '%s', '%s', '%s', '%s', '%s']);
     $id = (int) $wpdb->insert_id;
     squuad_cert_log(sprintf('Variable %s (%d) creada con el método %s', $key, $id, $method), 'variable_created');

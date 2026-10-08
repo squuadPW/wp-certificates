@@ -506,7 +506,7 @@ function add_admin_form_documents_content()
 
                     if (!empty($new_student_ids)) {
                         // Bulk Insert
-                        $current_time = current_time('mysql');
+                        $current_time = current_time('mysql', true); // UTC (ADR 0017 de Edusof)
                         $values = [];
                         $placeholders = [];
                         foreach ($new_student_ids as $student_id) {

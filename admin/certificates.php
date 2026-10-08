@@ -49,8 +49,8 @@ function admin_certificate_assignment_content () {
             $certificate_id = 0;
         }
         
-        // Fecha de hoy con formato de base de datos usando la hora local de WP
-        $emission_date = current_time('mysql'); 
+        // emission_date es DATE: día de la institución (ADR 0017 de Edusof)
+        $emission_date = current_time('Y-m-d');
 
         // Nadie firma por otro (EduSystem, ADR 0003 paso 10): los documentos que exigen firma se emiten para firma
         // desde la ficha del estudiante, no aquí. Siempre: las firmas-imagen se retiraron (ADR 0004)

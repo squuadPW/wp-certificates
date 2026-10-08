@@ -123,7 +123,7 @@ function squuad_cert_issue_to_users_handle(): void
     $id_types = $id_required ? array_map(static fn($v): int => is_scalar($v) ? absint($v) : 0, (array) wp_unslash($_POST['id_doc_type'] ?? [])) : [];
     $id_numbers = $id_required ? array_map(static fn($v): string => is_string($v) ? sanitize_text_field($v) : '', (array) wp_unslash($_POST['id_doc_number'] ?? [])) : [];
 
-    $emission_date = current_time('mysql');
+    $emission_date = current_time('Y-m-d'); // emission_date es DATE: día de la institución (ADR 0017 de Edusof)
     $issued = [];
     $existing = [];
     $errors = [];
