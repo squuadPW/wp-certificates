@@ -50,7 +50,10 @@ define('WP_C_REMOTE_INFO_URL', 'https://versions.squuad.com/plugins/wp-certifica
 //     verify_public_name (fijados y sellados al congelar; hoja vacía = con hoja, como todo lo anterior),
 //     verify_withdrawn_at_utc y verify_withdrawn_by. Solo añade
 //     columnas con su valor por defecto: nada cambia hasta que alguien apague la hoja.
-define('WP_C_DB_VERSION', '19');
+// 20: certificates.enrollment_id, certificados por inscripción (idea de dev-jonatan, rehecha): un estudiante con dos
+//     programas recibe el certificado una vez por inscripción. Solo añade una columna vacía con su índice; los
+//     certificados anteriores quedan sin inscripción y se asignan al primero que la pida.
+define('WP_C_DB_VERSION', '20');
 
 // get_plugin_data() vive en wp-admin/includes/plugin.php, que en el front no está cargado (antes solo funcionaba
 // porque EduSystem lo cargaba primero)
@@ -353,9 +356,11 @@ function create_tables_certificates() {
         html text NULL,
         tomo INT NULL,
         folio INT NULL,
+        enrollment_id INT(11) NULL,
         option_document JSON NULL,
         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        PRIMARY KEY (id)
+        PRIMARY KEY (id),
+        KEY enrollment_id (enrollment_id)
     )" . $charset_collate . ";");
 
     dbDelta("CREATE TABLE {$table_certificates_templates} (

@@ -361,8 +361,42 @@ function add_viewport_meta()
 }
 add_action('wp_head', 'add_viewport_meta', 1);
 
+/**
+ * Certificado ya emitido de un tipo y documento para un correo, separado por inscripción (programs_by_student de
+ * EduSystem): un estudiante con dos programas recibe el mismo certificado una vez por cada inscripción.
+ *
+ * Sin inscripción se busca como siempre, sin filtrar por inscripción. Con inscripción se busca el de esa inscripción y,
+ * si no hay, uno anterior sin inscripción (emitido antes de que existiera esta columna): se reutiliza y queda asignado
+ * a esa inscripción, para no duplicar los certificados que ya existen. Idea de certificados por inscripción tomada de
+ * dev-jonatan (sin sus commits).
+ *
+ * @return object|null Fila con id y simple_uuid.
+ */
+function squuad_cert_find_existing_certificate(string $type, string $name, string $email, $enrollment_id = null)
+{
+    global $wpdb;
+    $table = $wpdb->prefix . 'certificates';
+    $enrollment_id = absint($enrollment_id);
+    $base = "SELECT id, simple_uuid FROM {$table} WHERE type = %s AND name_document = %s AND email = %s";
+
+    if (!$enrollment_id) {
+        return $wpdb->get_row($wpdb->prepare($base . ' ORDER BY id ASC LIMIT 1', $type, $name, $email)) ?: null;
+    }
+
+    $own = $wpdb->get_row($wpdb->prepare($base . ' AND enrollment_id = %d ORDER BY id DESC LIMIT 1', $type, $name, $email, $enrollment_id));
+    if ($own) {
+        return $own;
+    }
+
+    $legacy = $wpdb->get_row($wpdb->prepare($base . ' AND enrollment_id IS NULL ORDER BY id ASC LIMIT 1', $type, $name, $email));
+    if ($legacy) {
+        $wpdb->update($table, ['enrollment_id' => $enrollment_id], ['id' => (int) $legacy->id, 'enrollment_id' => null]);
+    }
+    return $legacy ?: null;
+}
+
 // Plugin B: mi-plugin-receptor.php
-function create_certificate_edusystem_callback($type, $name, $program = '', $template_id, $student, $emission_date, $expiration_date = null)
+function create_certificate_edusystem_callback($type, $name, $program = '', $template_id, $student, $emission_date, $expiration_date = null, $enrollment_id = null)
 {
     global $wpdb;
     $table_certificates = $wpdb->prefix . 'certificates';
@@ -414,15 +448,8 @@ function create_certificate_edusystem_callback($type, $name, $program = '', $tem
         $student_full_name = trim($student_name . ' ' . $student_last_name);
     }
 
-    // 1. Validar si el registro ya existe
-    $existing_record = $wpdb->get_row(
-        $wpdb->prepare(
-            "SELECT id, simple_uuid FROM $table_certificates WHERE type = %s AND name_document = %s AND email = %s",
-            $type,
-            $name,
-            $student->email
-        )
-    );
+    // 1. Validar si el registro ya existe (en esa inscripción, si viene)
+    $existing_record = squuad_cert_find_existing_certificate((string) $type, (string) $name, (string) $student->email, $enrollment_id);
 
     if ($existing_record && !empty($existing_record->simple_uuid)) {
         // Si el registro existe, devolvemos su URL y la URL de la imagen.
@@ -444,6 +471,7 @@ function create_certificate_edusystem_callback($type, $name, $program = '', $tem
         'participant_id' => isset($participant_id) ? $participant_id : null,
         'course_id' => isset($course_id) ? $course_id : null,
         'html' => isset($html) ? $html : null,
+        'enrollment_id' => absint($enrollment_id) ?: null,
     ];
 
     $wpdb->insert($table_certificates, $insert_data);
@@ -466,7 +494,7 @@ function create_certificate_edusystem_callback($type, $name, $program = '', $tem
     return ['url' => $url, 'download_url' => $download_url, 'image_url' => $image_url];
 }
 
-add_filter('create_certificate_edusystem', 'create_certificate_edusystem_callback', 10, 7);
+add_filter('create_certificate_edusystem', 'create_certificate_edusystem_callback', 10, 8);
 
 function automatic_documents_loaded() {
     global $wpdb;
@@ -515,7 +543,7 @@ function automatic_documents_last_optimized() {
 
 add_filter('get_first_pending_automatic_document', 'automatic_documents_last_optimized');
 
-function assign_certificate_student( $student_id, $template_id, $type, $emission_date, $expiration_date = null, $program = '', $course_id = '', $user_signature_id = null ) {
+function assign_certificate_student( $student_id, $template_id, $type, $emission_date, $expiration_date = null, $program = '', $course_id = '', $user_signature_id = null, $enrollment_id = null ) {
     global $wpdb;
     // Emitir a un estudiante usa sus datos y el motor de plantillas de EduSystem: sin EduSystem no se emite
     if (!wpc_edusystem_active()) {
@@ -543,14 +571,8 @@ function assign_certificate_student( $student_id, $template_id, $type, $emission
         return false;
     }
 
-    $existing_record = $wpdb->get_row(
-        $wpdb->prepare(
-            "SELECT id, simple_uuid FROM $table_certificates WHERE type = %s AND name_document = %s AND email = %s",
-            $type,
-            $document->title,
-            $student->email
-        )
-    );
+    // En esa inscripción, si viene (certificados por inscripción)
+    $existing_record = squuad_cert_find_existing_certificate((string) $type, (string) $document->title, (string) $student->email, $enrollment_id);
 
     if ( !$existing_record ) {
         $student_full_name = trim("{$student->name} {$student->middle_name} {$student->last_name} {$student->middle_last_name}");
@@ -643,7 +665,7 @@ function assign_certificate_student( $student_id, $template_id, $type, $emission
 
         $qr = ['url' => '', 'image_url' => ''];
         if ($create_certificate_qr) {
-            $qr = apply_filters('create_certificate_edusystem', 'certificate', $document->title, (string) ($subject['program'] ?? ''), 1, $student, $emission_date);
+            $qr = apply_filters('create_certificate_edusystem', 'certificate', $document->title, (string) ($subject['program'] ?? ''), 1, $student, $emission_date, null, $enrollment_id);
         }
 
         // Estructura HTML final con contenedores limpios
@@ -679,6 +701,7 @@ function assign_certificate_student( $student_id, $template_id, $type, $emission
             'html'                => $html_final,
             'tomo'                => $book_data['tomo'] ?? null,
             'folio'               => $book_data['folio'] ?? null,
+            'enrollment_id'       => absint($enrollment_id) ?: null,
             'option_document'     => json_encode($option_document) // Guardamos el tamaño en un JSON estructurado
         ];
 
