@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-07T12:12:19+00:00\n"
+"POT-Creation-Date: 2026-10-12T23:56:20+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: wp-certificates\n"
@@ -64,7 +64,7 @@ msgstr ""
 #: admin/variables.php:352
 #: certification/admin/document-preview.php:95
 #: certification/admin/document-signing.php:304
-#: certification/admin/signing-settings.php:25
+#: certification/admin/signing-settings.php:27
 #: certification/includes/signature-certificate-copy.php:131
 #: includes/signed-pdf.php:217
 msgid "Sorry, you are not allowed to access this page."
@@ -181,10 +181,10 @@ msgstr ""
 #: certification/admin/templates/signer-inbox.php:248
 #: certification/includes/signature-certificate-copy.php:260
 #: certification/includes/signature-certificate-copy.php:268
-#: certification/includes/signature-format.php:967
+#: certification/includes/signature-format.php:968
 #: certification/public/functions/verify-page.php:246
 #: certification/public/functions/verify-page.php:441
-#: certification/public/templates/create-document-automatic.php:102
+#: certification/public/templates/create-document-automatic.php:104
 #: certification/public/templates/document-read-only.php:37
 #: certification/public/templates/documents-to-sign-batch.php:21
 #: certification/public/templates/documents-to-sign-batch.php:29
@@ -202,7 +202,7 @@ msgstr ""
 #: admin/templates/eds-document-detail.php:244
 #: certification/includes/signature-certificate-copy.php:261
 #: certification/includes/signature-certificate-copy.php:269
-#: certification/includes/signature-format.php:968
+#: certification/includes/signature-format.php:969
 #: certification/public/functions/verify-page.php:442
 msgid "Code"
 msgstr ""
@@ -228,13 +228,13 @@ msgstr ""
 
 #: admin/documents.php:48
 #: admin/templates/id-document-settings.php:154
-#: certification/public/templates/create-document-automatic.php:259
+#: certification/public/templates/create-document-automatic.php:261
 msgid "Cancel"
 msgstr ""
 
 #: admin/documents.php:49
 #: admin/templates/generate-modal.php:41
-#: certification/public/templates/create-document-automatic.php:158
+#: certification/public/templates/create-document-automatic.php:160
 #: certification/public/templates/document-read-only.php:44
 #: certification/public/templates/id-document-form.php:87
 msgid "Close"
@@ -439,7 +439,7 @@ msgstr ""
 #: admin/templates/id-document-settings.php:77
 #: certification/admin/templates/document-issued.php:30
 #: certification/admin/templates/signers.php:97
-#: certification/includes/signature-format.php:971
+#: certification/includes/signature-format.php:972
 #: certification/public/templates/documents-to-sign.php:30
 #: certification/public/templates/documents-to-sign.php:51
 msgid "Status"
@@ -643,7 +643,7 @@ msgid "The address must start with https:// (or http://127.0.0.1 if the service 
 msgstr ""
 
 #: admin/pdf-engine-settings.php:78
-#: certification/admin/signing-settings.php:78
+#: certification/admin/signing-settings.php:88
 msgid "Settings saved."
 msgstr ""
 
@@ -765,9 +765,9 @@ msgstr ""
 #: admin/templates/id-document-settings.php:49
 #: admin/templates/permissions.php:44
 #: admin/templates/signing-roles.php:42
-#: certification/admin/signing-settings.php:117
+#: certification/admin/signing-settings.php:135
 #: certification/public/functions/assets.php:97
-#: certification/public/templates/create-document-automatic.php:147
+#: certification/public/templates/create-document-automatic.php:149
 #: edusof-ui/includes/i18n-strings.php:76
 #: public/functions.php:19
 #: public/templates/select-nacionality.php:20
@@ -983,7 +983,7 @@ msgstr ""
 
 #: admin/templates/certificate-assignment-users.php:32
 #: certification/admin/templates/my-signature.php:39
-#: certification/public/templates/create-document-automatic.php:205
+#: certification/public/templates/create-document-automatic.php:207
 #: certification/public/templates/documents-to-sign-batch.php:46
 msgid "Clear"
 msgstr ""
@@ -1650,7 +1650,7 @@ msgid "Previous"
 msgstr ""
 
 #: admin/templates/eds-list-documents.php:179
-#: certification/includes/signature-format.php:801
+#: certification/includes/signature-format.php:802
 #: certification/public/functions/assets.php:59
 #: certification/public/templates/create-document-automatic.php:57
 msgid "Next"
@@ -1918,7 +1918,7 @@ msgstr ""
 
 #: admin/templates/variables.php:83
 #: admin/templates/variables.php:257
-#: certification/includes/signature-format.php:985
+#: certification/includes/signature-format.php:986
 msgid "Method"
 msgstr ""
 
@@ -2151,8 +2151,8 @@ msgstr ""
 
 #: certification/admin/document-preview.php:50
 #: certification/admin/templates/signer-inbox.php:38
-#: certification/includes/signature-format.php:1066
-#: certification/public/templates/create-document-automatic.php:121
+#: certification/includes/signature-format.php:1067
+#: certification/public/templates/create-document-automatic.php:123
 #, php-format
 msgid "Signature request #%1$d, round %2$d · Content fingerprint (SHA-256): %3$s"
 msgstr ""
@@ -2453,39 +2453,55 @@ msgstr ""
 msgid "Signer reactivated."
 msgstr ""
 
-#: certification/admin/signing-settings.php:76
+#: certification/admin/signing-settings.php:86
 msgid "Signing documents"
 msgstr ""
 
-#: certification/admin/signing-settings.php:85
+#: certification/admin/signing-settings.php:95
 msgid "Allow uploading an image of the signature"
 msgstr ""
 
-#: certification/admin/signing-settings.php:86
+#: certification/admin/signing-settings.php:96
 msgid "In the signing window, the person can type or draw their signature and, with this option on, upload an image of their own signature (they must confirm that it is theirs). It is the weakest proof: turn it off if your institution does not accept it. When it is off, the tab is hidden and the server rejects uploaded images."
 msgstr ""
 
-#: certification/admin/signing-settings.php:88
+#: certification/admin/signing-settings.php:98
 msgid "The GD extension of this server has no FreeType support: the «Type» tab is hidden and only drawn or uploaded signatures are accepted."
 msgstr ""
 
-#: certification/admin/signing-settings.php:91
+#: certification/admin/signing-settings.php:101
 msgid "This server does not have the GD extension of PHP: uploaded images cannot be checked, so the tab stays hidden."
 msgstr ""
 
-#: certification/admin/signing-settings.php:102
+#: certification/admin/signing-settings.php:112
 msgid "Attach the certificate of signatures to the PDF"
 msgstr ""
 
-#: certification/admin/signing-settings.php:103
+#: certification/admin/signing-settings.php:113
 msgid "Extra A4 page at the end of each signed PDF with who signed, when and how. If you turn it off, the document is checked with its QR code on the verification page and the certificate can be downloaded separately; make sure the templates use {{qrcode}}. Each document can follow this value or change it. Documents already signed do not change."
 msgstr ""
 
-#: certification/admin/signing-settings.php:112
+#: certification/admin/signing-settings.php:123
+msgid "Open the pending signature"
+msgstr ""
+
+#: certification/admin/signing-settings.php:124
+msgid "Automatic documents need attention: while someone has to sign one, My Account shows a notice on every page that cannot be closed. Choose whether the signing window also opens by itself."
+msgstr ""
+
+#: certification/admin/signing-settings.php:125
+msgid "Once per login, on the My Account dashboard (recommended)"
+msgstr ""
+
+#: certification/admin/signing-settings.php:126
+msgid "Only when the person clicks «Sign»"
+msgstr ""
+
+#: certification/admin/signing-settings.php:130
 msgid "Legal note of the certificate of signatures"
 msgstr ""
 
-#: certification/admin/signing-settings.php:114
+#: certification/admin/signing-settings.php:132
 msgid "It is printed at the end of the last page of each signed PDF. Leave it empty to use the neutral text below. It should be reviewed by the legal adviser of your institution."
 msgstr ""
 
@@ -2554,7 +2570,7 @@ msgstr ""
 #: certification/admin/templates/document-issued.php:14
 #: certification/includes/signature-certificate-copy.php:262
 #: certification/includes/signature-certificate-copy.php:270
-#: certification/includes/signature-format.php:977
+#: certification/includes/signature-format.php:978
 #: certification/public/functions/verify-page.php:444
 msgid "Completed"
 msgstr ""
@@ -2603,7 +2619,7 @@ msgstr ""
 #: certification/includes/signature-certificate-copy.php:122
 #: certification/includes/signature-certificate-copy.php:177
 #: certification/includes/signature-certificate-copy.php:271
-#: certification/includes/signature-format.php:963
+#: certification/includes/signature-format.php:964
 msgid "Certificate of signatures"
 msgstr ""
 
@@ -2807,12 +2823,12 @@ msgid "Signer number in the template variables (F1, F2…)"
 msgstr ""
 
 #: certification/admin/templates/document-signing.php:86
-#: certification/includes/signature-format.php:982
+#: certification/includes/signature-format.php:983
 msgid "No."
 msgstr ""
 
 #: certification/admin/templates/document-signing.php:86
-#: certification/includes/signature-format.php:983
+#: certification/includes/signature-format.php:984
 #: certification/includes/signers.php:251
 #: certification/public/functions/verify-page.php:268
 msgid "Signer"
@@ -3680,141 +3696,141 @@ msgid "Drawn (previous format)"
 msgstr ""
 
 #. translators: %s: identity document of the signer (prefix and number)
-#: certification/includes/signature-format.php:750
-#: certification/includes/signature-format.php:813
-#: certification/public/templates/create-document-automatic.php:245
+#: certification/includes/signature-format.php:751
+#: certification/includes/signature-format.php:814
+#: certification/public/templates/create-document-automatic.php:247
 #, php-format
 msgid "ID document: %s"
 msgstr ""
 
-#: certification/includes/signature-format.php:752
-#: certification/public/templates/create-document-automatic.php:248
+#: certification/includes/signature-format.php:753
+#: certification/public/templates/create-document-automatic.php:250
 msgid "Signed electronically"
 msgstr ""
 
 #. translators: %s: position of the person who still has to sign, for example "Parent"
-#: certification/includes/signature-format.php:755
+#: certification/includes/signature-format.php:756
 #, php-format
 msgid "Pending signature: %s"
 msgstr ""
 
 #. translators: %s: position of the person who still has to sign, for example "Parent"
-#: certification/includes/signature-format.php:755
+#: certification/includes/signature-format.php:756
 msgid "Pending signature"
 msgstr ""
 
-#: certification/includes/signature-format.php:803
+#: certification/includes/signature-format.php:804
 msgid "Sign here"
 msgstr ""
 
 #. translators: %s: position of the person who signs, for example "Student"
-#: certification/includes/signature-format.php:805
+#: certification/includes/signature-format.php:806
 #, php-format
 msgid "You · %s"
 msgstr ""
 
-#: certification/includes/signature-format.php:807
+#: certification/includes/signature-format.php:808
 msgid "Change"
 msgstr ""
 
-#: certification/includes/signature-format.php:811
+#: certification/includes/signature-format.php:812
 msgid "Date and time: added when you sign"
 msgstr ""
 
-#: certification/includes/signature-format.php:897
+#: certification/includes/signature-format.php:898
 msgid "This document was signed electronically. Each signer agreed to sign electronically, and their signature was recorded with the date, the time and the fingerprint of the content. Times are shown in the time zone of the institution."
 msgstr ""
 
-#: certification/includes/signature-format.php:905
+#: certification/includes/signature-format.php:906
 msgid "No consent recorded"
 msgstr ""
 
 #. translators: %s: version of the consent text, for example "v1"
-#: certification/includes/signature-format.php:909
+#: certification/includes/signature-format.php:910
 #, php-format
 msgid "Consent %s accepted"
 msgstr ""
 
-#: certification/includes/signature-format.php:964
+#: certification/includes/signature-format.php:965
 msgid "Summary of who signed this document, when and how."
 msgstr ""
 
 #. translators: 1: number of the signature request, 2: round
-#: certification/includes/signature-format.php:970
+#: certification/includes/signature-format.php:971
 msgid "Request"
 msgstr ""
 
 #. translators: 1: number of the signature request, 2: round
-#: certification/includes/signature-format.php:970
+#: certification/includes/signature-format.php:971
 #, php-format
 msgid "No. %1$d, round %2$d"
 msgstr ""
 
 #. translators: 1: signatures given, 2: signatures required
-#: certification/includes/signature-format.php:973
+#: certification/includes/signature-format.php:974
 #, php-format
 msgid "Completed: %1$d of %2$d signatures"
 msgstr ""
 
 #. translators: 1: signatures given, 2: signatures required
-#: certification/includes/signature-format.php:975
+#: certification/includes/signature-format.php:976
 #, php-format
 msgid "In progress: %1$d of %2$d signatures"
 msgstr ""
 
-#: certification/includes/signature-format.php:976
+#: certification/includes/signature-format.php:977
 #: certification/public/functions/verify-page.php:443
 msgid "Sent for signature"
 msgstr ""
 
-#: certification/includes/signature-format.php:980
+#: certification/includes/signature-format.php:981
 #: certification/public/functions/verify-page.php:452
 msgid "Signers, in the order in which they signed"
 msgstr ""
 
-#: certification/includes/signature-format.php:984
+#: certification/includes/signature-format.php:985
 msgid "Date and time"
 msgstr ""
 
-#: certification/includes/signature-format.php:986
+#: certification/includes/signature-format.php:987
 msgid "ID document"
 msgstr ""
 
-#: certification/includes/signature-format.php:1002
+#: certification/includes/signature-format.php:1003
 msgid "Not applicable"
 msgstr ""
 
-#: certification/includes/signature-format.php:1007
+#: certification/includes/signature-format.php:1008
 #: certification/public/functions/verify-page.php:463
 msgid "Content fingerprint (SHA-256)"
 msgstr ""
 
-#: certification/includes/signature-format.php:1009
+#: certification/includes/signature-format.php:1010
 msgid "It is a unique summary of the signed content. If a single letter of the document changed, the fingerprint would be different and the verification would detect it."
 msgstr ""
 
-#: certification/includes/signature-format.php:1010
+#: certification/includes/signature-format.php:1011
 msgid "Verify"
 msgstr ""
 
 #. translators: 1: verification address, 2: code of the document
-#: certification/includes/signature-format.php:1012
+#: certification/includes/signature-format.php:1013
 #, php-format
 msgid "Scan the QR code or go to %1$s and enter the code %2$s."
 msgstr ""
 
-#: certification/includes/signature-format.php:1014
+#: certification/includes/signature-format.php:1015
 msgid "Verification QR"
 msgstr ""
 
 #. translators: %s: offset of the time zone, for example "UTC−4"
-#: certification/includes/signature-format.php:1018
+#: certification/includes/signature-format.php:1019
 #, php-format
 msgid "Time zone: %s."
 msgstr ""
 
 #. translators: %s: code of the document
-#: certification/includes/signature-format.php:1021
+#: certification/includes/signature-format.php:1022
 #, php-format
 msgid "Certificate of signatures · %s"
 msgstr ""
@@ -4276,18 +4292,18 @@ msgid "Final PDF"
 msgstr ""
 
 #: certification/public/functions/assets.php:56
-#: certification/public/templates/create-document-automatic.php:278
+#: certification/public/templates/create-document-automatic.php:280
 msgid "The document could not be saved. Please reload the page and try again."
 msgstr ""
 
 #: certification/public/functions/assets.php:57
-#: certification/public/templates/create-document-automatic.php:89
+#: certification/public/templates/create-document-automatic.php:91
 msgid "Tick the box to be able to sign."
 msgstr ""
 
 #: certification/public/functions/assets.php:58
-#: certification/public/templates/create-document-automatic.php:91
-#: certification/public/templates/create-document-automatic.php:130
+#: certification/public/templates/create-document-automatic.php:93
+#: certification/public/templates/create-document-automatic.php:132
 msgid "Start"
 msgstr ""
 
@@ -4346,7 +4362,7 @@ msgid "Saving your signature…"
 msgstr ""
 
 #: certification/public/functions/assets.php:80
-#: certification/public/templates/create-document-automatic.php:136
+#: certification/public/templates/create-document-automatic.php:138
 msgid "Document signed"
 msgstr ""
 
@@ -4367,7 +4383,7 @@ msgid "The final PDF could not be saved now. You can generate it from «Document
 msgstr ""
 
 #: certification/public/functions/assets.php:86
-#: certification/public/templates/create-document-automatic.php:67
+#: certification/public/templates/create-document-automatic.php:69
 msgid "You"
 msgstr ""
 
@@ -4392,12 +4408,12 @@ msgid "Will sign after the previous signatures"
 msgstr ""
 
 #: certification/public/functions/assets.php:92
-#: certification/public/templates/create-document-automatic.php:72
+#: certification/public/templates/create-document-automatic.php:74
 msgid "your turn"
 msgstr ""
 
 #: certification/public/functions/assets.php:93
-#: certification/public/templates/create-document-automatic.php:70
+#: certification/public/templates/create-document-automatic.php:72
 msgid "signed"
 msgstr ""
 
@@ -4445,6 +4461,24 @@ msgstr ""
 
 #: certification/public/functions/documents-signature.php:316
 msgid "Saved. The final document is being generated by the PDF server; we will let you know when it is ready."
+msgstr ""
+
+#. translators: %d: number of documents
+#: certification/public/functions/signature-reminder.php:95
+#, php-format
+msgid "You have %d required document to sign"
+msgid_plural "You have %d required documents to sign"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: 1: document title, 2: name of the person the document belongs to
+#: certification/public/functions/signature-reminder.php:103
+#, php-format
+msgid "%1$s of %2$s"
+msgstr ""
+
+#: certification/public/functions/signature-reminder.php:107
+msgid "Sign now"
 msgstr ""
 
 #: certification/public/functions/signer-registration.php:27
@@ -4644,143 +4678,153 @@ msgid "Code %s"
 msgstr ""
 
 #: certification/public/templates/create-document-automatic.php:59
+#: certification/public/templates/document-fields-form.php:38
+msgid "Sign later"
+msgstr ""
+
+#: certification/public/templates/create-document-automatic.php:60
 msgid "Close without signing"
 msgstr ""
 
-#: certification/public/templates/create-document-automatic.php:64
+#: certification/public/templates/create-document-automatic.php:63
+#: certification/public/templates/document-fields-form.php:39
+msgid "It is required. We will remind you in My Account until you sign it."
+msgstr ""
+
+#: certification/public/templates/create-document-automatic.php:66
 msgid "Signing order"
 msgstr ""
 
-#: certification/public/templates/create-document-automatic.php:82
+#: certification/public/templates/create-document-automatic.php:84
 msgid "Review the document and sign it"
 msgstr ""
 
-#: certification/public/templates/create-document-automatic.php:112
+#: certification/public/templates/create-document-automatic.php:114
 msgid "This document was updated to the new signature system: please sign it again. Everyone who has to sign it must do so from their own account."
 msgstr ""
 
-#: certification/public/templates/create-document-automatic.php:138
+#: certification/public/templates/create-document-automatic.php:140
 msgid "Status of the signatures"
 msgstr ""
 
-#: certification/public/templates/create-document-automatic.php:141
+#: certification/public/templates/create-document-automatic.php:143
 msgid "Back to My documents"
 msgstr ""
 
-#: certification/public/templates/create-document-automatic.php:155
+#: certification/public/templates/create-document-automatic.php:157
 msgid "Adopt your signature"
 msgstr ""
 
-#: certification/public/templates/create-document-automatic.php:156
+#: certification/public/templates/create-document-automatic.php:158
 msgid "Choose how you want to sign."
 msgstr ""
 
-#: certification/public/templates/create-document-automatic.php:161
+#: certification/public/templates/create-document-automatic.php:163
 msgid "How to sign"
 msgstr ""
 
-#: certification/public/templates/create-document-automatic.php:164
+#: certification/public/templates/create-document-automatic.php:166
 msgctxt "signature tab: type the signature"
 msgid "Type"
 msgstr ""
 
-#: certification/public/templates/create-document-automatic.php:167
+#: certification/public/templates/create-document-automatic.php:169
 msgid "Draw"
 msgstr ""
 
-#: certification/public/templates/create-document-automatic.php:170
+#: certification/public/templates/create-document-automatic.php:172
 msgid "Upload image"
 msgstr ""
 
-#: certification/public/templates/create-document-automatic.php:176
+#: certification/public/templates/create-document-automatic.php:178
 msgid "Your typed signature"
 msgstr ""
 
-#: certification/public/templates/create-document-automatic.php:178
+#: certification/public/templates/create-document-automatic.php:180
 msgid "You can change how it is written (for example, with an initial). The name shown under the signature does not change: it is the name of your account."
 msgstr ""
 
-#: certification/public/templates/create-document-automatic.php:181
+#: certification/public/templates/create-document-automatic.php:183
 msgid "Choose a lettering style"
 msgstr ""
 
-#: certification/public/templates/create-document-automatic.php:199
+#: certification/public/templates/create-document-automatic.php:201
 msgid "Canvas to draw your signature"
 msgstr ""
 
-#: certification/public/templates/create-document-automatic.php:201
+#: certification/public/templates/create-document-automatic.php:203
 msgid "Sign here with the mouse or with your finger"
 msgstr ""
 
-#: certification/public/templates/create-document-automatic.php:204
+#: certification/public/templates/create-document-automatic.php:206
 msgid "Undo"
 msgstr ""
 
-#: certification/public/templates/create-document-automatic.php:206
+#: certification/public/templates/create-document-automatic.php:208
 msgid "Hard to draw? Use the «Type» tab."
 msgstr ""
 
-#: certification/public/templates/create-document-automatic.php:214
+#: certification/public/templates/create-document-automatic.php:216
 msgid "Drag the image of your signature here"
 msgstr ""
 
-#: certification/public/templates/create-document-automatic.php:215
+#: certification/public/templates/create-document-automatic.php:217
 msgid "or"
 msgstr ""
 
-#: certification/public/templates/create-document-automatic.php:216
+#: certification/public/templates/create-document-automatic.php:218
 msgid "Choose file"
 msgstr ""
 
-#: certification/public/templates/create-document-automatic.php:221
+#: certification/public/templates/create-document-automatic.php:223
 msgid "Formats: PNG or JPG, up to 2 MB."
 msgstr ""
 
-#: certification/public/templates/create-document-automatic.php:222
+#: certification/public/templates/create-document-automatic.php:224
 msgid "Sign with dark ink on white or light paper, without shadows."
 msgstr ""
 
-#: certification/public/templates/create-document-automatic.php:223
+#: certification/public/templates/create-document-automatic.php:225
 msgid "Crop the image so that only the signature shows."
 msgstr ""
 
-#: certification/public/templates/create-document-automatic.php:224
+#: certification/public/templates/create-document-automatic.php:226
 msgid "The background of the paper is not cleaned: use a white background."
 msgstr ""
 
-#: certification/public/templates/create-document-automatic.php:228
+#: certification/public/templates/create-document-automatic.php:230
 msgid "You can only upload your own signature."
 msgstr ""
 
-#: certification/public/templates/create-document-automatic.php:228
+#: certification/public/templates/create-document-automatic.php:230
 msgid "Using another person's signature is not allowed and the upload is recorded."
 msgstr ""
 
-#: certification/public/templates/create-document-automatic.php:230
+#: certification/public/templates/create-document-automatic.php:232
 msgid "I confirm that it is my own signature"
 msgstr ""
 
-#: certification/public/templates/create-document-automatic.php:235
+#: certification/public/templates/create-document-automatic.php:237
 msgid "This is how it will appear in the document"
 msgstr ""
 
-#: certification/public/templates/create-document-automatic.php:242
+#: certification/public/templates/create-document-automatic.php:244
 msgid "Date and time: added automatically when you sign"
 msgstr ""
 
-#: certification/public/templates/create-document-automatic.php:251
+#: certification/public/templates/create-document-automatic.php:253
 msgid "It will be used in:"
 msgstr ""
 
-#: certification/public/templates/create-document-automatic.php:252
+#: certification/public/templates/create-document-automatic.php:254
 msgid "If you want to change it later, press «Change» next to the signature before finishing."
 msgstr ""
 
-#: certification/public/templates/create-document-automatic.php:258
+#: certification/public/templates/create-document-automatic.php:260
 msgid "By pressing «Adopt and sign», you accept that this signature represents you and has the same validity as your handwritten signature."
 msgstr ""
 
-#: certification/public/templates/create-document-automatic.php:260
+#: certification/public/templates/create-document-automatic.php:262
 msgid "Adopt and sign"
 msgstr ""
 
@@ -5365,12 +5409,12 @@ msgid "Some variables of the document have no value: it was not issued."
 msgstr ""
 
 #: includes/provider-wp-user.php:234
-#: public/functions.php:617
+#: public/functions.php:639
 msgid "Tome: "
 msgstr ""
 
 #: includes/provider-wp-user.php:234
-#: public/functions.php:619
+#: public/functions.php:641
 msgid "Folio: "
 msgstr ""
 

@@ -50,3 +50,4 @@ require_once SQUUAD_CERT_MODULE_PATH . 'public/functions/signature-batch.php';
 require_once SQUUAD_CERT_MODULE_PATH . 'public/functions/checkout/cart-signatures.php';
 require_once SQUUAD_CERT_MODULE_PATH . 'public/functions/account/dashboard-signatures.php';
 require_once SQUUAD_CERT_MODULE_PATH . 'public/functions/assets.php';
+require_once SQUUAD_CERT_MODULE_PATH . 'public/functions/signature-reminder.php'; // ventana una vez por sesión y aviso fijo

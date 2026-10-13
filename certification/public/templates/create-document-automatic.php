@@ -56,9 +56,11 @@ $icon_close = '<svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true
                 <?php if ($signing) : ?>
                     <button type="button" class="wpc-btn wpc-btn--primary wpc-btn--lg wpc-sign-main" data-wpc-main hidden><?= esc_html__('Next', 'wp-certificates') ?></button>
                 <?php endif; ?>
+                <button type="button" class="wpc-btn wpc-btn--ghost" data-wpc-later><?= esc_html__('Sign later', 'wp-certificates') ?></button>
                 <button type="button" class="wpc-btn wpc-btn--ghost wpc-icon-btn" id="close-modal-enrollment" aria-label="<?= esc_attr__('Close without signing', 'wp-certificates') ?>"><?= $icon_close // phpcs:ignore -- SVG fijo ?></button>
             </div>
         </header>
+        <p class="wpc-sign-later-note" style="margin: 0 16px 8px; font-size: 13px; color: var(--eds-muted, #50575e)"><?= esc_html__('It is required. We will remind you in My Account until you sign it.', 'wp-certificates') ?></p>
 
         <?php if ($overview) : ?>
             <ol class="wpc-sign-order" aria-label="<?= esc_attr__('Signing order', 'wp-certificates') ?>">

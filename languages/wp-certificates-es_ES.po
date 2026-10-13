@@ -6402,3 +6402,52 @@ msgstr "No se pudo comprobar la evidencia de este documento."
 msgid "Certificate of signatures of %s"
 msgstr "Certificado de firmas de %s"
 
+
+# --- Cadenas nuevas (2026-10-12): traducirlas ---
+#: certification/admin/signing-settings.php:123
+msgid "Open the pending signature"
+msgstr "Abrir la firma pendiente"
+
+#: certification/admin/signing-settings.php:124
+msgid ""
+"Automatic documents need attention: while someone has to sign one, My "
+"Account shows a notice on every page that cannot be closed. Choose whether "
+"the signing window also opens by itself."
+msgstr "Los documentos automáticos requieren atención: mientras alguien tenga uno por firmar, Mi cuenta muestra en todas sus páginas un aviso que no se puede cerrar. Elija si además la ventana de firma se abre sola."
+
+#: certification/admin/signing-settings.php:125
+msgid "Once per login, on the My Account dashboard (recommended)"
+msgstr "Una vez por inicio de sesión, en el escritorio de Mi cuenta (recomendado)"
+
+#: certification/admin/signing-settings.php:126
+msgid "Only when the person clicks «Sign»"
+msgstr "Solo cuando la persona pulsa «Firmar»"
+
+#. translators: %d: number of documents
+#: certification/public/functions/signature-reminder.php:95
+#, php-format
+msgid "You have %d required document to sign"
+msgid_plural "You have %d required documents to sign"
+msgstr[0] "Tiene %d documento obligatorio por firmar"
+msgstr[1] "Tiene %d documentos obligatorios por firmar"
+
+#. translators: 1: document title, 2: name of the person the document belongs to
+#: certification/public/functions/signature-reminder.php:103
+#, php-format
+msgid "%1$s of %2$s"
+msgstr "%1$s de %2$s"
+
+#: certification/public/functions/signature-reminder.php:107
+msgid "Sign now"
+msgstr "Firmar ahora"
+
+#: certification/public/templates/create-document-automatic.php:59
+#: certification/public/templates/document-fields-form.php:38
+msgid "Sign later"
+msgstr "Firmar más tarde"
+
+#: certification/public/templates/create-document-automatic.php:63
+#: certification/public/templates/document-fields-form.php:39
+msgid "It is required. We will remind you in My Account until you sign it."
+msgstr "Es obligatorio. Se lo recordaremos en Mi cuenta hasta que lo firme."
+

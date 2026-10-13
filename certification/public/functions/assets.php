@@ -101,13 +101,26 @@ function squuad_cert_signature_public_assets(): void
     wp_enqueue_script('squuad-cert-signature-pad'); // también lo usa la firma en lote (documents-to-sign-batch.php)
 }
 
-// El modal se pinta al final de la página (insiste hasta que la cuenta firma o rellena lo pendiente)
+// La ventana se pinta al final de la página: sola, una vez por inicio de sesión y en el escritorio de Mi Cuenta; a
+// propósito («Firmar», formulario de campos enviado), siempre (public/functions/signature-reminder.php). El resto del
+// tiempo lo recuerda el aviso fijo.
 add_action('wp_footer', 'squuad_cert_signature_modal_footer');
 function squuad_cert_signature_modal_footer(): void
 {
     // Otro plugin puede aplazarlo si en esta página muestra un modal prioritario (p. ej. EduSystem: crear la
-    // contraseña o elegir una electiva); en la siguiente visita vuelve a insistir
-    if (squuad_cert_modal_page() && apply_filters('squuad_cert_show_signature_modal', true)) {
-        squuad_cert_modal_document_automatic();
+    // contraseña o elegir una electiva)
+    if (!squuad_cert_modal_page() || !apply_filters('squuad_cert_show_signature_modal', true)) {
+        return;
     }
+    $explicit = function_exists('squuad_cert_signature_explicit_open') && squuad_cert_signature_explicit_open();
+    if (!$explicit && function_exists('squuad_cert_signature_auto_open_here') && !squuad_cert_signature_auto_open_here()) {
+        return;
+    }
+    ob_start();
+    squuad_cert_modal_document_automatic();
+    $html = (string) ob_get_clean();
+    if ('' !== trim($html) && !$explicit && function_exists('squuad_cert_signature_mark_auto_opened')) {
+        squuad_cert_signature_mark_auto_opened();
+    }
+    echo $html; // phpcs:ignore -- plantillas del propio plugin, ya escapadas
 }

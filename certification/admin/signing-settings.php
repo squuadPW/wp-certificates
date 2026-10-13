@@ -9,6 +9,8 @@ declare(strict_types=1);
  *   revisar el asesor legal de cada institución.
  * - «Adjuntar el certificado de firmas al PDF» (ADR 0014 de Edusof): valor del sitio, activado por defecto; cada
  *   documento puede seguirlo o cambiarlo en su ficha.
+ * - «Abrir la firma pendiente» (12/10/2026): una vez por inicio de sesión (por defecto) o solo al pulsar «Firmar»
+ *   (public/functions/signature-reminder.php).
  *
  * Con el permiso de la pantalla (manager_configuration_certificates), nonce y registro en el log.
  */
@@ -33,6 +35,14 @@ function squuad_cert_signing_settings_handle(): void
     $old_sheet = function_exists('squuad_cert_signature_sheet_site') ? squuad_cert_signature_sheet_site() : 'yes';
     $old_upload = (string) get_option(SQUUAD_CERT_SIGNING_UPLOAD_OPTION, '1');
     $old_note = (string) get_option(SQUUAD_CERT_SIGNING_LEGAL_NOTE_OPTION, '');
+    if (defined('SQUUAD_CERT_SIGNATURE_AUTO_OPEN_OPTION') && isset($_POST['auto_open'])) {
+        $auto = 'manual' === ($_POST['auto_open'] ?? '') ? 'manual' : 'session';
+        $old_auto = squuad_cert_signature_auto_open_mode();
+        update_option(SQUUAD_CERT_SIGNATURE_AUTO_OPEN_OPTION, $auto, true);
+        if ($old_auto !== $auto) {
+            squuad_cert_log(sprintf('Firma de documentos: la ventana de firma pendiente se abre %s, por el usuario %d', 'manual' === $auto ? 'solo al pulsar Firmar' : 'una vez por inicio de sesión', get_current_user_id()), 'signing_settings');
+        }
+    }
 
     update_option(SQUUAD_CERT_SIGNING_UPLOAD_OPTION, $upload, false);
     update_option(SQUUAD_CERT_SIGNING_LEGAL_NOTE_OPTION, $note, false);
@@ -107,6 +117,14 @@ function squuad_cert_signing_settings_section(): void
                     <span class="eds-switch__track" aria-hidden="true"><span class="eds-switch__thumb"></span></span>
                 </label>
             </div>
+            <?php endif; ?>
+            <?php if (function_exists('squuad_cert_signature_auto_open_mode')) : $auto = squuad_cert_signature_auto_open_mode(); ?>
+            <fieldset style="margin-top: 20px; border: 0; padding: 0">
+                <legend style="padding: 0"><strong><?= esc_html__('Open the pending signature', 'wp-certificates') ?></strong></legend>
+                <p id="squuad-cert-signing-auto-help" style="margin: 0 0 6px; color: var(--eds-muted, #50575e)"><?= esc_html__('Automatic documents need attention: while someone has to sign one, My Account shows a notice on every page that cannot be closed. Choose whether the signing window also opens by itself.', 'wp-certificates') ?></p>
+                <label style="display: block; margin: 4px 0"><input type="radio" name="auto_open" value="session" aria-describedby="squuad-cert-signing-auto-help" <?php checked('session', $auto); ?>> <?= esc_html__('Once per login, on the My Account dashboard (recommended)', 'wp-certificates') ?></label>
+                <label style="display: block; margin: 4px 0"><input type="radio" name="auto_open" value="manual" aria-describedby="squuad-cert-signing-auto-help" <?php checked('manual', $auto); ?>> <?= esc_html__('Only when the person clicks «Sign»', 'wp-certificates') ?></label>
+            </fieldset>
             <?php endif; ?>
             <div class="eds-field" style="margin-top: 20px">
                 <label for="squuad-cert-signing-legal-note"><strong><?= esc_html__('Legal note of the certificate of signatures', 'wp-certificates') ?></strong></label>

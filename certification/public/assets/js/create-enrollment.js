@@ -46,12 +46,16 @@ document.addEventListener("DOMContentLoaded", () => {
         if (root) root.hidden = true;
         document.body.classList.remove("modal-open", "wpc-sign-open");
         document.documentElement.classList.remove("wpc-sign-open");
+        // El foco vuelve al aviso fijo de Mi Cuenta, donde se retoma la firma
+        const resume = document.querySelector(".wpc-pending-banner__sign");
+        if (resume) resume.focus();
     };
-    const closeButton = document.getElementById("close-modal-enrollment");
-    if (closeButton) closeButton.addEventListener("click", () => {
+    // «Firmar más tarde» y la X hacen lo mismo: cerrar sin firmar (vuelve en el siguiente inicio de sesión y el aviso fijo
+    // de Mi Cuenta lo sigue recordando)
+    document.querySelectorAll("#close-modal-enrollment, [data-wpc-later]").forEach((button) => button.addEventListener("click", () => {
         if (root && root.dataset.wpcSigned && !window.confirm(signaturesText("closeConfirm"))) return;
         closeModal();
-    });
+    }));
 
     if (root) initSigningWindow(root, closeModal);
 });

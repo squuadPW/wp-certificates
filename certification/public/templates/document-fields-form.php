@@ -35,6 +35,8 @@
 
                 <div style="text-align: center; margin-top: 2rem">
                     <button type="submit" class="submit button-create-enrollment"><?= esc_html__('Continue', 'wp-certificates') ?></button>
+                    <button type="button" class="button" data-wpc-later style="display: block; width: 100%; margin: 8px 0 0; box-sizing: border-box"><?= esc_html__('Sign later', 'wp-certificates') ?></button>
+                    <p style="margin: 12px 0 0; font-size: 13px; color: #50575e"><?= esc_html__('It is required. We will remind you in My Account until you sign it.', 'wp-certificates') ?></p>
                 </div>
             </form>
         </div>
