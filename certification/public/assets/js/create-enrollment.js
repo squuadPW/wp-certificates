@@ -279,7 +279,7 @@ function initSigningWindow(root, closeModal) {
         data.append("_ajax_nonce", nonce);
         data.append("request_id", field("request_id"));
         data.append("content_sha256", field("content_sha256"));
-        data.append("document_id", field("document_id") || "ENROLLMENT");
+        data.append("document_id", field("document_id")); // el servidor no lo usa (solo request_id): sin valor fijo
         data.append("student_user_id", field("student_user_id"));
         if (consentBox && consentBox.checked) data.append("consent_version", consentBox.value);
         const fieldsValues = field("document_fields_values");

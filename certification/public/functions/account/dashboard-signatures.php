@@ -121,11 +121,16 @@ function squuad_cert_modal_document_automatic()
     }
     // Las variables del sistema ganan a un campo con la misma clave. Los valores los resuelve wp-certificates (ADR 0005).
     // La cuenta que recibe el documento es el titular: da {{full_name}}, {{email}}… solo si ningún plugin activo las da
-    $replacements = array_merge($field_replacements, squuad_cert_template_replacements($html, $variables_subject, [
+    $ctx = squuad_cert_document_ctx($document, SQUUAD_CERT_SUBJECT_ACCOUNT, (int) $subject_id, [
         'document' => $document,
         'holder_type' => SQUUAD_CERT_SUBJECT_ACCOUNT,
         'holder_id' => $subject_id,
-    ])['replacements']);
+    ], false);
+    if (is_wp_error($ctx)) {
+        // Exige un contexto que solo da otro plugin: no es de este modal; sin aviso que se repita en cada página
+        return;
+    }
+    $replacements = array_merge($field_replacements, squuad_cert_template_replacements($html, $variables_subject, $ctx)['replacements']);
 
     // Borrador de la solicitud (ADR 0002): datos escapados, marcadores fijos para las firmas y el QR, imágenes
     // incrustadas. Se regenera en cada apertura hasta la primera firma, que lo congela.

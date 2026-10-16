@@ -78,6 +78,8 @@ add_filter('edusof_ui_screens', static fn($prefixes) => array_merge((array) $pre
 
 require_once WP_C_PATH . 'includes/autoload.php';
 require_once WP_C_PATH . 'includes/contract.php';
+// API de documentos para otros plugins (contrato): contexto obligatorio y plantillas inactivas
+require_once WP_C_PATH . 'includes/documents-api.php';
 require_once WP_C_PATH . 'includes/dates.php';
 require_once WP_C_PATH . 'includes/variables.php';
 // Titular «Usuario de WordPress» (wp_user): wp-certificates funciona sin EduSystem (ADR 0004, decisión 6 y paso 10)

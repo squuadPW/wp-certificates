@@ -6451,3 +6451,33 @@ msgstr "Firmar más tarde"
 msgid "It is required. We will remind you in My Account until you sign it."
 msgstr "Es obligatorio. Se lo recordaremos en Mi cuenta hasta que lo firme."
 
+
+#: includes/documents-api.php:32
+msgid ""
+"This document can only be generated from the screen of the plugin that "
+"provides it."
+msgstr "Este documento solo se genera desde la pantalla del plugin que lo ofrece."
+
+#: includes/documents-api.php:125
+msgid "The signers of the document could not be saved as requested."
+msgstr "No se pudieron guardar los firmantes del documento como se pidieron."
+
+#. translators: 1: user id of who entered, 2: account id
+#: src/Log.php:51
+#, php-format
+msgid "(done by user %1$s on behalf of account %2$d)"
+msgstr "(hecho por el usuario %1$s en nombre de la cuenta %2$d)"
+
+
+#: certification/admin/document-signing.php:267
+msgid ""
+"This document is generated from the screen of the plugin that provides it: "
+"issue it again from there."
+msgstr "Este documento se genera desde la pantalla del plugin que lo ofrece: vuelve a emitirlo desde allí."
+
+#: certification/includes/signing-turns.php:129
+msgid ""
+"This document is generated from the screen of the plugin that provides it: "
+"request it again from there."
+msgstr "Este documento se genera desde la pantalla del plugin que lo ofrece: vuelve a pedirlo desde allí."
+

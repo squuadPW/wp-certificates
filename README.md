@@ -49,6 +49,25 @@ Se publica junto con **EduSystem 6.0.0** (ADR 0004 de EduSystem). Resumen:
   marcan privados sin moverlos, también los del sistema de firma anterior (esquema v14). Su ficha solo la ven quien
   tiene el permiso de certificación o quien lo subió (la URL directa del archivo sigue respondiendo: pendiente servirlos
   con permisos).
+- **API de documentos para otros plugins** (dentro del contrato; las funciones se comprueban con `function_exists`):
+  - **Contexto de un documento al generarlo:** filtro `squuad_cert_document_context` para que otro plugin añada datos a
+    las variables (por ejemplo, la inscripción) y filtro `squuad_cert_document_required_context` para que declare que un
+    documento solo se genera con un contexto suyo (por ejemplo, un acta de una promoción). Si falta, ninguna ruta lo
+    genera (Generar, asignar, emitir para firma, documentos automáticos, Mi cuenta) y se muestra su aviso; en Mi cuenta
+    no se ofrece. Función `squuad_cert_document_ctx()`.
+  - **Inscripción en las variables:** al asignar un certificado con inscripción, las variables y la línea del libro la
+    reciben (`enrollment_id` en el contexto).
+  - **Plantillas inactivas desde otro plugin:** `squuad_cert_create_document($data, $slots, $requires)` crea un documento
+    inactivo con su política de firmantes (o no lo crea si la política no queda completa).
+  - **Registro en nombre de:** con una sesión conmutada («Entrar como» de soporte u otro plugin), el log anota quién hizo
+    la acción en nombre de la cuenta.
+  - Quitado el valor fijo «ENROLLMENT» del envío de la firma (el servidor no lo usaba).
+  - Seguridad: el contexto de la ruta gana (un filtro solo añade claves, nunca cambia el titular); consultar si un
+    documento necesita contexto no escribe en el registro; reemitir y «volver a pedir firmas» comprueban el contexto antes
+    de anular el tomo y folio o revocar firmas; la línea del libro al emitir para firma recibe el contexto (filtro
+    `squuad_cert_issue_book_entry` con un quinto argumento); la vuelta atrás de `squuad_cert_create_document` no deja
+    restos de la política; el modal de Mi cuenta no repite el aviso.
+  - En curso antes de publicar: emisión, firma y libro para cualquier tipo de titular (hoy, estudiante o cuenta).
 
 ### 1.0.29
 - Versión anterior (sin registro de cambios en este repositorio).

@@ -608,7 +608,13 @@ function assign_certificate_student( $student_id, $template_id, $type, $emission
         // 4. Valores de las variables, resueltos por wp-certificates (ADR 0005 de EduSystem): generales y métodos de
         // los plugins propios, aislados. Con libro de registro, si una variable falla el documento no se emite (y no se
         // gasta una línea del libro: se comprueba antes de reservarla).
-        $resolved = squuad_cert_template_replacements($header . $content . $footer, (int) $student->id, ['document' => $document]);
+        // Contexto: la inscripción del certificado, si viene, y lo que añadan otros plugins; un documento que
+        // exige un contexto que aquí no hay no se emite
+        $ctx = squuad_cert_document_ctx($document, 'edusystem_student', (int) $student->id, ['document' => $document] + ($enrollment_id ? ['enrollment_id' => (int) $enrollment_id] : []));
+        if (is_wp_error($ctx)) {
+            return false;
+        }
+        $resolved = squuad_cert_template_replacements($header . $content . $footer, (int) $student->id, $ctx);
         if ($resolved['failed'] && !empty($document->book)) {
             squuad_cert_log(sprintf('Certificado no emitido (documento %d, estudiante %d): variables sin valor %s', (int) $document->id, (int) $student->id, implode(', ', array_keys($resolved['failed']))), 'certificate_not_issued');
             return false;
@@ -619,7 +625,7 @@ function assign_certificate_student( $student_id, $template_id, $type, $emission
         // nada los sobrescriba. El texto de la línea es la descripción del documento y la reserva la hace quien tenga la
         // conexión con el libro (includes/book.php). Si no se puede reservar, el certificado no se emite.
         if ( $document->book ) {
-            $book_data = squuad_cert_book_reserve_line( $document, 'edusystem_student', (int) $student->id );
+            $book_data = squuad_cert_book_reserve_line( $document, 'edusystem_student', (int) $student->id, $ctx );
             if ( is_wp_error($book_data) ) {
                 return false;
             }

@@ -665,6 +665,10 @@ function squuad_cert_signature_user_documents(WP_User $user): array
             // Solo si pide firma o tiene campos, y solo a las cuentas con uno de los roles del panel: firman si la
             // plantilla tiene variable de firma; si no, solo rellenan los campos
             $automatic = squuad_cert_automatic_status($document);
+            // Un documento que exige un contexto de otro plugin no se ofrece en Mi cuenta: no se podría abrir
+            if (squuad_cert_document_needs_external_context($document, SQUUAD_CERT_SUBJECT_ACCOUNT, $subject_id, ['holder_type' => SQUUAD_CERT_SUBJECT_ACCOUNT, 'holder_id' => $subject_id])) {
+                continue;
+            }
             if (!$automatic['shown'] || '' === squuad_cert_signing_policy_role_for_user(squuad_cert_signing_policy($document), $user)) {
                 continue;
             }

@@ -70,6 +70,9 @@ function squuad_cert_request_issue_for_holder(int $holder_user_id, int $document
     if ('' === squuad_cert_signing_policy_role_for_user(squuad_cert_signing_policy($document), $holder)) {
         return null; // la cuenta no recibe este documento
     }
+    if (squuad_cert_document_needs_external_context($document, SQUUAD_CERT_SUBJECT_ACCOUNT, $holder_user_id, ['holder_type' => SQUUAD_CERT_SUBJECT_ACCOUNT, 'holder_id' => $holder_user_id])) {
+        return null; // exige un contexto que solo da otro plugin
+    }
     $document_id = (string) $document->document_identificator;
     $latest = squuad_cert_signature_request_latest($holder_user_id, $document_id);
     if ($latest && in_array($latest->status, SQUUAD_CERT_SIGNATURE_REQUEST_OPEN, true)) {
@@ -119,6 +122,11 @@ function squuad_cert_request_restart(int $request_id, string $reason, int $actor
     }
     if ('' === $reason) {
         return $fail(__('Write the reason for requesting the signatures again.', 'wp-certificates'));
+    }
+    // Antes de revocar nada: si el documento exige un contexto que solo da otro plugin, la ronda nueva no se podría crear
+    $restart_doc = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}documents_certificates WHERE id = %d", (int) $request->document_certificate_id));
+    if ($restart_doc && squuad_cert_document_needs_external_context($restart_doc, SQUUAD_CERT_SUBJECT_ACCOUNT, (int) $request->subject_id, ['holder_type' => SQUUAD_CERT_SUBJECT_ACCOUNT, 'holder_id' => (int) $request->subject_id])) {
+        return $fail(__('This document is generated from the screen of the plugin that provides it: request it again from there.', 'wp-certificates'));
     }
 
     $signature_ids = $wpdb->get_col($wpdb->prepare(

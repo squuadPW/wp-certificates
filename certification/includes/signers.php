@@ -1810,6 +1810,11 @@ function squuad_cert_signature_issue_document(int $student_id, int $document_cer
     if (!squuad_cert_signature_issue_signers($document)) {
         return $fail(__('This document has no system signers configured. Configure its signers or generate it as before.', 'wp-certificates'));
     }
+    // Contexto, antes de crear la solicitud o reservar el libro: si exige uno que aquí no hay, no se emite
+    $ctx = squuad_cert_document_ctx($document, SQUUAD_CERT_SUBJECT_STUDENT, $student_id, ['document' => $document, 'certificate_id' => $document->id]);
+    if (is_wp_error($ctx)) {
+        return $fail($ctx->get_error_message());
+    }
     $latest = squuad_cert_signature_issued_latest($student_id, $document_certificate_id);
     if ($latest && in_array($latest->status, SQUUAD_CERT_SIGNATURE_REQUEST_OPEN, true) && null !== $latest->frozen_at_utc) {
         return $fail(__('This document was already issued to this person and is waiting for signatures.', 'wp-certificates'));
@@ -1853,7 +1858,7 @@ function squuad_cert_signature_issue_document(int $student_id, int $document_cer
 
     // Línea nueva del libro: la reserva la capa admin (API de libros de EduSof) con el filtro; sin ella no se emite
     if ($uses_book && !$entry) {
-        $entry = apply_filters('squuad_cert_issue_book_entry', null, $student, $document, $request);
+        $entry = apply_filters('squuad_cert_issue_book_entry', null, $student, $document, $request, $ctx);
         if (is_wp_error($entry) || !is_object($entry) || empty($entry->id)) {
             return $fail(is_wp_error($entry) ? $entry->get_error_message() : __('The registry book did not assign a volume and folio. The document was not issued.', 'wp-certificates'));
         }
@@ -1872,7 +1877,7 @@ function squuad_cert_signature_issue_document(int $student_id, int $document_cer
 
     // Valores de las variables: los resuelve wp-certificates (ADR 0005). Un documento que se emite para firma no puede
     // quedar incompleto: si una variable falla, no se emite.
-    $resolved = squuad_cert_template_replacements(implode('', $parts), $student_id, ['document' => $document, 'certificate_id' => $document->id]);
+    $resolved = squuad_cert_template_replacements(implode('', $parts), $student_id, $ctx);
     if ($resolved['failed']) {
         return $fail(sprintf(
             /* translators: %s: list of variables */

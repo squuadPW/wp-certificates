@@ -213,7 +213,10 @@ function squuad_cert_issue_document_to_user(int $user_id, int $document_id, stri
     // Los métodos de otros plugins no reciben la cuenta como titular (sin EduSystem no hay ficha): 0. La línea del libro
     // usa el mismo titular que la plantilla (methods_subject_id, ver squuad_cert_book_line_text())
     $methods_subject = 0;
-    $ctx = ['document' => $document, 'holder_type' => SQUUAD_CERT_SUBJECT_ACCOUNT, 'holder_id' => $user_id, 'methods_subject_id' => $methods_subject];
+    $ctx = squuad_cert_document_ctx($document, SQUUAD_CERT_SUBJECT_ACCOUNT, $user_id, ['document' => $document, 'holder_type' => SQUUAD_CERT_SUBJECT_ACCOUNT, 'holder_id' => $user_id, 'methods_subject_id' => $methods_subject]);
+    if (is_wp_error($ctx)) {
+        return $ctx; // exige un contexto que solo da otro plugin
+    }
 
     $resolved = squuad_cert_template_replacements($header . $content . $footer, $methods_subject, $ctx);
     if ($resolved['failed'] && !empty($document->book)) {

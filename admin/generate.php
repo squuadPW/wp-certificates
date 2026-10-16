@@ -79,8 +79,14 @@ function squuad_cert_generate_document(): void
         wp_send_json_error(__('This document requires signatures: it can no longer be generated with signature images. Configure its signers (Certification > Documents > Document signers) and issue it for signature; each responsible person signs from their own account.', 'wp-certificates'), 409);
     }
 
+    // Contexto del documento: lo que añadan otros plugins; si el documento exige un contexto que esta pantalla no
+    // tiene (p. ej. una promoción), no se genera y se muestra el aviso de ese plugin
+    $ctx = squuad_cert_document_ctx($document, SQUUAD_CERT_GENERATE_SUBJECT, (int) $student->id, ['document' => $document, 'certificate_id' => $document->id]);
+    if (is_wp_error($ctx)) {
+        wp_send_json_error($ctx->get_error_message(), 409);
+    }
     // Valores de las variables: los resuelve wp-certificates (ADR 0005 de EduSystem)
-    $replacements = squuad_cert_template_replacements($document->header . $document->content . $document->footer, (int) $student->id, ['document' => $document, 'certificate_id' => $document->id])['replacements'];
+    $replacements = squuad_cert_template_replacements($document->header . $document->content . $document->footer, (int) $student->id, $ctx)['replacements'];
     // Campos adicionales del documento: aquí no hay respuestas; así no queda el texto literal {{clave}}
     if (function_exists('squuad_cert_document_fields_empty_replacements')) {
         $replacements = array_merge(squuad_cert_document_fields_empty_replacements($document), $replacements);

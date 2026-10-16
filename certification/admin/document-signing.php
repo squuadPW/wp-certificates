@@ -224,13 +224,13 @@ function squuad_cert_document_issued_section(object $student): void
  * documento, con su descripción (includes/book.php de wp-certificates); el libro devuelve tomo, folio y número de
  * línea. Devuelve la fila de squuad_cert_book_entries o WP_Error (no se emite).
  */
-add_filter('squuad_cert_issue_book_entry', 'squuad_cert_document_issue_reserve_book_line', 10, 4);
-function squuad_cert_document_issue_reserve_book_line($entry, object $student, object $document, object $request)
+add_filter('squuad_cert_issue_book_entry', 'squuad_cert_document_issue_reserve_book_line', 10, 5);
+function squuad_cert_document_issue_reserve_book_line($entry, object $student, object $document, object $request, array $ctx = [])
 {
     if (is_object($entry) && !is_wp_error($entry)) {
         return $entry;
     }
-    $line = squuad_cert_book_reserve_line($document, 'edusystem_student', (int) $student->id);
+    $line = squuad_cert_book_reserve_line($document, 'edusystem_student', (int) $student->id, $ctx);
     if (is_wp_error($line)) {
         return $line;
     }
@@ -260,6 +260,12 @@ function squuad_cert_document_issue_void_book_line(object $entry, string $reason
  */
 function squuad_cert_document_issue_resolve_book(object $request, object $entry, string $option, string $reason): array
 {
+    global $wpdb;
+    // Antes de anular el tomo y folio: si el documento exige un contexto que solo da otro plugin, no se podría reemitir
+    $document = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}documents_certificates WHERE id = %d", (int) $request->document_certificate_id));
+    if ($document && squuad_cert_document_needs_external_context($document, SQUUAD_CERT_SUBJECT_STUDENT, (int) $request->subject_id, ['certificate_id' => $document->id])) {
+        return ['ok' => false, 'message' => __('This document is generated from the screen of the plugin that provides it: issue it again from there.', 'wp-certificates')];
+    }
     if ('void' === $option) {
         $voided = squuad_cert_document_issue_void_book_line($entry, $reason);
         if (!$voided['ok']) {

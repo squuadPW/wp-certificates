@@ -42,6 +42,14 @@ final class Log
 
         $user_id = (int) get_current_user_id();
         $type = substr(sanitize_key($type) ?: 'info', 0, 60);
+        // Sesión conmutada («Entrar como» de soporte u otro plugin de cambio de usuario): la acción la hace quien entró,
+        // en nombre de la cuenta. Se anota quién (id; -1 = conmutada, origen desconocido) en el contexto y en el texto
+        $switched = function_exists('squuad_cert_signature_session_switched_from') ? (int) squuad_cert_signature_session_switched_from() : 0;
+        if (0 !== $switched && $user_id) {
+            $context['switched_from'] = $switched;
+            /* translators: 1: user id of who entered, 2: account id */
+            $message .= ' ' . sprintf(__('(done by user %1$s on behalf of account %2$d)', 'wp-certificates'), $switched > 0 ? (string) $switched : '?', $user_id);
+        }
 
         if (self::ready()) {
             $wpdb->insert(self::table(), [
