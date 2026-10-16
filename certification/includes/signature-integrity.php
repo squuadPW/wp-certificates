@@ -256,10 +256,29 @@ function squuad_cert_signature_canonical_v4(array $row): string
     return implode("\n", $lines);
 }
 
+/**
+ * Mensaje EDUSIG5 (esquema 21, cualquier tipo de titular; solo firmas de una solicitud: una firma sin solicitud sigue en
+ * EDUSIG1, que no sella el tipo, y hoy ninguna ruta firma sin solicitud): los campos de EDUSIG4 con la cabecera EDUSIG5 más, al final,
+ * el tipo de titular (subject_type: 'wp_user', 'edusystem_student', 'edusystem_promotion'…). EDUSIG1 a EDUSIG4 sellaban
+ * el número del titular pero no su tipo; con EDUSIG5, cambiar el tipo de una firma en la base de datos la deja
+ * «Alterada». Solo las firmas nuevas: las anteriores conservan su formato y verifican igual. No cambiar sin subir la
+ * versión.
+ */
+function squuad_cert_signature_canonical_v5(array $row): string
+{
+    $lines = explode("\n", squuad_cert_signature_canonical_v4($row));
+    $lines[0] = 'EDUSIG5';
+    $lines[] = rawurlencode((string) ($row['subject_type'] ?? ''));
+
+    return implode("\n", $lines);
+}
+
 /** Mensaje sellado de una fila según su formato (evidence_format; sin él, EDUSIG1). */
 function squuad_cert_signature_canonical_for(array $row): string
 {
     switch ($row['evidence_format'] ?? '') {
+        case 'EDUSIG5':
+            return squuad_cert_signature_canonical_v5($row);
         case 'EDUSIG4':
             return squuad_cert_signature_canonical_v4($row);
         case 'EDUSIG3':
@@ -379,6 +398,9 @@ function squuad_cert_signature_insert(array $data, int $subject_id, string $sign
             $row['signature_image_sha256'] = (string) $request_evidence['signature_image_sha256'];
             $row['evidence_format'] = 'EDUSIG4';
         }
+        // Toda firma nueva de una solicitud sella también el tipo de titular (EDUSIG5, esquema 21). Lleva los campos de
+        // EDUSIG4 (vacíos si no aplican), así que sirve igual para la dibujada, la escrita, la imagen y la del perfil
+        $row['evidence_format'] = 'EDUSIG5';
     } elseif ($v5) {
         $row['evidence_format'] = 'EDUSIG1';
     }
@@ -532,6 +554,11 @@ function squuad_cert_signature_verify_row(object $row, ?string $previous_fingerp
     if (null === $key) {
         return 'unknown_key';
     }
+    // Formato que esta versión no conoce (sellado por una versión más nueva de WP Certificates): no se puede comprobar;
+    // no se da por alterada, pero cuenta como problema (no se rebaja ninguna alarma: nunca sale «verificada»)
+    if (!in_array((string) ($row->evidence_format ?? ''), ['', 'EDUSIG1', 'EDUSIG2', 'EDUSIG3', 'EDUSIG4', 'EDUSIG5'], true)) {
+        return 'unknown_format';
+    }
 
     $data = (array) $row;
     $expected = hash_hmac('sha256', squuad_cert_signature_canonical_for($data), $key);
@@ -542,7 +569,7 @@ function squuad_cert_signature_verify_row(object $row, ?string $previous_fingerp
         && (null === $row->ip || '' === $row->ip && '' === (string) $row->ip_hmac || hash_equals((string) $row->ip_hmac, hash_hmac('sha256', (string) $row->ip, $key)))
         && (null === $row->user_agent || hash_equals((string) $row->ua_sha256, hash('sha256', (string) $row->user_agent)));
     // EDUSIG4: la huella sellada de la imagen tiene que ser la del PNG guardado en la firma
-    if ($content_ok && 'EDUSIG4' === ($row->evidence_format ?? '') && '' !== (string) ($row->signature_image_sha256 ?? '')
+    if ($content_ok && in_array($row->evidence_format ?? '', ['EDUSIG4', 'EDUSIG5'], true) && '' !== (string) ($row->signature_image_sha256 ?? '')
         && function_exists('squuad_cert_signature_image_sha256')) {
         $content_ok = hash_equals((string) $row->signature_image_sha256, squuad_cert_signature_image_sha256((string) $row->signature));
     }
@@ -557,7 +584,7 @@ function squuad_cert_signature_verify_row(object $row, ?string $previous_fingerp
     }
 
     // EDUSIG2, EDUSIG3 y EDUSIG4: el contenido que firmó tiene que ser el de su solicitud, y ese contenido tiene que estar íntegro
-    if (in_array($row->evidence_format ?? '', ['EDUSIG2', 'EDUSIG3', 'EDUSIG4'], true) && function_exists('squuad_cert_signature_request_get')) {
+    if (in_array($row->evidence_format ?? '', ['EDUSIG2', 'EDUSIG3', 'EDUSIG4', 'EDUSIG5'], true) && function_exists('squuad_cert_signature_request_get')) {
         $request = squuad_cert_signature_request_get((int) $row->request_id);
         if (!$request || !hash_equals((string) $request->content_sha256, (string) $row->content_sha256)
             || null === squuad_cert_signature_request_content((int) $row->request_id)) {
@@ -606,6 +633,7 @@ function squuad_cert_signature_integrity_label(string $status): string
         'content_altered' => __('Signed content altered', 'wp-certificates'),
         'chain_broken' => __('Chain broken', 'wp-certificates'),
         'unknown_key' => __('Unknown key', 'wp-certificates'),
+        'unknown_format' => __('Fingerprint format of a newer version (update WP Certificates)', 'wp-certificates'),
         'legacy' => __('Legacy, no fingerprint', 'wp-certificates'),
         'error' => __('No fingerprint (error)', 'wp-certificates'),
         'missing' => __('No fingerprint', 'wp-certificates'),
@@ -657,7 +685,7 @@ function squuad_cert_signature_verify_chain(int $problems_limit = 100): array
     $result = [
         'verified_at' => gmdate('Y-m-d H:i:s'),
         'verified_by' => get_current_user_id(),
-        'status' => array_fill_keys(['verified', 'altered', 'content_altered', 'retired_key', 'chain_broken', 'unknown_key', 'legacy', 'error', 'missing'], 0),
+        'status' => array_fill_keys(['verified', 'altered', 'content_altered', 'retired_key', 'chain_broken', 'unknown_key', 'unknown_format', 'legacy', 'error', 'missing'], 0),
         'context' => array_fill_keys(['automatic', 'other_account', 'switched', 'other_site'], 0),
         'live' => 0,
         'revoked' => 0,

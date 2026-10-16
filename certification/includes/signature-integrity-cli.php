@@ -47,7 +47,7 @@ function squuad_cert_signature_cli_verify(): void
         ));
     }
 
-    $bad = $result['status']['altered'] + ($result['status']['retired_key'] ?? 0) + $result['status']['chain_broken'] + $result['status']['unknown_key']
+    $bad = $result['status']['altered'] + ($result['status']['retired_key'] ?? 0) + $result['status']['chain_broken'] + $result['status']['unknown_key'] + ($result['status']['unknown_format'] ?? 0)
         + $result['status']['missing'] + ($result['head_ok'] ? 0 : 1);
     if ($bad > 0) {
         WP_CLI::halt(1);

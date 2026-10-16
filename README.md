@@ -85,8 +85,11 @@ Se publica junto con **EduSystem 6.0.0** (ADR 0004 de EduSystem). Resumen:
 - Seguridad del cambio de titular: los permisos de emitir, declinar y decidir el tomo y folio se piden al proveedor del
   tipo de la solicitud (un tipo sin `can_act` queda cerrado); la emisión vuelve a comprobarlos; el libro nunca registra
   una línea sin el nombre del titular; el registro de certificados por persona solo para estudiantes.
-  Pendiente (para después): la huella de una firma sella `subject_id` pero no `subject_type`; un formato de evidencia
-  nuevo lo incluiría solo para las firmas nuevas (las ya hechas no se vuelven a sellar).
+- **Huella EDUSIG5:** toda firma nueva de una solicitud sella también el tipo de titular (cambiarlo en la base de datos la
+  deja «Alterada»). Las firmas ya hechas (EDUSIG1 a EDUSIG4) conservan su formato y verifican igual. Un formato que la
+  versión instalada no conoce sale como «Formato de una versión más nueva», nunca «Verificada» (y cuenta como problema).
+  **No volver a una versión anterior a la 2.0.0 después de la primera firma**: una versión sin EDUSIG5 daría esas firmas
+  por alteradas. La caché de la página pública de verificación tiene en cuenta lo que sella cada firma.
 
 ### 1.0.29
 - Versión anterior (sin registro de cambios en este repositorio).

@@ -6529,3 +6529,8 @@ msgid ""
 "document was not issued."
 msgstr "La línea del libro de registro necesita el nombre de quien recibe el documento. El documento no se emitió."
 
+
+#: certification/includes/signature-integrity.php:636
+msgid "Fingerprint format of a newer version (update WP Certificates)"
+msgstr "Formato de huella de una versión más nueva (actualiza WP Certificates)"
+

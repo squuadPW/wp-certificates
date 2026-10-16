@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-16T15:26:30+00:00\n"
+"POT-Creation-Date: 2026-10-16T16:13:50+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: wp-certificates\n"
@@ -182,8 +182,8 @@ msgstr ""
 #: certification/includes/signature-certificate-copy.php:260
 #: certification/includes/signature-certificate-copy.php:268
 #: certification/includes/signature-format.php:968
-#: certification/public/functions/verify-page.php:246
-#: certification/public/functions/verify-page.php:441
+#: certification/public/functions/verify-page.php:249
+#: certification/public/functions/verify-page.php:444
 #: certification/public/templates/create-document-automatic.php:104
 #: certification/public/templates/document-read-only.php:37
 #: certification/public/templates/documents-to-sign-batch.php:21
@@ -203,7 +203,7 @@ msgstr ""
 #: certification/includes/signature-certificate-copy.php:261
 #: certification/includes/signature-certificate-copy.php:269
 #: certification/includes/signature-format.php:969
-#: certification/public/functions/verify-page.php:442
+#: certification/public/functions/verify-page.php:445
 msgid "Code"
 msgstr ""
 
@@ -2590,12 +2590,12 @@ msgstr ""
 #: certification/includes/signature-certificate-copy.php:262
 #: certification/includes/signature-certificate-copy.php:270
 #: certification/includes/signature-format.php:978
-#: certification/public/functions/verify-page.php:444
+#: certification/public/functions/verify-page.php:447
 msgid "Completed"
 msgstr ""
 
 #: certification/admin/templates/document-issued.php:15
-#: certification/public/functions/verify-page.php:379
+#: certification/public/functions/verify-page.php:382
 msgid "Declined"
 msgstr ""
 
@@ -2849,7 +2849,7 @@ msgstr ""
 #: certification/admin/templates/document-signing.php:86
 #: certification/includes/signature-format.php:984
 #: certification/includes/signers.php:251
-#: certification/public/functions/verify-page.php:268
+#: certification/public/functions/verify-page.php:271
 msgid "Signer"
 msgstr ""
 
@@ -3141,7 +3141,7 @@ msgstr ""
 
 #: certification/admin/templates/signature-integrity.php:104
 #: certification/admin/templates/signature-integrity.php:143
-#: certification/includes/signature-integrity.php:625
+#: certification/includes/signature-integrity.php:653
 msgid "Automatic (typed name)"
 msgstr ""
 
@@ -3154,7 +3154,7 @@ msgid "Switched session"
 msgstr ""
 
 #: certification/admin/templates/signature-integrity.php:107
-#: certification/includes/signature-integrity.php:639
+#: certification/includes/signature-integrity.php:667
 msgid "Signed on another site"
 msgstr ""
 
@@ -3798,12 +3798,12 @@ msgid "In progress: %1$d of %2$d signatures"
 msgstr ""
 
 #: certification/includes/signature-format.php:977
-#: certification/public/functions/verify-page.php:443
+#: certification/public/functions/verify-page.php:446
 msgid "Sent for signature"
 msgstr ""
 
 #: certification/includes/signature-format.php:981
-#: certification/public/functions/verify-page.php:452
+#: certification/public/functions/verify-page.php:455
 msgid "Signers, in the order in which they signed"
 msgstr ""
 
@@ -3820,7 +3820,7 @@ msgid "Not applicable"
 msgstr ""
 
 #: certification/includes/signature-format.php:1008
-#: certification/public/functions/verify-page.php:463
+#: certification/public/functions/verify-page.php:466
 msgid "Content fingerprint (SHA-256)"
 msgstr ""
 
@@ -3854,48 +3854,52 @@ msgstr ""
 msgid "Certificate of signatures · %s"
 msgstr ""
 
-#: certification/includes/signature-integrity.php:603
+#: certification/includes/signature-integrity.php:630
 msgid "Verified"
 msgstr ""
 
-#: certification/includes/signature-integrity.php:604
+#: certification/includes/signature-integrity.php:631
 msgid "Altered"
 msgstr ""
 
-#: certification/includes/signature-integrity.php:605
+#: certification/includes/signature-integrity.php:632
 msgid "Signed with a retired key"
 msgstr ""
 
-#: certification/includes/signature-integrity.php:606
+#: certification/includes/signature-integrity.php:633
 msgid "Signed content altered"
 msgstr ""
 
-#: certification/includes/signature-integrity.php:607
+#: certification/includes/signature-integrity.php:634
 msgid "Chain broken"
 msgstr ""
 
-#: certification/includes/signature-integrity.php:608
+#: certification/includes/signature-integrity.php:635
 msgid "Unknown key"
 msgstr ""
 
-#: certification/includes/signature-integrity.php:609
+#: certification/includes/signature-integrity.php:636
+msgid "Fingerprint format of a newer version (update WP Certificates)"
+msgstr ""
+
+#: certification/includes/signature-integrity.php:637
 msgid "Legacy, no fingerprint"
 msgstr ""
 
-#: certification/includes/signature-integrity.php:610
+#: certification/includes/signature-integrity.php:638
 msgid "No fingerprint (error)"
 msgstr ""
 
-#: certification/includes/signature-integrity.php:611
+#: certification/includes/signature-integrity.php:639
 msgid "No fingerprint"
 msgstr ""
 
-#: certification/includes/signature-integrity.php:629
+#: certification/includes/signature-integrity.php:657
 #, php-format
 msgid "Switched session by user %d"
 msgstr ""
 
-#: certification/includes/signature-integrity.php:634
+#: certification/includes/signature-integrity.php:662
 #, php-format
 msgid "Signed from the account of %s"
 msgstr ""
@@ -4547,155 +4551,155 @@ msgstr ""
 msgid "Create password and continue"
 msgstr ""
 
-#: certification/public/functions/verify-page.php:265
+#: certification/public/functions/verify-page.php:268
 msgid "Institution signer"
 msgstr ""
 
-#: certification/public/functions/verify-page.php:376
+#: certification/public/functions/verify-page.php:379
 msgid "Valid document"
 msgstr ""
 
-#: certification/public/functions/verify-page.php:376
+#: certification/public/functions/verify-page.php:379
 msgid "The signatures and the content are intact and match what was sealed when it was signed."
 msgstr ""
 
-#: certification/public/functions/verify-page.php:377
+#: certification/public/functions/verify-page.php:380
 msgid "Final document in preparation"
 msgstr ""
 
-#: certification/public/functions/verify-page.php:377
+#: certification/public/functions/verify-page.php:380
 msgid "Everyone has signed. The final document is being prepared; it is not valid until it is completed."
 msgstr ""
 
-#: certification/public/functions/verify-page.php:378
+#: certification/public/functions/verify-page.php:381
 msgid "Signature in progress"
 msgstr ""
 
-#: certification/public/functions/verify-page.php:378
+#: certification/public/functions/verify-page.php:381
 msgid "This document has not been signed by everyone yet. It is not valid until it is completed."
 msgstr ""
 
-#: certification/public/functions/verify-page.php:379
+#: certification/public/functions/verify-page.php:382
 msgid "This document was declined and is not valid."
 msgstr ""
 
-#: certification/public/functions/verify-page.php:380
+#: certification/public/functions/verify-page.php:383
 msgid "Closed"
 msgstr ""
 
-#: certification/public/functions/verify-page.php:380
+#: certification/public/functions/verify-page.php:383
 msgid "This signature request was closed by the institution with a document delivered by other means. Contact the institution."
 msgstr ""
 
-#: certification/public/functions/verify-page.php:381
+#: certification/public/functions/verify-page.php:384
 msgid "Voided"
 msgstr ""
 
-#: certification/public/functions/verify-page.php:381
+#: certification/public/functions/verify-page.php:384
 msgid "One or more signatures of this document were voided. It is not valid."
 msgstr ""
 
-#: certification/public/functions/verify-page.php:382
+#: certification/public/functions/verify-page.php:385
 msgid "Replaced"
 msgstr ""
 
-#: certification/public/functions/verify-page.php:382
+#: certification/public/functions/verify-page.php:385
 msgid "This document was replaced by a later issue. It is not valid."
 msgstr ""
 
-#: certification/public/functions/verify-page.php:383
-#: certification/public/functions/verify-page.php:430
+#: certification/public/functions/verify-page.php:386
+#: certification/public/functions/verify-page.php:433
 msgid "Could not be verified"
 msgstr ""
 
-#: certification/public/functions/verify-page.php:383
+#: certification/public/functions/verify-page.php:386
 msgid "This document could not be verified. Contact the institution."
 msgstr ""
 
 #. translators: %s: site name
-#: certification/public/functions/verify-page.php:392
+#: certification/public/functions/verify-page.php:395
 #, php-format
 msgid "Document verification — %s"
 msgstr ""
 
-#: certification/public/functions/verify-page.php:429
-#: certification/public/functions/verify-page.php:438
+#: certification/public/functions/verify-page.php:432
+#: certification/public/functions/verify-page.php:441
 msgid "Document verification"
 msgstr ""
 
-#: certification/public/functions/verify-page.php:430
+#: certification/public/functions/verify-page.php:433
 msgid "Too many attempts"
 msgstr ""
 
-#: certification/public/functions/verify-page.php:432
+#: certification/public/functions/verify-page.php:435
 #: public/endpoint.php:114
 msgid "Too many attempts. Please try again later."
 msgstr ""
 
-#: certification/public/functions/verify-page.php:433
+#: certification/public/functions/verify-page.php:436
 msgid "The verification link is not valid. Scan the QR code of the document again or contact the institution."
 msgstr ""
 
-#: certification/public/functions/verify-page.php:447
+#: certification/public/functions/verify-page.php:450
 msgid "Download the certificate of signatures"
 msgstr ""
 
 #. translators: %s: date and time
-#: certification/public/functions/verify-page.php:456
+#: certification/public/functions/verify-page.php:459
 #, php-format
 msgid "Signed on %s"
 msgstr ""
 
-#: certification/public/functions/verify-page.php:467
-#: certification/public/functions/verify-page.php:481
+#: certification/public/functions/verify-page.php:470
+#: certification/public/functions/verify-page.php:484
 msgid "Not available for this document."
 msgstr ""
 
-#: certification/public/functions/verify-page.php:470
+#: certification/public/functions/verify-page.php:473
 msgid "Fingerprint of the signed PDF (SHA-256)"
 msgstr ""
 
-#: certification/public/functions/verify-page.php:473
+#: certification/public/functions/verify-page.php:476
 msgid "Only the PDF file delivered by the institution has this fingerprint. A scan, a printout or a copy saved again will have a different one."
 msgstr ""
 
-#: certification/public/functions/verify-page.php:475
+#: certification/public/functions/verify-page.php:478
 msgid "Compare your PDF"
 msgstr ""
 
-#: certification/public/functions/verify-page.php:476
+#: certification/public/functions/verify-page.php:479
 msgid "Drop the PDF here or choose it. The check is done in your browser: the file is not sent anywhere."
 msgstr ""
 
-#: certification/public/functions/verify-page.php:477
+#: certification/public/functions/verify-page.php:480
 msgid "Choose PDF"
 msgstr ""
 
-#: certification/public/functions/verify-page.php:487
+#: certification/public/functions/verify-page.php:490
 msgid "This page only shows the data needed to check the document. The personal data of the holder is not shown."
 msgstr ""
 
-#: certification/public/functions/verify-page.php:495
+#: certification/public/functions/verify-page.php:498
 msgid "Your browser can only compare files on a secure (https) page. Open the verification link with https."
 msgstr ""
 
-#: certification/public/functions/verify-page.php:496
+#: certification/public/functions/verify-page.php:499
 msgid "The file is too large to be the signed PDF."
 msgstr ""
 
-#: certification/public/functions/verify-page.php:497
+#: certification/public/functions/verify-page.php:500
 msgid "Checking…"
 msgstr ""
 
-#: certification/public/functions/verify-page.php:498
+#: certification/public/functions/verify-page.php:501
 msgid "It matches: this file is exactly the signed PDF."
 msgstr ""
 
-#: certification/public/functions/verify-page.php:499
+#: certification/public/functions/verify-page.php:502
 msgid "It does not match. This file is not the signed PDF delivered by the institution. It may be a copy saved again, a scan or a different version; it does not necessarily mean it was forged. If in doubt, contact the institution."
 msgstr ""
 
-#: certification/public/functions/verify-page.php:500
+#: certification/public/functions/verify-page.php:503
 msgid "The file could not be read."
 msgstr ""
 

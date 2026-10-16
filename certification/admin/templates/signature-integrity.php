@@ -80,7 +80,7 @@ $form = static function (string $action, string $label, string $class = 'button'
             <thead><tr><th><?= esc_html__('Integrity', 'wp-certificates') ?></th><th style="text-align:right"><?= esc_html__('Signatures', 'wp-certificates') ?></th></tr></thead>
             <tbody>
                 <?php foreach ((array) $last['status'] as $status => $total) :
-                    $alarm = in_array($status, ['altered', 'retired_key', 'chain_broken', 'unknown_key', 'missing'], true) && $total > 0; ?>
+                    $alarm = in_array($status, ['altered', 'retired_key', 'chain_broken', 'unknown_key', 'unknown_format', 'missing'], true) && $total > 0; ?>
                     <tr>
                         <td><?= $alarm ? '<strong style="color:#b32d2e">' : '' ?><?= esc_html(squuad_cert_signature_integrity_label((string) $status)) ?><?= $alarm ? '</strong>' : '' ?></td>
                         <td style="text-align:right"><?= (int) $total ?></td>

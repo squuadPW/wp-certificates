@@ -90,8 +90,11 @@ function squuad_cert_verify_page_integrity(object $request): array
     global $wpdb;
 
     // Con el último eslabón de sus firmas: una firma nueva o anulada sin cambio de estado no deja la caché atrás
+    // y con lo que sella cada firma (huella, tipo de titular, formato, firma): un cambio en la base de datos no queda
+    // tapado por la caché
     $last_seq = (string) $wpdb->get_var($wpdb->prepare(
-        "SELECT CONCAT(COUNT(*), ':', COALESCE(MAX(chain_seq), 0)) FROM {$wpdb->prefix}squuad_cert_signatures WHERE request_id = %d",
+        "SELECT CONCAT(COUNT(*), ':', COALESCE(MAX(chain_seq), 0), ':', COALESCE(MD5(GROUP_CONCAT(CONCAT_WS('|', id, fingerprint, subject_type, subject_id, evidence_format, signature_sha256) ORDER BY id SEPARATOR ';')), ''))
+         FROM {$wpdb->prefix}squuad_cert_signatures WHERE request_id = %d",
         (int) $request->id
     ));
     $cache_key = 'squuad_cert_verify_' . md5((int) $request->id . '|' . (string) $request->status . '|' . (string) $request->final_pdf_sha256 . '|' . $last_seq);
