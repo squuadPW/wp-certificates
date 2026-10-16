@@ -53,7 +53,10 @@ define('WP_C_REMOTE_INFO_URL', 'https://versions.squuad.com/plugins/wp-certifica
 // 20: certificates.enrollment_id, certificados por inscripción (idea de dev-jonatan, rehecha): un estudiante con dos
 //     programas recibe el certificado una vez por inscripción. Solo añade una columna vacía con su índice; los
 //     certificados anteriores quedan sin inscripción y se asignan al primero que la pida.
-define('WP_C_DB_VERSION', '20');
+// 21: emisión, firma y libro para cualquier tipo de titular (no solo estudiantes ni cuentas): squuad_cert_book_entries.
+//     subject_type y subject_id con su índice; student_id pasa a admitir 0 (líneas de otros titulares). Las líneas de
+//     antes son de estudiantes: su titular se copia de student_id (idempotente, nada se borra). Lo ya firmado no cambia.
+define('WP_C_DB_VERSION', '21');
 
 // get_plugin_data() vive en wp-admin/includes/plugin.php, que en el front no está cargado (antes solo funcionaba
 // porque EduSystem lo cargaba primero)

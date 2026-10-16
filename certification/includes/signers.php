@@ -1756,7 +1756,13 @@ function squuad_cert_signature_issue_signers(object $document): array
 /** Última solicitud emitida de un documento gestionado para la ficha de un estudiante (o null). */
 function squuad_cert_signature_issued_latest(int $student_id, int $document_certificate_id): ?object
 {
-    return squuad_cert_signature_request_latest($student_id, SQUUAD_CERT_ISSUED_PREFIX . $document_certificate_id, SQUUAD_CERT_SUBJECT_STUDENT);
+    return squuad_cert_signature_issued_latest_for(SQUUAD_CERT_SUBJECT_STUDENT, $student_id, $document_certificate_id);
+}
+
+/** Última solicitud emitida de un documento gestionado para un titular de cualquier tipo registrado (o null). */
+function squuad_cert_signature_issued_latest_for(string $subject_type, int $subject_id, int $document_certificate_id): ?object
+{
+    return squuad_cert_signature_request_latest($subject_id, SQUUAD_CERT_ISSUED_PREFIX . $document_certificate_id, $subject_type);
 }
 
 /**
@@ -1792,17 +1798,41 @@ function squuad_cert_signature_issued_options(object $request): array
  */
 function squuad_cert_signature_issue_document(int $student_id, int $document_certificate_id, int $reuse_book_entry_id = 0): array
 {
+    return squuad_cert_signature_issue_document_for(SQUUAD_CERT_SUBJECT_STUDENT, $student_id, $document_certificate_id, $reuse_book_entry_id);
+}
+
+/**
+ * Lo mismo para un titular de cualquier tipo registrado con squuad_cert_register_subject_type() (esquema 21): una
+ * ficha de estudiante, una promoción, una sección… El proveedor del tipo da, con book_line_data($id), al menos 'name'
+ * (y opcionalmente 'email' y 'program'); para un estudiante, además 'student'. Las variables de la plantilla reciben
+ * el titular y su tipo (ctx methods_subject_type): un método de otro tipo no se ejecuta. Quien llama comprueba antes el
+ * permiso («Emitir para firma» y el can_act 'issue' del proveedor, squuad_cert_document_issue_can()); aquí se vuelve a
+ * comprobar por si acaso (defensa en profundidad).
+ */
+function squuad_cert_signature_issue_document_for(string $subject_type, int $subject_id, int $document_certificate_id, int $reuse_book_entry_id = 0): array
+{
     global $wpdb;
 
     $fail = static fn(string $message): array => ['ok' => false, 'message' => $message, 'request_id' => 0];
     $user_id = get_current_user_id();
-    // Datos de la ficha para el QR (programa y estudiante): los da el proveedor, no las funciones de EduSystem
-    $provider = function_exists('squuad_cert_subject_type') ? squuad_cert_subject_type(SQUUAD_CERT_SUBJECT_STUDENT) : null;
-    $subject = ($provider && !empty($provider['book_line_data'])) ? (array) call_user_func($provider['book_line_data'], $student_id, null) : [];
-    $student = $subject['student'] ?? null;
+    $is_student = SQUUAD_CERT_SUBJECT_STUDENT === $subject_type;
+    // Datos del titular para el QR y el libro: los da su proveedor, no las funciones de otro plugin
+    $provider = function_exists('squuad_cert_subject_type') ? squuad_cert_subject_type($subject_type) : null;
+    $subject = ($provider && !empty($provider['book_line_data']) && $subject_id > 0) ? (array) call_user_func($provider['book_line_data'], $subject_id, null) : [];
+    $holder_name = trim((string) ($subject['name'] ?? ''));
+    $holder = $is_student
+        ? ($subject['student'] ?? null)
+        : ('' !== $holder_name ? (object) ['id' => $subject_id, 'name' => $holder_name, 'last_name' => '', 'email' => (string) ($subject['email'] ?? '')] : null);
+    $student = $holder; // nombre de siempre en el resto de la función (filtros y QR)
+    $student_id = $subject_id;
     $document = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}documents_certificates WHERE id = %d", $document_certificate_id));
-    if (!$student || !$document || !$user_id) {
+    if (!$holder || !$document || !$user_id) {
         return $fail(__('The person or the document does not exist.', 'wp-certificates'));
+    }
+    if (!current_user_can('squuad_cert_issue_documents')
+        || ($provider && !empty($provider['can_act']) && !call_user_func($provider['can_act'], $user_id, $subject_id, 'issue'))
+        || (!$is_student && empty($provider['can_act']))) {
+        return $fail(__('You do not have permission to issue this document.', 'wp-certificates'));
     }
     if (function_exists('squuad_cert_signature_session_switched_from') && squuad_cert_signature_session_switched_from()) {
         return $fail(__('Documents cannot be issued from a switched session.', 'wp-certificates'));
@@ -1811,11 +1841,13 @@ function squuad_cert_signature_issue_document(int $student_id, int $document_cer
         return $fail(__('This document has no system signers configured. Configure its signers or generate it as before.', 'wp-certificates'));
     }
     // Contexto, antes de crear la solicitud o reservar el libro: si exige uno que aquí no hay, no se emite
-    $ctx = squuad_cert_document_ctx($document, SQUUAD_CERT_SUBJECT_STUDENT, $student_id, ['document' => $document, 'certificate_id' => $document->id]);
+    // {{holder_name}} y las variables del titular (también para un estudiante: su proveedor no aporta otras variables)
+    $base = ['document' => $document, 'certificate_id' => $document->id, 'methods_subject_type' => $subject_type, 'holder_type' => $subject_type, 'holder_id' => $subject_id];
+    $ctx = squuad_cert_document_ctx($document, $subject_type, $subject_id, $base);
     if (is_wp_error($ctx)) {
         return $fail($ctx->get_error_message());
     }
-    $latest = squuad_cert_signature_issued_latest($student_id, $document_certificate_id);
+    $latest = squuad_cert_signature_issued_latest_for($subject_type, $subject_id, $document_certificate_id);
     if ($latest && in_array($latest->status, SQUUAD_CERT_SIGNATURE_REQUEST_OPEN, true) && null !== $latest->frozen_at_utc) {
         return $fail(__('This document was already issued to this person and is waiting for signatures.', 'wp-certificates'));
     }
@@ -1825,11 +1857,11 @@ function squuad_cert_signature_issue_document(int $student_id, int $document_cer
     $entry = null;
     if ($reuse_book_entry_id) {
         $entry = squuad_cert_book_entry_get($reuse_book_entry_id);
-        if (!$uses_book || !$entry || 'active' !== $entry->status || (int) $entry->student_id !== $student_id
+        if (!$uses_book || !$entry || 'active' !== $entry->status || squuad_cert_book_entry_subject($entry) !== [$subject_type, $subject_id]
             || (int) $entry->document_certificate_id !== $document_certificate_id) {
             return $fail(__('That volume and folio cannot be reused.', 'wp-certificates'));
         }
-    } elseif ($uses_book && squuad_cert_book_entry_pending_decision($student_id, $document_certificate_id)) {
+    } elseif ($uses_book && squuad_cert_book_entry_pending_decision_for($subject_type, $subject_id, $document_certificate_id)) {
         return $fail(__('The previous issue of this document was declined and still holds its volume and folio: choose in "Documents issued for signature" whether to keep them or void them.', 'wp-certificates'));
     }
 
@@ -1843,7 +1875,7 @@ function squuad_cert_signature_issue_document(int $student_id, int $document_cer
         $template_sha256,
         $document_certificate_id,
         'issued',
-        SQUUAD_CERT_SUBJECT_STUDENT
+        $subject_type
     );
     if (!$request) {
         return $fail(__('The document could not be issued. Please try again.', 'wp-certificates'));
@@ -1872,7 +1904,11 @@ function squuad_cert_signature_issue_document(int $student_id, int $document_cer
         $qr_url = squuad_cert_signature_verify_url($request, 'design');
         $emission_date = gmdate('Y-m-d');
         $program = (string) ($subject['program'] ?? '');
-        apply_filters('create_certificate_edusystem', 'certificate', $document->title, $program, 1, $student, $emission_date);
+        // El registro del certificado es por persona (nombre y correo, API pública de certificados): solo para un
+        // estudiante. Otros titulares (una promoción…) no son una persona: su QR lleva a la verificación de la solicitud
+        if ($is_student) {
+            apply_filters('create_certificate_edusystem', 'certificate', $document->title, $program, 1, $student, $emission_date);
+        }
     }
 
     // Valores de las variables: los resuelve wp-certificates (ADR 0005). Un documento que se emite para firma no puede
@@ -1946,7 +1982,9 @@ function squuad_cert_signature_issue_document(int $student_id, int $document_cer
         'line_number' => (int) $entry->line_number,
         'reused' => (bool) $reuse_book_entry_id,
     ]] : []));
-    squuad_cert_log(sprintf('Documento %d emitido para firma al estudiante %d (solicitud %d) por el usuario %d', (int) $document->id, $student_id, (int) $request->id, $user_id), 'signing_policy');
+    squuad_cert_log($is_student
+        ? sprintf('Documento %d emitido para firma al estudiante %d (solicitud %d) por el usuario %d', (int) $document->id, $student_id, (int) $request->id, $user_id)
+        : sprintf('Documento %d emitido para firma al titular %s %d (solicitud %d) por el usuario %d', (int) $document->id, $subject_type, $subject_id, (int) $request->id, $user_id), 'signing_policy');
 
     squuad_cert_signer_notify_open_slots((int) $request->id);
 
@@ -2049,13 +2087,32 @@ function squuad_cert_book_entry_get(int $entry_id): ?object
  */
 function squuad_cert_book_entry_insert(int $student_id, int $document_certificate_id, int $book_id, array $line): ?object
 {
+    return squuad_cert_book_entry_insert_for(SQUUAD_CERT_SUBJECT_STUDENT, $student_id, $document_certificate_id, $book_id, $line);
+}
+
+/** Titular de una línea del libro: [tipo, id] (las de antes del esquema 21 son de estudiantes, por student_id). */
+function squuad_cert_book_entry_subject(object $entry): array
+{
+    $id = (int) ($entry->subject_id ?? 0);
+    return $id > 0 ? [(string) ($entry->subject_type ?? SQUUAD_CERT_SUBJECT_STUDENT), $id] : [SQUUAD_CERT_SUBJECT_STUDENT, (int) ($entry->student_id ?? 0)];
+}
+
+/** Lo mismo para un titular de cualquier tipo (esquema 21). student_id solo se rellena para estudiantes. */
+function squuad_cert_book_entry_insert_for(string $subject_type, int $subject_id, int $document_certificate_id, int $book_id, array $line): ?object
+{
     global $wpdb;
 
     if (empty($line['id'])) {
         return null;
     }
-    $wpdb->insert($wpdb->prefix . 'squuad_cert_book_entries', [
-        'student_id' => $student_id,
+    // Mientras el esquema 21 no esté aplicado (otra petición lo está aplicando): sin las columnas nuevas, y solo para
+    // estudiantes (antes no había otros titulares en el libro)
+    $schema21 = version_compare((string) get_option('wp_c_db_version'), '21', '>=');
+    if (!$schema21 && SQUUAD_CERT_SUBJECT_STUDENT !== $subject_type) {
+        return null;
+    }
+    $wpdb->insert($wpdb->prefix . 'squuad_cert_book_entries', ($schema21 ? ['subject_type' => $subject_type, 'subject_id' => $subject_id] : []) + [
+        'student_id' => SQUUAD_CERT_SUBJECT_STUDENT === $subject_type ? $subject_id : 0,
         'document_certificate_id' => $document_certificate_id,
         'book_id' => $book_id,
         'line_id' => (int) $line['id'],
@@ -2090,10 +2147,16 @@ function squuad_cert_book_entry_mark_void(int $entry_id, string $reason): bool
  */
 function squuad_cert_book_entry_pending_decision(int $student_id, int $document_certificate_id): ?object
 {
+    return squuad_cert_book_entry_pending_decision_for(SQUUAD_CERT_SUBJECT_STUDENT, $student_id, $document_certificate_id);
+}
+
+/** Lo mismo para un titular de cualquier tipo. */
+function squuad_cert_book_entry_pending_decision_for(string $subject_type, int $subject_id, int $document_certificate_id): ?object
+{
     if (!squuad_cert_book_entries_enabled()) {
         return null;
     }
-    $latest = squuad_cert_signature_issued_latest($student_id, $document_certificate_id);
+    $latest = squuad_cert_signature_issued_latest_for($subject_type, $subject_id, $document_certificate_id);
     if (!$latest || 'declined' !== $latest->status || !(int) $latest->book_entry_id) {
         return null;
     }

@@ -45,6 +45,9 @@ final class VariableMethods
             'type' => (string) $definition['type'],
             'offered' => (string) ($definition['offered'] ?? 'all'),
             'subject' => (bool) ($definition['subject'] ?? true),
+            // Tipo de titular para el que sirve (esquema 21; p. ej. 'edusystem_promotion'). Vacío = el de siempre: un
+            // método con titular recibe una ficha de estudiante. Con otro tipo de titular no se ejecuta (VariableRunner)
+            'subject_type' => (string) ($definition['subject_type'] ?? ''),
             'sensitive' => (bool) ($definition['sensitive'] ?? false),
             // Formato: el valor va en mayúsculas (<span class="text-uppercase">), como el 'wrap' de process_template()
             'wrap' => (bool) ($definition['wrap'] ?? false),
@@ -131,6 +134,14 @@ final class VariableMethods
         // Un método que designa firmantes devuelve texto (el id de la cuenta), nunca HTML ni una condición
         if (!empty($definition['account']) && 'text' !== ($definition['type'] ?? '')) {
             return 'un método de cuenta (account) debe ser de tipo text';
+        }
+        if (isset($definition['subject_type']) && '' !== (string) $definition['subject_type']) {
+            if (!preg_match('/^[a-z][a-z0-9_]{1,39}$/', (string) $definition['subject_type'])) {
+                return 'el tipo de titular debe ser un identificador en minúsculas';
+            }
+            if (false === ($definition['subject'] ?? true)) {
+                return 'un método sin titular no puede declarar un tipo de titular';
+            }
         }
         if (!is_callable($definition['callback'] ?? null)) {
             return 'la función no es invocable';

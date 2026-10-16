@@ -27,6 +27,8 @@ final class Providers
         'external_state',
         'can_act',
         'book_line_data',
+        // Nombre del tipo para las pantallas (p. ej. «Promoción»): opcional, sin argumentos
+        'type_label',
     ];
 
     /** Callbacks sin los que un tipo de titular no sirve. */

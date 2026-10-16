@@ -169,17 +169,19 @@ function squuad_cert_document_signing_sync_required(int $document_id, bool $requ
  * firma» (squuad_cert_issue_documents, Certificación > Permisos) y, si el titular tiene proveedor, que este lo deje
  * actuar sobre esa ficha (can_act 'issue').
  */
-function squuad_cert_document_issue_can(int $student_id = 0): bool
+function squuad_cert_document_issue_can(int $student_id = 0, string $subject_type = SQUUAD_CERT_SUBJECT_STUDENT, string $action = 'issue'): bool
 {
     if (!current_user_can('squuad_cert_issue_documents')) {
         return false;
     }
-    $provider = $student_id && function_exists('squuad_cert_subject_type') ? squuad_cert_subject_type(SQUUAD_CERT_SUBJECT_STUDENT) : null;
+    // El proveedor del tipo de titular de la solicitud (esquema 21), no siempre el de estudiantes: un acta de la
+    // promoción 501 no se autoriza contra el estudiante 501
+    $provider = $student_id && function_exists('squuad_cert_subject_type') ? squuad_cert_subject_type($subject_type) : null;
     if ($provider && !empty($provider['can_act'])) {
-        return (bool) call_user_func($provider['can_act'], get_current_user_id(), $student_id, 'issue');
+        return (bool) call_user_func($provider['can_act'], get_current_user_id(), $student_id, $action);
     }
-
-    return true;
+    // Otro tipo sin can_act (o sin proveedor): cerrado por defecto
+    return SQUUAD_CERT_SUBJECT_STUDENT === $subject_type;
 }
 
 add_action('admin_post_squuad_cert_issue_document', 'squuad_cert_document_issue_handle');
@@ -230,11 +232,14 @@ function squuad_cert_document_issue_reserve_book_line($entry, object $student, o
     if (is_object($entry) && !is_wp_error($entry)) {
         return $entry;
     }
-    $line = squuad_cert_book_reserve_line($document, 'edusystem_student', (int) $student->id, $ctx);
+    // Titular de la solicitud (esquema 21: cualquier tipo; para un estudiante, el de siempre)
+    $subject_type = (string) ($request->subject_type ?? SQUUAD_CERT_SUBJECT_STUDENT);
+    $subject_id = (int) ($request->subject_id ?? $student->id);
+    $line = squuad_cert_book_reserve_line($document, $subject_type, $subject_id, $ctx);
     if (is_wp_error($line)) {
         return $line;
     }
-    $row = squuad_cert_book_entry_insert((int) $student->id, (int) $document->id, (int) $document->book, ['id' => $line['line_id']] + $line);
+    $row = squuad_cert_book_entry_insert_for($subject_type, $subject_id, (int) $document->id, (int) $document->book, ['id' => $line['line_id']] + $line);
     if (!$row) {
         return new WP_Error('squuad_cert_book', __('The registry book did not assign a volume and folio (connection or book error). The document was not issued; try again.', 'wp-certificates'));
     }
@@ -263,7 +268,7 @@ function squuad_cert_document_issue_resolve_book(object $request, object $entry,
     global $wpdb;
     // Antes de anular el tomo y folio: si el documento exige un contexto que solo da otro plugin, no se podría reemitir
     $document = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}documents_certificates WHERE id = %d", (int) $request->document_certificate_id));
-    if ($document && squuad_cert_document_needs_external_context($document, SQUUAD_CERT_SUBJECT_STUDENT, (int) $request->subject_id, ['certificate_id' => $document->id])) {
+    if ($document && squuad_cert_document_needs_external_context($document, (string) $request->subject_type, (int) $request->subject_id, ['certificate_id' => $document->id, 'methods_subject_type' => (string) $request->subject_type])) {
         return ['ok' => false, 'message' => __('This document is generated from the screen of the plugin that provides it: issue it again from there.', 'wp-certificates')];
     }
     if ('void' === $option) {
@@ -280,7 +285,7 @@ function squuad_cert_document_issue_resolve_book(object $request, object $entry,
         'folio' => (int) $entry->folio,
         'reason' => $reason,
     ]);
-    $reissued = squuad_cert_signature_issue_document((int) $request->subject_id, (int) $request->document_certificate_id, 'keep' === $option ? (int) $entry->id : 0);
+    $reissued = squuad_cert_signature_issue_document_for((string) $request->subject_type, (int) $request->subject_id, (int) $request->document_certificate_id, 'keep' === $option ? (int) $entry->id : 0);
     if (!$reissued['ok']) {
         return ['ok' => false, 'message' => sprintf(__('Declined, but the document could not be issued again: %s', 'wp-certificates'), $reissued['message'])];
     }
@@ -305,7 +310,7 @@ function squuad_cert_document_verify_withdraw_handle(): void
     $request_id = absint($_POST['request_id'] ?? 0);
     check_admin_referer('squuad_cert_verify_withdraw_' . $request_id);
     $request = squuad_cert_signature_request_get($request_id);
-    if (!$request || 'issued' !== $request->origin || SQUUAD_CERT_SUBJECT_STUDENT !== $request->subject_type
+    if (!$request || 'issued' !== $request->origin || SQUUAD_CERT_SUBJECT_ACCOUNT === $request->subject_type
         || !function_exists('squuad_cert_verify_can_withdraw') || !squuad_cert_verify_can_withdraw()) {
         wp_die(esc_html__('Sorry, you are not allowed to access this page.', 'wp-certificates'), 403);
     }
@@ -326,7 +331,7 @@ function squuad_cert_document_issued_decline_handle(): void
     $request_id = absint($_POST['request_id'] ?? 0);
     check_admin_referer('squuad_cert_issued_decline_' . $request_id);
     $request = squuad_cert_signature_request_get($request_id);
-    if (!squuad_cert_document_issue_can($request ? (int) $request->subject_id : 0)) {
+    if (!$request || !squuad_cert_document_issue_can((int) $request->subject_id, (string) $request->subject_type, 'decline')) {
         wp_die(esc_html__('You do not have permission to manage admissions.', 'wp-certificates'), 403);
     }
     $reason = sanitize_textarea_field(wp_unslash($_POST['reason'] ?? ''));
@@ -358,12 +363,12 @@ function squuad_cert_document_issued_book_decision_handle(): void
     $request_id = absint($_POST['request_id'] ?? 0);
     check_admin_referer('squuad_cert_issued_book_decision_' . $request_id);
     $request = squuad_cert_signature_request_get($request_id);
-    if (!squuad_cert_document_issue_can($request ? (int) $request->subject_id : 0)) {
+    if (!$request || !squuad_cert_document_issue_can((int) $request->subject_id, (string) $request->subject_type, 'decline')) {
         wp_die(esc_html__('You do not have permission to manage admissions.', 'wp-certificates'), 403);
     }
     $option = sanitize_key($_POST['book_option'] ?? '');
     $reason = sanitize_textarea_field(wp_unslash($_POST['reason'] ?? ''));
-    $entry = $request ? squuad_cert_book_entry_pending_decision((int) $request->subject_id, (int) $request->document_certificate_id) : null;
+    $entry = $request ? squuad_cert_book_entry_pending_decision_for((string) $request->subject_type, (int) $request->subject_id, (int) $request->document_certificate_id) : null;
 
     if (!$entry || (int) $entry->declined_request_id !== $request_id) {
         $result = ['ok' => false, 'message' => __('There is no pending decision for this document. Please reload the page.', 'wp-certificates')];

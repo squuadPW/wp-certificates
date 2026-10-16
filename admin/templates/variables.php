@@ -7,18 +7,29 @@
  */
 defined('ABSPATH') || exit;
 
-// Nombre legible de un método: «Plugin › Grupo › Descripción (identificador)»
-$method_label = static function (string $id) use ($methods, $own_plugins): string {
+// Para qué titular sirve un método (esquema 21): «sin titular», o el nombre del tipo que da su proveedor
+$method_holder = static function (array $m): string {
+    if (empty($m['subject'])) {
+        return __('any document', 'wp-certificates');
+    }
+    $type = \Squuad\Certificados\VariableRunner::method_subject_type($m);
+    $provider = function_exists('squuad_cert_subject_type') ? squuad_cert_subject_type($type) : null;
+    $name = ($provider && !empty($provider['type_label']) && is_callable($provider['type_label'])) ? (string) call_user_func($provider['type_label']) : $type;
+    /* translators: %s: kind of holder (student, class…) */
+    return sprintf(__('holder: %s', 'wp-certificates'), $name);
+};
+// Nombre legible de un método: «Plugin › Grupo › Descripción (identificador) — titular»
+$method_label = static function (string $id) use ($methods, $own_plugins, $method_holder): string {
     if (!isset($methods[$id])) {
         return $id;
     }
     $m = $methods[$id];
     $plugin = $own_plugins[$m['plugin']]['Name'] ?? $m['plugin'];
 
-    return trim($plugin . ' › ' . ($m['group'] ? $m['group'] . ' › ' : '') . $m['label']) . ' (' . $id . ')';
+    return trim($plugin . ' › ' . ($m['group'] ? $m['group'] . ' › ' : '') . $m['label']) . ' (' . $id . ') — ' . $method_holder($m);
 };
 // Selector de método: solo los disponibles (plugin propio activado y fuera de cuarentena), agrupados por plugin
-$method_select = static function (string $current, bool $allow_empty) use ($available, $methods, $own_plugins, $method_label): void {
+$method_select = static function (string $current, bool $allow_empty) use ($available, $methods, $own_plugins, $method_label, $method_holder): void {
     $by_plugin = [];
     foreach ($available as $id => $m) {
         $by_plugin[$own_plugins[$m['plugin']]['Name'] ?? $m['plugin']][$id] = $m;
@@ -30,7 +41,7 @@ $method_select = static function (string $current, bool $allow_empty) use ($avai
         echo '<optgroup label="' . esc_attr($plugin) . '">';
         foreach ($items as $id => $m) {
             echo '<option value="' . esc_attr($id) . '"' . selected($current, $id, false) . '>'
-                . esc_html(($m['group'] ? $m['group'] . ' › ' : '') . $m['label'] . ' (' . $id . ')') . '</option>';
+                . esc_html(($m['group'] ? $m['group'] . ' › ' : '') . $m['label'] . ' (' . $id . ') — ' . $method_holder($m)) . '</option>';
         }
         echo '</optgroup>';
     }

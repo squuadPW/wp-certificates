@@ -20,6 +20,9 @@ defined('ABSPATH') || exit;
 /** Largo máximo del texto de la línea (provisional, hasta confirmar el del servidor de libros). */
 const SQUUAD_CERT_BOOK_LINE_MAX = 1000;
 
+/** Tipo de titular «ficha de estudiante» (el mismo valor que SQUUAD_CERT_SUBJECT_STUDENT, que se carga después). */
+const SQUUAD_CERT_SUBJECT_STUDENT_KEY = 'edusystem_student';
+
 /** Variables que no se pueden usar en la descripción: son el resultado de reservar la línea. */
 const SQUUAD_CERT_BOOK_LINE_FORBIDDEN = ['tomo', 'folio', 'tomo_folio', 'qrcode'];
 
@@ -27,8 +30,12 @@ const SQUUAD_CERT_BOOK_LINE_FORBIDDEN = ['tomo', 'folio', 'tomo_folio', 'qrcode'
  * Texto por defecto si el documento no tiene descripción: con EduSystem, el de siempre (equivalente al que se enviaba
  * antes); sin él, con las variables neutras de la persona (sin {{student_name}} ni {{program}}, que son de EduSystem).
  */
-function squuad_cert_book_line_default(): string
+function squuad_cert_book_line_default(string $subject_type = ''): string
 {
+    // Otros titulares (esquema 21: una promoción, una sección…): su nombre, sin las variables de una persona
+    if ('' !== $subject_type && !in_array($subject_type, [SQUUAD_CERT_SUBJECT_STUDENT_KEY, 'wp_user'], true)) {
+        return 'Documento emitido: {{holder_name}} | Documento: {{document_name}} | Fecha: {{today}}';
+    }
     if (function_exists('wpc_edusystem_active') && !wpc_edusystem_active()) {
         return 'Documento emitido: {{full_name}} ({{email}}) | Documento: {{document_name}} | Fecha: {{today}}';
     }
@@ -69,7 +76,7 @@ function squuad_cert_book_line_forbidden_used(string $description): array
 function squuad_cert_book_line_text(object $document, int $subject_id, array $ctx = []): array
 {
     $template = trim((string) ($document->book_line_description ?? ''));
-    $template = '' !== $template ? $template : squuad_cert_book_line_default();
+    $template = '' !== $template ? $template : squuad_cert_book_line_default((string) ($ctx['book_subject_type'] ?? $ctx['methods_subject_type'] ?? ''));
 
     $failed = [];
     foreach (squuad_cert_book_line_forbidden_used($template) as $key) {
@@ -116,6 +123,16 @@ function squuad_cert_book_reserve_line(object $document, string $subject_type, i
 
     if ($book_id <= 0) {
         return $fail('squuad_cert_book_none', __('The document has no registry book.', 'wp-certificates'), 'sin libro');
+    }
+    // Los métodos de la línea reciben este titular con su tipo; {{holder_name}} lo nombra (esquema 21)
+    if (!in_array($subject_type, [SQUUAD_CERT_SUBJECT_STUDENT_KEY, 'wp_user'], true)) {
+        $ctx += ['methods_subject_type' => $subject_type, 'holder_type' => $subject_type, 'holder_id' => $subject_id, 'book_subject_type' => $subject_type];
+        // El libro legal nunca registra una línea sin el nombre del titular
+        $provider = function_exists('squuad_cert_subject_type') ? squuad_cert_subject_type($subject_type) : null;
+        $name = ($provider && !empty($provider['label'])) ? trim((string) call_user_func($provider['label'], $subject_id)) : '';
+        if ('' === $name) {
+            return $fail('squuad_cert_book_holder', __('The registry book line needs the name of who receives the document. The document was not issued.', 'wp-certificates'), 'titular sin nombre');
+        }
     }
     $line = squuad_cert_book_line_text($document, $subject_id, $ctx);
     if ($line['failed']) {

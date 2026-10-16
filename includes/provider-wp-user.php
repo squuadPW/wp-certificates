@@ -40,6 +40,7 @@ function squuad_cert_wp_user_register_provider(): void
         'replacements' => 'squuad_cert_wp_user_replacements',
         'variables_catalog' => 'squuad_cert_wp_user_variables_catalog',
         'book_line_data' => 'squuad_cert_wp_user_book_line_data',
+        'type_label' => static fn(): string => __('Account', 'wp-certificates'),
     ]);
 }
 

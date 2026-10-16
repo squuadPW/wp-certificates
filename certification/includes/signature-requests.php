@@ -53,21 +53,23 @@ function squuad_cert_account_student_id(int $user_id): int
 /** Ficha de estudiante de EduSystem de una solicitud (para sus variables, su requisito y su libro), o 0. */
 function squuad_cert_request_student_id(object $request): int
 {
-    return SQUUAD_CERT_SUBJECT_STUDENT === (string) $request->subject_type
-        ? (int) $request->subject_id
-        : squuad_cert_account_student_id((int) $request->subject_id);
+    if (SQUUAD_CERT_SUBJECT_STUDENT === (string) $request->subject_type) {
+        return (int) $request->subject_id;
+    }
+    // Una cuenta puede tener su ficha; otros titulares (una promoción, una sección…) no son un estudiante
+    return SQUUAD_CERT_SUBJECT_ACCOUNT === (string) $request->subject_type ? squuad_cert_account_student_id((int) $request->subject_id) : 0;
 }
 
 /** Nombre visible del titular de una solicitud: el de la cuenta o, si es una ficha, el que da el proveedor. */
 function squuad_cert_request_subject_label(object $request): string
 {
-    if (SQUUAD_CERT_SUBJECT_STUDENT === (string) $request->subject_type) {
-        $provider = function_exists('squuad_cert_subject_type') ? squuad_cert_subject_type(SQUUAD_CERT_SUBJECT_STUDENT) : null;
-
-        return ($provider && !empty($provider['label'])) ? (string) call_user_func($provider['label'], (int) $request->subject_id) : '';
+    if (SQUUAD_CERT_SUBJECT_ACCOUNT === (string) $request->subject_type) {
+        return squuad_cert_account_name((int) $request->subject_id);
     }
+    // Cualquier otro tipo (esquema 21): el nombre lo da su proveedor
+    $provider = function_exists('squuad_cert_subject_type') ? squuad_cert_subject_type((string) $request->subject_type) : null;
 
-    return squuad_cert_account_name((int) $request->subject_id);
+    return ($provider && !empty($provider['label'])) ? (string) call_user_func($provider['label'], (int) $request->subject_id) : '';
 }
 
 /**

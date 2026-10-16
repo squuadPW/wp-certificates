@@ -45,6 +45,14 @@ final class VariableRunner
                 $replacements[$key] = ['value' => '', 'wrap' => false];
                 continue;
             }
+            // Tipo de titular (esquema 21): un método de otro tipo no se ejecuta con este titular (recibiría el número de
+            // otra cosa). Sin declarar, el de siempre: ficha de estudiante; la ruta dice qué titular reciben los métodos
+            // con ctx methods_subject_type (sin decirlo, también el de siempre)
+            if ($method['subject'] && self::method_subject_type($method) !== self::ctx_subject_type($ctx)) {
+                $failed[$key] = 'wrong_subject';
+                $replacements[$key] = ['value' => 'condition' === $method['type'] ? false : '', 'wrap' => false];
+                continue;
+            }
             [$ok, $value] = self::run($method, $subject_id, $ctx);
             if (!$ok) {
                 $failed[$key] = (string) $value;
@@ -109,6 +117,20 @@ final class VariableRunner
     }
 
     /** Ejecuta un método aislado. Devuelve [true, valor] o [false, motivo]. */
+    /** Tipo de titular de un método con titular (vacío = el de siempre). */
+    public static function method_subject_type(array $method): string
+    {
+        $type = (string) ($method['subject_type'] ?? '');
+        return '' !== $type ? $type : (defined('SQUUAD_CERT_SUBJECT_STUDENT') ? SQUUAD_CERT_SUBJECT_STUDENT : 'edusystem_student');
+    }
+
+    /** Tipo del titular que reciben los métodos en esta ruta (ctx methods_subject_type; sin decirlo, el de siempre). */
+    public static function ctx_subject_type(array $ctx): string
+    {
+        $type = (string) ($ctx['methods_subject_type'] ?? '');
+        return '' !== $type ? $type : (defined('SQUUAD_CERT_SUBJECT_STUDENT') ? SQUUAD_CERT_SUBJECT_STUDENT : 'edusystem_student');
+    }
+
     private static function run(array $method, int $subject_id, array $ctx): array
     {
         Quarantine::start($method['id']);

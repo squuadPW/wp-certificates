@@ -146,7 +146,9 @@ function squuad_cert_schema_signers()
     dbDelta(
         "CREATE TABLE " . $wpdb->prefix . "squuad_cert_book_entries (
         id INT(11) NOT NULL AUTO_INCREMENT,
-        student_id BIGINT(20) UNSIGNED NOT NULL,
+        student_id BIGINT(20) UNSIGNED NOT NULL DEFAULT '0',
+        subject_type VARCHAR(40) NOT NULL DEFAULT 'edusystem_student',
+        subject_id BIGINT(20) UNSIGNED NOT NULL DEFAULT 0,
         document_certificate_id INT(11) NOT NULL,
         request_id INT(11) NULL,
         book_id INT(11) NOT NULL,
@@ -162,6 +164,11 @@ function squuad_cert_schema_signers()
         void_reason TEXT NULL,
         PRIMARY KEY (id),
         KEY student_document (student_id,document_certificate_id),
+        KEY subject_document (subject_type,subject_id,document_certificate_id),
         KEY line_id (line_id))$charset_collate;"
     );
+    // Esquema 21 (cualquier tipo de titular): las líneas de antes son de estudiantes; su titular se copia de student_id.
+    // Idempotente (solo las que aún no lo tienen) y sin borrar nada: student_id se conserva.
+    $wpdb->query("UPDATE " . $wpdb->prefix . "squuad_cert_book_entries SET subject_id = student_id
+        WHERE subject_id = 0 AND student_id > 0 AND subject_type = 'edusystem_student'");
 }

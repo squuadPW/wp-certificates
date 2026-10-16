@@ -6498,3 +6498,34 @@ msgstr "La lista de variables aún no está lista."
 msgid "Error saving the variable."
 msgstr "Error al guardar la variable."
 
+
+#: admin/templates/variables.php:13
+msgid "any document"
+msgstr "cualquier documento"
+
+#. translators: %s: kind of holder (student, class…)
+#: admin/templates/variables.php:19
+#, php-format
+msgid "holder: %s"
+msgstr "titular: %s"
+
+#: includes/provider-wp-user.php:43
+msgid "Account"
+msgstr "Cuenta"
+
+#: src/Variables.php:28
+msgid ""
+"Name of who receives the document, of any kind (a person, a class, a group…)"
+msgstr "Nombre de quien recibe el documento, de cualquier tipo (una persona, una promoción, un grupo…)"
+
+
+#: certification/includes/signers.php:1835
+msgid "You do not have permission to issue this document."
+msgstr "No tienes permiso para emitir este documento."
+
+#: includes/book.php:134
+msgid ""
+"The registry book line needs the name of who receives the document. The "
+"document was not issued."
+msgstr "La línea del libro de registro necesita el nombre de quien recibe el documento. El documento no se emitió."
+

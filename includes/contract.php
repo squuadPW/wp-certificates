@@ -82,7 +82,8 @@ add_action('all_admin_notices', [Pair::class, 'notice']);
  * type ('text'|'html'|'condition'), callback (recibe
  * int $subject_id, array $ctx y devuelve el valor; solo lectura), y opcionales wrap (va en mayúsculas), group,
  * offered ('all'|'document'|
- * 'email'), subject (necesita titular, por defecto true) y sensitive.
+ * 'email'), subject (necesita titular, por defecto true), subject_type (tipo de titular para el que sirve, p. ej.
+ * 'edusystem_promotion'; vacío = ficha de estudiante, el de siempre; con otro titular no se ejecuta) y sensitive.
  */
 function squuad_cert_register_variable_method(string $provider, string $key, array $definition): bool
 {

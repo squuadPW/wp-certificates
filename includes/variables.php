@@ -51,6 +51,15 @@ function squuad_cert_general_replacements(array $ctx = []): array
     $holder_id = SQUUAD_CERT_SUBJECT_ACCOUNT === ($ctx['holder_type'] ?? '') ? (int) ($ctx['holder_id'] ?? 0) : 0;
     $identifier = $holder_id ? squuad_cert_id_document_identifier($holder_id) : '';
     $replacements['holder_id_document'] = ['value' => str_replace(['{', '}'], ['&#123;', '&#125;'], esc_html($identifier)), 'wrap' => false];
+    // {{holder_name}} (esquema 21): nombre del titular de cualquier tipo (cuenta, estudiante, promoción…), el que da su
+    // proveedor; vacío si la ruta no dice quién es
+    $holder_name = '';
+    $type = (string) ($ctx['holder_type'] ?? '');
+    if ('' !== $type && (int) ($ctx['holder_id'] ?? 0) > 0) {
+        $provider = function_exists('squuad_cert_subject_type') ? squuad_cert_subject_type($type) : null;
+        $holder_name = ($provider && !empty($provider['label'])) ? (string) call_user_func($provider['label'], (int) $ctx['holder_id']) : '';
+    }
+    $replacements['holder_name'] = ['value' => str_replace(['{', '}'], ['&#123;', '&#125;'], esc_html($holder_name)), 'wrap' => true];
 
     return $replacements;
 }

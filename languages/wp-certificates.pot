@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-16T14:09:46+00:00\n"
+"POT-Creation-Date: 2026-10-16T15:26:30+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: wp-certificates\n"
@@ -63,7 +63,7 @@ msgstr ""
 #: admin/variables.php:336
 #: admin/variables.php:352
 #: certification/admin/document-preview.php:95
-#: certification/admin/document-signing.php:310
+#: certification/admin/document-signing.php:315
 #: certification/admin/signing-settings.php:27
 #: certification/includes/signature-certificate-copy.php:131
 #: includes/signed-pdf.php:217
@@ -138,7 +138,7 @@ msgstr ""
 #: admin/templates/eds-document-detail.php:498
 #: admin/templates/eds-list-documents.php:118
 #: admin/templates/id-document-settings.php:79
-#: admin/templates/variables.php:84
+#: admin/templates/variables.php:95
 #: certification/includes/signature-certificate-copy.php:263
 msgid "Actions"
 msgstr ""
@@ -243,7 +243,7 @@ msgstr ""
 #: admin/documents.php:50
 #: admin/templates/eds-list-documents.php:160
 #: admin/templates/id-document-settings.php:107
-#: admin/templates/variables.php:120
+#: admin/templates/variables.php:131
 msgid "Delete"
 msgstr ""
 
@@ -464,9 +464,9 @@ msgstr ""
 #: admin/templates/document-detail.php:330
 #: admin/templates/eds-document-detail.php:494
 #: admin/templates/signing-roles.php:24
-#: admin/templates/variables.php:219
-#: admin/templates/variables.php:253
-#: admin/templates/variables.php:290
+#: admin/templates/variables.php:230
+#: admin/templates/variables.php:264
+#: admin/templates/variables.php:301
 msgid "Key"
 msgstr ""
 
@@ -520,7 +520,7 @@ msgstr ""
 #: admin/templates/eds-list-documents.php:41
 #: admin/templates/eds-list-documents.php:111
 #: admin/templates/list-documents.php:9
-#: admin/templates/variables.php:49
+#: admin/templates/variables.php:60
 #: includes/permissions.php:24
 msgid "Documents"
 msgstr ""
@@ -571,14 +571,14 @@ msgstr ""
 
 #: admin/generate.php:65
 #: admin/generate.php:166
-#: certification/admin/document-signing.php:192
-#: certification/admin/document-signing.php:330
-#: certification/admin/document-signing.php:362
+#: certification/admin/document-signing.php:194
+#: certification/admin/document-signing.php:335
+#: certification/admin/document-signing.php:367
 msgid "You do not have permission to manage admissions."
 msgstr ""
 
 #: admin/generate.php:71
-#: certification/includes/signers.php:1805
+#: certification/includes/signers.php:1830
 msgid "The person or the document does not exist."
 msgstr ""
 
@@ -897,7 +897,7 @@ msgid "Keys"
 msgstr ""
 
 #: admin/templates/api-keys.php:50
-#: admin/templates/variables.php:260
+#: admin/templates/variables.php:271
 #: certification/admin/templates/signature-integrity.php:48
 msgid "Created"
 msgstr ""
@@ -1128,7 +1128,7 @@ msgid "Defined by WP Certificates: they work on any site."
 msgstr ""
 
 #: admin/templates/document-detail.php:112
-#: admin/templates/variables.php:54
+#: admin/templates/variables.php:65
 #: admin/variables.php:29
 #: admin/variables.php:30
 #: includes/permissions.php:36
@@ -1608,7 +1608,7 @@ msgid "See which ones"
 msgstr ""
 
 #: admin/templates/eds-list-documents.php:79
-#: certification/admin/document-signing.php:506
+#: certification/admin/document-signing.php:511
 msgid "Hide this notice"
 msgstr ""
 
@@ -1634,8 +1634,8 @@ msgstr ""
 
 #: admin/templates/eds-list-documents.php:155
 #: admin/templates/id-document-settings.php:94
-#: admin/templates/variables.php:110
-#: admin/templates/variables.php:280
+#: admin/templates/variables.php:121
+#: admin/templates/variables.php:291
 msgid "Edit"
 msgstr ""
 
@@ -1855,222 +1855,232 @@ msgstr ""
 msgid "Unmarking a role does not change the signature requests already in progress: they keep their signers."
 msgstr ""
 
-#: admin/templates/variables.php:28
+#: admin/templates/variables.php:13
+msgid "any document"
+msgstr ""
+
+#. translators: %s: kind of holder (student, class…)
+#: admin/templates/variables.php:19
+#, php-format
+msgid "holder: %s"
+msgstr ""
+
+#: admin/templates/variables.php:39
 msgid "— No method —"
 msgstr ""
 
-#: admin/templates/variables.php:28
+#: admin/templates/variables.php:39
 msgid "— Choose a method —"
 msgstr ""
 
 #. translators: %s: method
-#: admin/templates/variables.php:40
+#: admin/templates/variables.php:51
 #, php-format
 msgid "Unavailable: %s"
 msgstr ""
 
-#: admin/templates/variables.php:48
+#: admin/templates/variables.php:59
 msgid "Documents and emails"
 msgstr ""
 
-#: admin/templates/variables.php:50
+#: admin/templates/variables.php:61
 msgid "Emails"
 msgstr ""
 
-#: admin/templates/variables.php:56
+#: admin/templates/variables.php:67
 msgid "Add variable"
 msgstr ""
 
-#: admin/templates/variables.php:59
+#: admin/templates/variables.php:70
 #: certification/admin/templates/signer-inbox.php:36
 #: certification/admin/templates/signer-inbox.php:128
 #: certification/public/templates/documents-to-sign-batch.php:13
 msgid "Back to the list"
 msgstr ""
 
-#: admin/templates/variables.php:68
+#: admin/templates/variables.php:79
 msgid "Administrators only."
 msgstr ""
 
-#: admin/templates/variables.php:69
+#: admin/templates/variables.php:80
 msgid "The value of a variable is given by a method written in the code of an own plugin (EduSof or Squuad) and chosen from a list. No code is ever written or stored here. Changes are recorded in the log."
 msgstr ""
 
-#: admin/templates/variables.php:74
+#: admin/templates/variables.php:85
 msgid "Variables saved in the database: this is the list shown when writing a document template. Editing or deleting a variable only changes this list; it does not change how the variable is filled in when a document is issued."
 msgstr ""
 
-#: admin/templates/variables.php:80
-#: admin/templates/variables.php:136
+#: admin/templates/variables.php:91
+#: admin/templates/variables.php:147
 msgid "Variable"
 msgstr ""
 
-#: admin/templates/variables.php:81
-#: admin/templates/variables.php:137
-#: admin/templates/variables.php:226
-#: admin/templates/variables.php:255
-#: admin/templates/variables.php:301
+#: admin/templates/variables.php:92
+#: admin/templates/variables.php:148
+#: admin/templates/variables.php:237
+#: admin/templates/variables.php:266
+#: admin/templates/variables.php:312
 msgid "Description"
 msgstr ""
 
-#: admin/templates/variables.php:82
-#: admin/templates/variables.php:230
-#: admin/templates/variables.php:256
-#: admin/templates/variables.php:305
+#: admin/templates/variables.php:93
+#: admin/templates/variables.php:241
+#: admin/templates/variables.php:267
+#: admin/templates/variables.php:316
 msgid "Offered in"
 msgstr ""
 
-#: admin/templates/variables.php:83
-#: admin/templates/variables.php:257
+#: admin/templates/variables.php:94
+#: admin/templates/variables.php:268
 #: certification/includes/signature-format.php:986
 msgid "Method"
 msgstr ""
 
-#: admin/templates/variables.php:89
+#: admin/templates/variables.php:100
 msgid "There are no variables in the database."
 msgstr ""
 
-#: admin/templates/variables.php:99
-#: admin/templates/variables.php:257
+#: admin/templates/variables.php:110
+#: admin/templates/variables.php:268
 msgid "No method (calculated by EduSystem as before)"
 msgstr ""
 
-#: admin/templates/variables.php:99
-#: admin/templates/variables.php:257
+#: admin/templates/variables.php:110
+#: admin/templates/variables.php:268
 msgid "No method"
 msgstr ""
 
-#: admin/templates/variables.php:103
+#: admin/templates/variables.php:114
 msgid "In quarantine"
 msgstr ""
 
-#: admin/templates/variables.php:103
+#: admin/templates/variables.php:114
 msgid "Unavailable"
 msgstr ""
 
-#: admin/templates/variables.php:109
+#: admin/templates/variables.php:120
 msgid "View"
 msgstr ""
 
 #. translators: %s: variable
-#: admin/templates/variables.php:114
+#: admin/templates/variables.php:125
 #, php-format
 msgid "Delete %s from the list? Documents that already use it are not changed."
 msgstr ""
 
-#: admin/templates/variables.php:129
+#: admin/templates/variables.php:140
 msgid "Variables of the person"
 msgstr ""
 
-#: admin/templates/variables.php:131
+#: admin/templates/variables.php:142
 msgid "Details of the person who receives the document. They are offered in the editor when a plugin or the WordPress account of the person gives them a value; the source is shown in \"Source of the value\"."
 msgstr ""
 
-#: admin/templates/variables.php:138
+#: admin/templates/variables.php:149
 msgid "Source of the value"
 msgstr ""
 
-#: admin/templates/variables.php:146
+#: admin/templates/variables.php:157
 #: admin/variables.php:139
 msgid "WordPress account of the person"
 msgstr ""
 
-#: admin/templates/variables.php:156
+#: admin/templates/variables.php:167
 msgid "Link variables without a method to the method with the same key"
 msgstr ""
 
-#: admin/templates/variables.php:159
+#: admin/templates/variables.php:170
 msgid "Own plugins that can provide methods"
 msgstr ""
 
-#: admin/templates/variables.php:161
+#: admin/templates/variables.php:172
 msgid "Only plugins whose details mention EduSof or Squuad appear here. Check the author and website before enabling one: only enabled plugins can provide methods."
 msgstr ""
 
-#: admin/templates/variables.php:169
+#: admin/templates/variables.php:180
 msgid "Enabled"
 msgstr ""
 
-#: admin/templates/variables.php:170
+#: admin/templates/variables.php:181
 msgid "Plugin"
 msgstr ""
 
-#: admin/templates/variables.php:171
+#: admin/templates/variables.php:182
 msgid "Author"
 msgstr ""
 
-#: admin/templates/variables.php:172
+#: admin/templates/variables.php:183
 msgid "Methods"
 msgstr ""
 
-#: admin/templates/variables.php:180
-#: admin/templates/variables.php:271
+#: admin/templates/variables.php:191
+#: admin/templates/variables.php:282
 msgid "inactive"
 msgstr ""
 
-#: admin/templates/variables.php:187
+#: admin/templates/variables.php:198
 msgid "Save plugins"
 msgstr ""
 
-#: admin/templates/variables.php:191
+#: admin/templates/variables.php:202
 msgid "Methods in quarantine"
 msgstr ""
 
-#: admin/templates/variables.php:192
+#: admin/templates/variables.php:203
 msgid "These methods stopped a request (memory, time or exit) and are not executed again until they are enabled. Fix the plugin before enabling them."
 msgstr ""
 
-#: admin/templates/variables.php:204
+#: admin/templates/variables.php:215
 msgid "Enable again"
 msgstr ""
 
-#: admin/templates/variables.php:222
+#: admin/templates/variables.php:233
 msgid "Lowercase letters, numbers and underscores. In the template it is written {{key}}."
 msgstr ""
 
-#: admin/templates/variables.php:240
-#: admin/templates/variables.php:315
+#: admin/templates/variables.php:251
+#: admin/templates/variables.php:326
 msgid "Method that gives the value"
 msgstr ""
 
-#: admin/templates/variables.php:243
+#: admin/templates/variables.php:254
 msgid "Methods of the enabled own plugins."
 msgstr ""
 
-#: admin/templates/variables.php:247
+#: admin/templates/variables.php:258
 msgid "Create variable"
 msgstr ""
 
-#: admin/templates/variables.php:252
+#: admin/templates/variables.php:263
 msgid "ID"
 msgstr ""
 
-#: admin/templates/variables.php:254
-#: admin/templates/variables.php:297
+#: admin/templates/variables.php:265
+#: admin/templates/variables.php:308
 msgid "How it is written"
 msgstr ""
 
-#: admin/templates/variables.php:262
+#: admin/templates/variables.php:273
 msgid "Documents that use it"
 msgstr ""
 
-#: admin/templates/variables.php:265
+#: admin/templates/variables.php:276
 msgid "No document template uses it."
 msgstr ""
 
-#: admin/templates/variables.php:293
+#: admin/templates/variables.php:304
 msgid "The key is what the code fills in when a document is generated: it cannot be changed here."
 msgstr ""
 
-#: admin/templates/variables.php:318
+#: admin/templates/variables.php:329
 msgid "Without a method, the value is calculated as before (EduSystem)."
 msgstr ""
 
-#: admin/templates/variables.php:318
+#: admin/templates/variables.php:329
 msgid "Without a method, the variable has no value."
 msgstr ""
 
-#: admin/templates/variables.php:322
+#: admin/templates/variables.php:333
 msgid "Save variable"
 msgstr ""
 
@@ -2163,7 +2173,7 @@ msgid "Signature request #%1$d, round %2$d · Content fingerprint (SHA-256): %3$
 msgstr ""
 
 #: certification/admin/document-preview.php:107
-#: includes/provider-wp-user.php:192
+#: includes/provider-wp-user.php:193
 msgid "The document does not exist."
 msgstr ""
 
@@ -2228,113 +2238,113 @@ msgid "Example"
 msgstr ""
 
 #: certification/admin/document-signing.php:102
-#: certification/admin/document-signing.php:517
+#: certification/admin/document-signing.php:522
 msgid "You do not have permission to configure document signers."
 msgstr ""
 
-#: certification/admin/document-signing.php:239
-#: includes/book.php:154
+#: certification/admin/document-signing.php:244
+#: includes/book.php:171
 msgid "The registry book did not assign a volume and folio (connection or book error). The document was not issued; try again."
 msgstr ""
 
-#: certification/admin/document-signing.php:250
+#: certification/admin/document-signing.php:255
 #, php-format
 msgid "The registry book could not void the volume and folio: %s"
 msgstr ""
 
-#: certification/admin/document-signing.php:267
+#: certification/admin/document-signing.php:272
 msgid "This document is generated from the screen of the plugin that provides it: issue it again from there."
 msgstr ""
 
-#: certification/admin/document-signing.php:285
+#: certification/admin/document-signing.php:290
 #, php-format
 msgid "Declined, but the document could not be issued again: %s"
 msgstr ""
 
 #. translators: 1: volume, 2: folio
-#: certification/admin/document-signing.php:291
+#: certification/admin/document-signing.php:296
 #, php-format
 msgid "Declined and issued again with volume %1$d, folio %2$d. The signers will find it in \"Documents to sign\"."
 msgstr ""
 
-#: certification/admin/document-signing.php:316
+#: certification/admin/document-signing.php:321
 msgid "Public verification withdrawn. The QR code of this document now shows that it could not be verified."
 msgstr ""
 
-#: certification/admin/document-signing.php:316
+#: certification/admin/document-signing.php:321
 msgid "Public verification restored."
 msgstr ""
 
-#: certification/admin/document-signing.php:317
+#: certification/admin/document-signing.php:322
 msgid "The change was not saved: write the reason and confirm it."
 msgstr ""
 
-#: certification/admin/document-signing.php:338
-#: certification/includes/signers.php:2120
-#: certification/includes/signers.php:2130
+#: certification/admin/document-signing.php:343
+#: certification/includes/signers.php:2183
+#: certification/includes/signers.php:2193
 msgid "This document can no longer be declined. Please reload the page."
 msgstr ""
 
-#: certification/admin/document-signing.php:340
+#: certification/admin/document-signing.php:345
 #: certification/admin/signer-inbox.php:110
 msgid "To decline a document you must write the reason and accept that the action cannot be reverted."
 msgstr ""
 
-#: certification/admin/document-signing.php:342
-#: certification/admin/document-signing.php:371
+#: certification/admin/document-signing.php:347
+#: certification/admin/document-signing.php:376
 msgid "Choose whether to keep or void the volume and folio."
 msgstr ""
 
-#: certification/admin/document-signing.php:369
+#: certification/admin/document-signing.php:374
 msgid "There is no pending decision for this document. Please reload the page."
 msgstr ""
 
-#: certification/admin/document-signing.php:373
+#: certification/admin/document-signing.php:378
 msgid "Write why the volume and folio are voided."
 msgstr ""
 
-#: certification/admin/document-signing.php:447
+#: certification/admin/document-signing.php:452
 #, php-format
 msgid "[%s] Security change: documents that require a signature"
 msgstr ""
 
-#: certification/admin/document-signing.php:448
+#: certification/admin/document-signing.php:453
 msgid "For security, documents can no longer be signed with signature images uploaded to \"Users and signatures\". Only the responsible person can sign, from their own account: nobody can sign on behalf of someone else."
 msgstr ""
 
-#: certification/admin/document-signing.php:451
-#: certification/admin/document-signing.php:457
+#: certification/admin/document-signing.php:456
+#: certification/admin/document-signing.php:462
 #: certification/includes/signers.php:465
-#: certification/includes/signers.php:2222
+#: certification/includes/signers.php:2285
 #, php-format
 msgid "Hello %s,"
 msgstr ""
 
-#: certification/admin/document-signing.php:452
+#: certification/admin/document-signing.php:457
 msgid "These documents require a signature and are disabled until the administration configures who signs them:"
 msgstr ""
 
-#: certification/admin/document-signing.php:453
+#: certification/admin/document-signing.php:458
 msgid "If you are responsible for signing them, the administration will invite you to register your own signature. Documents already signed keep their validity."
 msgstr ""
 
-#: certification/admin/document-signing.php:458
+#: certification/admin/document-signing.php:463
 msgid "These documents require a signature and are disabled until you configure who signs them:"
 msgstr ""
 
-#: certification/admin/document-signing.php:460
+#: certification/admin/document-signing.php:465
 msgid "What to do: 1) in Certification > Signers, invite the responsible persons to register their own signature; 2) in Certification > Documents, open each document and choose its signers in \"Document signers\"; 3) from the student file, use \"Issue for signature\". Documents already signed keep their validity."
 msgstr ""
 
-#: certification/admin/document-signing.php:461
+#: certification/admin/document-signing.php:466
 msgid "What to do: 1) in Certification > Signers, invite the responsible persons to register their own signature; 2) in Certification > Documents, open each document and choose its signers in \"Document signers\". Documents already signed keep their validity."
 msgstr ""
 
-#: certification/admin/document-signing.php:496
+#: certification/admin/document-signing.php:501
 msgid "Documents that require a signature are disabled until you configure who signs them"
 msgstr ""
 
-#: certification/admin/document-signing.php:497
+#: certification/admin/document-signing.php:502
 msgid "For security, nobody can sign on behalf of someone else: signature images are no longer used. Choose the signers of each document; they will sign from their own account."
 msgstr ""
 
@@ -2437,7 +2447,7 @@ msgid "You do not have permission to manage signers."
 msgstr ""
 
 #: certification/admin/signers.php:90
-#: includes/provider-wp-user.php:185
+#: includes/provider-wp-user.php:186
 msgid "The user does not exist."
 msgstr ""
 
@@ -3890,12 +3900,12 @@ msgstr ""
 msgid "Signed from the account of %s"
 msgstr ""
 
-#: certification/includes/signature-requests.php:901
+#: certification/includes/signature-requests.php:903
 msgid "I agree to sign this document electronically. I understand that my electronic signature has the same validity as my handwritten signature, that it is recorded with the date, the time and the details of my connection, and that the signed document cannot be modified."
 msgstr ""
 
 #. translators: %s: name of the person who receives the document (for example, the student)
-#: certification/includes/signature-requests.php:903
+#: certification/includes/signature-requests.php:905
 #, php-format
 msgid "I agree to sign this document electronically on my own behalf and on behalf of %s. I understand that my electronic signature has the same validity as my handwritten signature, that it is recorded with the date, the time and the details of my connection, and that the signed document cannot be modified."
 msgstr ""
@@ -4197,74 +4207,78 @@ msgstr ""
 msgid "You can no longer sign this document. Ask the school office to request the signatures again."
 msgstr ""
 
-#: certification/includes/signers.php:1808
+#: certification/includes/signers.php:1835
+msgid "You do not have permission to issue this document."
+msgstr ""
+
+#: certification/includes/signers.php:1838
 msgid "Documents cannot be issued from a switched session."
 msgstr ""
 
-#: certification/includes/signers.php:1811
-#: certification/includes/signers.php:1856
+#: certification/includes/signers.php:1841
+#: certification/includes/signers.php:1888
 msgid "This document has no system signers configured. Configure its signers or generate it as before."
 msgstr ""
 
-#: certification/includes/signers.php:1820
+#: certification/includes/signers.php:1852
 msgid "This document was already issued to this person and is waiting for signatures."
 msgstr ""
 
-#: certification/includes/signers.php:1830
+#: certification/includes/signers.php:1862
 msgid "That volume and folio cannot be reused."
 msgstr ""
 
-#: certification/includes/signers.php:1833
+#: certification/includes/signers.php:1865
 msgid "The previous issue of this document was declined and still holds its volume and folio: choose in \"Documents issued for signature\" whether to keep them or void them."
 msgstr ""
 
-#: certification/includes/signers.php:1849
+#: certification/includes/signers.php:1881
 msgid "The document could not be issued. Please try again."
 msgstr ""
 
-#: certification/includes/signers.php:1863
+#: certification/includes/signers.php:1895
 msgid "The registry book did not assign a volume and folio. The document was not issued."
 msgstr ""
 
 #. translators: %s: list of variables
-#: certification/includes/signers.php:1884
+#: certification/includes/signers.php:1920
 #, php-format
 msgid "The document was not issued: these variables could not be filled in: %s."
 msgstr ""
 
 #. translators: 1: volume number, 2: folio number
-#: certification/includes/signers.php:1903
+#: certification/includes/signers.php:1939
 #, php-format
 msgid "Volume: %1$d Folio: %2$d"
 msgstr ""
 
-#: certification/includes/signers.php:1920
+#: certification/includes/signers.php:1956
 msgid "The document is too large or could not be saved. Please try again."
 msgstr ""
 
-#: certification/includes/signers.php:1953
+#: certification/includes/signers.php:1991
 msgid "Document issued for signature. Each signer will find it in \"Documents to sign\"."
 msgstr ""
 
-#: certification/includes/signers.php:2133
+#: certification/includes/signers.php:2196
 msgid "The document was declined and its signatures were revoked."
 msgstr ""
 
-#: certification/includes/signers.php:2221
+#: certification/includes/signers.php:2284
 #, php-format
 msgid "[%1$s] Document waiting for your signature: %2$s"
 msgstr ""
 
-#: certification/includes/signers.php:2223
+#: certification/includes/signers.php:2286
 #, php-format
 msgid "The document \"%s\" is waiting for your signature."
 msgstr ""
 
-#: certification/includes/signers.php:2224
+#: certification/includes/signers.php:2287
 msgid "Sign in with your own account and open \"Documents to sign\" to review it and sign it:"
 msgstr ""
 
-#: certification/includes/signers.php:2225
+#: certification/includes/signers.php:2288
 msgid "Only you can sign it: nobody else can sign on your behalf."
 msgstr ""
 
@@ -5082,33 +5096,37 @@ msgstr ""
 msgid "it has no additional fields"
 msgstr ""
 
-#: includes/book.php:118
+#: includes/book.php:125
 msgid "The document has no registry book."
 msgstr ""
 
-#: includes/book.php:125
+#: includes/book.php:134
+msgid "The registry book line needs the name of who receives the document. The document was not issued."
+msgstr ""
+
+#: includes/book.php:142
 #, php-format
 msgid "The registry book line could not be filled (variables without value: %s). The document was not issued."
 msgstr ""
 
-#: includes/book.php:130
+#: includes/book.php:147
 msgid "The registry book line is empty. The document was not issued."
 msgstr ""
 
-#: includes/book.php:135
+#: includes/book.php:152
 #, php-format
 msgid "The registry book line is longer than %d characters. The document was not issued."
 msgstr ""
 
-#: includes/book.php:140
+#: includes/book.php:157
 msgid "The registry book is not available on this site. The document was not issued."
 msgstr ""
 
-#: includes/book.php:171
+#: includes/book.php:188
 msgid "The registry book is not available on this site."
 msgstr ""
 
-#: includes/book.php:175
+#: includes/book.php:192
 msgid "The registry book could not void the line."
 msgstr ""
 
@@ -5430,33 +5448,37 @@ msgstr ""
 msgid "Give these permissions to the roles (this screen)."
 msgstr ""
 
-#: includes/provider-wp-user.php:181
+#: includes/provider-wp-user.php:43
+msgid "Account"
+msgstr ""
+
+#: includes/provider-wp-user.php:182
 msgid "With EduSystem, documents are issued to its students."
 msgstr ""
 
-#: includes/provider-wp-user.php:188
+#: includes/provider-wp-user.php:189
 msgid "The user has no email: the document cannot be identified or validated."
 msgstr ""
 
-#: includes/provider-wp-user.php:196
+#: includes/provider-wp-user.php:197
 msgid "This document requires signatures: it cannot be issued here."
 msgstr ""
 
-#: includes/provider-wp-user.php:224
+#: includes/provider-wp-user.php:225
 msgid "Some variables of the document have no value: it was not issued."
 msgstr ""
 
-#: includes/provider-wp-user.php:237
+#: includes/provider-wp-user.php:238
 #: public/functions.php:645
 msgid "Tome: "
 msgstr ""
 
-#: includes/provider-wp-user.php:237
+#: includes/provider-wp-user.php:238
 #: public/functions.php:647
 msgid "Folio: "
 msgstr ""
 
-#: includes/provider-wp-user.php:293
+#: includes/provider-wp-user.php:294
 msgid "The certificate could not be saved."
 msgstr ""
 
@@ -5473,19 +5495,19 @@ msgctxt "User role"
 msgid "Signer"
 msgstr ""
 
-#: includes/variables.php:173
+#: includes/variables.php:182
 msgid "Full name of the person (last names, first names)"
 msgstr ""
 
-#: includes/variables.php:174
+#: includes/variables.php:183
 msgid "First names of the person"
 msgstr ""
 
-#: includes/variables.php:175
+#: includes/variables.php:184
 msgid "Last names of the person"
 msgstr ""
 
-#: includes/variables.php:176
+#: includes/variables.php:185
 msgid "Email of the person"
 msgstr ""
 
@@ -5628,61 +5650,65 @@ msgid "Code (identifier) of this document"
 msgstr ""
 
 #: src/Variables.php:28
-msgid "Identity document of the person who receives the document (prefix and number, for example V12345678; empty if it is not registered)"
+msgid "Name of who receives the document, of any kind (a person, a class, a group…)"
 msgstr ""
 
 #: src/Variables.php:29
-msgid "Today's date"
+msgid "Identity document of the person who receives the document (prefix and number, for example V12345678; empty if it is not registered)"
 msgstr ""
 
 #: src/Variables.php:30
-msgid "Page break in the PDF"
+msgid "Today's date"
 msgstr ""
 
 #: src/Variables.php:31
-msgid "Signatures of the roles not placed separately (empty when the document does not ask for signatures)"
+msgid "Page break in the PDF"
 msgstr ""
 
 #: src/Variables.php:32
-msgid "QR code to validate the document"
+msgid "Signatures of the roles not placed separately (empty when the document does not ask for signatures)"
 msgstr ""
 
 #: src/Variables.php:33
-msgid "Volume of the registry book"
+msgid "QR code to validate the document"
 msgstr ""
 
 #: src/Variables.php:34
-msgid "Folio of the registry book"
+msgid "Volume of the registry book"
 msgstr ""
 
 #: src/Variables.php:35
-msgid "Volume and folio of the registry book"
+msgid "Folio of the registry book"
 msgstr ""
 
 #: src/Variables.php:36
-msgid "Signature of the system signer (old templates)"
+msgid "Volume and folio of the registry book"
 msgstr ""
 
 #: src/Variables.php:37
-msgid "Name of the system signer (old templates)"
+msgid "Signature of the system signer (old templates)"
 msgstr ""
 
 #: src/Variables.php:38
-msgid "Position of the system signer (old templates)"
+msgid "Name of the system signer (old templates)"
 msgstr ""
 
 #: src/Variables.php:39
-msgid "Signature, name and position of system signer number N (old templates)"
+msgid "Position of the system signer (old templates)"
 msgstr ""
 
 #: src/Variables.php:40
-msgid "Signature, name and position of a system signer (see \"Document signers\")"
+msgid "Signature, name and position of system signer number N (old templates)"
 msgstr ""
 
 #: src/Variables.php:41
-msgid "Signature, name and role of the person whose account is given by a variable, for example the parent with {{signature_var_parent_user_id}} (see \"Document signers\")"
+msgid "Signature, name and position of a system signer (see \"Document signers\")"
 msgstr ""
 
 #: src/Variables.php:42
+msgid "Signature, name and role of the person whose account is given by a variable, for example the parent with {{signature_var_parent_user_id}} (see \"Document signers\")"
+msgstr ""
+
+#: src/Variables.php:43
 msgid "Answers to the additional fields of this document (see \"Advanced\")"
 msgstr ""

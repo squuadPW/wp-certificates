@@ -71,7 +71,22 @@ Se publica junto con **EduSystem 6.0.0** (ADR 0004 de EduSystem). Resumen:
     de anular el tomo y folio o revocar firmas; la línea del libro al emitir para firma recibe el contexto (filtro
     `squuad_cert_issue_book_entry` con un quinto argumento); la vuelta atrás de `squuad_cert_create_document` no deja
     restos de la política; el modal de Mi cuenta no repite el aviso.
-  - En curso antes de publicar: emisión, firma y libro para cualquier tipo de titular (hoy, estudiante o cuenta).
+- **Cualquier tipo de titular** (esquema 21): un documento se emite para firma, se firma, lleva su tomo y folio y se
+  verifica a nombre de cualquier tipo registrado con `squuad_cert_register_subject_type()` (una promoción, una sección…),
+  no solo de un estudiante o una cuenta. `squuad_cert_signature_issue_document_for($tipo, $id, $documento)` (la de
+  siempre, `squuad_cert_signature_issue_document($student_id, …)`, sigue igual), con sus funciones `_for` de la última
+  emisión y del libro. El libro guarda el titular (`squuad_cert_book_entries.subject_type` y `subject_id`; las líneas de
+  antes son de estudiantes y se completan solas). Variable general `{{holder_name}}` y texto del libro por defecto con
+  ella para los titulares que no son personas. Callback opcional `type_label` del proveedor. Lo ya firmado no cambia.
+- **Cada método de variable declara su tipo de titular** (`subject_type`): con otro titular no se ejecuta, la variable
+  queda vacía y el fallo se anota (`wrong_subject`). Sin declarar, el de siempre (ficha de estudiante). La ruta dice qué
+  titular reciben los métodos con `ctx methods_subject_type`. La pantalla de Variables muestra para qué titular sirve
+  cada método.
+- Seguridad del cambio de titular: los permisos de emitir, declinar y decidir el tomo y folio se piden al proveedor del
+  tipo de la solicitud (un tipo sin `can_act` queda cerrado); la emisión vuelve a comprobarlos; el libro nunca registra
+  una línea sin el nombre del titular; el registro de certificados por persona solo para estudiantes.
+  Pendiente (para después): la huella de una firma sella `subject_id` pero no `subject_type`; un formato de evidencia
+  nuevo lo incluiría solo para las firmas nuevas (las ya hechas no se vuelven a sellar).
 
 ### 1.0.29
 - Versión anterior (sin registro de cambios en este repositorio).
