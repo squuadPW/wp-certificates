@@ -14,6 +14,8 @@ declare(strict_types=1);
  *    squuad_cert_document_ctx() junta las dos cosas; todas las rutas de generación la usan.
  * 2. squuad_cert_create_document(): crea un documento INACTIVO con su política de firmantes (plantillas de ejemplo que
  *    instala otro plugin). El sitio lo revisa y lo activa en Certificación > Documentos.
+ * 3. squuad_cert_create_variable(): crea en la lista de variables (Certificación > Variables) una variable con su método
+ *    registrado, o enlaza la que ya existe sin método. Nunca cambia una variable que ya tiene método.
  */
 
 defined('ABSPATH') || exit;
@@ -141,5 +143,60 @@ function squuad_cert_create_document(array $data, array $slots = [], bool $requi
     if (function_exists('squuad_cert_log')) {
         squuad_cert_log(sprintf('Documento %d (%s) creado inactivo por otro plugin (usuario %d)', $id, $code, get_current_user_id()), 'document_created');
     }
+    return $id;
+}
+
+/**
+ * Crea una variable de la lista (Certificación > Variables) con un método registrado, para que otro plugin deje
+ * disponibles las variables de sus plantillas de ejemplo. Si ya existe una variable con esa clave:
+ *  - sin método: se le asigna este (igual que «Vincular por clave»);
+ *  - con método: no se toca (el sitio pudo cambiarlo) y se devuelve su id.
+ * $type: dónde se ofrece ('all', 'document' o 'email').
+ *
+ * @return int|WP_Error id de la variable
+ */
+function squuad_cert_create_variable(string $key, string $text, string $method, string $type = 'all')
+{
+    global $wpdb;
+    $table = $wpdb->prefix . 'variables_document';
+    $key = sanitize_key($key);
+    $text = trim(sanitize_text_field($text));
+    if (!preg_match('/^[a-z][a-z0-9_]{1,59}$/', $key) || '' === $text) {
+        return new WP_Error('squuad_cert_variable_invalid', __('The key and the description of the variable are required.', 'wp-certificates'));
+    }
+    if (!in_array($type, ['all', 'document', 'email'], true)) {
+        $type = 'all';
+    }
+    $general = array_map(static fn($tag) => trim((string) $tag, '{}'), array_keys(\Squuad\Certificados\Variables::general()));
+    if (in_array($key, $general, true)) {
+        return new WP_Error('squuad_cert_variable_general', __('That key is a general variable of WP Certificates.', 'wp-certificates'));
+    }
+    if (!isset(squuad_cert_variable_methods()[$method])) {
+        return new WP_Error('squuad_cert_variable_method', __('The method of the variable is not available.', 'wp-certificates'));
+    }
+    if ($table !== $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table))) {
+        return new WP_Error('squuad_cert_variable_db', __('The list of variables is not ready yet.', 'wp-certificates'));
+    }
+    $row = $wpdb->get_row($wpdb->prepare("SELECT id, method FROM {$table} WHERE identificator = %s LIMIT 1", $key));
+    if ($row) {
+        if ('' === (string) $row->method) {
+            $wpdb->update($table, ['method' => $method], ['id' => (int) $row->id], ['%s'], ['%d']);
+            squuad_cert_log(sprintf('Variable %s (%d) enlazada con el método %s por otro plugin', $key, (int) $row->id, $method), 'variable_linked');
+        }
+        return (int) $row->id;
+    }
+    $ok = $wpdb->insert($table, [
+        'text' => $text,
+        'visual' => '{{' . $key . '}}',
+        'identificator' => $key,
+        'type' => $type,
+        'method' => $method,
+        'created_at' => current_time('mysql', true), // UTC (ADR 0017 de Edusof)
+    ], ['%s', '%s', '%s', '%s', '%s', '%s']);
+    if (!$ok) {
+        return new WP_Error('squuad_cert_variable_db', __('Error saving the variable.', 'wp-certificates'));
+    }
+    $id = (int) $wpdb->insert_id;
+    squuad_cert_log(sprintf('Variable %s (%d) creada con el método %s por otro plugin (usuario %d)', $key, $id, $method, get_current_user_id()), 'variable_created');
     return $id;
 }

@@ -2,14 +2,14 @@
 # This file is distributed under the GPL2.
 msgid ""
 msgstr ""
-"Project-Id-Version: WP Certificates 2.1.0\n"
+"Project-Id-Version: WP Certificates 2.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wp-certificates\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-16T04:03:05+00:00\n"
+"POT-Creation-Date: 2026-10-16T14:09:46+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: wp-certificates\n"
@@ -348,20 +348,20 @@ msgid "You are not allowed to do this."
 msgstr ""
 
 #: admin/documents.php:307
-#: includes/documents-api.php:92
+#: includes/documents-api.php:94
 msgid "The name and the code are required."
 msgstr ""
 
 #. translators: %s: document code
 #: admin/documents.php:312
-#: includes/documents-api.php:96
+#: includes/documents-api.php:98
 #, php-format
 msgid "There is already a document with the code %s."
 msgstr ""
 
 #: admin/documents.php:334
 #: admin/documents.php:468
-#: includes/documents-api.php:121
+#: includes/documents-api.php:123
 msgid "Error saving document."
 msgstr ""
 
@@ -2126,6 +2126,7 @@ msgid "There is already a variable with that key."
 msgstr ""
 
 #: admin/variables.php:288
+#: includes/documents-api.php:172
 msgid "That key is a general variable of WP Certificates."
 msgstr ""
 
@@ -3983,7 +3984,7 @@ msgstr ""
 
 #: certification/includes/signers.php:385
 #: certification/includes/signers.php:826
-#: includes/documents-api.php:126
+#: includes/documents-api.php:128
 msgid "The signers module is not available yet."
 msgstr ""
 
@@ -5111,12 +5112,28 @@ msgstr ""
 msgid "The registry book could not void the line."
 msgstr ""
 
-#: includes/documents-api.php:32
+#: includes/documents-api.php:34
 msgid "This document can only be generated from the screen of the plugin that provides it."
 msgstr ""
 
-#: includes/documents-api.php:136
+#: includes/documents-api.php:138
 msgid "The signers of the document could not be saved as requested."
+msgstr ""
+
+#: includes/documents-api.php:165
+msgid "The key and the description of the variable are required."
+msgstr ""
+
+#: includes/documents-api.php:175
+msgid "The method of the variable is not available."
+msgstr ""
+
+#: includes/documents-api.php:178
+msgid "The list of variables is not ready yet."
+msgstr ""
+
+#: includes/documents-api.php:197
+msgid "Error saving the variable."
 msgstr ""
 
 #: includes/id-document-privacy.php:20

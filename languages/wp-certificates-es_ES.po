@@ -6481,3 +6481,20 @@ msgid ""
 "request it again from there."
 msgstr "Este documento se genera desde la pantalla del plugin que lo ofrece: vuelve a pedirlo desde allí."
 
+
+#: includes/documents-api.php:165
+msgid "The key and the description of the variable are required."
+msgstr "La clave y la descripción de la variable son obligatorias."
+
+#: includes/documents-api.php:175
+msgid "The method of the variable is not available."
+msgstr "El método de la variable no está disponible."
+
+#: includes/documents-api.php:178
+msgid "The list of variables is not ready yet."
+msgstr "La lista de variables aún no está lista."
+
+#: includes/documents-api.php:197
+msgid "Error saving the variable."
+msgstr "Error al guardar la variable."
+

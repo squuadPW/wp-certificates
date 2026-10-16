@@ -59,6 +59,10 @@ Se publica junto con **EduSystem 6.0.0** (ADR 0004 de EduSystem). Resumen:
     reciben (`enrollment_id` en el contexto).
   - **Plantillas inactivas desde otro plugin:** `squuad_cert_create_document($data, $slots, $requires)` crea un documento
     inactivo con su política de firmantes (o no lo crea si la política no queda completa).
+  - **Variables desde otro plugin:** `squuad_cert_create_variable($key, $text, $method, $type)` crea la variable con su
+    método registrado o enlaza la que ya existe sin método; nunca cambia una que ya tiene método.
+    Una variable que el sitio creó sin método con la misma clave se enlaza (como «Vincular por clave») y queda en el
+    registro de actividad: quien llama debe usar claves propias.
   - **Registro en nombre de:** con una sesión conmutada («Entrar como» de soporte u otro plugin), el log anota quién hizo
     la acción en nombre de la cuenta.
   - Quitado el valor fijo «ENROLLMENT» del envío de la firma (el servidor no lo usaba).
